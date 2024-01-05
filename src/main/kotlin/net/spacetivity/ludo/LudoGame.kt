@@ -1,5 +1,6 @@
 package net.spacetivity.ludo
 
+import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.entity.GameEntityHandler
 import net.spacetivity.ludo.team.GameTeamHandler
 import org.bukkit.plugin.java.JavaPlugin
@@ -16,7 +17,7 @@ class LudoGame : JavaPlugin() {
     }
 
     override fun onDisable() {
-
+        this.gameEntityHandler.gameEntities.forEach(GameEntity::despawn)
     }
 
     companion object {

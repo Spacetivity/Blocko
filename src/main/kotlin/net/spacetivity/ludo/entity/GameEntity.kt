@@ -5,6 +5,7 @@ import net.spacetivity.ludo.board.GameBoard
 import net.spacetivity.ludo.board.GameField
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.utils.ItemUtils
+import net.spacetivity.ludo.utils.MetadataUtils
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.ArmorStand
@@ -37,6 +38,8 @@ data class GameEntity(val teamName: String, val entityType: EntityType) {
         }
 
         gameTeam.scoreboardTeam?.addEntity(this.livingEntity!!)
+
+        MetadataUtils.set(this.livingEntity!!, "teamName", this.teamName)
     }
 
     // field amount -> how many fields the entity should move (is decided with rolling the dice)

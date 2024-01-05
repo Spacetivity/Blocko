@@ -40,7 +40,6 @@ class GameTeam(val name: String, val color: NamedTextColor, val headValue: Strin
         }
 
         this.teamMembers.add(player.uniqueId)
-        MetadataUtils.set(player, "teamName", this.name)
         player.sendMessage(Component.text("You are now in team: ${this.name}"))
     }
 
