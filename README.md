@@ -32,10 +32,6 @@ This Minecraft plugin is a Kotlin-based implementation of the classic board game
 2. Access the Ludo game using the specified commands or interact with in-game components.
 3. Enjoy playing 'Mensch Ärgere dich nicht!' with your friends or other players on the server.
 
-## Contributing
-
-Contributions are welcome! If you'd like to contribute to the project, feel free to submit pull requests or raise issues in the repository.
-
 ## License
 
 This project is licensed under [MIT License](LICENSE).

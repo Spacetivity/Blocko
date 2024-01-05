@@ -9,25 +9,34 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.EntityType
+import org.bukkit.entity.LivingEntity
 
-data class GameEntity(val teamName: String) {
+data class GameEntity(val teamName: String, val entityType: EntityType) {
 
     var currentFieldId: Int? = null
-    var livingEntity: ArmorStand? = null
+    var livingEntity: LivingEntity? = null
 
     fun spawn(location: Location) {
         if (this.livingEntity != null) return
+
         val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.teamName) ?: return
 
-        this.livingEntity = location.world.spawnEntity(location, EntityType.ARMOR_STAND) as ArmorStand
-        this.livingEntity!!.equipment.helmet = ItemUtils(Material.PLAYER_HEAD).setOwner(gameTeam.headValue).build()
+        this.livingEntity = location.world.spawnEntity(location, this.entityType) as LivingEntity
         this.livingEntity!!.isSilent = true;
         this.livingEntity!!.isGlowing = true
-        this.livingEntity!!.isSmall = true
         this.livingEntity!!.isInvisible = true
         this.livingEntity!!.setGravity(false)
-        this.livingEntity!!.setBasePlate(false)
         this.livingEntity!!.setAI(false)
+
+        if (this.livingEntity is ArmorStand) {
+            val armorStand: ArmorStand = this.livingEntity as ArmorStand
+            armorStand.setBasePlate(false)
+            armorStand.setArms(false)
+            armorStand.isSmall = true
+            armorStand.equipment.helmet = ItemUtils(Material.PLAYER_HEAD).setOwner(gameTeam.headValue).build()
+        }
+
+        gameTeam.scoreboardTeam?.addEntity(this.livingEntity!!)
     }
 
     // field amount -> how many fields the entity should move (is decided with rolling the dice)

@@ -10,13 +10,7 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.LivingEntity
 
-class GameField(
-    val world: World,
-    val id: Int,
-    val x: Double,
-    val z: Double,
-    var isTaken: Boolean = false
-) {
+class GameField(val world: World, val id: Int, val x: Double, val z: Double, var isTaken: Boolean = false) {
 
     fun getPossibleHolder(): GameEntity? {
         return LudoGame.instance.gameEntityHandler.gameEntities.find { it.currentFieldId == this.id }
