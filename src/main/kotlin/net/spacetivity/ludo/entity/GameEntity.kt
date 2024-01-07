@@ -1,6 +1,7 @@
 package net.spacetivity.ludo.entity
 
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.board.GameBoard
 import net.spacetivity.ludo.board.GameField
 import net.spacetivity.ludo.team.GameTeam
@@ -12,7 +13,7 @@ import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
 
-data class GameEntity(val teamName: String, val entityType: EntityType) {
+data class GameEntity(val arenaId: String, val teamName: String, val entityType: EntityType) {
 
     var currentFieldId: Int? = null
     var livingEntity: LivingEntity? = null
@@ -20,7 +21,8 @@ data class GameEntity(val teamName: String, val entityType: EntityType) {
     fun spawn(location: Location) {
         if (this.livingEntity != null) return
 
-        val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.teamName) ?: return
+        val gameArena: GameArena = LudoGame.instance.gameArenaHandler?.getArena(this.arenaId)?: return
+        val gameTeam: GameTeam = gameArena.gameTeamHandler.getTeam(this.teamName) ?: return
 
         this.livingEntity = location.world.spawnEntity(location, this.entityType) as LivingEntity
         this.livingEntity!!.isSilent = true;
@@ -56,6 +58,12 @@ data class GameEntity(val teamName: String, val entityType: EntityType) {
 
         val newField: GameField = board.getField(this.currentFieldId!!) ?: return
         newField.isTaken = true
+
+        val worldPosition: Location = newField.getWorldPosition(fieldHeight)
+
+        if (newField.turnComponent != null)
+            worldPosition.setDirection(newField.turnComponent.getRotation(this.livingEntity!!))
+
         this.livingEntity!!.teleport(newField.getWorldPosition(fieldHeight))
     }
 

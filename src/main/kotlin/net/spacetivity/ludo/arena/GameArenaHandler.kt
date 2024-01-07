@@ -3,7 +3,9 @@ package net.spacetivity.ludo.arena
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
@@ -12,10 +14,10 @@ class GameArenaHandler {
 
     val cachedArenas: MutableSet<GameArena> = mutableSetOf()
 
-    fun loadArena(id: String) {
+    init {
         transaction {
-            GameArenaDAO.select { GameArenaDAO.id eq id }.map { resultRow: ResultRow ->
-                val gameWorld: World = Bukkit.getWorld(resultRow[GameArenaDAO.worldName]) ?: return@map
+            for (resultRow: ResultRow in GameArenaDAO.selectAll().toMutableList()) {
+                val gameWorld: World = Bukkit.getWorld(resultRow[GameArenaDAO.worldName]) ?: continue
 
                 val serializedLocation = resultRow[GameArenaDAO.playerLocation].split(":")
                 val x: Double = serializedLocation[0].toDouble()
@@ -26,16 +28,16 @@ class GameArenaHandler {
 
                 val playerLocation = Location(gameWorld, x, y, z, yaw, pitch)
 
-                val gameArena = GameArena(gameWorld, playerLocation)
-
-                cachedArenas.add(gameArena)
+                cachedArenas.add(GameArena(gameWorld, playerLocation))
             }
         }
     }
 
-    fun createArena(worldName: String, location: Location) {
+    fun createArena(worldName: String, location: Location): Boolean {
         val id: String = UUID.randomUUID().toString().split("-")[0]
         val serializedLocation = "${location.x}:${location.y}:${location.z}:${location.yaw}:${location.pitch}"
+
+        if (getArena(id) != null || this.cachedArenas.any { it.gameWorld.name.equals(worldName, true) }) return false
 
         transaction {
             GameArenaDAO.insert { statement: InsertStatement<Number> ->
@@ -46,6 +48,9 @@ class GameArenaHandler {
             }
         }
 
+        this.cachedArenas.add(GameArena(Bukkit.getWorld(worldName)!!, location))
+
+        return true
     }
 
     fun resetArenas() {
@@ -53,12 +58,5 @@ class GameArenaHandler {
     }
 
     fun getArena(id: String): GameArena? = this.cachedArenas.find { it.id == id }
-
-    object GameArenaDAO : Table("game_arenas") {
-        val id: Column<String> = varchar("id", 10).uniqueIndex()
-        val worldName: Column<String> = varchar("id", 30)
-        val playerLocation: Column<String> = varchar("playerLocation", 30)
-        val maxPlayers: Column<Int> = integer("maxPlayers")
-    }
 
 }

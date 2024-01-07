@@ -2,6 +2,7 @@ package net.spacetivity.ludo.board
 
 import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamHandler
@@ -10,16 +11,27 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.LivingEntity
 
-class GameField(val world: World, val id: Int, val x: Double, val z: Double, var isTaken: Boolean = false) {
+class GameField(
+    val arenaId: String,
+    val world: World,
+    val id: Int,
+    val x: Double,
+    val z: Double,
+    val turnComponent: TurnComponent? = null,
+    var isTaken: Boolean = false
+) {
+
+    private val gameArena: GameArena? = LudoGame.instance.gameArenaHandler?.getArena(this.arenaId)
 
     fun getPossibleHolder(): GameEntity? {
-        return LudoGame.instance.gameEntityHandler.gameEntities.find { it.currentFieldId == this.id }
+        return this.gameArena?.gameEntityHandler?.gameEntities?.find { it.currentFieldId == this.id }
     }
 
     fun throwOut(newHolder: LivingEntity, fieldHeight: Double) {
         if (!this.isTaken) return
+        if (this.gameArena == null) return
 
-        val gameTeamHandler: GameTeamHandler = LudoGame.instance.gameTeamHandler
+        val gameTeamHandler: GameTeamHandler = this.gameArena.gameTeamHandler
         val holder: GameEntity = getPossibleHolder() ?: return
 
         val holderGameTeam: GameTeam = gameTeamHandler.getTeam(holder.teamName) ?: return

@@ -1,16 +1,12 @@
 package net.spacetivity.ludo.board
 
 class GameBoard(
+    val arenaId: String,
     val name: String,
-    val maxTeams: Int,
-    val enableSafetyFields: Boolean,
-    val fields: MutableSet<GameField>
 ) {
 
-    fun reset() {
-        TODO("Remove players, teleport entities back to their spawns")
-    }
+    private val gameFields: MutableSet<GameField> = mutableSetOf()
 
-    fun getField(id: Int): GameField? = this.fields.find { it.id == id }
+    fun getField(id: Int): GameField? = this.gameFields.find { it.id == id }
 
 }

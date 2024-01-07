@@ -2,6 +2,7 @@ package net.spacetivity.ludo.arena
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.spacetivity.ludo.board.GameBoard
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.entity.GameEntityHandler
 import net.spacetivity.ludo.team.GameTeamHandler
@@ -19,6 +20,8 @@ class GameArena(val gameWorld: World, val viewPlatformLocation: Location) {
     val gameTeamHandler: GameTeamHandler = GameTeamHandler()
     val gameEntityHandler: GameEntityHandler = GameEntityHandler()
     val currentPlayers: MutableSet<UUID> = mutableSetOf()
+
+    var gameBoard: GameBoard? = null
 
     var arenaHost: Player? = null
 
