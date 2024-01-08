@@ -1,11 +1,8 @@
 package net.spacetivity.ludo.board
 
-class GameBoard(
-    val arenaId: String,
-    val name: String,
-) {
+class GameBoard(val arenaId: String) {
 
-    private val gameFields: MutableSet<GameField> = mutableSetOf()
+    val gameFields: MutableSet<GameField> = mutableSetOf()
 
     fun getField(id: Int): GameField? = this.gameFields.find { it.id == id }
 

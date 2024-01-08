@@ -7,7 +7,7 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
-class TurnComponent(private val facing: PathFace) {
+class TurnComponent(val facing: PathFace) {
 
     fun getRotation(entity: LivingEntity): Vector {
         val radians = this.facing.radians

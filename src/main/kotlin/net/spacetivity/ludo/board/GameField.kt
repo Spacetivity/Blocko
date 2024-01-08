@@ -12,16 +12,16 @@ import org.bukkit.World
 import org.bukkit.entity.LivingEntity
 
 class GameField(
+    val id: Int,
     val arenaId: String,
     val world: World,
-    val id: Int,
     val x: Double,
     val z: Double,
-    val turnComponent: TurnComponent? = null,
+    var turnComponent: TurnComponent?,
     var isTaken: Boolean = false
 ) {
 
-    private val gameArena: GameArena? = LudoGame.instance.gameArenaHandler?.getArena(this.arenaId)
+    private val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
 
     fun getPossibleHolder(): GameEntity? {
         return this.gameArena?.gameEntityHandler?.gameEntities?.find { it.currentFieldId == this.id }

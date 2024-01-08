@@ -62,7 +62,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         val worldPosition: Location = newField.getWorldPosition(fieldHeight)
 
         if (newField.turnComponent != null)
-            worldPosition.setDirection(newField.turnComponent.getRotation(this.livingEntity!!))
+            worldPosition.setDirection(newField.turnComponent!!.getRotation(this.livingEntity!!))
 
         this.livingEntity!!.teleport(newField.getWorldPosition(fieldHeight))
     }

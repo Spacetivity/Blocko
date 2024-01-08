@@ -7,8 +7,15 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.GameArenaDAO
 import net.spacetivity.ludo.arena.GameArenaHandler
+import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
 import net.spacetivity.ludo.board.GameFieldDAO
+import net.spacetivity.ludo.command.LudoCommand
+import net.spacetivity.ludo.command.api.CommandProperties
+import net.spacetivity.ludo.command.api.LudoCommandExecutor
+import net.spacetivity.ludo.command.api.LudoCommandHandler
+import net.spacetivity.ludo.command.api.impl.BukkitCommandExecutor
 import net.spacetivity.ludo.database.DatabaseFile
+import net.spacetivity.ludo.listener.PlayerSetupListener
 import net.spacetivity.ludo.utils.FileUtils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -26,7 +33,9 @@ import java.util.*
 
 class LudoGame : JavaPlugin() {
 
-    var gameArenaHandler: GameArenaHandler? = null
+    lateinit var commandHandler: LudoCommandHandler
+    lateinit var gameArenaSetupHandler: GameArenaSetupHandler
+    lateinit var gameArenaHandler: GameArenaHandler
     private var idleTask: BukkitTask? = null
 
     override fun onEnable() {
@@ -55,12 +64,24 @@ class LudoGame : JavaPlugin() {
             return
         }
 
+        this.commandHandler = LudoCommandHandler()
+        this.gameArenaSetupHandler = GameArenaSetupHandler()
         this.gameArenaHandler = GameArenaHandler()
+
+        //TODO: Load all worlds from all game arenas!
+
+        registerCommand(LudoCommand())
+        PlayerSetupListener(this)
     }
 
     override fun onDisable() {
         this.idleTask?.cancel()
-        this.gameArenaHandler?.resetArenas()
+        this.gameArenaHandler.resetArenas()
+    }
+
+    private fun registerCommand(commandExecutor: LudoCommandExecutor) {
+        BukkitCommandExecutor::class.java.getDeclaredConstructor(CommandProperties::class.java, this::class.java)
+            .newInstance(this.commandHandler.registerCommand(commandExecutor), this)
     }
 
     companion object {
@@ -72,13 +93,12 @@ class LudoGame : JavaPlugin() {
     }
 
     fun tryStartupIdleScheduler() {
-        if (emptyArenasPreset() == null) return
-        if (!emptyArenasPreset()!!.first) return
+        if (!emptyArenasPreset().first) return
 
         this.idleTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, Runnable {
-            val validArenas = emptyArenasPreset()!!.second
+            val validArenas = emptyArenasPreset().second
 
-            if (!emptyArenasPreset()!!.first) {
+            if (!emptyArenasPreset().first) {
                 this.idleTask?.cancel()
                 this.idleTask = null
             }
@@ -95,17 +115,15 @@ class LudoGame : JavaPlugin() {
 
     fun tryShutdownIdleScheduler() {
         if (this.idleTask == null) return
-        if (emptyArenasPreset() == null) return
-        if (emptyArenasPreset()!!.first) return
+        if (emptyArenasPreset().first) return
 
         this.idleTask?.cancel()
         this.idleTask = null
     }
 
-    private fun emptyArenasPreset(): Pair<Boolean, List<GameArena>>? {
-        if (this.gameArenaHandler == null) return null
-        val emptyArenas = this.gameArenaHandler?.cachedArenas?.filter { it.currentPlayers.size < it.maxPlayers }?.toList()
-        return Pair(emptyArenas!!.isNotEmpty(), emptyArenas)
+    private fun emptyArenasPreset(): Pair<Boolean, List<GameArena>> {
+        val emptyArenas = this.gameArenaHandler.cachedArenas.filter { it.currentPlayers.size < it.maxPlayers }.toList()
+        return Pair(emptyArenas.isNotEmpty(), emptyArenas)
     }
 
     private fun createOrLoadDatabaseProperties(): DatabaseFile {
