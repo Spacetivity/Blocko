@@ -18,6 +18,7 @@ import net.spacetivity.ludo.database.DatabaseFile
 import net.spacetivity.ludo.listener.PlayerSetupListener
 import net.spacetivity.ludo.utils.FileUtils
 import org.bukkit.Bukkit
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitTask
@@ -34,8 +35,8 @@ import java.util.*
 class LudoGame : JavaPlugin() {
 
     lateinit var commandHandler: LudoCommandHandler
-    lateinit var gameArenaSetupHandler: GameArenaSetupHandler
     lateinit var gameArenaHandler: GameArenaHandler
+    lateinit var gameArenaSetupHandler: GameArenaSetupHandler
     private var idleTask: BukkitTask? = null
 
     override fun onEnable() {
@@ -64,9 +65,9 @@ class LudoGame : JavaPlugin() {
             return
         }
 
+        this.gameArenaHandler = GameArenaHandler()
         this.commandHandler = LudoCommandHandler()
         this.gameArenaSetupHandler = GameArenaSetupHandler()
-        this.gameArenaHandler = GameArenaHandler()
 
         //TODO: Load all worlds from all game arenas!
 
@@ -77,6 +78,13 @@ class LudoGame : JavaPlugin() {
     override fun onDisable() {
         this.idleTask?.cancel()
         this.gameArenaHandler.resetArenas()
+
+        for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {
+            for (entity: Entity in entities) {
+                if (!entity.hasMetadata("displayEntity")) continue
+                entity.remove()
+            }
+        }
     }
 
     private fun registerCommand(commandExecutor: LudoCommandExecutor) {

@@ -1,5 +1,6 @@
 package net.spacetivity.ludo.arena
 
+import net.spacetivity.ludo.LudoGame
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -60,6 +61,9 @@ class GameArenaHandler {
     }
 
     fun deleteArena(id: String) {
+        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(id)?: return
+        gameArena.gameFieldHandler.deleteFields()
+
         transaction {
             GameArenaDAO.deleteWhere { GameArenaDAO.id eq id }
         }

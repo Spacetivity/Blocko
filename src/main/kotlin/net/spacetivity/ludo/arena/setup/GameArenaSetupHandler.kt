@@ -7,10 +7,12 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.board.GameField
 import net.spacetivity.ludo.utils.ItemUtils
+import net.spacetivity.ludo.utils.MetadataUtils
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Sound
-import org.bukkit.entity.Player
+import org.bukkit.entity.*
 import java.time.Duration
 import java.util.*
 
@@ -37,16 +39,29 @@ class GameArenaSetupHandler {
             return
         }
 
+        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
+
         if (success) {
             if (!hasConfiguredFieldsAlready(player.uniqueId)) {
                 player.sendMessage(Component.text("You have to add game-fields first before you finish the setup!"))
                 return
             }
 
-            val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
             val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(arenaSetupData.arenaId)!!
 
             gameArena.gameFieldHandler.initFields(arenaSetupData.gameFields)
+        }
+
+        for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {
+            for (entity: Entity in entities) {
+                if (entity !is LivingEntity) continue
+                if (!entity.hasMetadata("displayEntity")) continue
+
+                val arenaId: String = MetadataUtils.get(entity, "displayEntity")!!
+                if (!arenaSetupData.arenaId.equals(arenaId, true)) continue
+
+                entity.remove()
+            }
         }
 
         player.inventory.remove(Material.IRON_HOE)
@@ -84,8 +99,24 @@ class GameArenaSetupHandler {
             )
         )
 
+        val entityLocation: Location = location.block.location.clone()
+        val y: Double = entityLocation.y
+
+        val fixedEntityLocation = entityLocation.clone().toCenterLocation()
+        fixedEntityLocation.y = y
+
+        val displayEntity: MagmaCube = location.world.spawnEntity(fixedEntityLocation, EntityType.MAGMA_CUBE) as MagmaCube
+        displayEntity.isInvisible = true
+        displayEntity.size = 2
+        displayEntity.isSilent = true
+        displayEntity.isInvulnerable = true
+        displayEntity.isGlowing = true
+        displayEntity.setAI(false)
+        displayEntity.setGravity(false)
+        MetadataUtils.set(displayEntity, "displayEntity", arenaSetupData.arenaId)
+
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.sendMessage(Component.text("Game field #${arenaSetupData.gameFields.size -1} at (${x} | ${z}) added."))
+        player.sendMessage(Component.text("Game field #${arenaSetupData.gameFields.size - 1} at (${x} | ${z}) added."))
     }
 
     fun hasOpenSetup(uuid: UUID): Boolean {

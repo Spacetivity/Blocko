@@ -21,17 +21,17 @@ class GameField(
     var isTaken: Boolean = false
 ) {
 
-    private val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
-
     fun getPossibleHolder(): GameEntity? {
-        return this.gameArena?.gameEntityHandler?.gameEntities?.find { it.currentFieldId == this.id }
+        return LudoGame.instance.gameArenaHandler.getArena(this.arenaId)?.gameEntityHandler?.gameEntities?.find { it.currentFieldId == this.id }
     }
 
     fun throwOut(newHolder: LivingEntity, fieldHeight: Double) {
-        if (!this.isTaken) return
-        if (this.gameArena == null) return
+        val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
 
-        val gameTeamHandler: GameTeamHandler = this.gameArena.gameTeamHandler
+        if (!this.isTaken) return
+        if (gameArena == null) return
+
+        val gameTeamHandler: GameTeamHandler = gameArena.gameTeamHandler
         val holder: GameEntity = getPossibleHolder() ?: return
 
         val holderGameTeam: GameTeam = gameTeamHandler.getTeam(holder.teamName) ?: return
