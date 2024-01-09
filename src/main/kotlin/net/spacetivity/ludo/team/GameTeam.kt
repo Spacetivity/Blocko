@@ -9,12 +9,10 @@ import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Team
 import java.util.*
 
-class GameTeam(val name: String, val color: NamedTextColor, val headValue: String) {
+class GameTeam(val name: String, val color: NamedTextColor) {
 
     var scoreboardTeam: Team?
-
     val teamMembers: MutableSet<UUID> = mutableSetOf()
-    val gameEntities: MutableMap<UUID, Int> = mutableMapOf()
     var spawnLocation: Location? = null
 
     init {

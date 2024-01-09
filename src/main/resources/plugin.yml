@@ -1,0 +1,9 @@
+name: LudoGamePlugin
+version: 1.0
+api-version: "1.20"
+main: net.spacetivity.ludo.LudoGame
+description: This Minecraft plugin is a Kotlin-based implementation of the classic board game 'Mensch Ärgere dich nicht!' (Ludo). It leverages the Paper 1.20.4 server, Gson library for data serialization, and Jetbrains Exposed framework for database management.
+website: https://builtbybit.com/creators/spacetivity.301580/
+author:
+  - TGamings
+  - realFallenBreak
