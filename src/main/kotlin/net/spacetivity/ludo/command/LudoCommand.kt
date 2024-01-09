@@ -169,10 +169,27 @@ class LudoCommand : LudoCommandExecutor {
         val result: MutableList<String> = mutableListOf()
 
         if (args.size == 1) result.addAll(listOf("arena", "worldTp"))
-        if (args.size == 2 && args[0].equals("arena", true)) result.addAll(listOf("list", "init", "delete"))
+        if (args.size == 2 && args[0].equals("arena", true)) result.addAll(
+            listOf(
+                "list",
+                "init",
+                "delete",
+                "startSetup",
+                "cancelSetup",
+                "finishSetup"
+            )
+        )
+
         if (args.size == 2 && args[0].equals("worldTp", true)) result.addAll(Bukkit.getWorlds().map { it.name })
 
-        if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("delete", true))
+        if (args.size == 3 && args[0].equals("arena", true) && (args[1].equals(
+                "delete",
+                true
+            ) || args[1].equals("startSetup", true) || args[1].equals(
+                "cancelSetup",
+                true
+            ) || args[1].equals("finishSetup", true))
+        )
             result.addAll(this.gameArenaHandler.cachedArenas.map { it.id })
 
         return result

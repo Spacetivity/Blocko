@@ -2,11 +2,7 @@ package net.spacetivity.ludo.arena
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.spacetivity.ludo.board.GameBoard
-import net.spacetivity.ludo.board.GameFieldHandler
-import net.spacetivity.ludo.entity.GameEntity
-import net.spacetivity.ludo.entity.GameEntityHandler
-import net.spacetivity.ludo.team.GameTeamHandler
+import net.spacetivity.ludo.LudoGame
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -15,12 +11,7 @@ import java.util.*
 
 class GameArena(val id: String, val gameWorld: World, val viewPlatformLocation: Location, val status: GameArenaStatus) {
 
-    val gameBoard: GameBoard = GameBoard(this.id)
-
     val maxPlayers: Int = 4
-    val gameTeamHandler: GameTeamHandler = GameTeamHandler()
-    val gameEntityHandler: GameEntityHandler = GameEntityHandler()
-    val gameFieldHandler: GameFieldHandler = GameFieldHandler(this.gameBoard)
 
     val currentPlayers: MutableSet<UUID> = mutableSetOf()
     var arenaHost: Player? = null
@@ -80,8 +71,8 @@ class GameArena(val id: String, val gameWorld: World, val viewPlatformLocation: 
 
     fun resetArena() {
         this.currentPlayers.clear()
-        this.gameTeamHandler.gameTeams.clear()
-        this.gameEntityHandler.gameEntities.forEach(GameEntity::despawn)
+        LudoGame.instance.gameTeamHandler.gameTeams.clear()
+        LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
     }
 
     private fun findNewHost(): Player? {

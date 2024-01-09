@@ -1,4 +1,4 @@
-package net.spacetivity.ludo.board
+package net.spacetivity.ludo.field
 
 import net.spacetivity.ludo.utils.PathFace
 import org.bukkit.entity.LivingEntity

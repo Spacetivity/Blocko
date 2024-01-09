@@ -61,8 +61,7 @@ class GameArenaHandler {
     }
 
     fun deleteArena(id: String) {
-        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(id)?: return
-        gameArena.gameFieldHandler.deleteFields()
+        LudoGame.instance.gameFieldHandler.deleteFields(id)
 
         transaction {
             GameArenaDAO.deleteWhere { GameArenaDAO.id eq id }

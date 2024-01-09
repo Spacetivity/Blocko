@@ -1,5 +1,7 @@
-package net.spacetivity.ludo.board
+package net.spacetivity.ludo.field
 
+import com.google.common.collect.ArrayListMultimap
+import com.google.common.collect.Multimap
 import net.spacetivity.ludo.utils.PathFace
 import org.bukkit.Bukkit
 import org.bukkit.World
@@ -11,7 +13,9 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class GameFieldHandler(private val gameBoard: GameBoard) {
+class GameFieldHandler {
+
+    val cachedGameFields: Multimap<String, GameField> = ArrayListMultimap.create()
 
     init {
         transaction {
@@ -27,14 +31,18 @@ class GameFieldHandler(private val gameBoard: GameBoard) {
                     TurnComponent(PathFace.valueOf(resultRow[GameFieldDAO.turnComponent]!!))
                 }
 
-                gameBoard.gameFields.add(GameField(id, arenaId, world, x, z, turnComponent, false))
+                cachedGameFields.put(arenaId, GameField(id, arenaId, world, x, z, turnComponent, false))
             }
         }
     }
 
-    fun deleteFields() {
-        transaction { GameFieldDAO.deleteWhere { arenaId eq gameBoard.arenaId } }
-        this.gameBoard.gameFields.clear()
+    fun getField(arenaId: String, id: Int): GameField? {
+        return this.cachedGameFields.get(arenaId).find { it.id == id }
+    }
+
+    fun deleteFields(arenaId: String) {
+        transaction { GameFieldDAO.deleteWhere { GameFieldDAO.arenaId eq arenaId } }
+        this.cachedGameFields.removeAll(arenaId)
     }
 
     fun initFields(gameFields: MutableList<GameField>) {
@@ -49,7 +57,7 @@ class GameFieldHandler(private val gameBoard: GameBoard) {
                     statement[turnComponent] = null
                 }
 
-                gameBoard.gameFields.add(gameField)
+                cachedGameFields
             }
         }
     }

@@ -1,4 +1,4 @@
-package net.spacetivity.ludo.board
+package net.spacetivity.ludo.field
 
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table

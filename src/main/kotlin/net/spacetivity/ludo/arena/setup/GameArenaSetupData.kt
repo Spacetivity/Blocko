@@ -1,6 +1,6 @@
 package net.spacetivity.ludo.arena.setup
 
-import net.spacetivity.ludo.board.GameField
+import net.spacetivity.ludo.field.GameField
 
 class GameArenaSetupData(val arenaId: String) {
 

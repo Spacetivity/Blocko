@@ -1,4 +1,4 @@
-package net.spacetivity.ludo.board
+package net.spacetivity.ludo.field
 
 import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
@@ -22,7 +22,7 @@ class GameField(
 ) {
 
     fun getPossibleHolder(): GameEntity? {
-        return LudoGame.instance.gameArenaHandler.getArena(this.arenaId)?.gameEntityHandler?.gameEntities?.find { it.currentFieldId == this.id }
+        return LudoGame.instance.gameEntityHandler.getEntityAtField(arenaId, this.id)
     }
 
     fun throwOut(newHolder: LivingEntity, fieldHeight: Double) {
@@ -31,16 +31,16 @@ class GameField(
         if (!this.isTaken) return
         if (gameArena == null) return
 
-        val gameTeamHandler: GameTeamHandler = gameArena.gameTeamHandler
+        val gameTeamHandler: GameTeamHandler = LudoGame.instance.gameTeamHandler
         val holder: GameEntity = getPossibleHolder() ?: return
 
-        val holderGameTeam: GameTeam = gameTeamHandler.getTeam(holder.teamName) ?: return
+        val holderGameTeam: GameTeam = gameTeamHandler.getTeam(this.arenaId, holder.teamName) ?: return
         val teamSpawnLocation: Location = holderGameTeam.spawnLocation ?: return
 
         holder.livingEntity?.teleport(teamSpawnLocation)
         newHolder.teleport(getWorldPosition(fieldHeight))
 
-        val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(newHolder) ?: return
+        val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolder) ?: return
         Bukkit.broadcast(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${holderGameTeam.name}."))
     }
 

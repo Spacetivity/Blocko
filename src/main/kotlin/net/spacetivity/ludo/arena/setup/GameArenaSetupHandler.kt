@@ -4,8 +4,7 @@ import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.arena.GameArena
-import net.spacetivity.ludo.board.GameField
+import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.utils.ItemUtils
 import net.spacetivity.ludo.utils.MetadataUtils
 import org.bukkit.Bukkit
@@ -47,9 +46,7 @@ class GameArenaSetupHandler {
                 return
             }
 
-            val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(arenaSetupData.arenaId)!!
-
-            gameArena.gameFieldHandler.initFields(arenaSetupData.gameFields)
+            LudoGame.instance.gameFieldHandler.initFields(arenaSetupData.gameFields)
         }
 
         for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {
