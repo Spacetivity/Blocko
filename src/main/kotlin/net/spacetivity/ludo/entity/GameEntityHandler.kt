@@ -20,6 +20,10 @@ class GameEntityHandler {
         return this.gameEntities.get(arenaId).filter { it.teamName.equals(teamName, true) }
     }
 
+    fun getEntitiesFromArena(arenaId: String): List<GameEntity> {
+        return this.gameEntities.get(arenaId).toList()
+    }
+
     fun clearEntitiesFromArena(arenaId: String) {
         val entities: MutableCollection<GameEntity> = this.gameEntities.get(arenaId).toMutableList()
         entities.forEach { it.despawn() }

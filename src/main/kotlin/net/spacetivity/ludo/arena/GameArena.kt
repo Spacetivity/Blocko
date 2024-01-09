@@ -9,7 +9,7 @@ import org.bukkit.World
 import org.bukkit.entity.Player
 import java.util.*
 
-class GameArena(val id: String, val gameWorld: World, val viewPlatformLocation: Location, val status: GameArenaStatus) {
+class GameArena(val id: String, val gameWorld: World, val viewPlatformLocation: Location, var status: GameArenaStatus) {
 
     val maxPlayers: Int = 4
 

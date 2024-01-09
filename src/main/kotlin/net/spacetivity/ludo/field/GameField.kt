@@ -44,6 +44,11 @@ class GameField(
         Bukkit.broadcast(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${holderGameTeam.name}."))
     }
 
-    fun getWorldPosition(fieldHeight: Double): Location = Location(this.world, this.x, fieldHeight, this.z, 0.0F, 0.0F)
+    fun getWorldPosition(fieldHeight: Double): Location {
+        val location = Location(this.world, this.x, fieldHeight, this.z, 0.0F, 0.0F)
+        val fixedLocation: Location = location.clone().toCenterLocation()
+        fixedLocation.y = fieldHeight
+        return fixedLocation
+    }
 
 }

@@ -5,13 +5,21 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.GameArenaHandler
+import net.spacetivity.ludo.arena.GameArenaStatus
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
 import net.spacetivity.ludo.command.api.CommandProperties
 import net.spacetivity.ludo.command.api.LudoCommandExecutor
 import net.spacetivity.ludo.command.api.LudoCommandSender
+import net.spacetivity.ludo.entity.GameEntity
+import net.spacetivity.ludo.entity.GameEntityHandler
+import net.spacetivity.ludo.field.GameField
+import net.spacetivity.ludo.field.GameFieldHandler
+import net.spacetivity.ludo.field.TurnComponent
+import net.spacetivity.ludo.utils.PathFace
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.WorldCreator
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import java.io.File
 
@@ -32,6 +40,42 @@ class LudoCommand : LudoCommandExecutor {
 
         if (!player.hasPermission("ludo.command")) {
             player.sendMessage(Component.text("No perms! :("))
+            return
+        }
+
+        //TODO: remove this (it's only for testing)
+        if (args.size == 2 && args[0].equals("start", true)) {
+            val arenaId: String = args[1]
+            val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
+
+            if (gameArena == null) {
+                player.sendMessage(Component.text("Arena does not exist!"))
+                return
+            }
+
+            if (gameArena.status != GameArenaStatus.READY) {
+                player.sendMessage(Component.text("This arena is not ready to start a game!"))
+                return
+            }
+
+            val gameEntityHandler: GameEntityHandler = LudoGame.instance.gameEntityHandler
+            val gameFieldHandler: GameFieldHandler = LudoGame.instance.gameFieldHandler
+
+            val entitiesFromArena: List<GameEntity> = gameEntityHandler.getEntitiesFromArena(arenaId)
+
+            if (entitiesFromArena.isEmpty()) {
+                val gameEntity = GameEntity(arenaId, "red", EntityType.VILLAGER)
+                gameEntityHandler.gameEntities.put(arenaId, gameEntity)
+
+                val firstField: GameField = gameFieldHandler.getField(arenaId, 0) ?: return
+                gameEntity.spawn(firstField.getWorldPosition(0.0))
+                player.sendMessage(Component.text("Spawned entity.", NamedTextColor.DARK_PURPLE))
+            }
+
+            val gameEntity: GameEntity = gameEntityHandler.gameEntities.get(arenaId).toList()[0]
+            gameEntity.move(1, 0.0)
+            player.sendMessage(Component.text("Moved entity.", NamedTextColor.LIGHT_PURPLE))
+
             return
         }
 
@@ -69,9 +113,15 @@ class LudoCommand : LudoCommandExecutor {
 
         if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("startSetup", true)) {
             val arenaId: String = args[2]
+            val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
 
-            if (this.gameArenaHandler.cachedArenas.none { it.id == arenaId }) {
+            if (gameArena == null) {
                 player.sendMessage(Component.text("Arena does not exist!"))
+                return
+            }
+
+            if (gameArena.status != GameArenaStatus.CONFIGURATING) {
+                player.sendMessage(Component.text("This arena is already fully configured!"))
                 return
             }
 
@@ -113,6 +163,39 @@ class LudoCommand : LudoCommandExecutor {
 
             this.gameArenaHandler.deleteArena(arenaId)
             player.sendMessage(Component.text("Arena deleted!", NamedTextColor.YELLOW))
+            return
+        }
+
+        if (args.size == 5 && args[0].equals("arena", true) && args[1].equals("setTurn", true)) {
+            val arenaId: String = args[2]
+            val fieldId: Int = args[3].toInt()
+
+            if (this.gameArenaHandler.cachedArenas.none { it.id == arenaId }) {
+                player.sendMessage(Component.text("Arena does not exist!"))
+                return
+            }
+
+            val pathFace: PathFace? = PathFace.entries.find { it.name.equals(args[4], true) }
+
+            if (pathFace == null) {
+                player.sendMessage(Component.text("Available ${PathFace.entries.joinToString(", ") { it.name }}"))
+                return
+            }
+
+            val gameFieldHandler: GameFieldHandler = LudoGame.instance.gameFieldHandler
+            val gameField: GameField? = gameFieldHandler.getField(arenaId, fieldId)
+
+            if (gameField == null) {
+                player.sendMessage(Component.text("This field does not exist!"))
+                return
+            }
+
+            val turnComponent = TurnComponent(pathFace)
+
+            gameField.turnComponent = turnComponent
+            gameFieldHandler.updateFieldTurnComponent(arenaId, fieldId, turnComponent)
+
+            player.sendMessage(Component.text("You created a turning point for your field. (Direction: ${turnComponent.facing.name})"))
             return
         }
 
@@ -159,6 +242,8 @@ class LudoCommand : LudoCommandExecutor {
                 "/ludo arena cancelSetup <arenaId>",
                 "/ludo arena finishSetup <arenaId>",
 
+                "/ludo arena setTurn <arenaId> <fieldId> <pathFace>",
+
                 "/ludo arena delete <arenaId>",
                 "/ludo worldTp <worldName>",
             )
@@ -180,7 +265,11 @@ class LudoCommand : LudoCommandExecutor {
             )
         )
 
-        if (args.size == 2 && args[0].equals("worldTp", true)) result.addAll(Bukkit.getWorlds().map { it.name })
+        if (args.size == 2 && args[0].equals("worldTp", true))
+            result.addAll(Bukkit.getWorlds().map { it.name })
+
+        if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("setTurn", true))
+            result.addAll(PathFace.entries.map { it.name })
 
         if (args.size == 3 && args[0].equals("arena", true) && (args[1].equals(
                 "delete",

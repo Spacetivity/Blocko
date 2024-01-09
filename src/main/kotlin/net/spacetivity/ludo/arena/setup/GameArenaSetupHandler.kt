@@ -4,6 +4,7 @@ import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.arena.GameArenaStatus
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.utils.ItemUtils
 import net.spacetivity.ludo.utils.MetadataUtils
@@ -27,7 +28,11 @@ class GameArenaSetupHandler {
             return
         }
 
-        player.inventory.setItem(0, ItemUtils(Material.IRON_HOE).build())
+        player.inventory.setItem(0, ItemUtils(Material.IRON_HOE)
+            .setName(Component.text("Left-click: Set Turn | Right-click: Add field"))
+            .build())
+
+
         player.sendMessage(Component.text("You are now in setup mode!"))
         this.arenaSetupCache.put(player.uniqueId, GameArenaSetupData(arenaId))
     }
@@ -46,6 +51,7 @@ class GameArenaSetupHandler {
                 return
             }
 
+            LudoGame.instance.gameArenaHandler.updateArenaStatus(arenaSetupData.arenaId, GameArenaStatus.READY)
             LudoGame.instance.gameFieldHandler.initFields(arenaSetupData.gameFields)
         }
 

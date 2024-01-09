@@ -17,7 +17,7 @@ class GameTeam(val name: String, val color: NamedTextColor) {
 
     init {
         val mainScoreboard = Bukkit.getScoreboardManager().mainScoreboard
-        val sbTeamName = "sh_team_${this.name}"
+        val sbTeamName = "${UUID.randomUUID().toString().split("-")[0]}_team_${this.name}"
 
         this.scoreboardTeam = mainScoreboard.getTeam(sbTeamName)
         if (this.scoreboardTeam == null) this.scoreboardTeam = mainScoreboard.registerNewTeam(sbTeamName)

@@ -1,10 +1,10 @@
 package net.spacetivity.ludo.utils
 
-enum class PathFace(val radians: Double) {
+enum class PathFace(val radians: Float) {
 
-    NORTH(Math.PI * 3 / 2),
-    SOUTH(Math.PI / 2),
-    EAST(0.0),
-    WEST(Math.PI)
+    NORTH(180.0f),
+    EAST(270.0f),
+    SOUTH(0.0f),
+    WEST(90.0f)
 
 }

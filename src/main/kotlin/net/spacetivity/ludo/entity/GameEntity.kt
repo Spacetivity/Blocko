@@ -13,6 +13,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
     var currentFieldId: Int? = null
     var livingEntity: LivingEntity? = null
+    var forceYaw: Float? = null
 
     fun spawn(location: Location) {
         if (this.livingEntity != null) return
@@ -22,7 +23,6 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         this.livingEntity = location.world.spawnEntity(location, this.entityType) as LivingEntity
         this.livingEntity!!.isSilent = true;
         this.livingEntity!!.isGlowing = true
-        this.livingEntity!!.isInvisible = true
         this.livingEntity!!.isInvulnerable = true
         this.livingEntity!!.setAI(false)
 
@@ -45,15 +45,19 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         val newFieldId: Int = if (this.currentFieldId == null) fieldAmount else this.currentFieldId!! + fieldAmount
         this.currentFieldId = newFieldId
 
-        val newField: GameField = gameFieldHandler.getField(this.arenaId,this.currentFieldId!!) ?: return
+        val newField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!!) ?: return
         newField.isTaken = true
 
         val worldPosition: Location = newField.getWorldPosition(fieldHeight)
 
-        if (newField.turnComponent != null)
-            worldPosition.setDirection(newField.turnComponent!!.getRotation(this.livingEntity!!))
+        if (newField.turnComponent != null) {
+            this.forceYaw = newField.turnComponent!!.getRotation()
+        }
 
-        this.livingEntity!!.teleport(newField.getWorldPosition(fieldHeight))
+        if (this.forceYaw != null)
+            worldPosition.yaw = this.forceYaw!!
+
+        this.livingEntity!!.teleport(worldPosition)
     }
 
     fun despawn() {

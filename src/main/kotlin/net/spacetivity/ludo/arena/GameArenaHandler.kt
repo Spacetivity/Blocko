@@ -4,12 +4,10 @@ import net.spacetivity.ludo.LudoGame
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
-import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
@@ -36,6 +34,16 @@ class GameArenaHandler {
                 cachedArenas.add(GameArena(id, gameWorld, playerLocation, status))
             }
         }
+    }
+
+    fun updateArenaStatus(id: String, status: GameArenaStatus) {
+        transaction {
+            GameArenaDAO.update({ GameArenaDAO.id eq id }) { statement: UpdateStatement ->
+                statement[GameArenaDAO.status] = status.name
+            }
+        }
+
+        getArena(id)?.status = status
     }
 
     fun createArena(worldName: String, location: Location): Boolean {
