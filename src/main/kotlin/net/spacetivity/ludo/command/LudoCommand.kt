@@ -5,7 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.GameArenaHandler
-import net.spacetivity.ludo.arena.GameArenaStatus
+import net.spacetivity.ludo.arena.GameArenaOption
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
 import net.spacetivity.ludo.command.api.CommandProperties
 import net.spacetivity.ludo.command.api.LudoCommandExecutor
@@ -53,7 +53,7 @@ class LudoCommand : LudoCommandExecutor {
                 return
             }
 
-            if (gameArena.status != GameArenaStatus.READY) {
+            if (gameArena.status != GameArenaOption.Status.READY) {
                 player.sendMessage(Component.text("This arena is not ready to start a game!"))
                 return
             }
@@ -120,7 +120,7 @@ class LudoCommand : LudoCommandExecutor {
                 return
             }
 
-            if (gameArena.status != GameArenaStatus.CONFIGURATING) {
+            if (gameArena.status != GameArenaOption.Status.CONFIGURATING) {
                 player.sendMessage(Component.text("This arena is already fully configured!"))
                 return
             }

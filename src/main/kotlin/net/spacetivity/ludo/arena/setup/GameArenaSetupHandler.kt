@@ -4,7 +4,7 @@ import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.arena.GameArenaStatus
+import net.spacetivity.ludo.arena.GameArenaOption
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.utils.ItemUtils
 import net.spacetivity.ludo.utils.MetadataUtils
@@ -51,8 +51,9 @@ class GameArenaSetupHandler {
                 return
             }
 
-            LudoGame.instance.gameArenaHandler.updateArenaStatus(arenaSetupData.arenaId, GameArenaStatus.READY)
+            LudoGame.instance.gameArenaHandler.updateArenaStatus(arenaSetupData.arenaId, GameArenaOption.Status.READY)
             LudoGame.instance.gameFieldHandler.initFields(arenaSetupData.gameFields)
+            LudoGame.instance.gameTeamHandler.initTeamSpawns(arenaSetupData.gameTeamSpawns)
         }
 
         for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {

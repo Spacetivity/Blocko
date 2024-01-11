@@ -13,7 +13,8 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
     var currentFieldId: Int? = null
     var livingEntity: LivingEntity? = null
-    var forceYaw: Float? = null
+
+    private var forceYaw: Float? = null
 
     fun spawn(location: Location) {
         if (this.livingEntity != null) return
@@ -27,11 +28,9 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         this.livingEntity!!.setAI(false)
 
         gameTeam.scoreboardTeam?.addEntity(this.livingEntity!!)
-
         MetadataUtils.set(this.livingEntity!!, "teamName", this.teamName)
     }
 
-    // field amount -> how many fields the entity should move (is decided with rolling the dice)
     fun move(fieldAmount: Int, fieldHeight: Double) {
         if (this.livingEntity == null) return
 
@@ -46,16 +45,18 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         this.currentFieldId = newFieldId
 
         val newField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!!) ?: return
-        newField.isTaken = true
+        if (!newField.isTaken) newField.isTaken = true
 
         val worldPosition: Location = newField.getWorldPosition(fieldHeight)
 
-        if (newField.turnComponent != null) {
+        if (newField.turnComponent != null)
             this.forceYaw = newField.turnComponent!!.getRotation()
-        }
 
         if (this.forceYaw != null)
             worldPosition.yaw = this.forceYaw!!
+
+        //throws out the old holder entity
+        newField.throwOut(this.livingEntity!!, fieldHeight)
 
         this.livingEntity!!.teleport(worldPosition)
     }

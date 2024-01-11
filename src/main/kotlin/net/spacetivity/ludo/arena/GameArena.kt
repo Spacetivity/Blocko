@@ -3,20 +3,37 @@ package net.spacetivity.ludo.arena
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.team.GameTeam
+import net.spacetivity.ludo.team.GameTeamHandler
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
 import java.util.*
 
-class GameArena(val id: String, val gameWorld: World, val viewPlatformLocation: Location, var status: GameArenaStatus) {
+class GameArena(
+    val id: String,
+    val gameWorld: World,
+    val viewPlatformLocation: Location,
+    var status: GameArenaOption.Status,
+    var phase: GameArenaOption.Phase
+) {
 
     val maxPlayers: Int = 4
 
     val currentPlayers: MutableSet<UUID> = mutableSetOf()
     var arenaHost: Player? = null
 
-    fun joinArena(player: Player) {
+    private val gameTeamHandler: GameTeamHandler = LudoGame.instance.gameTeamHandler
+
+    fun sendArenaMessage(message: Component) {
+        for (player: Player? in this.currentPlayers.map { Bukkit.getPlayer(it) }) {
+            if (player == null) continue
+            player.sendMessage(message)
+        }
+    }
+
+    fun join(player: Player) {
         if (this.currentPlayers.contains(player.uniqueId)) {
             player.sendMessage(Component.text("Already in arena!"))
             return
@@ -27,6 +44,15 @@ class GameArena(val id: String, val gameWorld: World, val viewPlatformLocation: 
             return
         }
 
+        val gameTeam: GameTeam? = this.gameTeamHandler.gameTeams.get(this.id).firstOrNull { it.teamMembers.isEmpty() }
+
+        if (gameTeam == null) {
+            player.sendMessage(Component.text("No empty team was found for you... Join cancelled!"))
+            return
+        }
+
+        gameTeam.join(player)
+
         if (this.currentPlayers.isEmpty()) {
             this.arenaHost = player
             player.sendMessage(Component.text("You are now the arena host!", NamedTextColor.YELLOW))
@@ -36,15 +62,15 @@ class GameArena(val id: String, val gameWorld: World, val viewPlatformLocation: 
         player.sendMessage("You joined the arena!")
     }
 
-    fun quitArena(player: Player) {
+    fun quit(player: Player) {
         if (!this.currentPlayers.contains(player.uniqueId)) {
             player.sendMessage(Component.text("Not in arena!"))
             return
         }
 
 
-        if (this.currentPlayers.size.dec() == 0) {
-            resetArena()
+        if ((this.currentPlayers.size - 1) == 0) {
+            reset()
             return
         }
 
@@ -54,22 +80,19 @@ class GameArena(val id: String, val gameWorld: World, val viewPlatformLocation: 
 
             if (this.arenaHost == null) {
                 println("No new host for arena $id could be determined!")
-                resetArena()
+                reset()
                 return
             }
 
             this.arenaHost?.sendMessage(Component.text("You are now the new Game-Host!", NamedTextColor.YELLOW))
         }
 
+        this.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(player)
         this.currentPlayers.remove(player.uniqueId)
         player.sendMessage("You left the arena!")
     }
 
-    fun startGame() {
-
-    }
-
-    fun resetArena() {
+    fun reset() {
         this.currentPlayers.clear()
         LudoGame.instance.gameTeamHandler.gameTeams.clear()
         LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)

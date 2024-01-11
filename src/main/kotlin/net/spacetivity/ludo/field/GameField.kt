@@ -6,7 +6,7 @@ import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamHandler
-import org.bukkit.Bukkit
+import net.spacetivity.ludo.team.GameTeamSpawn
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.LivingEntity
@@ -21,10 +21,6 @@ class GameField(
     var isTaken: Boolean = false
 ) {
 
-    fun getPossibleHolder(): GameEntity? {
-        return LudoGame.instance.gameEntityHandler.getEntityAtField(arenaId, this.id)
-    }
-
     fun throwOut(newHolder: LivingEntity, fieldHeight: Double) {
         val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
 
@@ -35,13 +31,15 @@ class GameField(
         val holder: GameEntity = getPossibleHolder() ?: return
 
         val holderGameTeam: GameTeam = gameTeamHandler.getTeam(this.arenaId, holder.teamName) ?: return
-        val teamSpawnLocation: Location = holderGameTeam.spawnLocation ?: return
+        val teamSpawnLocation: GameTeamSpawn = holderGameTeam.getFreeSpawnLocation()
+            ?: throw NullPointerException("No empty team spawn was found for $holderGameTeam.name")
 
-        holder.livingEntity?.teleport(teamSpawnLocation)
+        holder.livingEntity?.teleport(teamSpawnLocation.getWorldPosition())
+        teamSpawnLocation.isTaken = true
         newHolder.teleport(getWorldPosition(fieldHeight))
 
         val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolder) ?: return
-        Bukkit.broadcast(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${holderGameTeam.name}."))
+        gameArena.sendArenaMessage(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${holderGameTeam.name}."))
     }
 
     fun getWorldPosition(fieldHeight: Double): Location {
@@ -49,6 +47,10 @@ class GameField(
         val fixedLocation: Location = location.clone().toCenterLocation()
         fixedLocation.y = fieldHeight
         return fixedLocation
+    }
+
+    private fun getPossibleHolder(): GameEntity? {
+        return LudoGame.instance.gameEntityHandler.getEntityAtField(arenaId, this.id)
     }
 
 }

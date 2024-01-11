@@ -29,14 +29,14 @@ class GameArenaHandler {
                 val pitch: Float = serializedLocation[4].toFloat()
 
                 val playerLocation = Location(gameWorld, x, y, z, yaw, pitch)
-                val status: GameArenaStatus = GameArenaStatus.valueOf(resultRow[GameArenaDAO.status])
+                val status: GameArenaOption.Status = GameArenaOption.Status.valueOf(resultRow[GameArenaDAO.status])
 
-                cachedArenas.add(GameArena(id, gameWorld, playerLocation, status))
+                cachedArenas.add(GameArena(id, gameWorld, playerLocation, status, GameArenaOption.Phase.IDLE))
             }
         }
     }
 
-    fun updateArenaStatus(id: String, status: GameArenaStatus) {
+    fun updateArenaStatus(id: String, status: GameArenaOption.Status) {
         transaction {
             GameArenaDAO.update({ GameArenaDAO.id eq id }) { statement: UpdateStatement ->
                 statement[GameArenaDAO.status] = status.name
@@ -46,10 +46,15 @@ class GameArenaHandler {
         getArena(id)?.status = status
     }
 
+    fun updateArenaPhase(id: String, phase: GameArenaOption.Phase) {
+        getArena(id)?.phase = phase
+    }
+
     fun createArena(worldName: String, location: Location): Boolean {
         val id: String = UUID.randomUUID().toString().split("-")[0]
         val serializedLocation = "${location.x}:${location.y}:${location.z}:${location.yaw}:${location.pitch}"
-        val status = GameArenaStatus.CONFIGURATING
+        val status: GameArenaOption.Status = GameArenaOption.Status.CONFIGURATING
+        val phase: GameArenaOption.Phase = GameArenaOption.Phase.IDLE
 
         if (getArena(id) != null || this.cachedArenas.any { it.gameWorld.name.equals(worldName, true) }) return false
 
@@ -63,23 +68,24 @@ class GameArenaHandler {
             }
         }
 
-        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, location, status))
-
+        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, location, status, phase))
         return true
     }
 
     fun deleteArena(id: String) {
+        LudoGame.instance.gameTeamHandler.gameTeams.removeAll(id)
         LudoGame.instance.gameFieldHandler.deleteFields(id)
 
         transaction {
             GameArenaDAO.deleteWhere { GameArenaDAO.id eq id }
         }
 
+
         this.cachedArenas.removeIf { it.id == id }
     }
 
     fun resetArenas() {
-        this.cachedArenas.forEach(GameArena::resetArena)
+        this.cachedArenas.forEach(GameArena::reset)
     }
 
     fun getArena(id: String): GameArena? = this.cachedArenas.find { it.id == id }

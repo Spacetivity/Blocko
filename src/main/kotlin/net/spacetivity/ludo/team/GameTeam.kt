@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.utils.MetadataUtils
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Team
 import java.util.*
@@ -13,7 +12,7 @@ class GameTeam(val name: String, val color: NamedTextColor) {
 
     var scoreboardTeam: Team?
     val teamMembers: MutableSet<UUID> = mutableSetOf()
-    var spawnLocation: Location? = null
+    val teamSpawnLocations: MutableSet<GameTeamSpawn> = mutableSetOf()
 
     init {
         val mainScoreboard = Bukkit.getScoreboardManager().mainScoreboard
@@ -50,6 +49,10 @@ class GameTeam(val name: String, val color: NamedTextColor) {
         this.teamMembers.remove(player.uniqueId)
         MetadataUtils.remove(player, "teamName")
         player.sendMessage(Component.text("You are left your team."))
+    }
+
+    fun getFreeSpawnLocation(): GameTeamSpawn? {
+        return this.teamSpawnLocations.firstOrNull { !it.isTaken }
     }
 
     private fun isFull(): Boolean = this.teamMembers.isNotEmpty()

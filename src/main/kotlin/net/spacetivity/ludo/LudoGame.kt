@@ -19,6 +19,7 @@ import net.spacetivity.ludo.field.GameFieldDAO
 import net.spacetivity.ludo.field.GameFieldHandler
 import net.spacetivity.ludo.listener.PlayerSetupListener
 import net.spacetivity.ludo.team.GameTeamHandler
+import net.spacetivity.ludo.team.GameTeamSpawnDAO
 import net.spacetivity.ludo.utils.FileUtils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Entity
@@ -74,7 +75,8 @@ class LudoGame : JavaPlugin() {
                 addLogger(StdOutSqlLogger)
                 SchemaUtils.create(
                     GameArenaDAO,
-                    GameFieldDAO
+                    GameFieldDAO,
+                    GameTeamSpawnDAO
                 )
             }
         } catch (e: Exception) {

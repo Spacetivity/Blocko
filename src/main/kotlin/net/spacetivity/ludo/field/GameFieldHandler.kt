@@ -63,7 +63,7 @@ class GameFieldHandler {
                     statement[turnComponent] = null
                 }
 
-                cachedGameFields
+                cachedGameFields.put(gameField.arenaId, gameField)
             }
         }
     }
