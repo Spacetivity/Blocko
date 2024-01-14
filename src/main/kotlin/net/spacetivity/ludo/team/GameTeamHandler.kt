@@ -8,6 +8,8 @@ import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.utils.MetadataUtils
 import org.bukkit.entity.LivingEntity
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
@@ -27,39 +29,45 @@ class GameTeamHandler {
         }
 
         transaction {
-            for (resultRow: ResultRow in GameTeamSpawnDAO.selectAll().toMutableList()) {
-                val arenaId: String = resultRow[GameTeamSpawnDAO.arenaId]
-                val teamName: String = resultRow[GameTeamSpawnDAO.teamName]
-                val worldName: String = resultRow[GameTeamSpawnDAO.worldName]
-                val x: Double = resultRow[GameTeamSpawnDAO.x]
-                val y: Double = resultRow[GameTeamSpawnDAO.y]
-                val z: Double = resultRow[GameTeamSpawnDAO.z]
-                val yaw: Float = resultRow[GameTeamSpawnDAO.yaw]
-                val pitch: Float = resultRow[GameTeamSpawnDAO.pitch]
+            for (resultRow: ResultRow in GameTeamLocationDAO.selectAll().toMutableList()) {
+                val arenaId: String = resultRow[GameTeamLocationDAO.arenaId]
+                val teamName: String = resultRow[GameTeamLocationDAO.teamName]
+                val worldName: String = resultRow[GameTeamLocationDAO.worldName]
+                val x: Double = resultRow[GameTeamLocationDAO.x]
+                val y: Double = resultRow[GameTeamLocationDAO.y]
+                val z: Double = resultRow[GameTeamLocationDAO.z]
+                val yaw: Float = resultRow[GameTeamLocationDAO.yaw]
+                val pitch: Float = resultRow[GameTeamLocationDAO.pitch]
 
                 val gameTeam: GameTeam = getTeam(arenaId, teamName) ?: continue
-                gameTeam.teamSpawnLocations.add(GameTeamSpawn(arenaId, teamName, worldName, x, y, z, yaw, pitch, false))
+                gameTeam.teamLocations.add(GameTeamLocation(arenaId, teamName, worldName, x, y, z, yaw, pitch, false))
             }
         }
     }
 
-    fun initTeamSpawns(gameTeamSpawns: MutableList<GameTeamSpawn>) {
+    fun initTeamSpawns(gameTeamLocations: MutableList<GameTeamLocation>) {
         transaction {
-            for (gameTeamSpawn: GameTeamSpawn in gameTeamSpawns) {
-                GameTeamSpawnDAO.insert { statement: InsertStatement<Number> ->
-                    statement[arenaId] = gameTeamSpawn.arenaId
-                    statement[teamName] = gameTeamSpawn.teamName
-                    statement[worldName] = gameTeamSpawn.worldName
-                    statement[x] = gameTeamSpawn.x
-                    statement[y] = gameTeamSpawn.y
-                    statement[z] = gameTeamSpawn.z
-                    statement[yaw] = gameTeamSpawn.yaw
-                    statement[pitch] = gameTeamSpawn.pitch
+            for (gameTeamLocation: GameTeamLocation in gameTeamLocations) {
+                GameTeamLocationDAO.insert { statement: InsertStatement<Number> ->
+                    statement[arenaId] = gameTeamLocation.arenaId
+                    statement[teamName] = gameTeamLocation.teamName
+                    statement[worldName] = gameTeamLocation.worldName
+                    statement[x] = gameTeamLocation.x
+                    statement[y] = gameTeamLocation.y
+                    statement[z] = gameTeamLocation.z
+                    statement[yaw] = gameTeamLocation.yaw
+                    statement[pitch] = gameTeamLocation.pitch
                 }
 
-                val gameTeam: GameTeam = getTeam(gameTeamSpawn.arenaId, gameTeamSpawn.teamName) ?: continue
-                gameTeam.teamSpawnLocations.add(gameTeamSpawn)
+                val gameTeam: GameTeam = getTeam(gameTeamLocation.arenaId, gameTeamLocation.teamName) ?: continue
+                gameTeam.teamLocations.add(gameTeamLocation)
             }
+        }
+    }
+
+    fun deleteTeamSpawns(arenaId: String) {
+        transaction {
+            GameTeamLocationDAO.deleteWhere { GameTeamLocationDAO.arenaId eq arenaId }
         }
     }
 

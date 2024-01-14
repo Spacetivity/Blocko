@@ -16,7 +16,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 
 @InventoryProperties(id = "turn_inv", rows = 1, columns = 9)
-class GameFieldTurnInventory(private val gameField: GameField, private val blockLocation: Location) : InventoryProvider {
+class GameFieldTurnSetupInventory(private val gameField: GameField, private val blockLocation: Location) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
         val availablePositions = listOf(
@@ -50,9 +50,8 @@ class GameFieldTurnInventory(private val gameField: GameField, private val block
 
                 if (entity == null) return@of
 
-                LudoGame.instance.gameArenaSetupHandler.fieldScoreboardTeam?.removeEntity(entity)
-                LudoGame.instance.gameArenaSetupHandler.turnScoreboardTeam?.addEntity(entity)
-
+                LudoGame.instance.gameArenaSetupHandler.fieldScoreboardTeam.removeEntity(entity)
+                LudoGame.instance.gameArenaSetupHandler.turnScoreboardTeam.addEntity(entity)
             })
         }
 

@@ -75,6 +75,8 @@ class GameArenaHandler {
     fun deleteArena(id: String) {
         LudoGame.instance.gameTeamHandler.gameTeams.removeAll(id)
         LudoGame.instance.gameFieldHandler.deleteFields(id)
+        LudoGame.instance.gameGarageFieldHandler.deleteGarageFields(id)
+        LudoGame.instance.gameTeamHandler.deleteTeamSpawns(id)
 
         transaction {
             GameArenaDAO.deleteWhere { GameArenaDAO.id eq id }

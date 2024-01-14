@@ -6,7 +6,10 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.setup.GameArenaSetupData
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.inventory.GameArenaInventory
-import net.spacetivity.ludo.inventory.GameFieldTurnInventory
+import net.spacetivity.ludo.inventory.GameFieldTurnSetupInventory
+import net.spacetivity.ludo.inventory.GameTeamSetupInventory
+import net.spacetivity.ludo.inventory.InvType
+import net.spacetivity.ludo.utils.MetadataUtils
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.block.Block
@@ -45,35 +48,49 @@ class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
         val block: Block = event.block
 
         if (!this.ludoGame.gameArenaSetupHandler.hasOpenSetup(player.uniqueId)) return
-        if (player.inventory.itemInMainHand.type != Material.IRON_HOE) return
 
         event.isCancelled = true
 
-        val validBlockTypes: MutableList<Material> = mutableListOf()
+        val validBlockTypes: MutableList<Material> = mutableListOf(Material.BONE_BLOCK)
 
-        validBlockTypes.add(Material.BONE_BLOCK)
+        for (material: Material in Material.entries.filter { it.name.contains("WOOL") && !it.name.contains("CARPET") })
+            validBlockTypes.add(material)
 
-        Material.entries.filter { it.name.contains("WOOL") && !it.name.contains("CARPET") }
-            .forEach { validBlockTypes.add(it) }
+        if (player.inventory.itemInMainHand.type == Material.IRON_HOE) {
 
-        val warningAlert = "The fields can be wool or bone blocks!"
-        doIfBlockIsValid(player, validBlockTypes, block, warningAlert) {
-            val arenaSetupData: GameArenaSetupData = this.ludoGame.gameArenaSetupHandler.getSetupData(player.uniqueId)!!
-
-            val gameField: GameField? = arenaSetupData.gameFields
-                .find { it.x == block.location.x && it.z == block.location.z && it.world.name == block.location.world.name }
-
-            if (gameField == null) {
-                player.sendMessage(Component.text("Not a valid field of arena ${arenaSetupData.arenaId}"))
-                return@doIfBlockIsValid
+            if (!MetadataUtils.has(player, "fieldsFinished")) {
+                player.sendMessage(Component.text("Set all game fields first, before you set the garage fields!"))
+                return
             }
 
-            SpaceInventoryProvider.api.inventoryHandler.openStaticInventory(
-                player,
-                Component.text("Set a turn"),
-                GameFieldTurnInventory(gameField, block.location),
-                true
-            )
+            doIfBlockIsValid(player, validBlockTypes, block, "The fields can be wool or bone blocks!") {
+                val arenaSetupData: GameArenaSetupData = this.ludoGame.gameArenaSetupHandler.getSetupData(player.uniqueId)!!
+                val gameField: GameField? = arenaSetupData.gameFields.find { it.x == block.location.x && it.z == block.location.z && it.world.name == block.location.world.name }
+
+                if (gameField == null) {
+                    player.sendMessage(Component.text("Not a valid field of arena ${arenaSetupData.arenaId}"))
+                    return@doIfBlockIsValid
+                }
+
+                SpaceInventoryProvider.api.inventoryHandler.openStaticInventory(player, Component.text("Set a turn"), GameFieldTurnSetupInventory(gameField, block.location), true)
+            }
+
+        } else if (player.inventory.itemInMainHand.type == Material.GOLDEN_HOE) {
+
+            if (!MetadataUtils.has(player, "fieldsFinished")) {
+                player.sendMessage(Component.text("Set all game fields first, before you set the garage fields!"))
+                return
+            }
+
+            doIfBlockIsValid(player, mutableListOf(Material.BONE_BLOCK), block, "A team entrance has to be a BONE block!") {
+                SpaceInventoryProvider.api.inventoryHandler.openStaticInventory(
+                    player,
+                    Component.text("Set team entrance"),
+                    GameTeamSetupInventory(InvType.ENTRANCE, block.location),
+                    true
+                )
+            }
+
         }
     }
 
@@ -83,27 +100,53 @@ class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
         val block: Block = event.clickedBlock ?: return
 
         if (!this.ludoGame.gameArenaSetupHandler.hasOpenSetup(player.uniqueId)) return
-        if (player.inventory.itemInMainHand.type != Material.IRON_HOE) return
         if (event.hand == EquipmentSlot.HAND) return;
 
         val validBlockTypes: MutableList<Material> = mutableListOf()
+        if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
 
-        if (event.action.isRightClick && event.action == Action.RIGHT_CLICK_BLOCK) {
-            val warningAlert: String =
-                if (this.ludoGame.gameArenaSetupHandler.hasConfiguredFieldsAlready(player.uniqueId)) {
-                    validBlockTypes.add(Material.BONE_BLOCK)
-                    Material.entries.filter { it.name.contains("WOOL") && !it.name.contains("CARPET") }
-                        .forEach { validBlockTypes.add(it) }
-                    "The fields can be wool or bone blocks!"
-                } else {
-                    Material.entries.filter { it.name.contains("WOOL") && !it.name.contains("CARPET") }
-                        .forEach { validBlockTypes.add(it) }
-                    "The first field has to be a WOOL block!"
-                }
+        val warningAlert: String
+
+        if (player.inventory.itemInMainHand.type == Material.IRON_HOE) {
+
+            if (this.ludoGame.gameArenaSetupHandler.hasConfiguredFieldsAlready(player.uniqueId)) {
+                for (material: Material in Material.entries.filter { it.name.contains("WOOL") && !it.name.contains("CARPET") })
+                    validBlockTypes.add(material)
+
+                validBlockTypes.add(Material.BONE_BLOCK)
+                warningAlert = "The fields can be wool or bone blocks!"
+            } else {
+                for (material: Material in Material.entries.filter { it.name.contains("WOOL") && !it.name.contains("CARPET") })
+                    validBlockTypes.add(material)
+
+                warningAlert = "The first field has to be a WOOL block!"
+            }
 
             doIfBlockIsValid(player, validBlockTypes, block, warningAlert) {
                 this.ludoGame.gameArenaSetupHandler.addField(player, block.location)
             }
+
+        } else if (player.inventory.itemInMainHand.type == Material.GOLDEN_HOE) {
+
+            if (!MetadataUtils.has(player, "fieldsFinished")) {
+                player.sendMessage(Component.text("Set all game fields first, before you set the garage fields!"))
+                return
+            }
+
+            for (material: Material in Material.entries.filter { it.name.contains("WOOL") && !it.name.contains("CARPET") })
+                validBlockTypes.add(material)
+
+            warningAlert = "A garage field has to be a WOOL block!"
+
+            doIfBlockIsValid(player, validBlockTypes, block, warningAlert) {
+                SpaceInventoryProvider.api.inventoryHandler.openStaticInventory(
+                    player,
+                    Component.text("Add garage field"),
+                    GameTeamSetupInventory(InvType.GARAGE, block.location),
+                    true
+                )
+            }
+
         }
 
     }

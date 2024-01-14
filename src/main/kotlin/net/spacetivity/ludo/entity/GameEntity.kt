@@ -27,7 +27,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         this.livingEntity!!.isInvulnerable = true
         this.livingEntity!!.setAI(false)
 
-        gameTeam.scoreboardTeam?.addEntity(this.livingEntity!!)
+        gameTeam.scoreboardTeam.addEntity(this.livingEntity!!)
         MetadataUtils.set(this.livingEntity!!, "teamName", this.teamName)
     }
 
@@ -36,9 +36,12 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         val gameFieldHandler: GameFieldHandler = LudoGame.instance.gameFieldHandler
 
+        var isEnteringGarage = false
+
         if (this.currentFieldId != null) {
             val oldField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!!) ?: return
             oldField.isTaken = false
+            isEnteringGarage = oldField.teamGarageEntrance != null
         }
 
         val newFieldId: Int = if (this.currentFieldId == null) fieldAmount else this.currentFieldId!! + fieldAmount
@@ -56,7 +59,8 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
             worldPosition.yaw = this.forceYaw!!
 
         //throws out the old holder entity
-        newField.throwOut(this.livingEntity!!, fieldHeight)
+        if (!isEnteringGarage)
+            newField.throwOut(this.livingEntity!!, fieldHeight)
 
         this.livingEntity!!.teleport(worldPosition)
     }

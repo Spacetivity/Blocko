@@ -18,9 +18,11 @@ import net.spacetivity.ludo.database.DatabaseFile
 import net.spacetivity.ludo.entity.GameEntityHandler
 import net.spacetivity.ludo.field.GameFieldDAO
 import net.spacetivity.ludo.field.GameFieldHandler
+import net.spacetivity.ludo.garageField.GameGarageFieldDAO
+import net.spacetivity.ludo.garageField.GameGarageFieldHandler
 import net.spacetivity.ludo.listener.PlayerSetupListener
 import net.spacetivity.ludo.team.GameTeamHandler
-import net.spacetivity.ludo.team.GameTeamSpawnDAO
+import net.spacetivity.ludo.team.GameTeamLocationDAO
 import net.spacetivity.ludo.utils.FileUtils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Entity
@@ -43,6 +45,7 @@ class LudoGame : JavaPlugin() {
     lateinit var gameTeamHandler: GameTeamHandler
     lateinit var gameEntityHandler: GameEntityHandler
     lateinit var gameFieldHandler: GameFieldHandler
+    lateinit var gameGarageFieldHandler: GameGarageFieldHandler
 
     private var idleTask: BukkitTask? = null
 
@@ -75,7 +78,8 @@ class LudoGame : JavaPlugin() {
                 SchemaUtils.create(
                     GameArenaDAO,
                     GameFieldDAO,
-                    GameTeamSpawnDAO
+                    GameGarageFieldDAO,
+                    GameTeamLocationDAO
                 )
             }
         } catch (e: Exception) {
@@ -91,6 +95,7 @@ class LudoGame : JavaPlugin() {
         this.gameTeamHandler = GameTeamHandler()
         this.gameEntityHandler = GameEntityHandler()
         this.gameFieldHandler = GameFieldHandler()
+        this.gameGarageFieldHandler = GameGarageFieldHandler()
 
         //TODO: Load all worlds from all game arenas!
 

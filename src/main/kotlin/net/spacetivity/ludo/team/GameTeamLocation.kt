@@ -4,7 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 
-data class GameTeamSpawn(
+data class GameTeamLocation(
     val arenaId: String,
     val teamName: String,
     val worldName: String,

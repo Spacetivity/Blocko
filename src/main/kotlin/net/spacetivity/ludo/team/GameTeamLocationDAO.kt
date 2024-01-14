@@ -3,7 +3,7 @@ package net.spacetivity.ludo.team
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
 
-object GameTeamSpawnDAO : Table("game_team_spawns") {
+object GameTeamLocationDAO : Table("game_team_locations") {
     val arenaId: Column<String> = varchar("arenaId", 30)
     val teamName: Column<String> = varchar("teamName", 30)
     val worldName: Column<String> = varchar("worldName", 50)

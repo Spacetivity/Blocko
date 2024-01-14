@@ -3,27 +3,16 @@ package net.spacetivity.ludo.team
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.utils.MetadataUtils
-import org.bukkit.Bukkit
+import net.spacetivity.ludo.utils.ScoreboardUtils
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Team
 import java.util.*
 
 class GameTeam(val name: String, val color: NamedTextColor) {
 
-    var scoreboardTeam: Team?
+    val scoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam( "team_${this.name}", this.color)
     val teamMembers: MutableSet<UUID> = mutableSetOf()
-    val teamSpawnLocations: MutableSet<GameTeamSpawn> = mutableSetOf()
-
-    init {
-        val mainScoreboard = Bukkit.getScoreboardManager().mainScoreboard
-        val sbTeamName = "${UUID.randomUUID().toString().split("-")[0]}_team_${this.name}"
-
-        this.scoreboardTeam = mainScoreboard.getTeam(sbTeamName)
-        if (this.scoreboardTeam == null) this.scoreboardTeam = mainScoreboard.registerNewTeam(sbTeamName)
-
-        this.scoreboardTeam?.color(this.color)
-        this.scoreboardTeam?.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER)
-    }
+    val teamLocations: MutableSet<GameTeamLocation> = mutableSetOf()
 
     fun join(player: Player) {
         if (isFull()) {
@@ -51,8 +40,8 @@ class GameTeam(val name: String, val color: NamedTextColor) {
         player.sendMessage(Component.text("You are left your team."))
     }
 
-    fun getFreeSpawnLocation(): GameTeamSpawn? {
-        return this.teamSpawnLocations.firstOrNull { !it.isTaken }
+    fun getFreeSpawnLocation(): GameTeamLocation? {
+        return this.teamLocations.firstOrNull { !it.isTaken }
     }
 
     private fun isFull(): Boolean = this.teamMembers.isNotEmpty()

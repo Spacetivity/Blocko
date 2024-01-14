@@ -5,10 +5,12 @@ import com.google.common.collect.Multimap
 import net.spacetivity.ludo.utils.PathFace
 import org.bukkit.Bukkit
 import org.bukkit.World
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
-import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class GameFieldHandler {
@@ -29,21 +31,19 @@ class GameFieldHandler {
                     TurnComponent(PathFace.valueOf(resultRow[GameFieldDAO.turnComponent]!!))
                 }
 
-                cachedGameFields.put(arenaId, GameField(id, arenaId, world, x, z, turnComponent, false))
+                val teamGarageEntrance: String? = if (resultRow[GameFieldDAO.teamGarageEntrance].isNullOrEmpty()) {
+                    null
+                } else {
+                    resultRow[GameFieldDAO.teamGarageEntrance]
+                }
+
+                cachedGameFields.put(arenaId, GameField(id, arenaId, world, x, z, turnComponent, teamGarageEntrance, false))
             }
         }
     }
 
     fun getField(arenaId: String, id: Int): GameField? {
         return this.cachedGameFields.get(arenaId).find { it.id == id }
-    }
-
-    fun updateFieldTurnComponent(arenaId: String, id: Int, turnComponent: TurnComponent?) {
-        transaction {
-            GameFieldDAO.update({ (GameFieldDAO.arenaId eq arenaId) and (GameFieldDAO.id eq id) }) { statement: UpdateStatement ->
-                statement[GameFieldDAO.turnComponent] = turnComponent?.facing?.name
-            }
-        }
     }
 
     fun deleteFields(arenaId: String) {
@@ -61,6 +61,7 @@ class GameFieldHandler {
                     statement[x] = gameField.x
                     statement[z] = gameField.z
                     statement[turnComponent] = if (gameField.turnComponent == null) null else gameField.turnComponent!!.facing.name
+                    statement[teamGarageEntrance] = if (gameField.teamGarageEntrance == null) null else gameField.teamGarageEntrance!!
                 }
 
                 cachedGameFields.put(gameField.arenaId, gameField)

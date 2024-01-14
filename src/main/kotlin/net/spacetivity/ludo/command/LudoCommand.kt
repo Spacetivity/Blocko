@@ -218,6 +218,7 @@ class LudoCommand : LudoCommandExecutor {
             player.sendMessage(Component.text("Arena deleted!", NamedTextColor.YELLOW))
             return
         }
+
         if (args.size == 2 && args[0].equals("worldTp", true)) {
             val worldName: String = args[1]
             val world: World? = Bukkit.getWorld(worldName)
