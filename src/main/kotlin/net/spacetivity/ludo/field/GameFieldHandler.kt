@@ -38,10 +38,10 @@ class GameFieldHandler {
         return this.cachedGameFields.get(arenaId).find { it.id == id }
     }
 
-    fun updateFieldTurnComponent(arenaId: String, id: Int, turnComponent: TurnComponent) {
+    fun updateFieldTurnComponent(arenaId: String, id: Int, turnComponent: TurnComponent?) {
         transaction {
             GameFieldDAO.update({ (GameFieldDAO.arenaId eq arenaId) and (GameFieldDAO.id eq id) }) { statement: UpdateStatement ->
-                statement[GameFieldDAO.turnComponent] = turnComponent.facing.name
+                statement[GameFieldDAO.turnComponent] = turnComponent?.facing?.name
             }
         }
     }
@@ -60,7 +60,7 @@ class GameFieldHandler {
                     statement[worldName] = gameField.world.name
                     statement[x] = gameField.x
                     statement[z] = gameField.z
-                    statement[turnComponent] = null
+                    statement[turnComponent] = if (gameField.turnComponent == null) null else gameField.turnComponent!!.facing.name
                 }
 
                 cachedGameFields.put(gameField.arenaId, gameField)

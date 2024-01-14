@@ -24,6 +24,8 @@ val exposedVersion: String by project
 dependencies {
     compileOnly("com.google.code.gson:gson:2.10.1")
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+    compileOnly("net.spacetivity.inventory:inventory-api:1.0-SNAPSHOT")
+
     implementation(group = "org.mariadb.jdbc", name = "mariadb-java-client", version = "3.0.7")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")

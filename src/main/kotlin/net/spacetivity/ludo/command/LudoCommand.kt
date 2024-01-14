@@ -2,10 +2,12 @@ package net.spacetivity.ludo.command
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.spacetivity.inventory.api.SpaceInventoryProvider
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.GameArenaHandler
 import net.spacetivity.ludo.arena.GameArenaOption
+import net.spacetivity.ludo.arena.setup.GameArenaSetupData
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
 import net.spacetivity.ludo.command.api.CommandProperties
 import net.spacetivity.ludo.command.api.LudoCommandExecutor
@@ -40,6 +42,12 @@ class LudoCommand : LudoCommandExecutor {
 
         if (!player.hasPermission("ludo.command")) {
             player.sendMessage(Component.text("No perms! :("))
+            return
+        }
+
+        if (args.size == 1 && args[0].equals("arena", true)) {
+            val inventory = SpaceInventoryProvider.api.inventoryHandler.getInventory(player, "arena_inv") ?: return
+            inventory.open(player)
             return
         }
 
@@ -111,8 +119,8 @@ class LudoCommand : LudoCommandExecutor {
             return
         }
 
-        if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("startSetup", true)) {
-            val arenaId: String = args[2]
+        if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("start", true)) {
+            val arenaId: String = args[3]
             val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
 
             if (gameArena == null) {
@@ -129,27 +137,72 @@ class LudoCommand : LudoCommandExecutor {
             return
         }
 
-        if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("cancelSetup", true)) {
-            val arenaId: String = args[2]
+        if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("cancel", true)) {
+            checkSetupMode(player) { arenaSetupData: GameArenaSetupData ->
+                if (this.gameArenaHandler.cachedArenas.none { it.id == arenaSetupData.arenaId }) {
+                    player.sendMessage(Component.text("Arena does not exist!"))
+                    return@checkSetupMode
+                }
 
-            if (this.gameArenaHandler.cachedArenas.none { it.id == arenaId }) {
-                player.sendMessage(Component.text("Arena does not exist!"))
-                return
+                this.arenaSetupHandler.handleSetupEnd(player, false)
             }
-
-            this.arenaSetupHandler.handleSetupEnd(player, false)
             return
         }
 
-        if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("finishSetup", true)) {
-            val arenaId: String = args[2]
+        if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("finish", true)) {
+            checkSetupMode(player) { arenaSetupData: GameArenaSetupData ->
+                if (this.gameArenaHandler.cachedArenas.none { it.id == arenaSetupData.arenaId }) {
+                    player.sendMessage(Component.text("Arena does not exist!"))
+                    return@checkSetupMode
+                }
 
-            if (this.gameArenaHandler.cachedArenas.none { it.id == arenaId }) {
-                player.sendMessage(Component.text("Arena does not exist!"))
-                return
+                this.arenaSetupHandler.handleSetupEnd(player, true)
             }
+            return
+        }
 
-            this.arenaSetupHandler.handleSetupEnd(player, true)
+        if (args.size == 5 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("setTurn", true)) {
+            checkSetupMode(player) { arenaSetupData: GameArenaSetupData ->
+                val arenaId: String = arenaSetupData.arenaId
+                val fieldId: Int = args[3].toInt()
+
+                if (this.gameArenaHandler.cachedArenas.none { it.id == arenaId }) {
+                    player.sendMessage(Component.text("Arena does not exist!"))
+                    return@checkSetupMode
+                }
+
+                val pathFace: PathFace? = PathFace.entries.find { it.name.equals(args[4], true) }
+
+                if (pathFace == null) {
+                    player.sendMessage(Component.text("Available ${PathFace.entries.joinToString(", ") { it.name }}"))
+                    return@checkSetupMode
+                }
+
+                val gameField: GameField? = arenaSetupData.gameFields.find { it.id == fieldId }
+
+                if (gameField == null) {
+                    player.sendMessage(Component.text("This field does not exist!"))
+                    return@checkSetupMode
+                }
+
+                val turnComponent = TurnComponent(pathFace)
+
+                gameField.turnComponent = turnComponent
+                player.sendMessage(Component.text("You created a turning point for your field. (Direction: ${turnComponent.facing.name})"))
+            }
+            return
+        }
+
+        if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("addTeamSpawn", true)) {
+            checkSetupMode(player) { arenaSetupData: GameArenaSetupData ->
+                val teamName: String = args[3]
+                if (LudoGame.instance.gameTeamHandler.getTeam(arenaSetupData.arenaId, teamName) == null) {
+                    player.sendMessage(Component.text("Arena ${arenaSetupData.arenaId} has no team called $teamName"))
+                    return@checkSetupMode
+                }
+
+                this.arenaSetupHandler.addTeamSpawn(player, teamName, player.location)
+            }
             return
         }
 
@@ -165,40 +218,6 @@ class LudoCommand : LudoCommandExecutor {
             player.sendMessage(Component.text("Arena deleted!", NamedTextColor.YELLOW))
             return
         }
-
-        if (args.size == 5 && args[0].equals("arena", true) && args[1].equals("setTurn", true)) {
-            val arenaId: String = args[2]
-            val fieldId: Int = args[3].toInt()
-
-            if (this.gameArenaHandler.cachedArenas.none { it.id == arenaId }) {
-                player.sendMessage(Component.text("Arena does not exist!"))
-                return
-            }
-
-            val pathFace: PathFace? = PathFace.entries.find { it.name.equals(args[4], true) }
-
-            if (pathFace == null) {
-                player.sendMessage(Component.text("Available ${PathFace.entries.joinToString(", ") { it.name }}"))
-                return
-            }
-
-            val gameFieldHandler: GameFieldHandler = LudoGame.instance.gameFieldHandler
-            val gameField: GameField? = gameFieldHandler.getField(arenaId, fieldId)
-
-            if (gameField == null) {
-                player.sendMessage(Component.text("This field does not exist!"))
-                return
-            }
-
-            val turnComponent = TurnComponent(pathFace)
-
-            gameField.turnComponent = turnComponent
-            gameFieldHandler.updateFieldTurnComponent(arenaId, fieldId, turnComponent)
-
-            player.sendMessage(Component.text("You created a turning point for your field. (Direction: ${turnComponent.facing.name})"))
-            return
-        }
-
         if (args.size == 2 && args[0].equals("worldTp", true)) {
             val worldName: String = args[1]
             val world: World? = Bukkit.getWorld(worldName)
@@ -238,11 +257,12 @@ class LudoCommand : LudoCommandExecutor {
                 "/ludo arena list",
                 "/ludo arena init",
 
-                "/ludo arena startSetup <arenaId>",
-                "/ludo arena cancelSetup <arenaId>",
-                "/ludo arena finishSetup <arenaId>",
+                "/ludo arena setup start <arenaId>",
+                "/ludo arena setup cancel",
+                "/ludo arena setup finish",
 
-                "/ludo arena setTurn <arenaId> <fieldId> <pathFace>",
+                "/ludo arena setup setTurn <fieldId> <pathFace>",
+                "/ludo arena setup addTeamSpawn <teamName>",
 
                 "/ludo arena delete <arenaId>",
                 "/ludo worldTp <worldName>",
@@ -253,23 +273,31 @@ class LudoCommand : LudoCommandExecutor {
     override fun onTabComplete(sender: LudoCommandSender, args: List<String>): MutableList<String> {
         val result: MutableList<String> = mutableListOf()
 
-        if (args.size == 1) result.addAll(listOf("arena", "worldTp"))
-        if (args.size == 2 && args[0].equals("arena", true)) result.addAll(
-            listOf(
-                "list",
-                "init",
-                "delete",
-                "startSetup",
-                "cancelSetup",
-                "finishSetup"
-            )
-        )
+        if (!sender.isPlayer) return result
+        val player: Player = sender.castTo(Player::class.java)
+
+        if (args.size == 1)
+            result.addAll(listOf("arena", "worldTp"))
+
+        if (args.size == 2 && args[0].equals("arena", true))
+            result.addAll(listOf("list", "init", "setup", "delete"))
 
         if (args.size == 2 && args[0].equals("worldTp", true))
             result.addAll(Bukkit.getWorlds().map { it.name })
 
-        if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("setTurn", true))
+        if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("setup", true))
+            result.addAll(listOf("start", "cancel", "finish", "setTurn", "addTeamSpawn"))
+
+        if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("start", true))
+            result.addAll(this.gameArenaHandler.cachedArenas.map { it.id })
+
+        if (args.size == 5 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("setTurn", true))
             result.addAll(PathFace.entries.map { it.name })
+
+        if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("addTeamSpawn", true)) {
+            val arenaSetupData = this.arenaSetupHandler.getSetupData(player.uniqueId) ?: return result
+            result.addAll(LudoGame.instance.gameTeamHandler.gameTeams.get(arenaSetupData.arenaId).map { it.name })
+        }
 
         if (args.size == 3 && args[0].equals("arena", true) && (args[1].equals(
                 "delete",
@@ -282,6 +310,17 @@ class LudoCommand : LudoCommandExecutor {
             result.addAll(this.gameArenaHandler.cachedArenas.map { it.id })
 
         return result
+    }
+
+    private fun checkSetupMode(player: Player, result: (GameArenaSetupData) -> Unit) {
+        val arenaSetupData: GameArenaSetupData? = this.arenaSetupHandler.getSetupData(player.uniqueId)
+
+        if (arenaSetupData == null) {
+            player.sendMessage(Component.text("You are not in setup-mode!"))
+            return
+        }
+
+        result.invoke(arenaSetupData)
     }
 
 }

@@ -7,3 +7,5 @@ website: https://builtbybit.com/creators/spacetivity.301580/
 author:
   - TGamings
   - realFallenBreak
+depend:
+  - SpaceInventories

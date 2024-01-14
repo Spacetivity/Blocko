@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.team.GameTeam
-import net.spacetivity.ludo.team.GameTeamHandler
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -24,8 +23,6 @@ class GameArena(
     val currentPlayers: MutableSet<UUID> = mutableSetOf()
     var arenaHost: Player? = null
 
-    private val gameTeamHandler: GameTeamHandler = LudoGame.instance.gameTeamHandler
-
     fun sendArenaMessage(message: Component) {
         for (player: Player? in this.currentPlayers.map { Bukkit.getPlayer(it) }) {
             if (player == null) continue
@@ -44,7 +41,7 @@ class GameArena(
             return
         }
 
-        val gameTeam: GameTeam? = this.gameTeamHandler.gameTeams.get(this.id).firstOrNull { it.teamMembers.isEmpty() }
+        val gameTeam: GameTeam? = LudoGame.instance.gameTeamHandler.gameTeams.get(this.id).firstOrNull { it.teamMembers.isEmpty() }
 
         if (gameTeam == null) {
             player.sendMessage(Component.text("No empty team was found for you... Join cancelled!"))
@@ -87,7 +84,7 @@ class GameArena(
             this.arenaHost?.sendMessage(Component.text("You are now the new Game-Host!", NamedTextColor.YELLOW))
         }
 
-        this.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(player)
+        LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(player)
         this.currentPlayers.remove(player.uniqueId)
         player.sendMessage("You left the arena!")
     }

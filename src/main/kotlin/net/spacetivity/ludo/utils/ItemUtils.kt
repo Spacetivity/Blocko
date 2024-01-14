@@ -57,7 +57,7 @@ class ItemUtils(material: Material) {
         profile.setProperty(ProfileProperty("textures", value))
         val skullMeta: SkullMeta = this.itemMeta as SkullMeta
         skullMeta.playerProfile = profile;
-        this.itemMeta = skullMeta
+        itemStack.itemMeta = skullMeta
         return this
     }
 
