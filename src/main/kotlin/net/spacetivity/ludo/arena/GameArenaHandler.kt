@@ -1,9 +1,16 @@
 package net.spacetivity.ludo.arena
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.ludo.LudoGame
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
+import org.bukkit.block.Block
+import org.bukkit.block.Sign
+import org.bukkit.block.sign.Side
+import org.bukkit.block.sign.SignSide
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.statements.InsertStatement
@@ -13,7 +20,7 @@ import java.util.*
 
 class GameArenaHandler {
 
-    val cachedArenas: MutableSet<GameArena> = mutableSetOf()
+    val cachedArenas: MutableList<GameArena> = mutableListOf()
 
     init {
         transaction {
@@ -90,6 +97,63 @@ class GameArenaHandler {
         this.cachedArenas.forEach(GameArena::reset)
     }
 
-    fun getArena(id: String): GameArena? = this.cachedArenas.find { it.id == id }
+    fun getArena(id: String): GameArena? {
+        return this.cachedArenas.find { it.id == id }
+    }
+
+    fun loadJoinSign(location: Location, gameArena: GameArena?) {
+        val block: Block = location.block
+        if (!block.type.name.contains("WALL_SIGN", true)) return
+
+        val sign: Sign = block.state as Sign
+        val signSide: SignSide = sign.getSide(Side.FRONT)
+
+        signSide.line(0, Component.text("BLOCKO", NamedTextColor.BLUE, TextDecoration.BOLD))
+
+        if (gameArena == null) {
+            signSide.line(1, Component.text("Searching", NamedTextColor.GRAY))
+            signSide.line(2, Component.text("for arena...", NamedTextColor.GRAY))
+        } else {
+            val arenaStatus: GameArenaOption.Status = gameArena.status
+            val arenaPhase: GameArenaOption.Phase = gameArena.phase
+
+            val statusLine: Component = when (arenaStatus) {
+                GameArenaOption.Status.READY -> {
+
+                    when (arenaPhase) {
+                        GameArenaOption.Phase.IDLE -> {
+                            Component.text("${gameArena.currentPlayers.size}/${gameArena.maxPlayers}", NamedTextColor.YELLOW)
+                        }
+
+                        GameArenaOption.Phase.INGAME -> {
+                            Component.text("Ingame...", NamedTextColor.RED)
+                        }
+
+                        else -> {
+                            Component.text("Ending...", NamedTextColor.RED)
+                        }
+                    }
+
+                }
+
+                GameArenaOption.Status.CONFIGURATING -> {
+                    Component.text("Not ready...", NamedTextColor.RED)
+                }
+
+                else -> {
+                    Component.text("Resetting...", NamedTextColor.RED)
+                }
+            }
+
+            signSide.line(1, Component.text(gameArena.gameWorld.name, NamedTextColor.AQUA))
+            signSide.line(2, statusLine)
+
+            if (arenaStatus == GameArenaOption.Status.READY && arenaPhase == GameArenaOption.Phase.IDLE) {
+                signSide.line(3, Component.text("[JOIN]", NamedTextColor.GREEN))
+            }
+        }
+
+        sign.update()
+    }
 
 }

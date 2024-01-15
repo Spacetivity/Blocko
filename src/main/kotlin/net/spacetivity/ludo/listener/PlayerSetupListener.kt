@@ -39,7 +39,6 @@ class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
                 GameArenaInventory()
             )
         }
-
     }
 
     @EventHandler

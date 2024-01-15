@@ -9,6 +9,7 @@ import net.spacetivity.ludo.arena.GameArenaDAO
 import net.spacetivity.ludo.arena.GameArenaHandler
 import net.spacetivity.ludo.arena.GameArenaOption
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
+import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
 import net.spacetivity.ludo.command.LudoCommand
 import net.spacetivity.ludo.command.api.CommandProperties
 import net.spacetivity.ludo.command.api.LudoCommandExecutor
@@ -46,6 +47,7 @@ class LudoGame : JavaPlugin() {
     lateinit var gameEntityHandler: GameEntityHandler
     lateinit var gameFieldHandler: GameFieldHandler
     lateinit var gameGarageFieldHandler: GameGarageFieldHandler
+    lateinit var gameArenaSignHandler: GameArenaSignHandler
 
     private var idleTask: BukkitTask? = null
 
@@ -89,13 +91,15 @@ class LudoGame : JavaPlugin() {
             return
         }
 
-        this.gameArenaHandler = GameArenaHandler()
         this.commandHandler = LudoCommandHandler()
+        this.gameArenaHandler = GameArenaHandler()
         this.gameArenaSetupHandler = GameArenaSetupHandler()
         this.gameTeamHandler = GameTeamHandler()
         this.gameEntityHandler = GameEntityHandler()
         this.gameFieldHandler = GameFieldHandler()
         this.gameGarageFieldHandler = GameGarageFieldHandler()
+        this.gameArenaSignHandler = GameArenaSignHandler()
+        this.gameArenaSignHandler.loadArenaSigns()
 
         //TODO: Load all worlds from all game arenas!
 
