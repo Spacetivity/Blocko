@@ -1,4 +1,4 @@
-package net.spacetivity.ludo.arena.phase
+package net.spacetivity.ludo.phase
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap

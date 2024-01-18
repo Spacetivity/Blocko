@@ -8,7 +8,6 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.setup.GameArenaSetupData
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
 import net.spacetivity.ludo.field.GameField
-import net.spacetivity.ludo.inventory.GameArenaInventory
 import net.spacetivity.ludo.inventory.GameFieldTurnSetupInventory
 import net.spacetivity.ludo.inventory.GameTeamSetupInventory
 import net.spacetivity.ludo.inventory.InvType
@@ -24,7 +23,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.EquipmentSlot
 
 class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
@@ -36,24 +34,9 @@ class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
     }
 
     @EventHandler
-    fun onJoin(event: PlayerJoinEvent) {
-        val player: Player = event.player
-
-        if (player.hasPermission("ludo.command")) {
-            SpaceInventoryProvider.api.inventoryHandler.cacheInventory(
-                player,
-                Component.text("Game arenas"),
-                GameArenaInventory()
-            )
-        }
-    }
-
-    @EventHandler
     fun onBreak(event: BlockBreakEvent) {
         val player: Player = event.player
         val block: Block = event.block
-
-        event.isCancelled = true
 
         val validBlockTypes: MutableList<Material> = mutableListOf(Material.BONE_BLOCK)
 
@@ -65,6 +48,7 @@ class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
             Material.IRON_HOE -> {
 
                 if (!this.ludoGame.gameArenaSetupHandler.hasOpenSetup(player.uniqueId)) return
+                event.isCancelled = true
 
                 if (!MetadataUtils.has(player, "fieldsFinished")) {
                     player.sendMessage(Component.text("Set all game fields first, before you set the garage fields!"))
@@ -88,6 +72,7 @@ class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
             Material.GOLDEN_HOE -> {
 
                 if (!this.ludoGame.gameArenaSetupHandler.hasOpenSetup(player.uniqueId)) return
+                event.isCancelled = true
 
                 if (!MetadataUtils.has(player, "fieldsFinished")) {
                     player.sendMessage(Component.text("Set all game fields first, before you set the garage fields!"))
@@ -110,6 +95,8 @@ class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
                     player.sendMessage(Component.text("You only can create a arena sign on a wall sign block!"))
                     return
                 }
+
+                event.isCancelled = true
 
                 if (!this.gameArenaSignHandler.existsLocation(block.location)) {
                     player.sendMessage(Component.text("At this location is no arena sign!"))

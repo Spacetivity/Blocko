@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.GameArenaDAO
 import net.spacetivity.ludo.arena.GameArenaHandler
-import net.spacetivity.ludo.arena.phase.GamePhaseHandler
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
 import net.spacetivity.ludo.arena.sign.GameArenaSignDAO
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
@@ -24,6 +23,7 @@ import net.spacetivity.ludo.field.GameFieldHandler
 import net.spacetivity.ludo.garageField.GameGarageFieldDAO
 import net.spacetivity.ludo.garageField.GameGarageFieldHandler
 import net.spacetivity.ludo.listener.PlayerSetupListener
+import net.spacetivity.ludo.phase.GamePhaseHandler
 import net.spacetivity.ludo.team.GameTeamHandler
 import net.spacetivity.ludo.team.GameTeamLocationDAO
 import net.spacetivity.ludo.utils.FileUtils
@@ -43,8 +43,8 @@ import java.nio.file.Paths
 class LudoGame : JavaPlugin() {
 
     lateinit var commandHandler: LudoCommandHandler
-    lateinit var gameArenaHandler: GameArenaHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
+    lateinit var gameArenaHandler: GameArenaHandler
     lateinit var gameArenaSetupHandler: GameArenaSetupHandler
     lateinit var gameTeamHandler: GameTeamHandler
     lateinit var gameEntityHandler: GameEntityHandler
@@ -87,8 +87,8 @@ class LudoGame : JavaPlugin() {
         }
 
         this.commandHandler = LudoCommandHandler()
-        this.gameArenaHandler = GameArenaHandler()
         this.gamePhaseHandler = GamePhaseHandler()
+        this.gameArenaHandler = GameArenaHandler()
         this.gameArenaSetupHandler = GameArenaSetupHandler()
         this.gameTeamHandler = GameTeamHandler()
         this.gameEntityHandler = GameEntityHandler()

@@ -4,10 +4,11 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.arena.phase.GamePhase
-import net.spacetivity.ludo.arena.phase.impl.EndingPhase
-import net.spacetivity.ludo.arena.phase.impl.IdlePhase
-import net.spacetivity.ludo.arena.phase.impl.IngamePhase
+import net.spacetivity.ludo.phase.GamePhase
+import net.spacetivity.ludo.phase.GamePhaseHandler
+import net.spacetivity.ludo.phase.impl.EndingPhase
+import net.spacetivity.ludo.phase.impl.IdlePhase
+import net.spacetivity.ludo.phase.impl.IngamePhase
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -24,12 +25,13 @@ import java.util.*
 
 class GameArenaHandler {
 
+    private val gamePhaseHandler: GamePhaseHandler = LudoGame.instance.gamePhaseHandler
     val cachedArenas: MutableList<GameArena> = mutableListOf()
 
     init {
         transaction {
             for (resultRow: ResultRow in GameArenaDAO.selectAll().toMutableList()) {
-                val id: String = resultRow[GameArenaDAO.id]
+                val arenaId: String = resultRow[GameArenaDAO.id]
                 val gameWorld: World = Bukkit.getWorld(resultRow[GameArenaDAO.worldName]) ?: continue
 
                 val serializedLocation = resultRow[GameArenaDAO.playerLocation].split(":")
@@ -42,7 +44,12 @@ class GameArenaHandler {
                 val playerLocation = Location(gameWorld, x, y, z, yaw, pitch)
                 val status: GameArenaStatus = GameArenaStatus.valueOf(resultRow[GameArenaDAO.status])
 
-                cachedArenas.add(GameArena(id, gameWorld, playerLocation, status, IdlePhase(id)))
+                val idlePhase = IdlePhase(arenaId)
+                gamePhaseHandler.cachedGamePhases.put(arenaId, idlePhase)
+                gamePhaseHandler.cachedGamePhases.put(arenaId, IngamePhase(arenaId))
+                gamePhaseHandler.cachedGamePhases.put(arenaId, EndingPhase(arenaId))
+
+                cachedArenas.add(GameArena(arenaId, gameWorld, playerLocation, status, idlePhase))
             }
         }
     }
@@ -74,7 +81,8 @@ class GameArenaHandler {
             }
         }
 
-        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, location, status, IdlePhase(id)))
+        val indexPhase: GamePhase = this.gamePhaseHandler.cachedGamePhases[id].find { it.priority == 0 }!!
+        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, location, status, indexPhase))
         return true
     }
 
@@ -128,8 +136,8 @@ class GameArenaHandler {
                     else -> Component.text("Phase 404", NamedTextColor.RED)
                 }
 
-                GameArenaStatus.CONFIGURATING -> Component.text("Not ready...", NamedTextColor.RED)
-                else -> Component.text("Resetting...", NamedTextColor.RED)
+                GameArenaStatus.CONFIGURATING -> Component.text("Configuration...", NamedTextColor.RED)
+                GameArenaStatus.RESETTING -> Component.text("Resetting...", NamedTextColor.RED)
             }
 
             signSide.line(1, Component.text(gameArena.gameWorld.name, NamedTextColor.AQUA))

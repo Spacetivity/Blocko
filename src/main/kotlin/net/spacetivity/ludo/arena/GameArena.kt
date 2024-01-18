@@ -3,7 +3,7 @@ package net.spacetivity.ludo.arena
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.arena.phase.GamePhase
+import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -20,9 +20,13 @@ class GameArena(
 ) {
 
     val maxPlayers: Int = 4
-
     val currentPlayers: MutableSet<UUID> = mutableSetOf()
+
     var arenaHost: Player? = null
+
+    init {
+        if (this.status == GameArenaStatus.READY) this.phase.start()
+    }
 
     fun sendArenaMessage(message: Component) {
         for (player: Player? in this.currentPlayers.map { Bukkit.getPlayer(it) }) {
@@ -62,6 +66,7 @@ class GameArena(
         }
 
         this.currentPlayers.add(player.uniqueId)
+        this.phase.setupPlayerInventory(player)
         player.sendMessage("You joined the arena!")
     }
 

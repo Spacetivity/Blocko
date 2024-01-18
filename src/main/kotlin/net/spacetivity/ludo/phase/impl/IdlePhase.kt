@@ -1,7 +1,7 @@
-package net.spacetivity.ludo.arena.phase.impl
+package net.spacetivity.ludo.phase.impl
 
 import net.kyori.adventure.text.Component
-import net.spacetivity.ludo.arena.phase.GamePhase
+import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.utils.ItemUtils
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack

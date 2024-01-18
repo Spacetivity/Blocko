@@ -1,11 +1,10 @@
-package net.spacetivity.ludo.arena.phase
+package net.spacetivity.ludo.phase
 
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
-import net.spacetivity.ludo.arena.phase.impl.EndingPhase
-import net.spacetivity.ludo.arena.phase.impl.IdlePhase
-import net.spacetivity.ludo.arena.phase.impl.IngamePhase
-import net.spacetivity.ludo.extensions.getArena
+import net.spacetivity.ludo.phase.impl.EndingPhase
+import net.spacetivity.ludo.phase.impl.IdlePhase
+import net.spacetivity.ludo.phase.impl.IngamePhase
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -27,7 +26,6 @@ abstract class GamePhase(protected val arenaId: String, val name: String, val pr
     fun isEnding(): Boolean = this is EndingPhase
 
     fun setupPlayerInventory(player: Player) {
-        if (player.getArena()?.id != this.arenaId) return
         player.inventory.clear()
         player.exp = 0.0F
         player.level = 0
