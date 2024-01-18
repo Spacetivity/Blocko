@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.GameArenaDAO
 import net.spacetivity.ludo.arena.GameArenaHandler
-import net.spacetivity.ludo.arena.GameArenaOption
+import net.spacetivity.ludo.arena.phase.GamePhaseHandler
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
 import net.spacetivity.ludo.arena.sign.GameArenaSignDAO
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
@@ -44,6 +44,7 @@ class LudoGame : JavaPlugin() {
 
     lateinit var commandHandler: LudoCommandHandler
     lateinit var gameArenaHandler: GameArenaHandler
+    lateinit var gamePhaseHandler: GamePhaseHandler
     lateinit var gameArenaSetupHandler: GameArenaSetupHandler
     lateinit var gameTeamHandler: GameTeamHandler
     lateinit var gameEntityHandler: GameEntityHandler
@@ -87,6 +88,7 @@ class LudoGame : JavaPlugin() {
 
         this.commandHandler = LudoCommandHandler()
         this.gameArenaHandler = GameArenaHandler()
+        this.gamePhaseHandler = GamePhaseHandler()
         this.gameArenaSetupHandler = GameArenaSetupHandler()
         this.gameTeamHandler = GameTeamHandler()
         this.gameEntityHandler = GameEntityHandler()
@@ -140,7 +142,7 @@ class LudoGame : JavaPlugin() {
             }
 
             for (gameArena: GameArena in validArenas) {
-                if (gameArena.phase != GameArenaOption.Phase.IDLE) continue
+                if (!gameArena.phase.isIdle()) continue
                 gameArena.sendArenaMessage(Component.text("Waiting for more players...", NamedTextColor.RED))
             }
         }, 0L, 20L)
@@ -155,7 +157,7 @@ class LudoGame : JavaPlugin() {
     }
 
     private fun emptyArenasPreset(): Pair<Boolean, List<GameArena>> {
-        val emptyArenas = this.gameArenaHandler.cachedArenas.filter { it.currentPlayers.size < it.maxPlayers && it.phase == GameArenaOption.Phase.IDLE }.toList()
+        val emptyArenas = this.gameArenaHandler.cachedArenas.filter { it.currentPlayers.size < it.maxPlayers && it.phase.isIdle() }.toList()
         return Pair(emptyArenas.isNotEmpty(), emptyArenas)
     }
 

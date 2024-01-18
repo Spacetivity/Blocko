@@ -3,6 +3,7 @@ package net.spacetivity.ludo.arena
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.arena.phase.GamePhase
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -14,8 +15,8 @@ class GameArena(
     val id: String,
     val gameWorld: World,
     val viewPlatformLocation: Location,
-    var status: GameArenaOption.Status,
-    var phase: GameArenaOption.Phase
+    var status: GameArenaStatus,
+    var phase: GamePhase
 ) {
 
     val maxPlayers: Int = 4
@@ -33,6 +34,11 @@ class GameArena(
     fun join(player: Player) {
         if (this.currentPlayers.contains(player.uniqueId)) {
             player.sendMessage(Component.text("Already in arena!"))
+            return
+        }
+
+        if (!this.phase.isIdle()) {
+            player.sendMessage("The game is already running!")
             return
         }
 
@@ -93,6 +99,7 @@ class GameArena(
         this.currentPlayers.clear()
         LudoGame.instance.gameTeamHandler.gameTeams.clear()
         LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
+        LudoGame.instance.gamePhaseHandler.initIndexPhase(this)
     }
 
     private fun findNewHost(): Player? {

@@ -4,6 +4,10 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.arena.phase.GamePhase
+import net.spacetivity.ludo.arena.phase.impl.EndingPhase
+import net.spacetivity.ludo.arena.phase.impl.IdlePhase
+import net.spacetivity.ludo.arena.phase.impl.IngamePhase
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -36,14 +40,14 @@ class GameArenaHandler {
                 val pitch: Float = serializedLocation[4].toFloat()
 
                 val playerLocation = Location(gameWorld, x, y, z, yaw, pitch)
-                val status: GameArenaOption.Status = GameArenaOption.Status.valueOf(resultRow[GameArenaDAO.status])
+                val status: GameArenaStatus = GameArenaStatus.valueOf(resultRow[GameArenaDAO.status])
 
-                cachedArenas.add(GameArena(id, gameWorld, playerLocation, status, GameArenaOption.Phase.IDLE))
+                cachedArenas.add(GameArena(id, gameWorld, playerLocation, status, IdlePhase(id)))
             }
         }
     }
 
-    fun updateArenaStatus(id: String, status: GameArenaOption.Status) {
+    fun updateArenaStatus(id: String, status: GameArenaStatus) {
         transaction {
             GameArenaDAO.update({ GameArenaDAO.id eq id }) { statement: UpdateStatement ->
                 statement[GameArenaDAO.status] = status.name
@@ -53,15 +57,10 @@ class GameArenaHandler {
         getArena(id)?.status = status
     }
 
-    fun updateArenaPhase(id: String, phase: GameArenaOption.Phase) {
-        getArena(id)?.phase = phase
-    }
-
     fun createArena(worldName: String, location: Location): Boolean {
         val id: String = UUID.randomUUID().toString().split("-")[0]
         val serializedLocation = "${location.x}:${location.y}:${location.z}:${location.yaw}:${location.pitch}"
-        val status: GameArenaOption.Status = GameArenaOption.Status.CONFIGURATING
-        val phase: GameArenaOption.Phase = GameArenaOption.Phase.IDLE
+        val status: GameArenaStatus = GameArenaStatus.CONFIGURATING
 
         if (getArena(id) != null || this.cachedArenas.any { it.gameWorld.name.equals(worldName, true) }) return false
 
@@ -75,7 +74,7 @@ class GameArenaHandler {
             }
         }
 
-        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, location, status, phase))
+        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, location, status, IdlePhase(id)))
         return true
     }
 
@@ -118,41 +117,25 @@ class GameArenaHandler {
             signSide.line(1, Component.text("Searching", NamedTextColor.GRAY))
             signSide.line(2, Component.text("for arena...", NamedTextColor.GRAY))
         } else {
-            val arenaStatus: GameArenaOption.Status = gameArena.status
-            val arenaPhase: GameArenaOption.Phase = gameArena.phase
+            val arenaStatus: GameArenaStatus = gameArena.status
+            val arenaPhase: GamePhase = gameArena.phase
 
             val statusLine: Component = when (arenaStatus) {
-                GameArenaOption.Status.READY -> {
-
-                    when (arenaPhase) {
-                        GameArenaOption.Phase.IDLE -> {
-                            Component.text("${gameArena.currentPlayers.size}/${gameArena.maxPlayers}", NamedTextColor.YELLOW)
-                        }
-
-                        GameArenaOption.Phase.INGAME -> {
-                            Component.text("Ingame...", NamedTextColor.RED)
-                        }
-
-                        else -> {
-                            Component.text("Ending...", NamedTextColor.RED)
-                        }
-                    }
-
+                GameArenaStatus.READY -> when (arenaPhase) {
+                    is IdlePhase -> Component.text("${gameArena.currentPlayers.size}/${gameArena.maxPlayers}", NamedTextColor.YELLOW)
+                    is IngamePhase -> Component.text("Ingame...", NamedTextColor.RED)
+                    is EndingPhase -> Component.text("Ending...", NamedTextColor.RED)
+                    else -> Component.text("Phase 404", NamedTextColor.RED)
                 }
 
-                GameArenaOption.Status.CONFIGURATING -> {
-                    Component.text("Not ready...", NamedTextColor.RED)
-                }
-
-                else -> {
-                    Component.text("Resetting...", NamedTextColor.RED)
-                }
+                GameArenaStatus.CONFIGURATING -> Component.text("Not ready...", NamedTextColor.RED)
+                else -> Component.text("Resetting...", NamedTextColor.RED)
             }
 
             signSide.line(1, Component.text(gameArena.gameWorld.name, NamedTextColor.AQUA))
             signSide.line(2, statusLine)
 
-            if (arenaStatus == GameArenaOption.Status.READY && arenaPhase == GameArenaOption.Phase.IDLE) {
+            if (arenaStatus == GameArenaStatus.READY && arenaPhase.isIdle()) {
                 signSide.line(3, Component.text("[JOIN]", NamedTextColor.GREEN))
             }
         }

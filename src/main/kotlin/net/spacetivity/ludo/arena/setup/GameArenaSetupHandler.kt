@@ -5,7 +5,7 @@ import com.google.common.cache.CacheBuilder
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.arena.GameArenaOption
+import net.spacetivity.ludo.arena.GameArenaStatus
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.garageField.GameGarageField
 import net.spacetivity.ludo.team.GameTeam
@@ -94,7 +94,7 @@ class GameArenaSetupHandler {
                 return
             }
 
-            LudoGame.instance.gameArenaHandler.updateArenaStatus(arenaSetupData.arenaId, GameArenaOption.Status.READY)
+            LudoGame.instance.gameArenaHandler.updateArenaStatus(arenaSetupData.arenaId, GameArenaStatus.READY)
             LudoGame.instance.gameFieldHandler.initFields(arenaSetupData.gameFields)
             LudoGame.instance.gameGarageFieldHandler.initGarageFields(arenaSetupData.gameGarageFields)
             LudoGame.instance.gameTeamHandler.initTeamSpawns(arenaSetupData.gameTeamLocations)
