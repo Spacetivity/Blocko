@@ -101,6 +101,10 @@ class GameArenaHandler {
         return this.cachedArenas.find { it.id == id }
     }
 
+    fun getArenaOfPlayer(uuid: UUID): GameArena? {
+        return this.cachedArenas.find { it.currentPlayers.contains(uuid) }
+    }
+
     fun loadJoinSign(location: Location, gameArena: GameArena?) {
         val block: Block = location.block
         if (!block.type.name.contains("WALL_SIGN", true)) return

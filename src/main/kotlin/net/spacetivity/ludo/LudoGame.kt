@@ -105,6 +105,7 @@ class LudoGame : JavaPlugin() {
     override fun onDisable() {
         this.idleTask?.cancel()
         this.gameArenaHandler.resetArenas()
+        this.diceHandler.stopDiceAnimation()
 
         for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {
             for (entity: Entity in entities) {
