@@ -5,9 +5,8 @@ import net.spacetivity.ludo.arena.GameArena
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -33,8 +32,6 @@ class GameArenaSignHandler {
     }
 
     fun createSignLocation(location: Location) {
-        if (existsLocation(location)) return
-
         transaction {
             GameArenaSignDAO.insert { statement: InsertStatement<Number> ->
                 statement[worldName] = location.world.name
@@ -47,12 +44,21 @@ class GameArenaSignHandler {
         this.cachedSignLocations.add(location)
     }
 
-    fun loadArenaSigns() { //TODO: Maybe add an 'id' field to the SIGN DAO to sort the signs correctly!
+    fun deleteArenaSign(location: Location) {
+        transaction {
+            GameArenaSignDAO.deleteIgnoreWhere {
+                (worldName eq location.world.name) and (x eq location.x) and (y eq location.y) and (z eq location.z)
+            }
+        }
+
+        this.cachedSignLocations.removeIf { it.world.name == location.world.name && it.x == location.x && it.y == location.y && it.z == location.z }
+    }
+
+    fun loadArenaSigns() {
         for (index: Int in this.cachedSignLocations.indices) {
             val location: Location = this.cachedSignLocations[index]
             val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.cachedArenas.getOrNull(index)
             LudoGame.instance.gameArenaHandler.loadJoinSign(location, gameArena)
-
         }
     }
 

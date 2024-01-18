@@ -88,7 +88,7 @@ class LudoCommand : LudoCommandExecutor {
         }
 
         if (args.size == 2 && args[0].equals("arena", true) && args[1].equals("list", true)) {
-            val cachedArenas: MutableSet<GameArena> = this.gameArenaHandler.cachedArenas
+            val cachedArenas: MutableList<GameArena> = this.gameArenaHandler.cachedArenas
 
             if (cachedArenas.isEmpty()) {
                 player.sendMessage(Component.text("No arenas found!", NamedTextColor.RED))

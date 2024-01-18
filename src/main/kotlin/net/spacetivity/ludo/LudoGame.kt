@@ -9,6 +9,7 @@ import net.spacetivity.ludo.arena.GameArenaDAO
 import net.spacetivity.ludo.arena.GameArenaHandler
 import net.spacetivity.ludo.arena.GameArenaOption
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
+import net.spacetivity.ludo.arena.sign.GameArenaSignDAO
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
 import net.spacetivity.ludo.command.LudoCommand
 import net.spacetivity.ludo.command.api.CommandProperties
@@ -16,6 +17,7 @@ import net.spacetivity.ludo.command.api.LudoCommandExecutor
 import net.spacetivity.ludo.command.api.LudoCommandHandler
 import net.spacetivity.ludo.command.api.impl.BukkitCommandExecutor
 import net.spacetivity.ludo.database.DatabaseFile
+import net.spacetivity.ludo.dice.DiceHandler
 import net.spacetivity.ludo.entity.GameEntityHandler
 import net.spacetivity.ludo.field.GameFieldDAO
 import net.spacetivity.ludo.field.GameFieldHandler
@@ -48,23 +50,14 @@ class LudoGame : JavaPlugin() {
     lateinit var gameFieldHandler: GameFieldHandler
     lateinit var gameGarageFieldHandler: GameGarageFieldHandler
     lateinit var gameArenaSignHandler: GameArenaSignHandler
+    lateinit var diceHandler: DiceHandler
 
     private var idleTask: BukkitTask? = null
 
     override fun onEnable() {
         instance = this
 
-        Bukkit.getConsoleSender().sendMessage("""
-            
-            §b ____  _            _         
-            §b| __ )| | ___   ___| | _____  
-            §b|  _ \| |/ _ \ / __| |/ / _ \ 
-            §3| |_) | | (_) | (__|   < (_) |
-            §3|____/|_|\___/ \___|_|\_\___/ 
-            
-            §bBlocko §6v0.1 - ALPHA §bby spacetivity.net (§ehttps://github.com/Spacetivity§b)
-            
-        """.trimIndent())
+        Bukkit.getConsoleSender().sendMessage("Blocko v0.1 by spacetivity.net (https://github.com/Spacetivity)")
 
         try {
             val dbProperties: DatabaseFile = createOrLoadDatabaseProperties()
@@ -81,7 +74,8 @@ class LudoGame : JavaPlugin() {
                     GameArenaDAO,
                     GameFieldDAO,
                     GameGarageFieldDAO,
-                    GameTeamLocationDAO
+                    GameTeamLocationDAO,
+                    GameArenaSignDAO
                 )
             }
         } catch (e: Exception) {
@@ -100,6 +94,7 @@ class LudoGame : JavaPlugin() {
         this.gameGarageFieldHandler = GameGarageFieldHandler()
         this.gameArenaSignHandler = GameArenaSignHandler()
         this.gameArenaSignHandler.loadArenaSigns()
+        this.diceHandler = DiceHandler()
 
         //TODO: Load all worlds from all game arenas!
 

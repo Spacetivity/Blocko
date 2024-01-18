@@ -40,6 +40,7 @@ class GameFieldTurnSetupInventory(private val gameField: GameField, private val 
             items.add(InteractiveItem.of(ItemUtils(Material.PLAYER_HEAD)
                 .setName(Component.text(pathFace.name, NamedTextColor.BLUE))
                 .setLoreByComponent(mutableListOf(Component.text("Click to set the field turn", NamedTextColor.YELLOW)))
+                .setOwner(pathFace.headValue)
                 .build())
             { _, _, _ ->
                 player.closeInventory()
