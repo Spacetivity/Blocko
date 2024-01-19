@@ -23,7 +23,7 @@ class GameField(
     override var isTaken: Boolean = false
 ) : BoardField {
 
-    fun throwOut(newHolder: LivingEntity, fieldHeight: Double) {
+    fun checkForOldHolder(newHolder: LivingEntity) {
         val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
 
         if (!this.isTaken) return
@@ -40,7 +40,6 @@ class GameField(
 
         holder.livingEntity?.teleport(teamSpawnLocation.getWorldPosition())
         teamSpawnLocation.isTaken = true
-        newHolder.teleport(getWorldPosition(fieldHeight))
 
         val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolder) ?: return
         gameArena.sendArenaMessage(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${holderGameTeam.name}."))

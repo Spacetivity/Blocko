@@ -55,7 +55,8 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
             if (turn) this.forceYaw = newField.turnComponent!!.getRotation()
         }
 
-        newField.throwOut(this.livingEntity!!, fieldHeight)
+        // checks if the new field contains already a new entity. If 'yes' it throws the entity out.
+        newField.checkForOldHolder(this.livingEntity!!)
 
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
         this.livingEntity!!.teleport(worldPosition)
