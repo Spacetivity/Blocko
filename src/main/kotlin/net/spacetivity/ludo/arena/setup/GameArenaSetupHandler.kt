@@ -99,6 +99,7 @@ class GameArenaSetupHandler {
             LudoGame.instance.gameFieldHandler.initFields(arenaSetupData.gameFields)
             LudoGame.instance.gameGarageFieldHandler.initGarageFields(arenaSetupData.gameGarageFields)
             LudoGame.instance.gameTeamHandler.initTeamSpawns(arenaSetupData.gameTeamLocations)
+            LudoGame.instance.gameArenaSignHandler.loadArenaSigns()
 
             val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(arenaSetupData.arenaId)?: return
             LudoGame.instance.gamePhaseHandler.initIndexPhase(gameArena)

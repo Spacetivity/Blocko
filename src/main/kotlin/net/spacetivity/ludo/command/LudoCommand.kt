@@ -196,7 +196,8 @@ class LudoCommand : LudoCommandExecutor {
         if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("addTeamSpawn", true)) {
             checkSetupMode(player) { arenaSetupData: GameArenaSetupData ->
                 val teamName: String = args[3]
-                if (LudoGame.instance.gameTeamHandler.getTeam(arenaSetupData.arenaId, teamName) == null) {
+
+                if (arenaSetupData.gameTeams.none { it.name.equals(teamName, true) }) {
                     player.sendMessage(Component.text("Arena ${arenaSetupData.arenaId} has no team called $teamName"))
                     return@checkSetupMode
                 }
@@ -297,7 +298,7 @@ class LudoCommand : LudoCommandExecutor {
 
         if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("addTeamSpawn", true)) {
             val arenaSetupData = this.arenaSetupHandler.getSetupData(player.uniqueId) ?: return result
-            result.addAll(LudoGame.instance.gameTeamHandler.gameTeams.get(arenaSetupData.arenaId).map { it.name })
+            result.addAll(arenaSetupData.gameTeams.map { it.name })
         }
 
         if (args.size == 3 && args[0].equals("arena", true) && (args[1].equals(

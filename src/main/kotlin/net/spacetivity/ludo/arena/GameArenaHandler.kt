@@ -81,8 +81,12 @@ class GameArenaHandler {
             }
         }
 
-        val indexPhase: GamePhase = this.gamePhaseHandler.cachedGamePhases[id].find { it.priority == 0 }!!
-        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, location, status, indexPhase))
+        val idlePhase = IdlePhase(id)
+        gamePhaseHandler.cachedGamePhases.put(id, idlePhase)
+        gamePhaseHandler.cachedGamePhases.put(id, IngamePhase(id))
+        gamePhaseHandler.cachedGamePhases.put(id, EndingPhase(id))
+
+        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, location, status, idlePhase))
         return true
     }
 
@@ -91,11 +95,11 @@ class GameArenaHandler {
         LudoGame.instance.gameFieldHandler.deleteFields(id)
         LudoGame.instance.gameGarageFieldHandler.deleteGarageFields(id)
         LudoGame.instance.gameTeamHandler.deleteTeamSpawns(id)
+        LudoGame.instance.gamePhaseHandler.deletePhases(id)
 
         transaction {
             GameArenaDAO.deleteWhere { GameArenaDAO.id eq id }
         }
-
 
         this.cachedArenas.removeIf { it.id == id }
     }

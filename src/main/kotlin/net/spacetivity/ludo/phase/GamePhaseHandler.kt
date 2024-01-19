@@ -8,6 +8,10 @@ class GamePhaseHandler {
 
     val cachedGamePhases: Multimap<String, GamePhase> = ArrayListMultimap.create()
 
+    fun deletePhases(arenaId: String) {
+        this.cachedGamePhases.removeAll(arenaId)
+    }
+
     fun nextPhase(gameArena: GameArena) {
         gameArena.phase.stop()
 
