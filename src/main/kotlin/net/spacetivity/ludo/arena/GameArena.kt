@@ -3,6 +3,7 @@ package net.spacetivity.ludo.arena
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.extensions.clearPhaseItems
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
@@ -51,23 +52,25 @@ class GameArena(
             return
         }
 
-        val gameTeam: GameTeam? = LudoGame.instance.gameTeamHandler.gameTeams.get(this.id).firstOrNull { it.teamMembers.isEmpty() }
+        val gameTeam: GameTeam? = LudoGame.instance.gameTeamHandler.gameTeams.get(this.id).filter { it.teamMembers.isEmpty() }.randomOrNull()
 
         if (gameTeam == null) {
+            println(LudoGame.instance.gameTeamHandler.gameTeams.size()) //TODO: REMOVE THAT
             player.sendMessage(Component.text("No empty team was found for you... Join cancelled!"))
             return
         }
 
-        gameTeam.join(player)
+        player.sendMessage(Component.text("You joined the arena!", NamedTextColor.GREEN))
 
-        if (this.currentPlayers.isEmpty()) {
+        if (this.currentPlayers.isEmpty() || this.arenaHost == null) {
             this.arenaHost = player
-            player.sendMessage(Component.text("You are now the arena host!", NamedTextColor.YELLOW))
+            player.sendMessage(Component.text("You are now the arena host!", NamedTextColor.GREEN))
         }
 
         this.currentPlayers.add(player.uniqueId)
         this.phase.setupPlayerInventory(player)
-        player.sendMessage("You joined the arena!")
+
+        gameTeam.join(player)
     }
 
     fun quit(player: Player) {
@@ -76,40 +79,54 @@ class GameArena(
             return
         }
 
+        player.sendMessage("You left the arena!")
+        player.clearPhaseItems()
 
-        if ((this.currentPlayers.size - 1) == 0) {
+        LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(player)
+        this.currentPlayers.remove(player.uniqueId)
+
+        if (this.phase.isIngame() && this.currentPlayers.isEmpty()) {
             reset()
             return
         }
 
-        if (this.arenaHost != null && player.uniqueId == this.arenaHost!!.uniqueId) {
+        if (this.arenaHost != null && this.arenaHost!!.uniqueId == player.uniqueId) {
             this.arenaHost = null
             this.arenaHost = findNewHost()
 
             if (this.arenaHost == null) {
                 println("No new host for arena $id could be determined!")
                 reset()
-                return
+            } else {
+                this.arenaHost?.sendMessage(Component.text("You are now the new Game-Host!", NamedTextColor.YELLOW))
             }
 
-            this.arenaHost?.sendMessage(Component.text("You are now the new Game-Host!", NamedTextColor.YELLOW))
         }
-
-        LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(player)
-        this.currentPlayers.remove(player.uniqueId)
-        player.sendMessage("You left the arena!")
     }
 
     fun reset() {
         this.currentPlayers.clear()
-        LudoGame.instance.gameTeamHandler.gameTeams.clear()
+
+        for (gameTeam: GameTeam in LudoGame.instance.gameTeamHandler.gameTeams.values()) {
+            for (teamMember: UUID in gameTeam.teamMembers) {
+                val player = Bukkit.getPlayer(teamMember) ?: continue
+                gameTeam.quit(player)
+            }
+        }
+
         LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
-        LudoGame.instance.gamePhaseHandler.initIndexPhase(this)
+        if (!this.phase.isIdle()) LudoGame.instance.gamePhaseHandler.initIndexPhase(this)
     }
 
     private fun findNewHost(): Player? {
-        val newHostUuid: UUID = this.currentPlayers.filter { it != this.arenaHost!!.uniqueId }.random()
-        return Bukkit.getPlayer(newHostUuid) ?: findNewHost()
+        if (this.currentPlayers.isEmpty() || this.currentPlayers.size == 1) return null
+
+        val newHostUuid: UUID = if (this.arenaHost == null)
+            this.currentPlayers.random()
+        else
+            this.currentPlayers.filter { it != this.arenaHost?.uniqueId }.random()
+
+        return Bukkit.getPlayer(newHostUuid)
     }
 
 }

@@ -2,7 +2,6 @@ package net.spacetivity.ludo.team
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.spacetivity.ludo.utils.MetadataUtils
 import net.spacetivity.ludo.utils.ScoreboardUtils
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Team
@@ -26,7 +25,7 @@ class GameTeam(val name: String, val color: NamedTextColor) {
         }
 
         this.teamMembers.add(player.uniqueId)
-        player.sendMessage(Component.text("You are now in team: ${this.name}"))
+        player.sendMessage(Component.text("You are now in team: ${this.name}", NamedTextColor.GREEN))
     }
 
     fun quit(player: Player) {
@@ -36,8 +35,7 @@ class GameTeam(val name: String, val color: NamedTextColor) {
         }
 
         this.teamMembers.remove(player.uniqueId)
-        MetadataUtils.remove(player, "teamName")
-        player.sendMessage(Component.text("You are left your team."))
+        player.sendMessage(Component.text("You are left your team.", NamedTextColor.YELLOW))
     }
 
     fun getFreeSpawnLocation(): GameTeamLocation? {

@@ -12,23 +12,31 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class GameArenaSignHandler {
 
-    private val cachedSignLocations: MutableList<Location> = mutableListOf()
+    private val cachedArenaSigns: MutableList<GameArenaSign> = mutableListOf()
 
     init {
         transaction {
-            for (resultRow: ResultRow in GameArenaSignDAO.selectAll().toMutableList()) {
+            val resultRows: MutableList<ResultRow> = GameArenaSignDAO.selectAll().toMutableList()
+
+            for (index: Int in resultRows.indices) {
+                val resultRow: ResultRow = resultRows[index]
                 val gameWorld: World = Bukkit.getWorld(resultRow[GameArenaSignDAO.worldName]) ?: continue
                 val x: Double = resultRow[GameArenaSignDAO.x]
                 val y: Double = resultRow[GameArenaSignDAO.y]
                 val z: Double = resultRow[GameArenaSignDAO.z]
 
-                cachedSignLocations.add(Location(gameWorld, x, y, z))
+                val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.cachedArenas.getOrNull(index)
+                cachedArenaSigns.add(GameArenaSign(Location(gameWorld, x, y, z), gameArena?.id))
             }
         }
     }
 
     fun existsLocation(location: Location): Boolean {
-        return this.cachedSignLocations.any { it.x == location.x && it.y == location.y && it.z == location.z }
+        return this.cachedArenaSigns.any { it.location.world.name == location.world.name && it.location.x == location.x && it.location.y == location.y && it.location.z == location.z }
+    }
+
+    fun getSign(location: Location): GameArenaSign? {
+        return this.cachedArenaSigns.find{ it.location.world.name == location.world.name && it.location.x == location.x && it.location.y == location.y && it.location.z == location.z }
     }
 
     fun createSignLocation(location: Location) {
@@ -41,7 +49,8 @@ class GameArenaSignHandler {
             }
         }
 
-        this.cachedSignLocations.add(location)
+        this.cachedArenaSigns.add(GameArenaSign(location, null))
+        recalculateSignData()
     }
 
     fun deleteArenaSign(location: Location) {
@@ -51,14 +60,21 @@ class GameArenaSignHandler {
             }
         }
 
-        this.cachedSignLocations.removeIf { it.world.name == location.world.name && it.x == location.x && it.y == location.y && it.z == location.z }
+        this.cachedArenaSigns.removeIf { it.location.world.name == location.world.name && it.location.x == location.x && it.location.y == location.y && it.location.z == location.z }
+        recalculateSignData()
     }
 
     fun loadArenaSigns() {
-        for (index: Int in this.cachedSignLocations.indices) {
-            val location: Location = this.cachedSignLocations[index]
-            val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.cachedArenas.getOrNull(index)
-            LudoGame.instance.gameArenaHandler.loadJoinSign(location, gameArena)
+        for (arenaSign: GameArenaSign in this.cachedArenaSigns) {
+            val arenaId: String? = arenaSign.arenaId
+            val gameArena: GameArena? = if (arenaId == null) null else LudoGame.instance.gameArenaHandler.getArena(arenaId)
+            LudoGame.instance.gameArenaHandler.loadJoinSign(arenaSign.location, gameArena)
+        }
+    }
+
+    private fun recalculateSignData() {
+        for (index: Int in this.cachedArenaSigns.indices) {
+            cachedArenaSigns[index].arenaId = LudoGame.instance.gameArenaHandler.cachedArenas.getOrNull(index)?.id
         }
     }
 

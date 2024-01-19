@@ -11,3 +11,8 @@ fun Player.isPlaying(): Boolean {
 fun Player.getArena(): GameArena? {
     return LudoGame.instance.gameArenaHandler.getArenaOfPlayer(uniqueId)
 }
+
+fun Player.clearPhaseItems() {
+    val gameArena: GameArena = getArena() ?: return
+    gameArena.phase.clearPlayerInventory(this)
+}

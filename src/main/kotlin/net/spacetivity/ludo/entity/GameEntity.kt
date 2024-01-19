@@ -36,12 +36,9 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         val gameFieldHandler: GameFieldHandler = LudoGame.instance.gameFieldHandler
 
-        var isEnteringGarage = false
-
         if (this.currentFieldId != null) {
             val oldField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!!) ?: return
             oldField.isTaken = false
-            isEnteringGarage = oldField.teamGarageEntrance != null
         }
 
         val newFieldId: Int = if (this.currentFieldId == null) fieldAmount else this.currentFieldId!! + fieldAmount
@@ -52,16 +49,15 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         val worldPosition: Location = newField.getWorldPosition(fieldHeight)
 
-        if (newField.turnComponent != null)
-            this.forceYaw = newField.turnComponent!!.getRotation()
+        if (newField.turnComponent != null) {
+            val teamEntranceName: String? = newField.teamGarageEntrance
+            val turn = teamEntranceName.equals(this.teamName, true) || teamEntranceName == null
+            if (turn) this.forceYaw = newField.turnComponent!!.getRotation()
+        }
 
-        if (this.forceYaw != null)
-            worldPosition.yaw = this.forceYaw!!
+        newField.throwOut(this.livingEntity!!, fieldHeight)
 
-        //throws out the old holder entity
-        if (!isEnteringGarage)
-            newField.throwOut(this.livingEntity!!, fieldHeight)
-
+        if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
         this.livingEntity!!.teleport(worldPosition)
     }
 

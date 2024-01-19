@@ -81,7 +81,9 @@ class LudoCommand : LudoCommandExecutor {
             }
 
             val gameEntity: GameEntity = gameEntityHandler.gameEntities.get(arenaId).toList()[0]
-            gameEntity.move(1, 0.0)
+            val fieldAmount: Int = if (gameEntity.currentFieldId == null) 0 else 1
+
+            gameEntity.move(fieldAmount, 0.0)
             player.sendMessage(Component.text("Moved entity.", NamedTextColor.LIGHT_PURPLE))
 
             return

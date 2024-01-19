@@ -5,8 +5,11 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.inventory.api.SpaceInventoryProvider
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.setup.GameArenaSetupData
+import net.spacetivity.ludo.arena.sign.GameArenaSign
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
+import net.spacetivity.ludo.extensions.getArena
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.inventory.GameFieldTurnSetupInventory
 import net.spacetivity.ludo.inventory.GameTeamSetupInventory
@@ -23,14 +26,28 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerKickEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.EquipmentSlot
 
-class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
+class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
     private val gameArenaSignHandler: GameArenaSignHandler = LudoGame.instance.gameArenaSignHandler
 
     init {
         this.ludoGame.server.pluginManager.registerEvents(this, this.ludoGame)
+    }
+
+    @EventHandler
+    fun onQuit(event: PlayerQuitEvent) {
+        val player: Player = event.player
+        player.getArena()?.quit(player)
+    }
+
+    @EventHandler
+    fun onKick(event: PlayerKickEvent) {
+        val player: Player = event.player
+        player.getArena()?.quit(player)
     }
 
     @EventHandler
@@ -125,9 +142,8 @@ class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
     fun openSignEvent(event: PlayerOpenSignEvent) {
         val player: Player = event.player
 
-        if (player.inventory.itemInMainHand.type != Material.DIAMOND_HOE) return
-
-        event.isCancelled = true
+        if (player.inventory.itemInMainHand.type == Material.DIAMOND_HOE || LudoGame.instance.gameArenaSignHandler.existsLocation(event.sign.location))
+            event.isCancelled = true
     }
 
     @EventHandler
@@ -135,10 +151,26 @@ class PlayerSetupListener(private val ludoGame: LudoGame) : Listener {
         val player: Player = event.player
         val block: Block = event.clickedBlock ?: return
 
-        if (event.hand == EquipmentSlot.HAND) return;
+        if (player.inventory.itemInMainHand.type != Material.AIR && event.hand == EquipmentSlot.HAND) return;
 
         val validBlockTypes: MutableList<Material> = mutableListOf()
         if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
+
+        if (block.type.name.contains("WALL_SIGN", true)) { //TODO: CHECK AND TEST THIS!!!
+            event.isCancelled = true
+
+            val arenaSign: GameArenaSign = LudoGame.instance.gameArenaSignHandler.getSign(block.location) ?: return
+            val gameArena: GameArena? = if (arenaSign.arenaId == null) null else LudoGame.instance.gameArenaHandler.getArena(arenaSign.arenaId!!)
+
+            if (gameArena == null) {
+                player.sendMessage(Component.text("This sign has no arena assigned!", NamedTextColor.DARK_RED))
+                return
+            }
+
+            if (player.getArena() != null && player.getArena()!!.id == gameArena.id) gameArena.quit(player)
+            else gameArena.join(player)
+            return
+        }
 
         val warningAlert: String
 

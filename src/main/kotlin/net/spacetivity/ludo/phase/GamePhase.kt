@@ -26,13 +26,17 @@ abstract class GamePhase(protected val arenaId: String, val name: String, val pr
     fun isEnding(): Boolean = this is EndingPhase
 
     fun setupPlayerInventory(player: Player) {
-        player.inventory.clear()
-        player.exp = 0.0F
-        player.level = 0
+        clearPlayerInventory(player)
 
         for (entry: MutableMap.MutableEntry<Int, ItemStack> in this.hotbarItems.entries) {
             player.inventory.setItem(entry.key, entry.value)
         }
+    }
+
+    fun clearPlayerInventory(player: Player) {
+        player.inventory.clear()
+        player.exp = 0.0F
+        player.level = 0
     }
 
     protected fun getArena(): GameArena {

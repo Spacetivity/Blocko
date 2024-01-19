@@ -5,7 +5,6 @@ import com.google.common.cache.CacheBuilder
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.GameArenaStatus
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.garageField.GameGarageField
@@ -100,9 +99,6 @@ class GameArenaSetupHandler {
             LudoGame.instance.gameGarageFieldHandler.initGarageFields(arenaSetupData.gameGarageFields)
             LudoGame.instance.gameTeamHandler.initTeamSpawns(arenaSetupData.gameTeamLocations)
             LudoGame.instance.gameArenaSignHandler.loadArenaSigns()
-
-            val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(arenaSetupData.arenaId)?: return
-            LudoGame.instance.gamePhaseHandler.initIndexPhase(gameArena)
         }
 
         for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {

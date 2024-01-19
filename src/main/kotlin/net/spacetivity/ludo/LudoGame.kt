@@ -22,7 +22,7 @@ import net.spacetivity.ludo.field.GameFieldDAO
 import net.spacetivity.ludo.field.GameFieldHandler
 import net.spacetivity.ludo.garageField.GameGarageFieldDAO
 import net.spacetivity.ludo.garageField.GameGarageFieldHandler
-import net.spacetivity.ludo.listener.PlayerSetupListener
+import net.spacetivity.ludo.listener.PlayerListener
 import net.spacetivity.ludo.phase.GamePhaseHandler
 import net.spacetivity.ludo.team.GameTeamHandler
 import net.spacetivity.ludo.team.GameTeamLocationDAO
@@ -101,7 +101,7 @@ class LudoGame : JavaPlugin() {
         //TODO: Load all worlds from all game arenas!
 
         registerCommand(LudoCommand())
-        PlayerSetupListener(this)
+        PlayerListener(this)
     }
 
     override fun onDisable() {
