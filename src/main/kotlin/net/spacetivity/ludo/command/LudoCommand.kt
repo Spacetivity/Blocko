@@ -2,7 +2,6 @@ package net.spacetivity.ludo.command
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.spacetivity.inventory.api.SpaceInventoryProvider
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.GameArenaHandler
@@ -45,12 +44,6 @@ class LudoCommand : LudoCommandExecutor {
             return
         }
 
-        if (args.size == 1 && args[0].equals("arena", true)) {
-            val inventory = SpaceInventoryProvider.api.inventoryHandler.getInventory(player, "arena_inv") ?: return
-            inventory.open(player)
-            return
-        }
-
         //TODO: remove this (it's only for testing)
         if (args.size == 2 && args[0].equals("start", true)) {
             val arenaId: String = args[1]
@@ -81,9 +74,8 @@ class LudoCommand : LudoCommandExecutor {
             }
 
             val gameEntity: GameEntity = gameEntityHandler.gameEntities.get(arenaId).toList()[0]
-            val fieldAmount: Int = if (gameEntity.currentFieldId == null) 0 else 1
 
-            gameEntity.move(fieldAmount, 0.0)
+            gameEntity.move(1, 0.0)
             player.sendMessage(Component.text("Moved entity.", NamedTextColor.LIGHT_PURPLE))
 
             return
@@ -118,6 +110,26 @@ class LudoCommand : LudoCommandExecutor {
             }
 
             player.sendMessage(Component.text("Arena created!", NamedTextColor.GREEN))
+            return
+        }
+
+        if (args.size == 2 && args[0].equals("arena", true) && (args[1].equals("join", true) || args[1].equals("quit", true))) {
+            val isJoin: Boolean = args[1].equals("join", true)
+            val arenaId: String = args[3]
+            val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
+
+            if (gameArena == null) {
+                player.sendMessage(Component.text("Arena does not exist!"))
+                return
+            }
+
+            if (gameArena.status != GameArenaStatus.READY) {
+                player.sendMessage(Component.text("This arena is not ready to join!"))
+                return
+            }
+
+            if (isJoin) gameArena.join(player)
+            else gameArena.quit(player)
             return
         }
 
@@ -259,6 +271,10 @@ class LudoCommand : LudoCommandExecutor {
         sender.sendMessages(
             arrayOf(
                 "/ludo arena list",
+
+                "/ludo arena join <arenaId",
+                "/ludo arena quit <arenaId",
+
                 "/ludo arena init",
 
                 "/ludo arena setup start <arenaId>",
@@ -284,7 +300,7 @@ class LudoCommand : LudoCommandExecutor {
             result.addAll(listOf("arena", "worldTp"))
 
         if (args.size == 2 && args[0].equals("arena", true))
-            result.addAll(listOf("list", "init", "setup", "delete"))
+            result.addAll(listOf("list", "join", "quit", "init", "setup", "delete"))
 
         if (args.size == 2 && args[0].equals("worldTp", true))
             result.addAll(Bukkit.getWorlds().map { it.name })
@@ -292,7 +308,10 @@ class LudoCommand : LudoCommandExecutor {
         if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("setup", true))
             result.addAll(listOf("start", "cancel", "finish", "setTurn", "addTeamSpawn"))
 
-        if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("start", true))
+        if (args.size == 4 && args[0].equals("arena", true) && (args[1].equals("setup", true)
+                    || args[1].equals("join", true)
+                    || args[1].equals("quit", true)) && args[2].equals("start", true)
+        )
             result.addAll(this.gameArenaHandler.cachedArenas.map { it.id })
 
         if (args.size == 5 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("setTurn", true))

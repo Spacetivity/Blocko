@@ -23,7 +23,7 @@ class GameField(
     override var isTaken: Boolean = false
 ) : BoardField {
 
-    fun checkForOldHolder(newHolder: LivingEntity) {
+    fun checkForOpponent(newHolder: LivingEntity) {
         val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
 
         if (!this.isTaken) return

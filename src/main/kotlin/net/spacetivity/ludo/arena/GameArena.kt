@@ -55,7 +55,6 @@ class GameArena(
         val gameTeam: GameTeam? = LudoGame.instance.gameTeamHandler.gameTeams.get(this.id).filter { it.teamMembers.isEmpty() }.randomOrNull()
 
         if (gameTeam == null) {
-            println(LudoGame.instance.gameTeamHandler.gameTeams.size()) //TODO: REMOVE THAT
             player.sendMessage(Component.text("No empty team was found for you... Join cancelled!"))
             return
         }
@@ -79,7 +78,7 @@ class GameArena(
             return
         }
 
-        player.sendMessage("You left the arena!")
+        player.sendMessage(Component.text("You left the arena!", NamedTextColor.YELLOW))
         player.clearPhaseItems()
 
         LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(player)
