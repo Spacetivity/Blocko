@@ -17,6 +17,7 @@ import net.spacetivity.ludo.command.api.LudoCommandHandler
 import net.spacetivity.ludo.command.api.impl.BukkitCommandExecutor
 import net.spacetivity.ludo.database.DatabaseFile
 import net.spacetivity.ludo.dice.DiceHandler
+import net.spacetivity.ludo.dice.DiceSidesFile
 import net.spacetivity.ludo.entity.GameEntityHandler
 import net.spacetivity.ludo.field.GameFieldDAO
 import net.spacetivity.ludo.field.GameFieldHandler
@@ -41,6 +42,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 class LudoGame : JavaPlugin() {
+
+    lateinit var diceSidesFile: DiceSidesFile
 
     lateinit var commandHandler: LudoCommandHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
@@ -86,6 +89,8 @@ class LudoGame : JavaPlugin() {
             return
         }
 
+        this.diceSidesFile = createOrLoadDiceSidesFile()
+
         this.commandHandler = LudoCommandHandler()
         this.gamePhaseHandler = GamePhaseHandler()
         this.gameArenaHandler = GameArenaHandler()
@@ -96,7 +101,9 @@ class LudoGame : JavaPlugin() {
         this.gameGarageFieldHandler = GameGarageFieldHandler()
         this.gameArenaSignHandler = GameArenaSignHandler()
         this.gameArenaSignHandler.loadArenaSigns()
+
         this.diceHandler = DiceHandler()
+        this.diceHandler.startDiceAnimation()
 
         //TODO: Load all worlds from all game arenas!
 
@@ -174,6 +181,31 @@ class LudoGame : JavaPlugin() {
             FileUtils.save(file, result)
         } else {
             result = FileUtils.read(file, DatabaseFile::class.java)!!
+        }
+
+        return result
+    }
+
+    private fun createOrLoadDiceSidesFile(): DiceSidesFile {
+        val diceSidesFilePath = File("${dataFolder.toPath()}/dice")
+        val result: DiceSidesFile
+
+        if (!Files.exists(diceSidesFilePath.toPath())) Files.createDirectories(diceSidesFilePath.toPath())
+
+        val file: File = Paths.get("${diceSidesFilePath}/dice_sides.json").toFile()
+
+        if (!Files.exists(file.toPath())) {
+            result = DiceSidesFile(mutableMapOf(
+                Pair(1, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTMxMzVlYTMxYmMxNWJlMTM0NjJiZjEwZTkxMmExNDBlNWE3ZDY4ZWY0YmQyNmUzZDc1MDU1OWQ1MDJiZjk1In19fQ=="),
+                Pair(2, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjFhZmM1YzkzZmM1MzMyMzNkZWY1ODU4ZDE5YTNhMWI1NzY0YzViMmRjZTZiNWQxZjc5Mzg2ZTk2NDA1MDNhZiJ9fX0="),
+                Pair(3, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODQ1NTVhMzY0MTE5NWMxNjg2MGU4MmYzODlmZDI3Y2JkMTE3ODA0OWJkN2IxYmI3N2IwMzFmYjM5OGE2NDQ4MiJ9fX0="),
+                Pair(4, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2NmMTliYmJiMTNhMWYzNWFjOGYxNDFjZmNlZjlkMDA4NGQxNzZlY2I0ZjRlZWZiNThhZmRhMzUzMGQwYTcyNyJ9fX0="),
+                Pair(5, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM1MWFmNDk5ZjRiZjBiNmNmYWI3YTFmNjI2MWM1YzExYWUyY2RjMDE5ODI1YWFkYjk2OWQ1NjdmZjM1NDUzNSJ9fX0="),
+                Pair(6, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNjZDc1M2RiMTlmYmZjZDNhNTRmNmZkZDBhYTQ1ZDFhM2JmMjVjNjM3ZDY2N2M0M2U2NDZiMWEzOTBmYTYyZCJ9fX0=")
+            ))
+            FileUtils.save(file, result)
+        } else {
+            result = FileUtils.read(file, DiceSidesFile::class.java)!!
         }
 
         return result

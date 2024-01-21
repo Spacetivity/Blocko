@@ -10,12 +10,11 @@ fun Player.isDicing(): Boolean {
 }
 
 fun Player.startDicing() {
-    LudoGame.instance.diceHandler.startDicing(uniqueId)
+    LudoGame.instance.diceHandler.startDicing(this)
 }
 
-fun Player.stopDicing(): Int {
+fun Player.stopDicing() {
     LudoGame.instance.diceHandler.stopDicing(this)
-    return readDicedNumber()!!
 }
 
 /**

@@ -42,12 +42,14 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
     fun onQuit(event: PlayerQuitEvent) {
         val player: Player = event.player
         player.getArena()?.quit(player)
+        MetadataUtils.remove(player, "dicedNumber")
     }
 
     @EventHandler
     fun onKick(event: PlayerKickEvent) {
         val player: Player = event.player
         player.getArena()?.quit(player)
+        MetadataUtils.remove(player, "dicedNumber")
     }
 
     @EventHandler
@@ -156,7 +158,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
         val validBlockTypes: MutableList<Material> = mutableListOf()
         if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
 
-        if (block.type.name.contains("WALL_SIGN", true)) { //TODO: CHECK AND TEST THIS!!!
+        if (player.inventory.itemInMainHand.type == Material.AIR && block.type.name.contains("WALL_SIGN", true)) { //TODO: CHECK AND TEST THIS!!!
             event.isCancelled = true
 
             val arenaSign: GameArenaSign = LudoGame.instance.gameArenaSignHandler.getSign(block.location) ?: return

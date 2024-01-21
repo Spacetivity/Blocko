@@ -20,6 +20,7 @@ object MetadataUtils {
     }
 
     fun remove(entity: LivingEntity, key: String) {
+        if (!has(entity, key)) return
         entity.removeMetadata(key, LudoGame.instance)
     }
 
