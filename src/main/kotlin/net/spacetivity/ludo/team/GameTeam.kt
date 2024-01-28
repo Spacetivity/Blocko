@@ -7,7 +7,7 @@ import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Team
 import java.util.*
 
-class GameTeam(val name: String, val color: NamedTextColor) {
+class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
 
     val scoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam( "team_${this.name}", this.color)
     val teamMembers: MutableSet<UUID> = mutableSetOf()

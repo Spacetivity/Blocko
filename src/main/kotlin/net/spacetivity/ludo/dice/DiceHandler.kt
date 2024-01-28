@@ -33,7 +33,7 @@ class DiceHandler {
         this.diceAnimationTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {
             for (player in Bukkit.getOnlinePlayers()) {
                 if (!player.isDicing()) continue
-                roll(player)
+                rollDice(player)
             }
         }, 0L, 4L)
     }
@@ -42,16 +42,18 @@ class DiceHandler {
         if (this.diceAnimationTask != null) this.diceAnimationTask!!.cancel()
     }
 
+    fun giveDice(player: Player) {
+        player.inventory.setItem(4, ItemUtils(Material.PLAYER_HEAD)
+            .setOwner(this.diceSides[1]!!)
+            .setName(getDiceDisplayName(1))
+            .build())
+    }
+
     fun startDicing(player: Player) {
         if (player.isDicing()) {
             player.sendMessage(Component.text("You are already dicing!"))
             return
         }
-
-        player.inventory.setItem(4, ItemUtils(Material.PLAYER_HEAD)
-            .setOwner(this.diceSides[1]!!)
-            .setName(getDiceDisplayName(1))
-            .build())
 
         this.dicingPlayers[player.uniqueId] = DiceSession(1)
     }
@@ -73,7 +75,7 @@ class DiceHandler {
         player.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
     }
 
-    private fun roll(player: Player) {
+    private fun rollDice(player: Player) {
         if (!player.isDicing()) return
 
         val storageContents: Array<ItemStack?> = player.inventory.storageContents

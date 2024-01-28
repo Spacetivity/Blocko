@@ -17,14 +17,6 @@ fun Player.stopDicing() {
     LudoGame.instance.diceHandler.stopDicing(this)
 }
 
-/**
- * Reads the diced number associated with the player using metadata.
- *
- * This function retrieves the diced number stored in the player's metadata,
- * removes it from the metadata, and returns the value.
- *
- * @return The diced number if available, or `null` if not present in the metadata.
- */
 fun Player.readDicedNumber(): Int? {
     val dicedNumber: Int = MetadataUtils.get(this, "dicedNumber")?: return null
     MetadataUtils.remove(this, "dicedNumber")

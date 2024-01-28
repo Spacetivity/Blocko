@@ -10,10 +10,15 @@ import net.spacetivity.ludo.arena.setup.GameArenaSetupData
 import net.spacetivity.ludo.arena.sign.GameArenaSign
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
 import net.spacetivity.ludo.extensions.getArena
+import net.spacetivity.ludo.extensions.isDicing
+import net.spacetivity.ludo.extensions.startDicing
+import net.spacetivity.ludo.extensions.stopDicing
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.inventory.GameFieldTurnSetupInventory
 import net.spacetivity.ludo.inventory.GameTeamSetupInventory
 import net.spacetivity.ludo.inventory.InvType
+import net.spacetivity.ludo.phase.GamePhaseMode
+import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.utils.MetadataUtils
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -28,7 +33,6 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerKickEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.inventory.EquipmentSlot
 
 class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
@@ -151,35 +155,56 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
     @EventHandler
     fun onInteract(event: PlayerInteractEvent) {
         val player: Player = event.player
-        val block: Block = event.clickedBlock ?: return
-
-        if (player.inventory.itemInMainHand.type != Material.AIR && event.hand == EquipmentSlot.HAND) return;
+        val block: Block? = event.clickedBlock
 
         val validBlockTypes: MutableList<Material> = mutableListOf()
-        if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
-
-        if (player.inventory.itemInMainHand.type == Material.AIR && block.type.name.contains("WALL_SIGN", true)) { //TODO: CHECK AND TEST THIS!!!
-            event.isCancelled = true
-
-            val arenaSign: GameArenaSign = LudoGame.instance.gameArenaSignHandler.getSign(block.location) ?: return
-            val gameArena: GameArena? = if (arenaSign.arenaId == null) null else LudoGame.instance.gameArenaHandler.getArena(arenaSign.arenaId!!)
-
-            if (gameArena == null) {
-                player.sendMessage(Component.text("This sign has no arena assigned!", NamedTextColor.DARK_RED))
-                return
-            }
-
-            if (player.getArena() != null && player.getArena()!!.id == gameArena.id) gameArena.quit(player)
-            else gameArena.join(player)
-            return
-        }
-
         val warningAlert: String
 
         when (player.inventory.itemInMainHand.type) {
+            Material.AIR -> {
+                if (block == null) return
+                if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
+                if (!block.type.name.contains("WALL_SIGN", true)) return
+                event.isCancelled = true
+
+                val arenaSign: GameArenaSign = LudoGame.instance.gameArenaSignHandler.getSign(block.location) ?: return
+                val gameArena: GameArena? = if (arenaSign.arenaId == null) null else LudoGame.instance.gameArenaHandler.getArena(arenaSign.arenaId!!)
+
+                if (gameArena == null) {
+                    player.sendMessage(Component.text("This sign has no arena assigned!", NamedTextColor.DARK_RED))
+                    return
+                }
+
+                if (player.getArena() != null && player.getArena()!!.id == gameArena.id) gameArena.quit(player)
+                else gameArena.join(player)
+            }
+
+            Material.PLAYER_HEAD -> {
+                val gameArena: GameArena = player.getArena() ?: return
+                if (!gameArena.phase.isIngame()) return
+
+                if (!event.action.isRightClick) return
+
+                val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+
+                if (!ingamePhase.isInControllingTeam(player.uniqueId)) {
+                    player.sendMessage(Component.text("Please wait your turn!", NamedTextColor.RED))
+                    return
+                }
+
+                if (ingamePhase.phaseMode != GamePhaseMode.DICING) {
+                    player.sendMessage(Component.text("You cannot dice now!", NamedTextColor.RED))
+                    return
+                }
+
+                if (player.isDicing()) player.stopDicing()
+                else player.startDicing()
+            }
 
             Material.IRON_HOE -> {
 
+                if (block == null) return
+                if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
                 if (!this.ludoGame.gameArenaSetupHandler.hasOpenSetup(player.uniqueId)) return
 
                 if (this.ludoGame.gameArenaSetupHandler.hasConfiguredFieldsAlready(player.uniqueId)) {
@@ -203,6 +228,8 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
             Material.GOLDEN_HOE -> {
 
+                if (block == null) return
+                if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
                 if (!this.ludoGame.gameArenaSetupHandler.hasOpenSetup(player.uniqueId)) return
 
                 if (!MetadataUtils.has(player, "fieldsFinished")) {
@@ -227,6 +254,10 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
             }
 
             Material.DIAMOND_HOE -> {
+
+                if (block == null) return
+                if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
+
                 if (!block.type.name.contains("WALL_SIGN", true)) {
                     player.sendMessage(Component.text("You only can create a arena sign on a wall sign block!"))
                     return

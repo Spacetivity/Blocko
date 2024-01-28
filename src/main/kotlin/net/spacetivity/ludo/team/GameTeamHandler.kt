@@ -22,10 +22,10 @@ class GameTeamHandler {
 
     init {
         for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas) {
-            addTeam(gameArena.id, GameTeam("red", NamedTextColor.RED))
-            addTeam(gameArena.id, GameTeam("green", NamedTextColor.GREEN))
-            addTeam(gameArena.id, GameTeam("blue", NamedTextColor.BLUE))
-            addTeam(gameArena.id, GameTeam("yellow", NamedTextColor.YELLOW))
+            addTeam(gameArena.id, GameTeam("red", NamedTextColor.RED, 0))
+            addTeam(gameArena.id, GameTeam("green", NamedTextColor.GREEN, 1))
+            addTeam(gameArena.id, GameTeam("blue", NamedTextColor.BLUE, 2))
+            addTeam(gameArena.id, GameTeam("yellow", NamedTextColor.YELLOW, 3))
         }
 
         transaction {

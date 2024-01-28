@@ -1,12 +1,13 @@
 package net.spacetivity.ludo.phase.impl
 
 import net.kyori.adventure.text.Component
+import net.spacetivity.ludo.countdown.impl.IdleCountdown
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.utils.ItemUtils
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 
-class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0) {
+class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown(arenaId)) {
 
     override fun start() {
         println("Phase $name started in arena $arenaId!")

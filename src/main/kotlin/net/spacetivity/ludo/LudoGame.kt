@@ -61,8 +61,6 @@ class LudoGame : JavaPlugin() {
     override fun onEnable() {
         instance = this
 
-        Bukkit.getConsoleSender().sendMessage("Blocko v0.1 by spacetivity.net (https://github.com/Spacetivity)")
-
         try {
             val dbProperties: DatabaseFile = createOrLoadDatabaseProperties()
             Database.connect(

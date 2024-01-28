@@ -55,10 +55,10 @@ class GameArenaSetupHandler {
         val arenaSetupData = GameArenaSetupData(arenaId)
         arenaSetupData.gameTeams.addAll(
             listOf(
-                GameTeam("red", NamedTextColor.RED),
-                GameTeam("green", NamedTextColor.GREEN),
-                GameTeam("blue", NamedTextColor.BLUE),
-                GameTeam("yellow", NamedTextColor.YELLOW),
+                GameTeam("red", NamedTextColor.RED, 0),
+                GameTeam("green", NamedTextColor.GREEN, 1),
+                GameTeam("blue", NamedTextColor.BLUE,2),
+                GameTeam("yellow", NamedTextColor.YELLOW, 3),
             )
         )
 

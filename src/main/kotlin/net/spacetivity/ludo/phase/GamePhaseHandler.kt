@@ -2,7 +2,12 @@ package net.spacetivity.ludo.phase
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.arena.GameArena
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
+import java.util.*
 
 class GamePhaseHandler {
 
@@ -13,15 +18,24 @@ class GamePhaseHandler {
     }
 
     fun nextPhase(gameArena: GameArena) {
+        for (uuid: UUID in gameArena.currentPlayers) {
+            val player: Player = Bukkit.getPlayer(uuid) ?: return
+            gameArena.phase.clearPlayerInventory(player)
+        }
+
         gameArena.phase.stop()
 
         val newPhasePriority: Int = gameArena.phase.priority.inc()
-        val newGamePhase: GamePhase = this.cachedGamePhases[gameArena.id].find { it.priority == newPhasePriority }
-            ?: throw NullPointerException("Phase $newPhasePriority not found for arena ${gameArena.id}!")
+        val newGamePhase: GamePhase? = this.cachedGamePhases[gameArena.id].find { it.priority == newPhasePriority }
+
+        if (newGamePhase == null) {
+            gameArena.reset()
+            Bukkit.getConsoleSender().sendMessage(Component.text("ERROR: Phase $newPhasePriority not found for arena ${gameArena.id}!", NamedTextColor.DARK_RED))
+            return
+        }
 
         gameArena.phase = newGamePhase
         newGamePhase.start()
-        println("Arena ${gameArena.id} has now changed its phase to: ${newGamePhase.name}")
     }
 
     fun initIndexPhase(gameArena: GameArena) {

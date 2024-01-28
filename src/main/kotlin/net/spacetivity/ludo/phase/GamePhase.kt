@@ -2,15 +2,15 @@ package net.spacetivity.ludo.phase
 
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
+import net.spacetivity.ludo.countdown.GameCountdown
 import net.spacetivity.ludo.phase.impl.EndingPhase
 import net.spacetivity.ludo.phase.impl.IdlePhase
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-abstract class GamePhase(protected val arenaId: String, val name: String, val priority: Int) {
+abstract class GamePhase(protected val arenaId: String, val name: String, val priority: Int, var countdown: GameCountdown?) {
 
-    //TODO: var countdown: GameCountdown?
     private val hotbarItems: MutableMap<Int, ItemStack> = mutableMapOf()
 
     init {

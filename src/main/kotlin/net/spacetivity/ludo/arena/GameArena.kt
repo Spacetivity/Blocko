@@ -8,6 +8,7 @@ import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.entity.Player
 import java.util.*
@@ -33,6 +34,13 @@ class GameArena(
         for (player: Player? in this.currentPlayers.map { Bukkit.getPlayer(it) }) {
             if (player == null) continue
             player.sendMessage(message)
+        }
+    }
+
+    fun sendArenaSound(sound: Sound) {
+        for (player: Player? in this.currentPlayers.map { Bukkit.getPlayer(it) }) {
+            if (player == null) continue
+            player.playSound(player.location, sound, 0.2F, 1F)
         }
     }
 
@@ -68,6 +76,7 @@ class GameArena(
 
         this.currentPlayers.add(player.uniqueId)
         this.phase.setupPlayerInventory(player)
+        this.phase.countdown?.tryStartup()
 
         gameTeam.join(player)
     }
@@ -83,6 +92,8 @@ class GameArena(
 
         LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(player)
         this.currentPlayers.remove(player.uniqueId)
+
+        if (this.currentPlayers.isEmpty()) this.phase.countdown?.cancel()
 
         if (this.phase.isIngame() && this.currentPlayers.isEmpty()) {
             reset()
@@ -104,6 +115,13 @@ class GameArena(
     }
 
     fun reset() {
+        this.phase.countdown?.cancel()
+
+        for (uuid: UUID in this.currentPlayers) {
+            val player: Player = Bukkit.getPlayer(uuid) ?: return
+            this.phase.clearPlayerInventory(player)
+        }
+
         this.currentPlayers.clear()
 
         for (gameTeam: GameTeam in LudoGame.instance.gameTeamHandler.gameTeams.values()) {
@@ -115,6 +133,8 @@ class GameArena(
 
         LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
         if (!this.phase.isIdle()) LudoGame.instance.gamePhaseHandler.initIndexPhase(this)
+
+        println("Arena ${this.id} was reset! Phase is now: ${this.phase.name}")
     }
 
     private fun findNewHost(): Player? {

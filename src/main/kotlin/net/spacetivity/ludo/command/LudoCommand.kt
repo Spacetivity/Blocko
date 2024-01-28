@@ -47,6 +47,12 @@ class LudoCommand : LudoCommandExecutor {
         }
 
         //TODO: remove this (it's only for testing)
+        if (args.size == 1 && args[0].equals("dice", true)) {
+            LudoGame.instance.diceHandler.giveDice(player)
+            return
+        }
+
+        //TODO: remove this (it's only for testing)
         if (args.size == 2 && args[0].equals("dice", true) && (args[1].equals("start", true) || args[1].equals("stop", true))) {
             val isStart = args[1].equals("start", true)
 
