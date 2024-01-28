@@ -42,11 +42,18 @@ class DiceHandler {
         if (this.diceAnimationTask != null) this.diceAnimationTask!!.cancel()
     }
 
-    fun giveDice(player: Player) {
+    fun getDiceItem(player: Player) {
         player.inventory.setItem(4, ItemUtils(Material.PLAYER_HEAD)
             .setOwner(this.diceSides[1]!!)
             .setName(getDiceDisplayName(1))
             .build())
+    }
+
+    fun getDiceItem(): ItemStack {
+        return ItemUtils(Material.PLAYER_HEAD)
+            .setOwner(this.diceSides[1]!!)
+            .setName(getDiceDisplayName(1))
+            .build()
     }
 
     fun startDicing(player: Player) {

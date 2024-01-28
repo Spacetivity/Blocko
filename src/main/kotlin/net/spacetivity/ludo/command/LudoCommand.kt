@@ -13,8 +13,6 @@ import net.spacetivity.ludo.command.api.LudoCommandExecutor
 import net.spacetivity.ludo.command.api.LudoCommandSender
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.entity.GameEntityHandler
-import net.spacetivity.ludo.extensions.startDicing
-import net.spacetivity.ludo.extensions.stopDicing
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.field.GameFieldHandler
 import net.spacetivity.ludo.field.TurnComponent
@@ -48,17 +46,7 @@ class LudoCommand : LudoCommandExecutor {
 
         //TODO: remove this (it's only for testing)
         if (args.size == 1 && args[0].equals("dice", true)) {
-            LudoGame.instance.diceHandler.giveDice(player)
-            return
-        }
-
-        //TODO: remove this (it's only for testing)
-        if (args.size == 2 && args[0].equals("dice", true) && (args[1].equals("start", true) || args[1].equals("stop", true))) {
-            val isStart = args[1].equals("start", true)
-
-            if (isStart) player.startDicing()
-            else player.stopDicing()
-
+            LudoGame.instance.diceHandler.getDiceItem(player)
             return
         }
 
