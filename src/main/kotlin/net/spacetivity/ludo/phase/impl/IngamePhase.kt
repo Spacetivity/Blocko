@@ -13,7 +13,7 @@ import java.util.*
 class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
     private var controllingTeamId: Int = 0
-    var phaseMode: GamePhaseMode = GamePhaseMode.DICING
+    var phaseMode: GamePhaseMode = GamePhaseMode.DICE
 
     override fun start() {
         println("Phase $name started in arena $arenaId!")
@@ -26,7 +26,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
         hotbarItems[0] = LudoGame.instance.diceHandler.getDiceItem()
-        for ((entityIndex, i) in (2 .. 5).withIndex()) {
+        for ((entityIndex, i) in (2..5).withIndex()) {
             hotbarItems[i] = ItemUtils(Material.ARMOR_STAND)
                 .setName(Component.text("Move Entity #$entityIndex"))
                 .build()

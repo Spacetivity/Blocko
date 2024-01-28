@@ -49,6 +49,7 @@ class LudoGame : JavaPlugin() {
     lateinit var commandHandler: LudoCommandHandler
     lateinit var bossbarHandler: BossbarHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
+    lateinit var diceHandler: DiceHandler
     lateinit var gameArenaHandler: GameArenaHandler
     lateinit var gameArenaSetupHandler: GameArenaSetupHandler
     lateinit var gameTeamHandler: GameTeamHandler
@@ -56,7 +57,6 @@ class LudoGame : JavaPlugin() {
     lateinit var gameFieldHandler: GameFieldHandler
     lateinit var gameGarageFieldHandler: GameGarageFieldHandler
     lateinit var gameArenaSignHandler: GameArenaSignHandler
-    lateinit var diceHandler: DiceHandler
 
     private var idleTask: BukkitTask? = null
 
@@ -94,6 +94,8 @@ class LudoGame : JavaPlugin() {
         this.commandHandler = LudoCommandHandler()
         this.bossbarHandler = BossbarHandler()
         this.gamePhaseHandler = GamePhaseHandler()
+        this.diceHandler = DiceHandler()
+        this.diceHandler.startDiceAnimation()
         this.gameArenaHandler = GameArenaHandler()
         this.gameArenaSetupHandler = GameArenaSetupHandler()
         this.gameTeamHandler = GameTeamHandler()
@@ -103,8 +105,7 @@ class LudoGame : JavaPlugin() {
         this.gameArenaSignHandler = GameArenaSignHandler()
         this.gameArenaSignHandler.loadArenaSigns()
 
-        this.diceHandler = DiceHandler()
-        this.diceHandler.startDiceAnimation()
+
 
         //TODO: Load all worlds from all game arenas!
 

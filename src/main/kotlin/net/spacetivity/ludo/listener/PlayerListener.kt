@@ -192,7 +192,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                     return
                 }
 
-                if (ingamePhase.phaseMode != GamePhaseMode.DICING) {
+                if (ingamePhase.phaseMode != GamePhaseMode.DICE) {
                     player.sendMessage(Component.text("You cannot dice now!", NamedTextColor.RED))
                     return
                 }

@@ -10,7 +10,7 @@ import java.util.*
 class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
 
     val scoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam( "team_${this.name}", this.color)
-    val teamMembers: MutableSet<UUID> = mutableSetOf()
+    val teamMembers: MutableSet<UUID> = mutableSetOf() //TODO: Change this to a GamePlayer instance, so that AI can be a team holder
     val teamLocations: MutableSet<GameTeamLocation> = mutableSetOf()
 
     fun join(player: Player) {
