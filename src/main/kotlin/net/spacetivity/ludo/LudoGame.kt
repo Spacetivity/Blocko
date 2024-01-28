@@ -10,6 +10,7 @@ import net.spacetivity.ludo.arena.GameArenaHandler
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
 import net.spacetivity.ludo.arena.sign.GameArenaSignDAO
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
+import net.spacetivity.ludo.bossbar.BossbarHandler
 import net.spacetivity.ludo.command.LudoCommand
 import net.spacetivity.ludo.command.api.CommandProperties
 import net.spacetivity.ludo.command.api.LudoCommandExecutor
@@ -46,6 +47,7 @@ class LudoGame : JavaPlugin() {
     lateinit var diceSidesFile: DiceSidesFile
 
     lateinit var commandHandler: LudoCommandHandler
+    lateinit var bossbarHandler: BossbarHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
     lateinit var gameArenaHandler: GameArenaHandler
     lateinit var gameArenaSetupHandler: GameArenaSetupHandler
@@ -90,6 +92,7 @@ class LudoGame : JavaPlugin() {
         this.diceSidesFile = createOrLoadDiceSidesFile()
 
         this.commandHandler = LudoCommandHandler()
+        this.bossbarHandler = BossbarHandler()
         this.gamePhaseHandler = GamePhaseHandler()
         this.gameArenaHandler = GameArenaHandler()
         this.gameArenaSetupHandler = GameArenaSetupHandler()
