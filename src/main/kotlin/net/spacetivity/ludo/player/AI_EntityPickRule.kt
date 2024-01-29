@@ -52,11 +52,31 @@ enum class AI_EntityPickRule(val weight: Int, val probability: Double) {
                         availableRules.add(MOVABLE_AND_TARGET_IN_SIGHT)
                     } else if (gameEntity.isMovable(dicedNumber) && gameEntity.isGarageInSight(dicedNumber)) {
                         availableRules.add(MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE)
-                    } else{
+                    } else {
                         availableRules.add(NOT_MOVABLE)
                     }
 
                     // find the highest weighted rule | if two have the same weight, do the number game!
+                    if (availableRules.size > 1) {
+                        val rulesWithEqualWeight: List<AI_EntityPickRule> = availableRules.filter { it.weight == availableRules[0].weight }
+
+                        if (rulesWithEqualWeight.size > 1) {
+                            val randomNumber: Int = (1..10).random()
+
+                            if (randomNumber > 5) {
+                                val possibleRule: AI_EntityPickRule? = availableRules.maxByOrNull { it.probability }
+                                if (possibleRule != null) rule = possibleRule
+                            } else {
+                                rule = rulesWithEqualWeight.random()
+                            }
+
+                        } else {
+                            rule = rulesWithEqualWeight[0]
+                        }
+
+                    } else {
+                        rule = availableRules[0]
+                    }
 
                 }
 
