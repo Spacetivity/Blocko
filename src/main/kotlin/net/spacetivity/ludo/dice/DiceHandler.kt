@@ -8,6 +8,8 @@ import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.extensions.*
+import net.spacetivity.ludo.phase.GamePhaseMode
+import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.utils.HeadUtils
 import net.spacetivity.ludo.utils.ItemUtils
@@ -31,8 +33,23 @@ class DiceHandler {
     fun startDiceAnimation() {
         this.diceAnimationTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {
             for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas) {
+
+                if (!gameArena.phase.isIngame()) continue
+                val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+
                 for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
                     if (!gamePlayer.isDicing()) continue
+                    val diceSession: DiceSession = gamePlayer.getDiceSession() ?: continue
+
+                    val endTimestamp: Long = diceSession.dicingEndTimestamp
+                    val currentTimestamp: Long = System.currentTimeMillis()
+
+                    if (currentTimestamp <= endTimestamp) {
+                        stopDicing(gamePlayer)
+                        ingamePhase.phaseMode = GamePhaseMode.PICK_ENTITY
+                        continue
+                    }
+
                     rollDice(gamePlayer)
                 }
             }
@@ -63,7 +80,8 @@ class DiceHandler {
             return
         }
 
-        this.dicingPlayers[gamePlayer.uuid] = DiceSession(1)
+        this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 4))
+        if (!gamePlayer.inAction) gamePlayer.inAction = true
     }
 
     fun stopDicing(gamePlayer: GamePlayer) {
@@ -82,6 +100,8 @@ class DiceHandler {
         gamePlayer.clearSlot(4)
         gamePlayer.playSound(Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM)
         gamePlayer.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
+
+        gamePlayer.inAction = false //TODO: EXPERIMENTAL!!!
     }
 
     private fun rollDice(gamePlayer: GamePlayer) {

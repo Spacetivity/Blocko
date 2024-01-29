@@ -1,8 +1,11 @@
 package net.spacetivity.ludo.player
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
+import net.spacetivity.ludo.extensions.sendMessage
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import org.bukkit.Bukkit
@@ -42,19 +45,28 @@ class GamePlayActionTasks {
                 val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(gamePlayer.arenaId) ?: continue
 
                 if (!gameArena.phase.isIngame()) continue
+                if (gamePlayer.inAction) continue
 
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
                 if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
 
                 when (ingamePhase.phaseMode) {
                     GamePhaseMode.DICE -> {
-                        gamePlayer.dice()
-                        ingamePhase.phaseMode = GamePhaseMode.PICK_ENTITY
+                        if (gamePlayer.isAI) {
+                            gamePlayer.dice()
+                        } else {
+                            gamePlayer.sendMessage(Component.text("Please dice now. :)", NamedTextColor.LIGHT_PURPLE))
+                            gamePlayer.inAction = true
+                        }
                     }
+
                     GamePhaseMode.PICK_ENTITY -> {
-                        gamePlayer.pickEntity()
-                        ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
+                        if (gamePlayer.isAI) {
+                            gamePlayer.autoPickEntity()
+                            ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
+                        }
                     }
+
                     GamePhaseMode.MOVE_ENTITY -> {
                         gamePlayer.movePickedEntity(0.0)
                         ingamePhase.phaseMode = GamePhaseMode.DICE

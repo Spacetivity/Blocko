@@ -9,7 +9,8 @@ import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.setup.GameArenaSetupData
 import net.spacetivity.ludo.arena.sign.GameArenaSign
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
-import net.spacetivity.ludo.extensions.*
+import net.spacetivity.ludo.extensions.getArena
+import net.spacetivity.ludo.extensions.toGamePlayerInstance
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.inventory.GameFieldTurnSetupInventory
 import net.spacetivity.ludo.inventory.GameTeamSetupInventory
@@ -197,8 +198,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                     return
                 }
 
-                if (gamePlayer.isDicing()) gamePlayer.stopDicing()
-                else gamePlayer.startDicing()
+                gamePlayer.dice()
             }
 
             Material.IRON_HOE -> {
