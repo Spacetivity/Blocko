@@ -46,15 +46,32 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         this.livingEntity = null
     }
 
+    fun isGarageInSight(dicedNumber: Int): Boolean {
+        var fieldsTravelled = 0
+
+        for (currentFieldId: Int in this.currentFieldId!!..this.currentFieldId!! + dicedNumber) {
+            val field: GameField = LudoGame.instance.gameFieldHandler.getField(this.arenaId, currentFieldId) ?: continue
+            if (field.teamGarageEntrance == null) continue
+            if (field.teamGarageEntrance != this.teamName) continue
+
+            fieldsTravelled++
+            break
+        }
+
+        return (dicedNumber - 1) > fieldsTravelled
+    }
+
     fun isMovable(dicedNumber: Int): Boolean {
         val gameGarageFieldHandler: GameGarageFieldHandler = LudoGame.instance.gameGarageFieldHandler
         val gameFieldHandler: GameFieldHandler = LudoGame.instance.gameFieldHandler
 
         if (MetadataUtils.has(this.livingEntity!!, "inGarage")) {
-            val goalGarageField: GameGarageField = gameGarageFieldHandler.getGarageField(this.arenaId, this.teamName, this.currentFieldId!! + dicedNumber) ?: return false
+            val goalGarageField: GameGarageField = gameGarageFieldHandler.getGarageField(this.arenaId, this.teamName, this.currentFieldId!! + dicedNumber)
+                ?: return false
             return !goalGarageField.isTaken
         } else {
-            val goalField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!! + dicedNumber) ?: return false
+            val goalField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!! + dicedNumber)
+                ?: return false
             return !(goalField.isTaken && goalField.getCurrentHolder()!!.teamName == this.teamName)
         }
     }
@@ -63,7 +80,8 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         if (MetadataUtils.has(this.livingEntity!!, "inGarage")) return false
         val gameFieldHandler: GameFieldHandler = LudoGame.instance.gameFieldHandler
 
-        val goalField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!! + dicedNumber) ?: return false
+        val goalField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!! + dicedNumber)
+            ?: return false
         return goalField.isTaken && goalField.getCurrentHolder()!!.teamName != this.teamName
     }
 
@@ -116,7 +134,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         return this.currentFieldId == goalFieldId
     }
 
-    private fun moveInGarage(fieldHeight: Double, dicedNumber: Int) : Boolean {
+    private fun moveInGarage(fieldHeight: Double, dicedNumber: Int): Boolean {
         if (this.livingEntity == null) return false
 
         val gameGarageFieldHandler: GameGarageFieldHandler = LudoGame.instance.gameGarageFieldHandler

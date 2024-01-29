@@ -21,50 +21,43 @@ enum class AI_EntityPickRule(val weight: Int, val probability: Double) {
 
     companion object {
 
-        /**
-         * Analyzes the current rule situation for the AI player.
-         * Determines the appropriate entity pick rule based on the game state and diced number.
-         * @param aiPlayer The AI player for whom the rule situation is analyzed.
-         * @param dicedNumber The number obtained from the dice roll.
-         * @return The AI entity pick rule determined based on the analysis.
-         */
-        fun analyzeCurrentRuleSituation(aiPlayer: GamePlayer, dicedNumber: Int): AI_EntityPickRule {
+        fun analyzeCurrentRuleSituation(aiPlayer: GamePlayer, dicedNumber: Int): Pair<AI_EntityPickRule, GameEntity?> { //TODO: It also has to return the entity
             val gameEntities: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(aiPlayer.arenaId, aiPlayer.teamName)
 
-            var rule: AI_EntityPickRule = NOT_MOVABLE
+            var rule: Pair<AI_EntityPickRule, GameEntity?> = Pair(NOT_MOVABLE, null)
 
             if (gameEntities.any { it.currentFieldId == null } && dicedNumber == 6) {
-                rule = MOVABLE_OUT_OF_START
+                rule = Pair(MOVABLE_OUT_OF_START, gameEntities.random())
             } else if (gameEntities.all { it.currentFieldId == null } && dicedNumber == 6) {
-                rule = MOVABLE_OUT_OF_START
+                rule = Pair(MOVABLE_OUT_OF_START, gameEntities.random())
             } else if (gameEntities.all { it.currentFieldId == null } && dicedNumber != 6) {
-                rule = NOT_MOVABLE
+                rule = Pair(NOT_MOVABLE, null)
             } else {
 
-                val availableRules: MutableList<AI_EntityPickRule> = mutableListOf()
+                val availableRules: MutableList<Pair<AI_EntityPickRule, GameEntity?>> = mutableListOf()
 
                 for (gameEntity: GameEntity in gameEntities) {
                     if (MetadataUtils.has(gameEntity.livingEntity!!, "inGarage") && gameEntity.isMovable(dicedNumber)) {
-                        availableRules.add(GARAGE_MOVABLE)
+                        availableRules.add(Pair(GARAGE_MOVABLE, gameEntity))
                     } else if (gameEntity.isMovable(dicedNumber)) {
-                        availableRules.add(MOVABLE)
+                        availableRules.add(Pair(MOVABLE, gameEntity))
                     } else if (gameEntity.isMovable(dicedNumber) && gameEntity.hasValidTarget(dicedNumber)) {
-                        availableRules.add(MOVABLE_AND_TARGET_IN_SIGHT)
+                        availableRules.add(Pair(MOVABLE_AND_TARGET_IN_SIGHT, gameEntity))
                     } else if (gameEntity.isMovable(dicedNumber) && gameEntity.isGarageInSight(dicedNumber)) {
-                        availableRules.add(MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE)
+                        availableRules.add(Pair(MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE, gameEntity))
                     } else {
-                        availableRules.add(NOT_MOVABLE)
+                        rule = Pair(NOT_MOVABLE, null)
                     }
 
                     // find the highest weighted rule | if two have the same weight, do the number game!
                     if (availableRules.size > 1) {
-                        val rulesWithEqualWeight: List<AI_EntityPickRule> = availableRules.filter { it.weight == availableRules[0].weight }
+                        val rulesWithEqualWeight: List<Pair<AI_EntityPickRule, GameEntity?>> = availableRules.filter { it.first.weight == availableRules[0].first.weight }
 
                         if (rulesWithEqualWeight.size > 1) {
                             val randomNumber: Int = (1..10).random()
 
                             if (randomNumber > 5) {
-                                val possibleRule: AI_EntityPickRule? = availableRules.maxByOrNull { it.probability }
+                                val possibleRule: Pair<AI_EntityPickRule, GameEntity?>? = availableRules.maxByOrNull { it.first.probability }
                                 if (possibleRule != null) rule = possibleRule
                             } else {
                                 rule = rulesWithEqualWeight.random()
