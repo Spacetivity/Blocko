@@ -2,6 +2,8 @@ package net.spacetivity.ludo.player
 
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.entity.GameEntity
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import java.util.*
 
 class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val isAI: Boolean, var dicedNumber: Int?) {
@@ -34,6 +36,10 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
 
     fun hasWon(): Boolean {
         return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(this.arenaId, this.teamName).all { !it.isMovable(1) }
+    }
+
+    fun toBukkitInstance(): Player? {
+        return Bukkit.getPlayer(this.uuid)
     }
 
 }

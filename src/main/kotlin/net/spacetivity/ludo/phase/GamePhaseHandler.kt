@@ -5,9 +5,9 @@ import com.google.common.collect.Multimap
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.arena.GameArena
+import net.spacetivity.ludo.player.GamePlayer
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import java.util.*
 
 class GamePhaseHandler {
 
@@ -18,8 +18,8 @@ class GamePhaseHandler {
     }
 
     fun nextPhase(gameArena: GameArena) {
-        for (uuid: UUID in gameArena.currentPlayers) {
-            val player: Player = Bukkit.getPlayer(uuid) ?: return
+        for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+            val player: Player = gamePlayer.toBukkitInstance() ?: return
             gameArena.phase.clearPlayerInventory(player)
         }
 

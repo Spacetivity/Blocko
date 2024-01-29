@@ -113,7 +113,7 @@ class GameArenaHandler {
     }
 
     fun getArenaOfPlayer(uuid: UUID): GameArena? {
-        return this.cachedArenas.find { it.currentPlayers.contains(uuid) }
+        return this.cachedArenas.find { it.currentPlayers.any { gp -> gp.uuid == uuid } }
     }
 
     fun loadJoinSign(location: Location, gameArena: GameArena?) {

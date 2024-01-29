@@ -9,16 +9,14 @@ import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.setup.GameArenaSetupData
 import net.spacetivity.ludo.arena.sign.GameArenaSign
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
-import net.spacetivity.ludo.extensions.getArena
-import net.spacetivity.ludo.extensions.isDicing
-import net.spacetivity.ludo.extensions.startDicing
-import net.spacetivity.ludo.extensions.stopDicing
+import net.spacetivity.ludo.extensions.*
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.inventory.GameFieldTurnSetupInventory
 import net.spacetivity.ludo.inventory.GameTeamSetupInventory
 import net.spacetivity.ludo.inventory.InvType
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
+import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.utils.MetadataUtils
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -183,6 +181,8 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 val gameArena: GameArena = player.getArena() ?: return
                 if (!gameArena.phase.isIngame()) return
 
+                val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
+
                 if (!event.action.isRightClick) return
 
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
@@ -197,8 +197,8 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                     return
                 }
 
-                if (player.isDicing()) player.stopDicing()
-                else player.startDicing()
+                if (gamePlayer.isDicing()) gamePlayer.stopDicing()
+                else gamePlayer.startDicing()
             }
 
             Material.IRON_HOE -> {

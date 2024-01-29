@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.extensions.clearPhaseItems
 import net.spacetivity.ludo.phase.GamePhase
+import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -22,7 +23,7 @@ class GameArena(
 ) {
 
     val maxPlayers: Int = 4
-    val currentPlayers: MutableSet<UUID> = mutableSetOf()
+    val currentPlayers: MutableSet<GamePlayer> = mutableSetOf()
 
     var arenaHost: Player? = null
 
@@ -31,21 +32,21 @@ class GameArena(
     }
 
     fun sendArenaMessage(message: Component) {
-        for (player: Player? in this.currentPlayers.map { Bukkit.getPlayer(it) }) {
+        for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
             if (player == null) continue
             player.sendMessage(message)
         }
     }
 
     fun sendArenaSound(sound: Sound) {
-        for (player: Player? in this.currentPlayers.map { Bukkit.getPlayer(it) }) {
+        for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
             if (player == null) continue
             player.playSound(player.location, sound, 0.2F, 1F)
         }
     }
 
     fun join(player: Player) {
-        if (this.currentPlayers.contains(player.uniqueId)) {
+        if (this.currentPlayers.any { it.uuid == player.uniqueId }) {
             player.sendMessage(Component.text("Already in arena!"))
             return
         }
@@ -74,7 +75,7 @@ class GameArena(
             player.sendMessage(Component.text("You are now the arena host!", NamedTextColor.GREEN))
         }
 
-        this.currentPlayers.add(player.uniqueId)
+        this.currentPlayers.add(GamePlayer(player.uniqueId, this.id, gameTeam.name, false, null))
         this.phase.setupPlayerInventory(player)
         this.phase.countdown?.tryStartup()
 
@@ -82,7 +83,7 @@ class GameArena(
     }
 
     fun quit(player: Player) {
-        if (!this.currentPlayers.contains(player.uniqueId)) {
+        if (this.currentPlayers.none { it.uuid == player.uniqueId }) {
             player.sendMessage(Component.text("Not in arena!"))
             return
         }
@@ -91,7 +92,7 @@ class GameArena(
         player.clearPhaseItems()
 
         LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(player)
-        this.currentPlayers.remove(player.uniqueId)
+        this.currentPlayers.removeIf { it.uuid == player.uniqueId }
 
         if (this.currentPlayers.isEmpty()) this.phase.countdown?.cancel()
 
@@ -117,8 +118,8 @@ class GameArena(
     fun reset() {
         this.phase.countdown?.cancel()
 
-        for (uuid: UUID in this.currentPlayers) {
-            val player: Player = Bukkit.getPlayer(uuid) ?: return
+        for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
+            if (player == null) continue
             this.phase.clearPlayerInventory(player)
         }
 
@@ -138,14 +139,16 @@ class GameArena(
     }
 
     private fun findNewHost(): Player? {
-        if (this.currentPlayers.isEmpty() || this.currentPlayers.size == 1) return null
+        val actualCurrentPlayers: List<GamePlayer> = this.currentPlayers.filter { !it.isAI }
 
-        val newHostUuid: UUID = if (this.arenaHost == null)
-            this.currentPlayers.random()
+        if (actualCurrentPlayers.isEmpty() || actualCurrentPlayers.size == 1) return null
+
+        val newHostUuid: Player? = if (this.arenaHost == null)
+            actualCurrentPlayers.random().toBukkitInstance()
         else
-            this.currentPlayers.filter { it != this.arenaHost?.uniqueId }.random()
+            actualCurrentPlayers.filter { it.uuid != this.arenaHost?.uniqueId }.random().toBukkitInstance()
 
-        return Bukkit.getPlayer(newHostUuid)
+        return newHostUuid
     }
 
 }

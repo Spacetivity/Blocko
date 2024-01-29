@@ -7,6 +7,7 @@ import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.field.GameFieldHandler
 import net.spacetivity.ludo.garageField.GameGarageField
 import net.spacetivity.ludo.garageField.GameGarageFieldHandler
+import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.utils.BoardField
 import net.spacetivity.ludo.utils.MetadataUtils
@@ -20,6 +21,9 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
     var livingEntity: LivingEntity? = null
 
     private var forceYaw: Float? = null
+
+    var controller: GamePlayer? = null
+    var shouldMove: Boolean = false
 
     fun spawn(location: Location) {
         if (this.livingEntity != null) return
@@ -57,41 +61,35 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         return false
     }
 
-    fun move(dicedNumber: Int, fieldHeight: Double) {
-        if (this.livingEntity == null) return
+    fun move(dicedNumber: Int, fieldHeight: Double): Boolean {
+        if (this.livingEntity == null) return false
 
         val gameFieldHandler: GameFieldHandler = LudoGame.instance.gameFieldHandler
 
         if (this.currentFieldId != null) {
-            val oldField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!!) ?: return
+            val oldField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!!) ?: return false
             oldField.isTaken = false
-
-            var continueMoveFunc = true
 
             if (MetadataUtils.has(this.livingEntity!!, "inGarage") || (oldField.teamGarageEntrance != null && oldField.teamGarageEntrance.equals(this.teamName, true))) {
                 if (!MetadataUtils.has(this.livingEntity!!, "inGarage")) this.currentFieldId = null
                 MetadataUtils.setIfAbsent(this.livingEntity!!, "inGarage", this.teamName)
-                moveInGarage(fieldHeight, dicedNumber)
-                continueMoveFunc = false
+                return moveInGarage(fieldHeight, dicedNumber)
             }
-
-            if (!continueMoveFunc)
-                return
         }
 
         val teamStartFieldId = 0
         val newFieldId: Int = if (this.currentFieldId == null) teamStartFieldId else this.currentFieldId!! + 1
         val goalFieldId: Int = if (dicedNumber == 1 || this.currentFieldId == null) newFieldId else this.currentFieldId!! + dicedNumber
-        val goalField: GameField = gameFieldHandler.getField(this.arenaId, goalFieldId) ?: return
+        val goalField: GameField = gameFieldHandler.getField(this.arenaId, goalFieldId) ?: return false
 
         this.currentFieldId = newFieldId
 
-        val newField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!!) ?: return
+        val newField: GameField = gameFieldHandler.getField(this.arenaId, this.currentFieldId!!) ?: return false
 
         if (isBlocked(newField) || isBlocked(goalField)) {
-            val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
+            val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return false
             gameArena.sendArenaMessage(Component.text("Cannot move entity. Target field is blocked!"))
-            return
+            return false
         }
 
         // checks if the new field contains already a new entity. If 'yes' it throws the entity out.
@@ -108,39 +106,43 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
         this.livingEntity!!.teleport(worldPosition)
+
+        return this.currentFieldId == goalFieldId
     }
 
-    private fun moveInGarage(fieldHeight: Double, dicedNumber: Int) {
-        if (this.livingEntity == null) return
+    private fun moveInGarage(fieldHeight: Double, dicedNumber: Int) : Boolean {
+        if (this.livingEntity == null) return false
 
         val gameGarageFieldHandler: GameGarageFieldHandler = LudoGame.instance.gameGarageFieldHandler
 
         val newFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + 1
         val newField: GameGarageField = gameGarageFieldHandler.getGarageField(this.arenaId, this.teamName, newFieldId)
-            ?: return
+            ?: return false
 
         this.currentFieldId = newFieldId
 
-        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
+        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return false
 
         if (dicedNumber > 4) {
             gameArena.sendArenaMessage(Component.text("You cannot move more than 4 fields in your garage!"))
-            return
+            return false
         }
 
         val goalFieldId: Int = if (dicedNumber == 1 || this.currentFieldId == null) newFieldId else this.currentFieldId!! + dicedNumber
         val goalField: GameGarageField = gameGarageFieldHandler.getGarageField(this.arenaId, this.teamName, goalFieldId)
-            ?: return
+            ?: return false
 
         if (isBlocked(newField) || isBlocked(goalField)) {
             gameArena.sendArenaMessage(Component.text("Cannot move entity. Target field is blocked!"))
-            return
+            return false
         }
 
         newField.isTaken = true
 
         val worldPosition: Location = newField.getWorldPosition(fieldHeight)
         this.livingEntity!!.teleport(worldPosition)
+
+        return this.currentFieldId == goalFieldId
     }
 
     private fun isBlocked(field: BoardField): Boolean {

@@ -17,7 +17,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
     override fun start() {
         println("Phase $name started in arena $arenaId!")
-        getArenaPlayers().forEach { setupPlayerInventory(it) }
+        getArena().currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance()!! }.forEach { setupPlayerInventory(it) }
     }
 
     override fun stop() {

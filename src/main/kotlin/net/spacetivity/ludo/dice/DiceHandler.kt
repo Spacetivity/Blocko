@@ -6,12 +6,11 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.extensions.getCurrentDiceNumber
-import net.spacetivity.ludo.extensions.isDicing
-import net.spacetivity.ludo.extensions.setCurrentDiceNumber
+import net.spacetivity.ludo.arena.GameArena
+import net.spacetivity.ludo.extensions.*
+import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.utils.HeadUtils
 import net.spacetivity.ludo.utils.ItemUtils
-import net.spacetivity.ludo.utils.MetadataUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -31,9 +30,11 @@ class DiceHandler {
 
     fun startDiceAnimation() {
         this.diceAnimationTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {
-            for (player in Bukkit.getOnlinePlayers()) {
-                if (!player.isDicing()) continue
-                rollDice(player)
+            for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas) {
+                for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+                    if (!gamePlayer.isDicing()) continue
+                    rollDice(gamePlayer)
+                }
             }
         }, 0L, 4L)
     }
@@ -56,45 +57,46 @@ class DiceHandler {
             .build()
     }
 
-    fun startDicing(player: Player) {
-        if (player.isDicing()) {
-            player.sendMessage(Component.text("You are already dicing!"))
+    fun startDicing(gamePlayer: GamePlayer) {
+        if (gamePlayer.isDicing()) {
+            gamePlayer.sendMessage(Component.text("You are already dicing!"))
             return
         }
 
-        this.dicingPlayers[player.uniqueId] = DiceSession(1)
+        this.dicingPlayers[gamePlayer.uuid] = DiceSession(1)
     }
 
-    fun stopDicing(player: Player) {
-        if (!player.isDicing()) {
-            player.sendMessage(Component.text("You are not dicing!"))
+    fun stopDicing(gamePlayer: GamePlayer) {
+        if (!gamePlayer.isDicing()) {
+            gamePlayer.sendMessage(Component.text("You are not dicing!"))
             return
         }
 
-        val diceSession: DiceSession = this.dicingPlayers[player.uniqueId] ?: return
+        val diceSession: DiceSession = this.dicingPlayers[gamePlayer.uuid] ?: return
         val dicedNumber: Int = diceSession.currentDiceNumber
 
-        this.dicingPlayers.remove(player.uniqueId)
+        this.dicingPlayers.remove(gamePlayer.uuid)
 
-        MetadataUtils.set(player, "dicedNumber", dicedNumber)
-        player.inventory.clear(4)
-        player.playSound(player.location, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 10F, 1F)
-        player.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
+        gamePlayer.dicedNumber = dicedNumber
+
+        gamePlayer.clearSlot(4)
+        gamePlayer.playSound(Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM)
+        gamePlayer.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
     }
 
-    private fun rollDice(player: Player) {
-        if (!player.isDicing()) return
+    private fun rollDice(gamePlayer: GamePlayer) {
+        if (!gamePlayer.isDicing()) return
 
-        val storageContents: Array<ItemStack?> = player.inventory.storageContents
+        val storageContents: Array<ItemStack?> = gamePlayer.accessStorageContents() ?: return
         val itemStack: ItemStack = storageContents.find { it != null && it.type == Material.PLAYER_HEAD } ?: return
         val skullMeta: SkullMeta = itemStack.itemMeta as SkullMeta
 
-        val blockNumber: Int? = player.getCurrentDiceNumber()
-        val diceSide: Pair<Int, String> = getDiceSide(player, blockNumber)
+        val blockNumber: Int? = gamePlayer.getCurrentDiceNumber()
+        val diceSide: Pair<Int, String> = getDiceSide(blockNumber)
 
-        player.playSound(player.location, Sound.BLOCK_BAMBOO_BREAK, 10F, 1F)
-        player.setCurrentDiceNumber(diceSide.first)
-        player.sendActionBar(Component.text("Current number: ${diceSide.first}", NamedTextColor.AQUA, TextDecoration.BOLD))
+        gamePlayer.playSound(Sound.BLOCK_BAMBOO_BREAK)
+        gamePlayer.setCurrentDiceNumber(diceSide.first)
+        gamePlayer.sendActionBar(Component.text("Current number: ${diceSide.first}", NamedTextColor.AQUA, TextDecoration.BOLD))
 
         val diceProfile: PlayerProfile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
         diceProfile.setProperty(ProfileProperty("textures", diceSide.second))
@@ -108,7 +110,7 @@ class DiceHandler {
         return Component.text("$diceNumber", NamedTextColor.YELLOW, TextDecoration.BOLD)
     }
 
-    private fun getDiceSide(player: Player, blockedDiceNumber: Number?): Pair<Int, String> {
+    private fun getDiceSide(blockedDiceNumber: Number?): Pair<Int, String> {
         val randomNumber: Int = ThreadLocalRandom.current().nextInt(1, 7)
         val diceSide: Pair<Int, String>? = this.diceSides.entries.find { it.key == randomNumber }?.toPair()
 
@@ -117,7 +119,7 @@ class DiceHandler {
             return Pair(1, HeadUtils.DICE_ONE)
         }
 
-        if (blockedDiceNumber != null && diceSide.first == blockedDiceNumber) return getDiceSide(player, blockedDiceNumber)
+        if (blockedDiceNumber != null && diceSide.first == blockedDiceNumber) return getDiceSide(blockedDiceNumber)
         return diceSide
     }
 

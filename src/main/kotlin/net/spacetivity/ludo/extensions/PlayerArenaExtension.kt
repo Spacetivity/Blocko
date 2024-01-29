@@ -2,6 +2,7 @@ package net.spacetivity.ludo.extensions
 
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
+import net.spacetivity.ludo.player.GamePlayer
 import org.bukkit.entity.Player
 
 fun Player.isPlaying(): Boolean {
@@ -15,4 +16,8 @@ fun Player.getArena(): GameArena? {
 fun Player.clearPhaseItems() {
     val gameArena: GameArena = getArena() ?: return
     gameArena.phase.clearPlayerInventory(this)
+}
+
+fun Player.toGamePlayerInstance(): GamePlayer? {
+    return getArena()?.currentPlayers?.find { it.uuid == this.uniqueId }
 }
