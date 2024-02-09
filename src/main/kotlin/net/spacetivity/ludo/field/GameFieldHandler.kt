@@ -2,7 +2,9 @@ package net.spacetivity.ludo.field
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import net.spacetivity.ludo.utils.PathFace
+import com.google.gson.reflect.TypeToken
+import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.jetbrains.exposed.sql.ResultRow
@@ -20,30 +22,24 @@ class GameFieldHandler {
     init {
         transaction {
             for (resultRow: ResultRow in GameFieldDAO.selectAll().toMutableList()) {
-                val id: Int = resultRow[GameFieldDAO.id]
                 val arenaId: String = resultRow[GameFieldDAO.arenaId]
                 val world: World = Bukkit.getWorld(resultRow[GameFieldDAO.worldName]) ?: continue
                 val x: Double = resultRow[GameFieldDAO.x]
                 val z: Double = resultRow[GameFieldDAO.z]
-                val turnComponent: TurnComponent? = if (resultRow[GameFieldDAO.turnComponent].isNullOrEmpty()) {
-                    null
-                } else {
-                    TurnComponent(PathFace.valueOf(resultRow[GameFieldDAO.turnComponent]!!))
-                }
+                val properties: GameFieldProperties = LudoGame.GSON.fromJson(resultRow[GameFieldDAO.properties], object : TypeToken<GameFieldProperties>() {}.type)
+                val isGarageField: Boolean = resultRow[GameFieldDAO.isGarageField]
 
-                val teamGarageEntrance: String? = if (resultRow[GameFieldDAO.teamGarageEntrance].isNullOrEmpty()) {
-                    null
-                } else {
-                    resultRow[GameFieldDAO.teamGarageEntrance]
-                }
-
-                cachedGameFields.put(arenaId, GameField(id, arenaId, world, x, z, turnComponent, teamGarageEntrance, false))
+                cachedGameFields.put(arenaId, GameField(arenaId, world, x, z, properties, isGarageField, false))
             }
         }
     }
 
-    fun getField(arenaId: String, id: Int): GameField? {
-        return this.cachedGameFields.get(arenaId).find { it.id == id }
+    fun getFirstFieldForTeam(arenaId: String, gameTeam: GameTeam): GameField? {
+        return this.cachedGameFields[arenaId].find { it.properties.getFieldId(gameTeam) == 0 }
+    }
+
+    fun getField(arenaId: String, x: Double, z: Double): GameField? {
+        return this.cachedGameFields.get(arenaId).find { it.x == x && it.z == z }
     }
 
     fun deleteFields(arenaId: String) {
@@ -55,13 +51,12 @@ class GameFieldHandler {
         transaction {
             for (gameField: GameField in gameFields) {
                 GameFieldDAO.insert { statement: InsertStatement<Number> ->
-                    statement[id] = gameField.id
                     statement[arenaId] = gameField.arenaId
                     statement[worldName] = gameField.world.name
                     statement[x] = gameField.x
                     statement[z] = gameField.z
-                    statement[turnComponent] = if (gameField.turnComponent == null) null else gameField.turnComponent!!.facing.name
-                    statement[teamGarageEntrance] = if (gameField.teamGarageEntrance == null) null else gameField.teamGarageEntrance!!
+                    statement[properties] = LudoGame.GSON.toJson(gameField.properties)
+                    statement[isGarageField] = gameField.isGarageField
                 }
 
                 cachedGameFields.put(gameField.arenaId, gameField)

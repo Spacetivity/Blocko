@@ -7,15 +7,14 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArenaStatus
 import net.spacetivity.ludo.field.GameField
-import net.spacetivity.ludo.garageField.GameGarageField
+import net.spacetivity.ludo.field.GameFieldProperties
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamLocation
-import net.spacetivity.ludo.utils.ItemUtils
 import net.spacetivity.ludo.utils.MetadataUtils
+import net.spacetivity.ludo.utils.PathFace
 import net.spacetivity.ludo.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.*
 import org.bukkit.scoreboard.Team
@@ -25,12 +24,16 @@ import java.util.*
 class GameArenaSetupHandler {
 
     private val arenaSetupCache: Cache<UUID, GameArenaSetupData> = CacheBuilder.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(10))
+        .expireAfterWrite(Duration.ofMinutes(3))
+        .removalListener<UUID, GameArenaSetupData> {
+            val player: Player = Bukkit.getPlayer(it.key!!) ?: return@removalListener
+            handleSetupEnd(player, false)
+        }
         .build()
 
     private val garageFieldScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("garage_field_setup", NamedTextColor.LIGHT_PURPLE)
-    val fieldScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("garage_field_setup", NamedTextColor.GREEN)
-    val turnScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("turn_setup", NamedTextColor.YELLOW)
+    private val fieldScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("garage_field_setup", NamedTextColor.GREEN)
+    private val turnScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("turn_setup", NamedTextColor.YELLOW)
 
     fun getSetupData(uuid: UUID): GameArenaSetupData? {
         return this.arenaSetupCache.getIfPresent(uuid)
@@ -42,22 +45,17 @@ class GameArenaSetupHandler {
             return
         }
 
-        player.inventory.setItem(0, ItemUtils(Material.IRON_HOE)
-            .setName(Component.text("Left-click: Set Turn | Right-click: Add field"))
-            .build())
-
-        player.inventory.setItem(1, ItemUtils(Material.GOLDEN_HOE)
-            .setName(Component.text("Left-click: Set Team Entrance | Right-click: Add team garage field"))
-            .build())
+        val setupTool = GameArenaSetupTool(player)
+        setupTool.setToPlayer()
 
         player.sendMessage(Component.text("You are now in setup mode!"))
 
-        val arenaSetupData = GameArenaSetupData(arenaId)
+        val arenaSetupData = GameArenaSetupData(arenaId, setupTool)
         arenaSetupData.gameTeams.addAll(
             listOf(
                 GameTeam("red", NamedTextColor.RED, 0),
                 GameTeam("green", NamedTextColor.GREEN, 1),
-                GameTeam("blue", NamedTextColor.BLUE,2),
+                GameTeam("blue", NamedTextColor.BLUE, 2),
                 GameTeam("yellow", NamedTextColor.YELLOW, 3),
             )
         )
@@ -96,7 +94,6 @@ class GameArenaSetupHandler {
 
             LudoGame.instance.gameArenaHandler.updateArenaStatus(arenaSetupData.arenaId, GameArenaStatus.READY)
             LudoGame.instance.gameFieldHandler.initFields(arenaSetupData.gameFields)
-            LudoGame.instance.gameGarageFieldHandler.initGarageFields(arenaSetupData.gameGarageFields)
             LudoGame.instance.gameTeamHandler.initTeamSpawns(arenaSetupData.gameTeamLocations)
             LudoGame.instance.gameArenaSignHandler.loadArenaSigns()
         }
@@ -114,8 +111,7 @@ class GameArenaSetupHandler {
         }
 
         MetadataUtils.remove(player, "fieldsFinished")
-        player.inventory.remove(Material.IRON_HOE)
-        player.inventory.remove(Material.GOLDEN_HOE)
+        player.inventory.remove(arenaSetupData.setupTool.itemStack)
         player.sendMessage(Component.text("You are no longer in setup mode!"))
         this.arenaSetupCache.invalidate(player.uniqueId)
     }
@@ -137,12 +133,12 @@ class GameArenaSetupHandler {
             return
         }
 
-        val oldTeamEntrance: GameField? = arenaSetupData.gameFields.find { it.x == x && it.z == z && it.teamGarageEntrance.equals(teamName, true) }
+        val oldTeamEntrance: GameField? = arenaSetupData.gameFields.find { it.x == x && it.z == z && it.properties.teamEntrance != null && it.properties.teamEntrance.equals(teamName, true) }
 
         if (oldTeamEntrance != null)
-            oldTeamEntrance.teamGarageEntrance = null
+            oldTeamEntrance.properties.teamEntrance = null
 
-        gameField.teamGarageEntrance = teamName
+        gameField.properties.teamEntrance = teamName
         player.sendMessage(Component.text("Team entrance for team $teamName created."))
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
     }
@@ -189,8 +185,6 @@ class GameArenaSetupHandler {
         }
 
         val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
-        val fieldId: Int = arenaSetupData.gameFields.size
-
         val x: Double = location.x
         val z: Double = location.z
 
@@ -219,13 +213,12 @@ class GameArenaSetupHandler {
 
         arenaSetupData.gameFields.add(
             GameField(
-                fieldId,
                 arenaSetupData.arenaId,
                 location.world,
                 x,
                 z,
-                null,
-                null,
+                GameFieldProperties(mutableMapOf(), null, null),
+                false,
                 false
             )
         )
@@ -243,7 +236,34 @@ class GameArenaSetupHandler {
         MetadataUtils.set(displayEntity, "displayEntity", arenaSetupData.arenaId)
 
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.sendMessage(Component.text("Game field #${arenaSetupData.gameFields.size - 1} at (${x} | ${z}) added."))
+        player.sendActionBar(Component.text("Game field #${arenaSetupData.gameFields.size - 1} at (${x} | ${z}) added."))
+    }
+
+    fun setTurn(player: Player, gameField: GameField, blockLocation: Location, face: PathFace) {
+        if (!hasOpenSetup(player.uniqueId)) {
+            player.sendMessage(Component.text("You are not in setup mode!"))
+            return
+        }
+
+        if (gameField.isGarageField) {
+            player.sendMessage(Component.text("You cannot set a turn to a garage field!"))
+            return
+        }
+
+        gameField.properties.turnComponent = face
+
+        val entityLocation: Location = blockLocation.block.location.clone().toCenterLocation()
+        val displayEntity: MagmaCube? = blockLocation.world.entities.find { it.world == entityLocation.world && it.location.x == entityLocation.x && it.location.y == blockLocation.y && it.location.z == blockLocation.z && it.type == EntityType.MAGMA_CUBE } as MagmaCube?
+
+        if (displayEntity != null) {
+            this.fieldScoreboardTeam.removeEntity(displayEntity)
+            this.turnScoreboardTeam.addEntity(displayEntity)
+        } else {
+            player.sendMessage(Component.text("Cannot update entity display!", NamedTextColor.DARK_RED))
+        }
+
+        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
+        player.sendMessage(Component.text("You created a turning point for your field. (Direction: ${face.name})"))
     }
 
     fun addGarageField(player: Player, teamName: String, location: Location) {
@@ -253,44 +273,61 @@ class GameArenaSetupHandler {
         }
 
         val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
-        val fieldId: Int = arenaSetupData.gameGarageFields.size
 
         val x: Double = location.x
         val z: Double = location.z
 
-        if (arenaSetupData.gameGarageFields.any { it.x == x && it.z == z }) {
-            player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_BASS, 0.1F, 0.1F)
+        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z && it.isGarageField }
+
+        if (possibleField == null) {
             player.sendMessage(Component.text("There is already a garage field on this location!"))
             return
         }
 
-        arenaSetupData.gameGarageFields.add(
-            GameGarageField(
-                fieldId,
-                arenaSetupData.arenaId,
-                teamName,
-                location.world,
-                x,
-                z
-            )
-        )
+        if (possibleField.properties.teamEntrance != null || possibleField.properties.turnComponent != null) {
+            player.sendMessage(Component.text("This field cannot be a garage field!"))
+            return
+        }
+
+        possibleField.isGarageField = true
 
         val entityLocation: Location = location.block.location.clone().toCenterLocation()
-        val displayEntity: MagmaCube = location.world.spawnEntity(entityLocation, EntityType.MAGMA_CUBE) as MagmaCube
+        val displayEntity: MagmaCube? = location.world.entities.find { it.world == entityLocation.world && it.location.x == entityLocation.x && it.location.y == location.y && it.location.z == location.z && it.type == EntityType.MAGMA_CUBE } as MagmaCube?
 
-        displayEntity.isInvisible = true
-        displayEntity.size = 1
-        displayEntity.isSilent = true
-        displayEntity.isInvulnerable = true
-        displayEntity.isGlowing = true
-        displayEntity.setAI(false)
-        displayEntity.setGravity(false)
-        MetadataUtils.set(displayEntity, "displayEntity", arenaSetupData.arenaId)
-
-        this.garageFieldScoreboardTeam.addEntity(displayEntity)
+        if (displayEntity != null) {
+            this.fieldScoreboardTeam.removeEntity(displayEntity)
+            this.garageFieldScoreboardTeam.addEntity(displayEntity)
+        } else {
+            player.sendMessage(Component.text("Cannot update entity display!", NamedTextColor.DARK_RED))
+        }
 
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.sendMessage(Component.text("Game Garage field #${arenaSetupData.gameFields.size - 1} at (${x} | ${z}) added."))
+        player.sendMessage(Component.text("Set field at (${x} | ${z}) to garage field of team ${teamName}."))
+    }
+
+    fun setFieldId(player: Player, teamName: String, location: Location) {
+        if (!hasOpenSetup(player.uniqueId)) {
+            player.sendMessage(Component.text("You are not in setup mode!"))
+            return
+        }
+
+        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
+
+        val x: Double = location.x
+        val z: Double = location.z
+
+        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z && it.isGarageField }
+
+        if (possibleField == null) {
+            player.sendMessage(Component.text("There is already a garage field on this location!"))
+            return
+        }
+
+        val newFieldIndex: Int = arenaSetupData.setupTool.fieldIndex.inc()
+        possibleField.properties.setFieldId(teamName, newFieldIndex)
+
+        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
+        player.sendMessage(Component.text("Set field id to $newFieldIndex for team $teamName", NamedTextColor.YELLOW))
     }
 
     fun hasOpenSetup(uuid: UUID): Boolean {
@@ -304,12 +341,12 @@ class GameArenaSetupHandler {
 
     private fun hasConfiguredAllGarageFields(uuid: UUID): Boolean {
         val arenaSetupData: GameArenaSetupData = getSetupData(uuid) ?: return false
-        return arenaSetupData.gameGarageFields.size == 16
+        return arenaSetupData.gameFields.filter { it.isGarageField }.size == 16
     }
 
     private fun hasConfiguredAllTeamEntrances(uuid: UUID): Boolean {
         val arenaSetupData: GameArenaSetupData = getSetupData(uuid) ?: return false
-        return arenaSetupData.gameFields.filter { it.teamGarageEntrance != null }.size == 4
+        return arenaSetupData.gameFields.filter { it.properties.teamEntrance != null }.size == 4
     }
 
     private fun hasConfiguredAllTeamSpawns(uuid: UUID): Boolean {

@@ -7,21 +7,19 @@ import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamHandler
 import net.spacetivity.ludo.team.GameTeamLocation
-import net.spacetivity.ludo.utils.BoardField
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.LivingEntity
 
 class GameField(
-    override val id: Int,
-    override val arenaId: String,
-    override val world: World,
-    override val x: Double,
-    override val z: Double,
-    var turnComponent: TurnComponent?,
-    var teamGarageEntrance: String?,
-    override var isTaken: Boolean = false
-) : BoardField {
+    val arenaId: String,
+    val world: World,
+    val x: Double,
+    val z: Double,
+    val properties: GameFieldProperties,
+    var isGarageField: Boolean,
+    var isTaken: Boolean = false
+) {
 
     fun checkForOpponent(newHolder: LivingEntity) {
         val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
@@ -45,15 +43,15 @@ class GameField(
         gameArena.sendArenaMessage(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${holderGameTeam.name}."))
     }
 
-    override fun getWorldPosition(fieldHeight: Double): Location {
+    fun getWorldPosition(fieldHeight: Double): Location {
         val location = Location(this.world, this.x, fieldHeight, this.z, 0.0F, 0.0F)
         val fixedLocation: Location = location.clone().toCenterLocation()
         fixedLocation.y = fieldHeight
         return fixedLocation
     }
 
-    override fun getCurrentHolder(): GameEntity? {
-        return LudoGame.instance.gameEntityHandler.getEntityAtField(arenaId, this.id)
+    fun getCurrentHolder(): GameEntity? {
+        return LudoGame.instance.gameEntityHandler.getEntityAtField(arenaId, this.x, this.z)
     }
 
 }

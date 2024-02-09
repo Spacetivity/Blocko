@@ -12,8 +12,8 @@ class GameEntityHandler {
         return this.gameEntities.get(arenaId).find { it.livingEntity?.uniqueId == uuid }
     }
 
-    fun getEntityAtField(arenaId: String, fieldId: Int): GameEntity? {
-        return this.gameEntities.get(arenaId).find { it.currentFieldId == fieldId }
+    fun getEntityAtField(arenaId: String, x: Double, z: Double): GameEntity? {
+        return this.gameEntities.get(arenaId).find { it.livingEntity!!.x == x && it.livingEntity!!.z == z }
     }
 
     fun getEntitiesFromTeam(arenaId: String, teamName: String): List<GameEntity> {

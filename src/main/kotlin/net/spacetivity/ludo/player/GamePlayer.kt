@@ -9,7 +9,7 @@ import java.util.*
 
 class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val isAI: Boolean, var dicedNumber: Int?) {
 
-    private var activeEntity: GameEntity? = null
+    var activeEntity: GameEntity? = null
     var inAction: Boolean = false
 
     fun dice() {
@@ -23,31 +23,31 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
         if (inAction) return
         if (this.dicedNumber == null) return
         inAction = true
-        val gameEntities: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(this.arenaId, this.teamName)
 
-        var resultEntity: GameEntity? = null
+        val situation: Pair<AI_EntityPickRule, GameEntity?> = AI_EntityPickRule.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
+        if (situation.second != null) this.activeEntity = situation.second!!
 
-        for (gameEntity in gameEntities) {
-            if (gameEntity.isMovable(this.dicedNumber!!)) {
-                resultEntity = gameEntity
-            } else if (gameEntity.isMovable(this.dicedNumber!!) && gameEntity.hasValidTarget(this.dicedNumber!!)) {
-                resultEntity = gameEntity
-            }
-        }
+        println("TRIED PICKING A ENTITY FOR TEAM $teamName with result ${situation.first.name}")
 
-        if (resultEntity == null) return
-
-        this.activeEntity = resultEntity
         inAction = false
     }
 
-    fun movePickedEntity(fieldHeight: Double) {
+    fun movePickedEntity() {
         if (inAction) return
         if (this.dicedNumber == null) return
         if (this.activeEntity == null) return
 
-        inAction = true
-        this.activeEntity!!.move(this.dicedNumber!!, fieldHeight)
+        if (!this.inAction) this.inAction = true
+
+        val currentFieldId: Int? = this.activeEntity!!.currentFieldId
+
+        val teamStartPoint = 0
+        this.activeEntity?.newGoalFieldId = if (currentFieldId == null) teamStartPoint + this.dicedNumber!! else currentFieldId + this.dicedNumber!!
+
+
+        if (!this.activeEntity!!.shouldMove) this.activeEntity!!.shouldMove = true
+        if (this.activeEntity!!.controller == null) this.activeEntity!!.controller = this
+//        if (MetadataUtils.has(this.activeEntity.livingEntity, "inGarage"))
     }
 
     fun hasWon(): Boolean {

@@ -8,15 +8,16 @@ import net.spacetivity.inventory.api.inventory.InventoryProvider
 import net.spacetivity.inventory.api.item.InteractiveItem
 import net.spacetivity.inventory.api.item.InventoryPosition
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.arena.setup.GameArenaSetupData
 import net.spacetivity.ludo.field.GameField
-import net.spacetivity.ludo.utils.ItemUtils
+import net.spacetivity.ludo.utils.ItemBuilder
 import net.spacetivity.ludo.utils.PathFace
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
 @InventoryProperties(id = "turn_inv", rows = 1, columns = 9)
-class GameFieldTurnSetupInventory(private val gameField: GameField, private val blockLocation: Location) : InventoryProvider {
+class GameFieldTurnSetupInventory(private val blockLocation: Location) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
         val availablePositions = listOf(
@@ -37,22 +38,17 @@ class GameFieldTurnSetupInventory(private val gameField: GameField, private val 
         val items: MutableList<InteractiveItem> = mutableListOf()
 
         for (pathFace: PathFace in PathFace.entries) {
-            items.add(InteractiveItem.of(ItemUtils(Material.PLAYER_HEAD)
+            items.add(InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
                 .setName(Component.text(pathFace.name, NamedTextColor.BLUE))
                 .setLoreByComponent(mutableListOf(Component.text("Click to set the field turn", NamedTextColor.YELLOW)))
                 .setOwner(pathFace.headValue)
                 .build())
             { _, _, _ ->
                 player.closeInventory()
-                player.performCommand("ludo arena setup setTurn ${this.gameField.id} ${pathFace.name}")
 
-                val centerLocation = this.blockLocation.clone().toCenterLocation()
-                val entity = centerLocation.world.entities.find { it.location.x == centerLocation.x && it.location.z == centerLocation.z }
-
-                if (entity == null) return@of
-
-                LudoGame.instance.gameArenaSetupHandler.fieldScoreboardTeam.removeEntity(entity)
-                LudoGame.instance.gameArenaSetupHandler.turnScoreboardTeam.addEntity(entity)
+                val setupData: GameArenaSetupData = LudoGame.instance.gameArenaSetupHandler.getSetupData(player.uniqueId) ?: return@of
+                val gameField: GameField = setupData.gameFields.find { it.x == this.blockLocation.x && it.z == this.blockLocation.z } ?: return@of
+                LudoGame.instance.gameArenaSetupHandler.setTurn(player, gameField, this.blockLocation, pathFace)
             })
         }
 

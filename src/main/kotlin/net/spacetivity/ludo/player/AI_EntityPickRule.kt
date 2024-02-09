@@ -11,7 +11,9 @@ enum class AI_EntityPickRule(val weight: Int, val probability: Double) {
     // If the random number is less than or equal to 5, one of the two rules wins randomly.
 
     GARAGE_MOVABLE(0, 1.0),
-    MOVABLE(1, 1.0),
+
+    MOVABLE(1, 0.6),
+    MOVABLE_BUT_LANDS_AFTER_OPPONENT(1, 0.4),
 
     MOVABLE_AND_TARGET_IN_SIGHT(2, 0.4),
     MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE(2, 0.6),
@@ -21,7 +23,7 @@ enum class AI_EntityPickRule(val weight: Int, val probability: Double) {
 
     companion object {
 
-        fun analyzeCurrentRuleSituation(aiPlayer: GamePlayer, dicedNumber: Int): Pair<AI_EntityPickRule, GameEntity?> { //TODO: It also has to return the entity
+        fun analyzeCurrentRuleSituation(aiPlayer: GamePlayer, dicedNumber: Int): Pair<AI_EntityPickRule, GameEntity?> {
             val gameEntities: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(aiPlayer.arenaId, aiPlayer.teamName)
 
             var rule: Pair<AI_EntityPickRule, GameEntity?> = Pair(NOT_MOVABLE, null)
@@ -41,6 +43,8 @@ enum class AI_EntityPickRule(val weight: Int, val probability: Double) {
                         availableRules.add(Pair(GARAGE_MOVABLE, gameEntity))
                     } else if (gameEntity.isMovable(dicedNumber)) {
                         availableRules.add(Pair(MOVABLE, gameEntity))
+                    } else if (gameEntity.isMovable(dicedNumber) && gameEntity.landsAfterOpponent(dicedNumber)) {
+                        availableRules.add(Pair(MOVABLE_BUT_LANDS_AFTER_OPPONENT, gameEntity))
                     } else if (gameEntity.isMovable(dicedNumber) && gameEntity.hasValidTarget(dicedNumber)) {
                         availableRules.add(Pair(MOVABLE_AND_TARGET_IN_SIGHT, gameEntity))
                     } else if (gameEntity.isMovable(dicedNumber) && gameEntity.isGarageInSight(dicedNumber)) {

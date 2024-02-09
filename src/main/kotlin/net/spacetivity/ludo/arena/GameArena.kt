@@ -75,7 +75,9 @@ class GameArena(
             player.sendMessage(Component.text("You are now the arena host!", NamedTextColor.GREEN))
         }
 
-        this.currentPlayers.add(GamePlayer(player.uniqueId, this.id, gameTeam.name, false, null))
+        val isAI = true //TODO: THIS IS ONLY FOR TESTING!!!!
+
+        this.currentPlayers.add(GamePlayer(player.uniqueId, this.id, gameTeam.name, isAI, null))
         this.phase.setupPlayerInventory(player)
         this.phase.countdown?.tryStartup()
 

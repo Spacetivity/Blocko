@@ -10,9 +10,8 @@ import net.spacetivity.inventory.api.item.InteractiveItem
 import net.spacetivity.inventory.api.item.InventoryPosition
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.setup.GameArenaSetupData
-import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.team.GameTeam
-import net.spacetivity.ludo.utils.ItemUtils
+import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
@@ -42,28 +41,35 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
             ?: return items
 
         for (gameTeam: GameTeam in arenaSetupData.gameTeams) {
-            items.add(InteractiveItem.of(ItemUtils(Material.LEATHER_CHESTPLATE)
+            items.add(InteractiveItem.of(ItemBuilder(Material.LEATHER_CHESTPLATE)
                 .setName(Component.text(gameTeam.name, gameTeam.color))
                 .setLoreByComponent(mutableListOf(Component.text(if (this.type == InvType.GARAGE) "Click to set a garage field" else "Click to set a team entrance", NamedTextColor.YELLOW)))
                 .setArmorColor(Color.fromRGB(gameTeam.color.red(), gameTeam.color.green(), gameTeam.color.blue()))
                 .build())
             { _, _, _ ->
                 player.closeInventory()
-                if (this.type == InvType.GARAGE) {
+                when (this.type) {
 
-                    if (arenaSetupData.gameGarageFields.filter { it.teamName == gameTeam.name }.toList().size >= 4) {
-                        player.sendMessage(Component.text("You cannot set more then 4 team garage fields!", NamedTextColor.RED))
-                        return@of
+                    InvType.GARAGE -> {
+                        if (arenaSetupData.gameFields.filter { it.isGarageField }.size > 4) {
+                            player.sendMessage(Component.text("You cannot set more then 4 team garage fields!", NamedTextColor.RED))
+                            return@of
+                        }
+
+                        LudoGame.instance.gameArenaSetupHandler.addGarageField(player, gameTeam.name, this.location)
                     }
 
-                    LudoGame.instance.gameArenaSetupHandler.addGarageField(player, gameTeam.name, this.location)
-                } else {
-                    LudoGame.instance.gameArenaSetupHandler.setTeamEntrance(player, gameTeam.name, this.location)
+                    InvType.IDS -> {
+                        val setupData: GameArenaSetupData = LudoGame.instance.gameArenaSetupHandler.getSetupData(player.uniqueId) ?: return@of
+                        setupData.setupTool.currentTeamName = gameTeam.name
+                        player.sendMessage(Component.text("Now, please set the field ids for team ${gameTeam.name}!", NamedTextColor.GREEN))
+                    }
 
-                    val gameField: GameField = arenaSetupData.gameFields.find { it.x == this.location.x && it.z == this.location.z }
-                        ?: return@of
+                    else -> {
+                        LudoGame.instance.gameArenaSetupHandler.setTeamEntrance(player, gameTeam.name, this.location)
+                        SpaceInventoryProvider.api.inventoryHandler.openStaticInventory(player, Component.text("Set a turn"), GameFieldTurnSetupInventory(location), true)
+                    }
 
-                    SpaceInventoryProvider.api.inventoryHandler.openStaticInventory(player, Component.text("Set a turn"), GameFieldTurnSetupInventory(gameField, location), true)
                 }
             })
         }
@@ -75,5 +81,6 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
 
 enum class InvType {
     GARAGE,
-    ENTRANCE
+    ENTRANCE,
+    IDS
 }

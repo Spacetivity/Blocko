@@ -12,7 +12,7 @@ import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.utils.HeadUtils
-import net.spacetivity.ludo.utils.ItemUtils
+import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -44,9 +44,12 @@ class DiceHandler {
                     val endTimestamp: Long = diceSession.dicingEndTimestamp
                     val currentTimestamp: Long = System.currentTimeMillis()
 
-                    if (currentTimestamp <= endTimestamp) {
+                    if (currentTimestamp >= endTimestamp) {
                         stopDicing(gamePlayer)
                         ingamePhase.phaseMode = GamePhaseMode.PICK_ENTITY
+
+                        println("STOPPED DICING AND DICED NUM IS > ${gamePlayer.dicedNumber}")
+
                         continue
                     }
 
@@ -61,14 +64,14 @@ class DiceHandler {
     }
 
     fun getDiceItem(player: Player) {
-        player.inventory.setItem(4, ItemUtils(Material.PLAYER_HEAD)
+        player.inventory.setItem(4, ItemBuilder(Material.PLAYER_HEAD)
             .setOwner(this.diceSides[1]!!)
             .setName(getDiceDisplayName(1))
             .build())
     }
 
     fun getDiceItem(): ItemStack {
-        return ItemUtils(Material.PLAYER_HEAD)
+        return ItemBuilder(Material.PLAYER_HEAD)
             .setOwner(this.diceSides[1]!!)
             .setName(getDiceDisplayName(1))
             .build()
@@ -107,23 +110,26 @@ class DiceHandler {
     private fun rollDice(gamePlayer: GamePlayer) {
         if (!gamePlayer.isDicing()) return
 
-        val storageContents: Array<ItemStack?> = gamePlayer.accessStorageContents() ?: return
-        val itemStack: ItemStack = storageContents.find { it != null && it.type == Material.PLAYER_HEAD } ?: return
-        val skullMeta: SkullMeta = itemStack.itemMeta as SkullMeta
-
         val blockNumber: Int? = gamePlayer.getCurrentDiceNumber()
         val diceSide: Pair<Int, String> = getDiceSide(blockNumber)
+
+        if (!gamePlayer.isAI) {
+            val storageContents: Array<ItemStack?> = gamePlayer.accessStorageContents() ?: return
+            val itemStack: ItemStack = storageContents.find { it != null && it.type == Material.PLAYER_HEAD } ?: return
+            val skullMeta: SkullMeta = itemStack.itemMeta as SkullMeta
+            val diceProfile: PlayerProfile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
+            diceProfile.setProperty(ProfileProperty("textures", diceSide.second))
+
+            skullMeta.playerProfile = diceProfile
+            skullMeta.displayName(getDiceDisplayName(diceSide.first))
+            itemStack.itemMeta = skullMeta
+        }
 
         gamePlayer.playSound(Sound.BLOCK_BAMBOO_BREAK)
         gamePlayer.setCurrentDiceNumber(diceSide.first)
         gamePlayer.sendActionBar(Component.text("Current number: ${diceSide.first}", NamedTextColor.AQUA, TextDecoration.BOLD))
 
-        val diceProfile: PlayerProfile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
-        diceProfile.setProperty(ProfileProperty("textures", diceSide.second))
-
-        skullMeta.playerProfile = diceProfile
-        skullMeta.displayName(getDiceDisplayName(diceSide.first))
-        itemStack.itemMeta = skullMeta
+        println("ROLLED THE DICE: >> ${diceSide.first}")
     }
 
     private fun getDiceDisplayName(diceNumber: Int): Component {
