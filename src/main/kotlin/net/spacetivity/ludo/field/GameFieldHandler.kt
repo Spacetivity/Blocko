@@ -2,9 +2,7 @@ package net.spacetivity.ludo.field
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import com.google.gson.reflect.TypeToken
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.jetbrains.exposed.sql.ResultRow
@@ -26,7 +24,7 @@ class GameFieldHandler {
                 val world: World = Bukkit.getWorld(resultRow[GameFieldDAO.worldName]) ?: continue
                 val x: Double = resultRow[GameFieldDAO.x]
                 val z: Double = resultRow[GameFieldDAO.z]
-                val properties: GameFieldProperties = LudoGame.GSON.fromJson(resultRow[GameFieldDAO.properties], object : TypeToken<GameFieldProperties>() {}.type)
+                val properties: GameFieldProperties = LudoGame.GSON.fromJson(resultRow[GameFieldDAO.properties], GameFieldProperties::class.java)
                 val isGarageField: Boolean = resultRow[GameFieldDAO.isGarageField]
 
                 cachedGameFields.put(arenaId, GameField(arenaId, world, x, z, properties, isGarageField, false))
@@ -34,8 +32,8 @@ class GameFieldHandler {
         }
     }
 
-    fun getFirstFieldForTeam(arenaId: String, gameTeam: GameTeam): GameField? {
-        return this.cachedGameFields[arenaId].find { it.properties.getFieldId(gameTeam) == 0 }
+    fun getFirstFieldForTeam(arenaId: String, teamName: String): GameField? {
+        return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == 0 }
     }
 
     fun getField(arenaId: String, x: Double, z: Double): GameField? {

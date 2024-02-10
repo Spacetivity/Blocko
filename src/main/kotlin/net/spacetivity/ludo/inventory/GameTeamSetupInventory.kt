@@ -51,22 +51,17 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
                 when (this.type) {
 
                     InvType.GARAGE -> {
-                        if (arenaSetupData.gameFields.filter { it.isGarageField }.size > 4) {
-                            player.sendMessage(Component.text("You cannot set more then 4 team garage fields!", NamedTextColor.RED))
-                            return@of
-                        }
-
                         LudoGame.instance.gameArenaSetupHandler.addGarageField(player, gameTeam.name, this.location)
                     }
 
                     InvType.IDS -> {
                         val setupData: GameArenaSetupData = LudoGame.instance.gameArenaSetupHandler.getSetupData(player.uniqueId) ?: return@of
                         setupData.setupTool.currentTeamName = gameTeam.name
+                        setupData.setupTool.fieldIndex = 0
                         player.sendMessage(Component.text("Now, please set the field ids for team ${gameTeam.name}!", NamedTextColor.GREEN))
                     }
 
                     else -> {
-                        LudoGame.instance.gameArenaSetupHandler.setTeamEntrance(player, gameTeam.name, this.location)
                         SpaceInventoryProvider.api.inventoryHandler.openStaticInventory(player, Component.text("Set a turn"), GameFieldTurnSetupInventory(location), true)
                     }
 

@@ -16,8 +16,8 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
         writer.name("teamFieldIds")
         writer.value(LudoGame.GSON.toJson(properties.teamFieldIds))
 
-        writer.name("teamEntrance")
-        writer.value(if (properties.teamEntrance == null) "-" else properties.teamEntrance)
+        writer.name("garageForTeam")
+        writer.value(if (properties.garageForTeam == null) "-" else properties.garageForTeam)
 
         writer.name("turnComponent")
         writer.value(if (properties.turnComponent == null) "-" else properties.turnComponent!!.name)
@@ -27,7 +27,7 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
 
     override fun read(reader: JsonReader): GameFieldProperties {
         lateinit var teamFieldsIds: MutableMap<String, Int>
-        var teamEntrance: String? = null
+        var garageForTeam: String? = null
         var turnComponent: PathFace? = null
 
         reader.beginObject()
@@ -38,17 +38,26 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
             val token: JsonToken = reader.peek()
             if (token == JsonToken.NAME) fieldName = reader.nextName()
 
-            reader.peek()
-
             when (fieldName) {
-                "teamFieldIds" -> teamFieldsIds = LudoGame.GSON.fromJson(reader.nextString(), object : TypeToken<MutableMap<String, Int>>() {}.type)
-                "teamEntrance" -> teamEntrance = if (reader.nextString() == "-") null else reader.nextString()
-                "turnComponent" -> turnComponent = if (reader.nextString() == "-") null else PathFace.valueOf(reader.nextString())
+                "teamFieldIds" -> {
+                    reader.peek()
+                    teamFieldsIds = LudoGame.GSON.fromJson(reader.nextString(), object : TypeToken<MutableMap<String, Int>>() {}.type)
+                }
+                "garageForTeam" -> {
+                    reader.peek()
+                    val garageValue: String = reader.nextString()
+                    garageForTeam = if (garageValue == "-") null else garageValue
+                }
+                "turnComponent" -> {
+                    reader.peek()
+                    val turnComponentValue: String = reader.nextString()
+                    turnComponent = if (turnComponentValue == "-") null else PathFace.valueOf(turnComponentValue)
+                }
             }
         }
 
         reader.endObject()
-        return GameFieldProperties(teamFieldsIds, teamEntrance, turnComponent)
+        return GameFieldProperties(teamFieldsIds, garageForTeam, turnComponent)
     }
 
 }

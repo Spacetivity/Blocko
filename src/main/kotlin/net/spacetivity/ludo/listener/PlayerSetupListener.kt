@@ -11,6 +11,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 
 class PlayerSetupListener(private val plugin: LudoGame) : Listener {
@@ -31,6 +32,8 @@ class PlayerSetupListener(private val plugin: LudoGame) : Listener {
     @EventHandler
     fun onInteractWithSetupTool(event: PlayerInteractEvent) {
         val player: Player = event.player
+
+        if (event.hand != EquipmentSlot.HAND) return
 
         val heldItemStack: ItemStack = player.inventory.itemInMainHand
 

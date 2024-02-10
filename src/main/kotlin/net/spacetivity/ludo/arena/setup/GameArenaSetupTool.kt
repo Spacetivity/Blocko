@@ -21,7 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta
 
 class GameArenaSetupTool(private val holder: Player) {
 
-    private var currentMode: ToolMode = ToolMode.ADD_FIELD
+    var currentMode: ToolMode = ToolMode.ADD_FIELD
 
     val itemStack: ItemStack = ItemBuilder(Material.entries.find { it.name == LudoGame.instance.itemsFile.setupItemType }
         ?: throw NullPointerException("Invalid setup item type!"))

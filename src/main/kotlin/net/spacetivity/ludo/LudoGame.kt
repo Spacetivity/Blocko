@@ -127,6 +127,7 @@ class LudoGame : JavaPlugin() {
         this.gameArenaHandler.resetArenas()
         this.diceHandler.stopDiceAnimation()
         this.gamePlayActionHandler.stopTasks()
+        this.gameArenaSetupHandler.stopTask()
 
         for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {
             for (entity: Entity in entities) {

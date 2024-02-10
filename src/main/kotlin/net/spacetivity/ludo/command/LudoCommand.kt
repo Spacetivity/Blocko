@@ -76,7 +76,7 @@ class LudoCommand : LudoCommandExecutor {
 
                 val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(arenaId, gameEntity.teamName) ?: return
 
-                val firstField: GameField = gameFieldHandler.getFirstFieldForTeam(arenaId, gameTeam) ?: return
+                val firstField: GameField = gameFieldHandler.getFirstFieldForTeam(arenaId, gameTeam.name) ?: return
                 gameEntity.spawn(firstField.getWorldPosition(0.0))
                 player.sendMessage(Component.text("Spawned entity.", NamedTextColor.DARK_PURPLE))
             }

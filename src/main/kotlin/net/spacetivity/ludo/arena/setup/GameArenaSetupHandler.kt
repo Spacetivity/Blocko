@@ -1,7 +1,5 @@
 package net.spacetivity.ludo.arena.setup
 
-import com.google.common.cache.Cache
-import com.google.common.cache.CacheBuilder
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
@@ -16,32 +14,62 @@ import net.spacetivity.ludo.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Sound
+import org.bukkit.block.BlockFace
 import org.bukkit.entity.*
+import org.bukkit.scheduler.BukkitTask
 import org.bukkit.scoreboard.Team
-import java.time.Duration
 import java.util.*
 
 class GameArenaSetupHandler {
 
-    private val arenaSetupCache: Cache<UUID, GameArenaSetupData> = CacheBuilder.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(3))
-        .removalListener<UUID, GameArenaSetupData> {
-            val player: Player = Bukkit.getPlayer(it.key!!) ?: return@removalListener
-            handleSetupEnd(player, false)
-        }
-        .build()
+    private val arenaSetupCache: MutableMap<UUID, GameArenaSetupData> = mutableMapOf()
 
     private val garageFieldScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("garage_field_setup", NamedTextColor.LIGHT_PURPLE)
     private val fieldScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("garage_field_setup", NamedTextColor.GREEN)
     private val turnScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("turn_setup", NamedTextColor.YELLOW)
 
+    private var setupTask: BukkitTask? = null
+
+    init {
+        this.setupTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {
+            for (entry: MutableMap.MutableEntry<UUID, GameArenaSetupData> in this.arenaSetupCache.entries) {
+                val player: Player = Bukkit.getPlayer(entry.key) ?: continue
+                val arenaSetupData: GameArenaSetupData = entry.value
+
+                val toolMode: GameArenaSetupTool.ToolMode = arenaSetupData.setupTool.currentMode
+
+                if (toolMode == GameArenaSetupTool.ToolMode.SET_TURN || toolMode == GameArenaSetupTool.ToolMode.SET_TEAM_ENTRANCE) {
+                    val facing: BlockFace = player.facing
+                    if (facing == BlockFace.NORTH || facing == BlockFace.SOUTH || facing == BlockFace.EAST || facing == BlockFace.WEST) {
+                        player.sendActionBar(Component.text("Current facing direction: ${facing.name}", NamedTextColor.GRAY))
+                    }
+                }
+
+                if (System.currentTimeMillis() < arenaSetupData.timeoutTimestamp) continue
+
+                handleSetupEnd(player, false)
+            }
+        }, 0L, 20L)
+    }
+
+    fun stopTask() {
+        if (this.setupTask == null) return
+        this.setupTask!!.cancel()
+        this.setupTask = null
+    }
+
     fun getSetupData(uuid: UUID): GameArenaSetupData? {
-        return this.arenaSetupCache.getIfPresent(uuid)
+        return this.arenaSetupCache[uuid]
     }
 
     fun startSetup(player: Player, arenaId: String) {
         if (hasOpenSetup(player.uniqueId)) {
             player.sendMessage(Component.text("You are already in setup mode!"))
+            return
+        }
+
+        if (this.arenaSetupCache.entries.any { it.value.arenaId.equals(arenaId, true) }) {
+            player.sendMessage(Component.text("This arena is already being configured.", NamedTextColor.RED))
             return
         }
 
@@ -69,7 +97,7 @@ class GameArenaSetupHandler {
             return
         }
 
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
+        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
 
         if (success) {
             if (!hasConfiguredFieldsAlready(player.uniqueId)) {
@@ -79,11 +107,6 @@ class GameArenaSetupHandler {
 
             if (!hasConfiguredAllGarageFields(player.uniqueId)) {
                 player.sendMessage(Component.text("You have to add all garage fields for all teams before you finish the setup!"))
-                return
-            }
-
-            if (!hasConfiguredAllTeamEntrances(player.uniqueId)) {
-                player.sendMessage(Component.text("You have to set all team entrances before you finish the setup!"))
                 return
             }
 
@@ -110,37 +133,9 @@ class GameArenaSetupHandler {
             }
         }
 
-        MetadataUtils.remove(player, "fieldsFinished")
         player.inventory.remove(arenaSetupData.setupTool.itemStack)
         player.sendMessage(Component.text("You are no longer in setup mode!"))
-        this.arenaSetupCache.invalidate(player.uniqueId)
-    }
-
-    fun setTeamEntrance(player: Player, teamName: String, location: Location) {
-        if (!hasOpenSetup(player.uniqueId)) {
-            player.sendMessage(Component.text("You are not in setup mode!"))
-            return
-        }
-
-        val x: Double = location.x
-        val z: Double = location.z
-
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
-        val gameField: GameField? = arenaSetupData.gameFields.find { it.x == x && it.z == z }
-
-        if (gameField == null) {
-            player.sendMessage(Component.text("There is no game field at this location!"))
-            return
-        }
-
-        val oldTeamEntrance: GameField? = arenaSetupData.gameFields.find { it.x == x && it.z == z && it.properties.teamEntrance != null && it.properties.teamEntrance.equals(teamName, true) }
-
-        if (oldTeamEntrance != null)
-            oldTeamEntrance.properties.teamEntrance = null
-
-        gameField.properties.teamEntrance = teamName
-        player.sendMessage(Component.text("Team entrance for team $teamName created."))
-        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
+        this.arenaSetupCache.remove(player.uniqueId)
     }
 
     fun addTeamSpawn(player: Player, teamName: String, location: Location) {
@@ -149,7 +144,7 @@ class GameArenaSetupHandler {
             return
         }
 
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
+        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
 
         if (arenaSetupData.gameTeamLocations.any { it.x == location.x && it.y == location.y && it.z == location.z }) {
             player.sendMessage(Component.text("There is already a team spawn on this location!"))
@@ -179,35 +174,12 @@ class GameArenaSetupHandler {
             return
         }
 
-        if (MetadataUtils.has(player, "fieldsFinished")) {
-            player.sendMessage(Component.text("All fields are already set for this arena!"))
-            return
-        }
-
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
+        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
         val x: Double = location.x
         val z: Double = location.z
 
         if (arenaSetupData.gameFields.any { it.x == x && it.z == z }) {
-            val firstField = arenaSetupData.gameFields[0]
-            if (firstField.x == x && firstField.z == z && arenaSetupData.gameFields.any { it.x != x && it.z != z }) {
-
-                for (displayEntity: LivingEntity in location.world.entities.filterIsInstance<LivingEntity>()) {
-                    if (!MetadataUtils.has(displayEntity, "displayEntity")) continue
-                    val entityArenaId: String = MetadataUtils.get(displayEntity, "displayEntity") ?: continue
-                    if (entityArenaId != arenaSetupData.arenaId) continue
-
-                    this.fieldScoreboardTeam.addEntity(displayEntity)
-                }
-
-                MetadataUtils.set(player, "fieldsFinished", arenaSetupData.arenaId)
-                player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-                player.sendMessage(Component.text("Fields are now set and connected!."))
-                return
-            }
-
-            player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_BASS, 0.1F, 0.1F)
-            player.sendMessage(Component.text("There is already a field on this location!"))
+            player.sendMessage(Component.text("There is already a game field at this location!", NamedTextColor.RED))
             return
         }
 
@@ -253,7 +225,7 @@ class GameArenaSetupHandler {
         gameField.properties.turnComponent = face
 
         val entityLocation: Location = blockLocation.block.location.clone().toCenterLocation()
-        val displayEntity: MagmaCube? = blockLocation.world.entities.find { it.world == entityLocation.world && it.location.x == entityLocation.x && it.location.y == blockLocation.y && it.location.z == blockLocation.z && it.type == EntityType.MAGMA_CUBE } as MagmaCube?
+        val displayEntity: MagmaCube? = entityLocation.world.entities.find { it.world == entityLocation.world && it.location.x == entityLocation.x && it.location.z == entityLocation.z && it.type == EntityType.MAGMA_CUBE } as MagmaCube?
 
         if (displayEntity != null) {
             this.fieldScoreboardTeam.removeEntity(displayEntity)
@@ -272,27 +244,32 @@ class GameArenaSetupHandler {
             return
         }
 
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
+        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
 
         val x: Double = location.x
         val z: Double = location.z
 
-        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z && it.isGarageField }
+        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z }
 
         if (possibleField == null) {
-            player.sendMessage(Component.text("There is already a garage field on this location!"))
+            player.sendMessage(Component.text("There is no field on this location!"))
             return
         }
 
-        if (possibleField.properties.teamEntrance != null || possibleField.properties.turnComponent != null) {
+        if (possibleField.isGarageField) {
+            player.sendMessage(Component.text("This field is already a garage field!"))
+        }
+
+        if (possibleField.properties.turnComponent != null) {
             player.sendMessage(Component.text("This field cannot be a garage field!"))
             return
         }
 
         possibleField.isGarageField = true
+        possibleField.properties.garageForTeam = teamName
 
         val entityLocation: Location = location.block.location.clone().toCenterLocation()
-        val displayEntity: MagmaCube? = location.world.entities.find { it.world == entityLocation.world && it.location.x == entityLocation.x && it.location.y == location.y && it.location.z == location.z && it.type == EntityType.MAGMA_CUBE } as MagmaCube?
+        val displayEntity: MagmaCube? = entityLocation.world.entities.find { it.world == entityLocation.world && it.location.x == entityLocation.x && it.location.z == entityLocation.z && it.type == EntityType.MAGMA_CUBE } as MagmaCube?
 
         if (displayEntity != null) {
             this.fieldScoreboardTeam.removeEntity(displayEntity)
@@ -311,30 +288,36 @@ class GameArenaSetupHandler {
             return
         }
 
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache.getIfPresent(player.uniqueId)!!
+        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
 
         val x: Double = location.x
         val z: Double = location.z
 
-        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z && it.isGarageField }
+        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z }
 
         if (possibleField == null) {
-            player.sendMessage(Component.text("There is already a garage field on this location!"))
+            player.sendMessage(Component.text("There is no field on this location!"))
             return
         }
 
-        val newFieldIndex: Int = arenaSetupData.setupTool.fieldIndex.inc()
-        possibleField.properties.setFieldId(teamName, newFieldIndex)
+        if (possibleField.properties.getFieldId(teamName) != null) {
+            player.sendMessage(Component.text("This field already has an id!"))
+            return
+        }
+
+        val currentFieldIndex: Int = arenaSetupData.setupTool.fieldIndex
+        possibleField.properties.setFieldId(teamName, currentFieldIndex)
+        arenaSetupData.setupTool.fieldIndex += 1
 
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.sendMessage(Component.text("Set field id to $newFieldIndex for team $teamName", NamedTextColor.YELLOW))
+        player.sendMessage(Component.text("Set field id to $currentFieldIndex for team $teamName", NamedTextColor.YELLOW))
     }
 
-    fun hasOpenSetup(uuid: UUID): Boolean {
-        return this.arenaSetupCache.getIfPresent(uuid) != null
+    private fun hasOpenSetup(uuid: UUID): Boolean {
+        return this.arenaSetupCache[uuid] != null
     }
 
-    fun hasConfiguredFieldsAlready(uuid: UUID): Boolean {
+    private fun hasConfiguredFieldsAlready(uuid: UUID): Boolean {
         val arenaSetupData: GameArenaSetupData = getSetupData(uuid) ?: return false
         return arenaSetupData.gameFields.isNotEmpty()
     }
@@ -342,11 +325,6 @@ class GameArenaSetupHandler {
     private fun hasConfiguredAllGarageFields(uuid: UUID): Boolean {
         val arenaSetupData: GameArenaSetupData = getSetupData(uuid) ?: return false
         return arenaSetupData.gameFields.filter { it.isGarageField }.size == 16
-    }
-
-    private fun hasConfiguredAllTeamEntrances(uuid: UUID): Boolean {
-        val arenaSetupData: GameArenaSetupData = getSetupData(uuid) ?: return false
-        return arenaSetupData.gameFields.filter { it.properties.teamEntrance != null }.size == 4
     }
 
     private fun hasConfiguredAllTeamSpawns(uuid: UUID): Boolean {
