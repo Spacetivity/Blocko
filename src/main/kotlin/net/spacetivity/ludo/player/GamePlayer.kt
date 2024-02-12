@@ -18,8 +18,6 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
         this.startDicing()
     }
 
-    //TODO: Implement ai intelligence. Not only pic a entity if its movable, pic it also when its movable AND in the goal field is a enemy to throw out (EXPERIMENTAL)
-    // this is only valid for ai players
     fun autoPickEntity(ingamePhase: IngamePhase) {
         if (this.inAction) return
         if (this.dicedNumber == null) return
@@ -56,7 +54,7 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
     }
 
     fun hasWon(): Boolean {
-        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(this.arenaId, this.teamName).all { !it.isMovable(1) }
+        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(this.arenaId, this.teamName).all { it.isInGarage() && !it.isMovable(1) }
     }
 
     fun toBukkitInstance(): Player? {

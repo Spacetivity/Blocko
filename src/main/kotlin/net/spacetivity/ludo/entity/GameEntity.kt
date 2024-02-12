@@ -23,6 +23,10 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
     var controller: GamePlayer? = null
     var shouldMove: Boolean = false
 
+    init {
+        LudoGame.instance.gameEntityHandler.gameEntities.put(this.arenaId, this)
+    }
+
     fun spawn(location: Location) {
         if (this.livingEntity != null) return
 

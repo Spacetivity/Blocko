@@ -2,6 +2,8 @@ package net.spacetivity.ludo.entity
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
+import net.spacetivity.ludo.team.GameTeamLocation
+import org.bukkit.entity.EntityType
 import java.util.*
 
 class GameEntityHandler {
@@ -28,6 +30,10 @@ class GameEntityHandler {
         val entities: MutableCollection<GameEntity> = this.gameEntities.get(arenaId).toMutableList()
         entities.forEach { it.despawn() }
         this.gameEntities.removeAll(arenaId)
+    }
+
+    fun spawnEntity(gameTeamLocation: GameTeamLocation, type: EntityType) {
+        GameEntity(gameTeamLocation.arenaId, gameTeamLocation.teamName, type).spawn(gameTeamLocation.getWorldPosition())
     }
 
 }

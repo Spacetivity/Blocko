@@ -32,6 +32,7 @@ import net.spacetivity.ludo.player.GamePlayActionHandler
 import net.spacetivity.ludo.team.GameTeamHandler
 import net.spacetivity.ludo.team.GameTeamLocationDAO
 import net.spacetivity.ludo.utils.FileUtils
+import net.spacetivity.ludo.utils.HeadUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Entity
@@ -182,12 +183,12 @@ class LudoGame : JavaPlugin() {
 
         if (!Files.exists(file.toPath())) {
             result = DiceSidesFile(mutableMapOf(
-                Pair(1, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTMxMzVlYTMxYmMxNWJlMTM0NjJiZjEwZTkxMmExNDBlNWE3ZDY4ZWY0YmQyNmUzZDc1MDU1OWQ1MDJiZjk1In19fQ=="),
-                Pair(2, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjFhZmM1YzkzZmM1MzMyMzNkZWY1ODU4ZDE5YTNhMWI1NzY0YzViMmRjZTZiNWQxZjc5Mzg2ZTk2NDA1MDNhZiJ9fX0="),
-                Pair(3, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODQ1NTVhMzY0MTE5NWMxNjg2MGU4MmYzODlmZDI3Y2JkMTE3ODA0OWJkN2IxYmI3N2IwMzFmYjM5OGE2NDQ4MiJ9fX0="),
-                Pair(4, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2NmMTliYmJiMTNhMWYzNWFjOGYxNDFjZmNlZjlkMDA4NGQxNzZlY2I0ZjRlZWZiNThhZmRhMzUzMGQwYTcyNyJ9fX0="),
-                Pair(5, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM1MWFmNDk5ZjRiZjBiNmNmYWI3YTFmNjI2MWM1YzExYWUyY2RjMDE5ODI1YWFkYjk2OWQ1NjdmZjM1NDUzNSJ9fX0="),
-                Pair(6, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNjZDc1M2RiMTlmYmZjZDNhNTRmNmZkZDBhYTQ1ZDFhM2JmMjVjNjM3ZDY2N2M0M2U2NDZiMWEzOTBmYTYyZCJ9fX0=")
+                Pair(1, HeadUtils.DICE_ONE),
+                Pair(2, HeadUtils.DICE_TWO),
+                Pair(3, HeadUtils.DICE_THREE),
+                Pair(4, HeadUtils.DICE_FOUR),
+                Pair(5, HeadUtils.DICE_FIVE),
+                Pair(6, HeadUtils.DICE_SIX)
             ))
             FileUtils.save(file, result)
         } else {

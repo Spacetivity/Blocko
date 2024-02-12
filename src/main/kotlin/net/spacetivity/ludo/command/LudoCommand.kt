@@ -11,16 +11,10 @@ import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
 import net.spacetivity.ludo.command.api.CommandProperties
 import net.spacetivity.ludo.command.api.LudoCommandExecutor
 import net.spacetivity.ludo.command.api.LudoCommandSender
-import net.spacetivity.ludo.entity.GameEntity
-import net.spacetivity.ludo.entity.GameEntityHandler
-import net.spacetivity.ludo.field.GameField
-import net.spacetivity.ludo.field.GameFieldHandler
-import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.utils.PathFace
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.WorldCreator
-import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import java.io.File
 
@@ -41,51 +35,6 @@ class LudoCommand : LudoCommandExecutor {
 
         if (!player.hasPermission("ludo.command")) {
             player.sendMessage(Component.text("No perms! :("))
-            return
-        }
-
-        //TODO: remove this (it's only for testing)
-        if (args.size == 1 && args[0].equals("dice", true)) {
-            LudoGame.instance.diceHandler.getDiceItem(player)
-            return
-        }
-
-        //TODO: remove this (it's only for testing)
-        if (args.size == 2 && args[0].equals("start", true)) {
-            val arenaId: String = args[1]
-            val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
-
-            if (gameArena == null) {
-                player.sendMessage(Component.text("Arena does not exist!"))
-                return
-            }
-
-            if (gameArena.status != GameArenaStatus.READY) {
-                player.sendMessage(Component.text("This arena is not ready to start a game!"))
-                return
-            }
-
-            val gameEntityHandler: GameEntityHandler = LudoGame.instance.gameEntityHandler
-            val gameFieldHandler: GameFieldHandler = LudoGame.instance.gameFieldHandler
-
-            val entitiesFromArena: List<GameEntity> = gameEntityHandler.getEntitiesFromArena(arenaId)
-
-            if (entitiesFromArena.isEmpty()) {
-                val gameEntity = GameEntity(arenaId, "red", EntityType.VILLAGER)
-                gameEntityHandler.gameEntities.put(arenaId, gameEntity)
-
-                val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(arenaId, gameEntity.teamName) ?: return
-
-                val firstField: GameField = gameFieldHandler.getFirstFieldForTeam(arenaId, gameTeam.name) ?: return
-                gameEntity.spawn(firstField.getWorldPosition(0.0))
-                player.sendMessage(Component.text("Spawned entity.", NamedTextColor.DARK_PURPLE))
-            }
-
-            val gameEntity: GameEntity = gameEntityHandler.gameEntities.get(arenaId).toList()[0]
-            gameEntity.moveOneFieldForward(1, 0.0)
-
-            player.sendMessage(Component.text("Moved entity.", NamedTextColor.LIGHT_PURPLE))
-
             return
         }
 

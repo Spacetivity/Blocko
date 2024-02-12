@@ -4,10 +4,10 @@ import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.countdown.GameCountdown
+import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Sound
+import org.bukkit.entity.EntityType
 import org.bukkit.scheduler.BukkitTask
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.util.function.Predicate
 
 class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 20, Predicate { t -> t >= 1 }) {
@@ -23,15 +23,16 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 20, Predicate { t 
     }
 
     override fun handleCountdownEnd() {
+        // Spawns in all game entities for all teams if they have game players!
+        for (gameTeamLocation in LudoGame.instance.gameTeamHandler.getLocationsOfAllTeams(this.arenaId)) {
+            val gameTeam: GameTeam? = LudoGame.instance.gameTeamHandler.getTeam(gameTeamLocation.arenaId, gameTeamLocation.teamName)
+            if (gameTeam == null || gameTeam.teamMembers.isEmpty()) continue
+
+            LudoGame.instance.gameEntityHandler.spawnEntity(gameTeamLocation, EntityType.VILLAGER)
+        }
+
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
         LudoGame.instance.gamePhaseHandler.nextPhase(gameArena)
-    }
-
-    private fun getCountdownProgress(currentTimerIndex: Int): Double {
-        val startIndex: Int = this.fallbackDuration
-        val percentage: Int = (currentTimerIndex / startIndex) * 100
-        val decimal = BigDecimal(percentage).setScale(2, RoundingMode.HALF_UP)
-        return decimal.toDouble()
     }
 
 }

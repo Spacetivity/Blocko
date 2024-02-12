@@ -88,4 +88,14 @@ class GameTeamHandler {
         return this.gameTeams.get(arenaId).find { it.name.equals(name, true) }
     }
 
+    fun getLocationsOfAllTeams(arenaId: String): Collection<GameTeamLocation> {
+        val locations: MutableList<GameTeamLocation> = mutableListOf()
+        for (gameTeam in this.gameTeams[arenaId]) locations.addAll(gameTeam.teamLocations)
+        return locations
+    }
+
+    fun getLocationOfTeam(arenaId: String, name: String): Collection<GameTeamLocation> {
+        return this.gameTeams[arenaId].find { it.name == name }?.teamLocations ?: return listOf()
+    }
+
 }
