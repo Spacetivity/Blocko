@@ -10,6 +10,7 @@ import net.spacetivity.inventory.api.item.InteractiveItem
 import net.spacetivity.inventory.api.item.InventoryPosition
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.setup.GameArenaSetupData
+import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Color
@@ -62,6 +63,15 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
                     }
 
                     else -> {
+                        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == this.location.x && it.z == this.location.z }
+
+                        if (possibleField == null) {
+                            player.sendMessage(Component.text("Cannot set team entrance, field is not there!", NamedTextColor.RED))
+                            return@of
+                        }
+
+                        possibleField.properties.teamEntrance = gameTeam.name
+
                         SpaceInventoryProvider.api.inventoryHandler.openStaticInventory(player, Component.text("Set a turn"), GameFieldTurnSetupInventory(location), true)
                     }
 

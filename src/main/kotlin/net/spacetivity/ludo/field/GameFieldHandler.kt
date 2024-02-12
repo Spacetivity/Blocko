@@ -36,6 +36,14 @@ class GameFieldHandler {
         return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == 0 }
     }
 
+    fun getLastFieldForTeam(arenaId: String, teamName: String): GameField {
+        return this.cachedGameFields[arenaId].maxBy { it.properties.getFieldId(teamName)!! }
+    }
+
+    fun getFieldForTeam(arenaId: String, teamName: String, id: Int): GameField? {
+        return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == id }
+    }
+
     fun getField(arenaId: String, x: Double, z: Double): GameField? {
         return this.cachedGameFields.get(arenaId).find { it.x == x && it.z == z }
     }

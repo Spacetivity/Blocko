@@ -19,8 +19,11 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
         writer.name("garageForTeam")
         writer.value(if (properties.garageForTeam == null) "-" else properties.garageForTeam)
 
+        writer.name("teamEntrance")
+        writer.value(if (properties.teamEntrance == null) "-" else properties.teamEntrance)
+
         writer.name("turnComponent")
-        writer.value(if (properties.turnComponent == null) "-" else properties.turnComponent!!.name)
+        writer.value(if (properties.rotation == null) "-" else properties.rotation!!.name)
 
         writer.endObject()
     }
@@ -28,6 +31,7 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
     override fun read(reader: JsonReader): GameFieldProperties {
         lateinit var teamFieldsIds: MutableMap<String, Int>
         var garageForTeam: String? = null
+        var teamEntrance: String? = null
         var turnComponent: PathFace? = null
 
         reader.beginObject()
@@ -48,6 +52,11 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
                     val garageValue: String = reader.nextString()
                     garageForTeam = if (garageValue == "-") null else garageValue
                 }
+                "teamEntrance" -> {
+                    reader.peek()
+                    val teamEntranceValue: String = reader.nextString()
+                    teamEntrance = if (teamEntranceValue == "-") null else teamEntranceValue
+                }
                 "turnComponent" -> {
                     reader.peek()
                     val turnComponentValue: String = reader.nextString()
@@ -57,7 +66,7 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
         }
 
         reader.endObject()
-        return GameFieldProperties(teamFieldsIds, garageForTeam, turnComponent)
+        return GameFieldProperties(teamFieldsIds, garageForTeam, teamEntrance, turnComponent)
     }
 
 }

@@ -2,7 +2,7 @@ package net.spacetivity.ludo.field
 
 import net.spacetivity.ludo.utils.PathFace
 
-data class GameFieldProperties(val teamFieldIds: MutableMap<String, Int>, var garageForTeam: String?, var turnComponent: PathFace?) {
+data class GameFieldProperties(val teamFieldIds: MutableMap<String, Int>, var garageForTeam: String?, var teamEntrance: String?, var rotation: PathFace?) {
 
     fun getFieldId(teamName: String): Int? {
         return this.teamFieldIds[teamName]
@@ -13,7 +13,7 @@ data class GameFieldProperties(val teamFieldIds: MutableMap<String, Int>, var ga
     }
 
     fun isTurnNeeded(): Boolean {
-        return this.turnComponent != null
+        return this.rotation != null
     }
 
 }

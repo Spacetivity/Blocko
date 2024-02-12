@@ -25,7 +25,7 @@ class GamePlayActionHandler {
                 val controller: GamePlayer = gameEntity.controller ?: continue
                 val dicedNumber: Int = controller.dicedNumber ?: continue
 
-                val hasReachedGoal: Boolean = gameEntity.move(dicedNumber, 0.0)
+                val hasReachedGoal: Boolean = gameEntity.moveOneFieldForward(dicedNumber, 0.0)
                 if (!hasReachedGoal) continue
 
                 println("reached goal!")
@@ -82,7 +82,7 @@ class GamePlayActionHandler {
 
                         GamePhaseMode.PICK_ENTITY -> {
                             if (gamePlayer.isAI) {
-                                gamePlayer.autoPickEntity()
+                                gamePlayer.autoPickEntity(ingamePhase)
                                 ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
                             } else {
                                 gamePlayer.sendMessage(Component.text("Please select a entity now.", NamedTextColor.LIGHT_PURPLE))

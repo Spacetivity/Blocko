@@ -18,7 +18,8 @@ enum class AI_EntityPickRule(val weight: Int, val probability: Double) {
     MOVABLE_AND_TARGET_IN_SIGHT(2, 0.4),
     MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE(2, 0.6),
 
-    MOVABLE_OUT_OF_START(99, 1.0),
+    MOVABLE_OUT_OF_START(98, 1.0),
+    MOVABLE_AWAY_FROM_FIRST_FIELD(99, 1.0),
     NOT_MOVABLE(100, 1.0);
 
     companion object {
@@ -29,11 +30,13 @@ enum class AI_EntityPickRule(val weight: Int, val probability: Double) {
             var rule: Pair<AI_EntityPickRule, GameEntity?> = Pair(NOT_MOVABLE, null)
 
             if (gameEntities.any { it.currentFieldId == null } && dicedNumber == 6) {
-                rule = Pair(MOVABLE_OUT_OF_START, gameEntities.random())
+                rule = Pair(MOVABLE_OUT_OF_START, gameEntities.find { it.currentFieldId == null })
             } else if (gameEntities.all { it.currentFieldId == null } && dicedNumber == 6) {
                 rule = Pair(MOVABLE_OUT_OF_START, gameEntities.random())
             } else if (gameEntities.all { it.currentFieldId == null } && dicedNumber != 6) {
                 rule = Pair(NOT_MOVABLE, null)
+            } else if (gameEntities.any { it.currentFieldId == 0 }) {
+                rule = Pair(MOVABLE_AWAY_FROM_FIRST_FIELD, gameEntities.find { it.currentFieldId != null && it.currentFieldId == 0 })
             } else {
 
                 val availableRules: MutableList<Pair<AI_EntityPickRule, GameEntity?>> = mutableListOf()
@@ -45,10 +48,12 @@ enum class AI_EntityPickRule(val weight: Int, val probability: Double) {
                         availableRules.add(Pair(MOVABLE, gameEntity))
                     } else if (gameEntity.isMovable(dicedNumber) && gameEntity.landsAfterOpponent(dicedNumber)) {
                         availableRules.add(Pair(MOVABLE_BUT_LANDS_AFTER_OPPONENT, gameEntity))
-                    } else if (gameEntity.isMovable(dicedNumber) && gameEntity.hasValidTarget(dicedNumber)) {
+                    } else if (gameEntity.isMovable(dicedNumber) && gameEntity.hasTargetAtGoalField(dicedNumber)) {
                         availableRules.add(Pair(MOVABLE_AND_TARGET_IN_SIGHT, gameEntity))
                     } else if (gameEntity.isMovable(dicedNumber) && gameEntity.isGarageInSight(dicedNumber)) {
                         availableRules.add(Pair(MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE, gameEntity))
+                    } else if (gameEntity.isInGarage() && !gameEntity.isMovable(dicedNumber)) {
+                        rule = Pair(NOT_MOVABLE, null)
                     } else {
                         rule = Pair(NOT_MOVABLE, null)
                     }

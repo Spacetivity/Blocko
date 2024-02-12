@@ -35,7 +35,6 @@ class GameArenaSetupHandler {
             for (entry: MutableMap.MutableEntry<UUID, GameArenaSetupData> in this.arenaSetupCache.entries) {
                 val player: Player = Bukkit.getPlayer(entry.key) ?: continue
                 val arenaSetupData: GameArenaSetupData = entry.value
-
                 val toolMode: GameArenaSetupTool.ToolMode = arenaSetupData.setupTool.currentMode
 
                 if (toolMode == GameArenaSetupTool.ToolMode.SET_TURN || toolMode == GameArenaSetupTool.ToolMode.SET_TEAM_ENTRANCE) {
@@ -189,7 +188,7 @@ class GameArenaSetupHandler {
                 location.world,
                 x,
                 z,
-                GameFieldProperties(mutableMapOf(), null, null),
+                GameFieldProperties(mutableMapOf(), null, null,null),
                 false,
                 false
             )
@@ -222,7 +221,7 @@ class GameArenaSetupHandler {
             return
         }
 
-        gameField.properties.turnComponent = face
+        gameField.properties.rotation = face
 
         val entityLocation: Location = blockLocation.block.location.clone().toCenterLocation()
         val displayEntity: MagmaCube? = entityLocation.world.entities.find { it.world == entityLocation.world && it.location.x == entityLocation.x && it.location.z == entityLocation.z && it.type == EntityType.MAGMA_CUBE } as MagmaCube?
@@ -260,7 +259,7 @@ class GameArenaSetupHandler {
             player.sendMessage(Component.text("This field is already a garage field!"))
         }
 
-        if (possibleField.properties.turnComponent != null) {
+        if (possibleField.properties.rotation != null) {
             player.sendMessage(Component.text("This field cannot be a garage field!"))
             return
         }

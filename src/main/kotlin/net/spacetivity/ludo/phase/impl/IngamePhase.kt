@@ -38,13 +38,11 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun setNextControllingTeam(): GameTeam? {
-        this.controllingTeamId = 0
+        val newControllingTeam: GameTeam? = LudoGame.instance.gameTeamHandler.gameTeams.get(this.arenaId).find { it.teamId == this.controllingTeamId.inc() }
+        val newControllingTeamId: Int = newControllingTeam?.teamId ?: 0
+        this.controllingTeamId = newControllingTeamId
+        println("NOW TEAM ${getControllingTeam()?.name} can play!")
         return getControllingTeam()
-
-//        val newControllingTeam: GameTeam? = LudoGame.instance.gameTeamHandler.gameTeams.get(this.arenaId).find { it.teamId == this.controllingTeamId.inc() }
-//        val newControllingTeamId: Int = newControllingTeam?.teamId ?: 0
-//        this.controllingTeamId = newControllingTeamId
-//        return getControllingTeam()
     }
 
     fun getControllingTeam(): GameTeam? {
