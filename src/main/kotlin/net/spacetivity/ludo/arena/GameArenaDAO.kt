@@ -10,5 +10,5 @@ object GameArenaDAO : Table("game_arenas") {
     val maxPlayers: Column<Int> = integer("maxPlayers")
     val status: Column<String> = varchar("arenaStatus", 30)
 
-    override val primaryKey = PrimaryKey(varchar("id", 10))
+    override val primaryKey = PrimaryKey(id)
 }

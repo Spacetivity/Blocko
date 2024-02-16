@@ -12,6 +12,7 @@ import net.spacetivity.ludo.extensions.toGamePlayerInstance
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
+import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
@@ -24,6 +25,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerKickEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import java.util.*
 
 class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
@@ -110,8 +112,20 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                     return
                 }
 
-                if (player.getArena() != null && player.getArena()!!.id == gameArena.id) gameArena.quit(player)
-                else gameArena.join(player)
+                if (player.getArena() != null && player.getArena()!!.id == gameArena.id) {
+                    gameArena.quit(player)
+                } else {
+                    //TODO: Implement actual team selection later...
+                    val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[gameArena.id].random()
+                    gameArena.join(player.uniqueId, gameTeam, false)
+
+                    //TODO: Remove the 2 lines below after testing!!!
+                    val aiPlayerTeam = LudoGame.instance.gameTeamHandler.gameTeams[gameArena.id]
+                        .filter { it.teamMembers.isEmpty() }
+                        .random()
+
+                    gameArena.join(UUID.randomUUID(), aiPlayerTeam,true)
+                }
             }
 
             Material.PLAYER_HEAD -> {

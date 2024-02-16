@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
+import net.spacetivity.ludo.extensions.sendActionBar
 import net.spacetivity.ludo.extensions.sendMessage
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
@@ -68,6 +69,9 @@ class GamePlayActionHandler {
                     if (gamePlayer.inAction) continue
 
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+
+                    gamePlayer.sendActionBar(Component.text("Current game player >> ${ingamePhase.getControllingTeam()?.name}"))
+
                     if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
 
                     when (ingamePhase.phaseMode) {

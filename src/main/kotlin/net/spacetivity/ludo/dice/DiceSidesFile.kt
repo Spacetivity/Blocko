@@ -1,3 +1,5 @@
 package net.spacetivity.ludo.dice
 
-data class DiceSidesFile(val diceSides: MutableMap<Int, String>)
+import net.spacetivity.ludo.files.SpaceFile
+
+data class DiceSidesFile(val diceSides: MutableMap<Int, String>) : SpaceFile

@@ -49,10 +49,9 @@ class LudoCommand : LudoCommandExecutor {
             player.sendMessage(Component.text("All arenas: "))
 
             cachedArenas.forEach { gameArena: GameArena ->
-                val arenaHostName: String = if (gameArena.arenaHost == null) "-/-" else gameArena.arenaHost!!.name
                 val currentPlayerAmount: Int = gameArena.currentPlayers.size
                 val maxPlayerAmount: Int = gameArena.maxPlayers
-                player.sendMessage(Component.text("> ArenaId: ${gameArena.id} [JOIN] ($currentPlayerAmount/$maxPlayerAmount) (Host: ${arenaHostName})"))
+                player.sendMessage(Component.text("> ArenaId: ${gameArena.id} [JOIN] ($currentPlayerAmount/$maxPlayerAmount)"))
             }
 
             return
@@ -70,25 +69,25 @@ class LudoCommand : LudoCommandExecutor {
             return
         }
 
-        if (args.size == 2 && args[0].equals("arena", true) && (args[1].equals("join", true) || args[1].equals("quit", true))) {
-            val isJoin: Boolean = args[1].equals("join", true)
-            val arenaId: String = args[3]
-            val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
-
-            if (gameArena == null) {
-                player.sendMessage(Component.text("Arena does not exist!"))
-                return
-            }
-
-            if (gameArena.status != GameArenaStatus.READY) {
-                player.sendMessage(Component.text("This arena is not ready to join!"))
-                return
-            }
-
-            if (isJoin) gameArena.join(player)
-            else gameArena.quit(player)
-            return
-        }
+//        if (args.size == 2 && args[0].equals("arena", true) && (args[1].equals("join", true) || args[1].equals("quit", true))) {
+//            val isJoin: Boolean = args[1].equals("join", true)
+//            val arenaId: String = args[3]
+//            val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
+//
+//            if (gameArena == null) {
+//                player.sendMessage(Component.text("Arena does not exist!"))
+//                return
+//            }
+//
+//            if (gameArena.status != GameArenaStatus.READY) {
+//                player.sendMessage(Component.text("This arena is not ready to join!"))
+//                return
+//            }
+//
+//            if (isJoin) gameArena.join(player)
+//            else gameArena.quit(player)
+//            return
+//        }
 
         if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("start", true)) {
             val arenaId: String = args[3]

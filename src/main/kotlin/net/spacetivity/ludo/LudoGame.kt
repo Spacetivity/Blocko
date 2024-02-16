@@ -156,58 +156,30 @@ class LudoGame : JavaPlugin() {
     }
 
     private fun createOrLoadDatabaseProperties(): DatabaseFile {
-        val databaseFilePath = File("${dataFolder.toPath()}/database")
-        val result: DatabaseFile
-
-        if (!Files.exists(databaseFilePath.toPath())) Files.createDirectories(databaseFilePath.toPath())
-
-        val file: File = Paths.get("${databaseFilePath}/mysql.json").toFile()
-
-        if (!Files.exists(file.toPath())) {
-            result = DatabaseFile("37.114.34.28", 3306, "ludo_game", "root", "-")
-            FileUtils.save(file, result)
-        } else {
-            result = FileUtils.read(file, DatabaseFile::class.java)!!
-        }
-
-        return result
+        return createOrLoadFile("database", "mysql", DatabaseFile::class, DatabaseFile("37.114.34.28", 3306, "ludo_game", "root", "-"))
     }
 
     private fun createOrLoadDiceSidesFile(): DiceSidesFile {
-        val diceSidesFilePath = File("${dataFolder.toPath()}/dice")
-        val result: DiceSidesFile
-
-        if (!Files.exists(diceSidesFilePath.toPath())) Files.createDirectories(diceSidesFilePath.toPath())
-
-        val file: File = Paths.get("${diceSidesFilePath}/dice_sides.json").toFile()
-
-        if (!Files.exists(file.toPath())) {
-            result = DiceSidesFile(mutableMapOf(
-                Pair(1, HeadUtils.DICE_ONE),
-                Pair(2, HeadUtils.DICE_TWO),
-                Pair(3, HeadUtils.DICE_THREE),
-                Pair(4, HeadUtils.DICE_FOUR),
-                Pair(5, HeadUtils.DICE_FIVE),
-                Pair(6, HeadUtils.DICE_SIX)
-            ))
-            FileUtils.save(file, result)
-        } else {
-            result = FileUtils.read(file, DiceSidesFile::class.java)!!
-        }
-
-        return result
+        return createOrLoadFile("dice", "dice_sides", DiceSidesFile::class, DiceSidesFile(mutableMapOf(
+            Pair(1, HeadUtils.DICE_ONE),
+            Pair(2, HeadUtils.DICE_TWO),
+            Pair(3, HeadUtils.DICE_THREE),
+            Pair(4, HeadUtils.DICE_FOUR),
+            Pair(5, HeadUtils.DICE_FIVE),
+            Pair(6, HeadUtils.DICE_SIX)
+        )))
     }
 
     private fun createOrLoadItemsFile(): ItemsFile {
-        return createOrLoadFile(ItemsFile::class, ItemsFile("items", "items", Material.GOLDEN_HOE.name))
+        return createOrLoadFile("items", "items", ItemsFile::class, ItemsFile(Material.GOLDEN_HOE.name))
     }
 
-    private fun <T : SpaceFile> createOrLoadFile(clazz: KClass<T>, content: T): T {
-        val filePath = File("${dataFolder.toPath()}/${content.subFolderName}")
+    private fun <T : SpaceFile> createOrLoadFile(subFolderName: String, fileName: String, clazz: KClass<T>, content: T): T {
+        val filePath = File("${dataFolder.toPath()}/$subFolderName")
         val result: T
 
         if (!Files.exists(filePath.toPath())) Files.createDirectories(filePath.toPath())
-        val file: File = Paths.get("${filePath}/${content.fileName}.json").toFile()
+        val file: File = Paths.get("${filePath}/$fileName.json").toFile()
 
         if (!Files.exists(file.toPath())) {
             result = content

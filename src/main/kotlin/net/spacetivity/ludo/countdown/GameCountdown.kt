@@ -21,7 +21,7 @@ abstract class GameCountdown(protected val arenaId: String, private val duration
         if (this.countdownTask != null || !this.startCondition.test(gameArena.currentPlayers.size)) return
 
         isRunning = true
-        this.countdownTask = Bukkit.getScheduler().runTaskTimerAsynchronously(LudoGame.instance, Runnable {
+        this.countdownTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {
             val remainingSeconds: Int = this.modifiableDuration
 
             if (remainingSeconds == 0) {
