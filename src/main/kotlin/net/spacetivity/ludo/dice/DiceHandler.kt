@@ -16,7 +16,6 @@ import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
-import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.scheduler.BukkitTask
@@ -63,13 +62,6 @@ class DiceHandler {
         if (this.diceAnimationTask != null) this.diceAnimationTask!!.cancel()
     }
 
-    fun getDiceItem(player: Player) {
-        player.inventory.setItem(4, ItemBuilder(Material.PLAYER_HEAD)
-            .setOwner(this.diceSides[1]!!)
-            .setName(getDiceDisplayName(1))
-            .build())
-    }
-
     fun getDiceItem(): ItemStack {
         return ItemBuilder(Material.PLAYER_HEAD)
             .setOwner(this.diceSides[1]!!)
@@ -84,7 +76,6 @@ class DiceHandler {
         }
 
         this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 4))
-        if (!gamePlayer.inAction) gamePlayer.inAction = true
     }
 
     fun stopDicing(gamePlayer: GamePlayer) {
@@ -103,8 +94,6 @@ class DiceHandler {
         gamePlayer.clearSlot(4)
         gamePlayer.playSound(Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM)
         gamePlayer.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
-
-        //gamePlayer.inAction = false //TODO: EXPERIMENTAL!!!
     }
 
     private fun rollDice(gamePlayer: GamePlayer) {

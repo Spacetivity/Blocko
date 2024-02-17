@@ -1,6 +1,7 @@
 package net.spacetivity.ludo.player
 
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.extensions.isDicing
 import net.spacetivity.ludo.extensions.startDicing
@@ -13,21 +14,15 @@ import java.util.*
 class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val isAI: Boolean, var dicedNumber: Int?) {
 
     var activeEntity: GameEntity? = null
-    var inAction: Boolean = false
-
-    var isPicking: Boolean = false
-    var isMoving: Boolean = false
 
     fun dice() {
         if (isDicing()) return
         this.startDicing()
+
     }
 
     fun autoPickEntity(ingamePhase: IngamePhase) {
-        if (this.isPicking) return
         if (this.dicedNumber == null) return
-
-        if (!this.isPicking) this.isPicking = true
 
         val situation: Pair<AI_EntityPickRule, GameEntity?> = AI_EntityPickRule.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
         if (situation.second != null) this.activeEntity = situation.second!!
@@ -35,24 +30,19 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
         println("TRIED PICKING A ENTITY FOR TEAM $teamName with result ${situation.first.name}")
 
         // If there is no entity available for moving forward, the game moves on to the next team to play
-        if (situation.first != AI_EntityPickRule.NOT_MOVABLE) {
+        if (situation.first == AI_EntityPickRule.NOT_MOVABLE && situation.second == null) {
             this.activeEntity = null
             ingamePhase.phaseMode = GamePhaseMode.DICE
             ingamePhase.setNextControllingTeam()
-            this.isPicking = false
             return
         }
 
-        this.isPicking = false
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
     }
 
     fun movePickedEntity() {
-        if (isMoving) return
         if (this.dicedNumber == null) return
         if (this.activeEntity == null) return
-
-        if (!this.inAction) this.isMoving = true
 
         val currentFieldId: Int? = this.activeEntity!!.currentFieldId
 
@@ -69,6 +59,12 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
 
     fun toBukkitInstance(): Player? {
         return Bukkit.getPlayer(this.uuid)
+    }
+
+    fun inAction(): Boolean {
+        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return false
+        val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+        return ingamePhase.isInControllingTeam(this.uuid)
     }
 
 }

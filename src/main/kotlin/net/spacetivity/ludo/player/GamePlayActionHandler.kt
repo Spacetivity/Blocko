@@ -1,13 +1,14 @@
 package net.spacetivity.ludo.player
 
+import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
+import net.spacetivity.ludo.bossbar.BossbarHandler
 import net.spacetivity.ludo.entity.GameEntity
-import net.spacetivity.ludo.extensions.isDicing
 import net.spacetivity.ludo.extensions.sendActionBar
-import net.spacetivity.ludo.extensions.sendMessage
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.team.GameTeam
@@ -56,9 +57,7 @@ class GamePlayActionHandler {
                     continue
                 }
 
-                gamePlayer.inAction = false
                 gamePlayer.activeEntity = null
-                gamePlayer.isMoving = false
             }
         }, 0L, 20L)
     }
@@ -71,36 +70,38 @@ class GamePlayActionHandler {
 
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
+                    val bossbarHandler: BossbarHandler = LudoGame.instance.bossbarHandler
                     val currentGamePlayerName: String? = if (ingamePhase.getControllingTeam()?.name == gamePlayer.teamName) "you" else ingamePhase.getControllingTeam()?.name
-                    gamePlayer.sendActionBar(Component.text("Current game player >> $currentGamePlayerName"))
+                    val bossbarText: TextComponent = Component.text("Current game player >> $currentGamePlayerName")
 
-                    if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
+                    if (!gamePlayer.isAI) {
+                        if (bossbarHandler.getBossbars(gamePlayer.uuid).none { it.first == "currentPlayerInfo" }) {
+                            bossbarHandler.registerBossbar(gamePlayer.toBukkitInstance()!!, "currentPlayerInfo", bossbarText, 1.0F, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
+                        } else {
+                            bossbarHandler.updateBossbar(gamePlayer.uuid, "currentPlayerInfo", BossbarHandler.BossBarUpdate.NAME, bossbarText)
+                        }
+                    }
+
+                    if (!gamePlayer.inAction()) continue
 
                     when (ingamePhase.phaseMode) {
                         GamePhaseMode.DICE -> {
-                            if (gamePlayer.isDicing()) continue
-
                             if (gamePlayer.isAI) {
                                 gamePlayer.dice()
                             } else {
-                                gamePlayer.sendMessage(Component.text("Please dice now.", NamedTextColor.LIGHT_PURPLE))
-                                gamePlayer.inAction = true
+                                gamePlayer.sendActionBar(Component.text("Please dice now.", NamedTextColor.LIGHT_PURPLE))
                             }
                         }
 
                         GamePhaseMode.PICK_ENTITY -> {
-                            if(gamePlayer.isPicking) continue
-
                             if (gamePlayer.isAI) {
                                 gamePlayer.autoPickEntity(ingamePhase)
                             } else {
-                                gamePlayer.sendMessage(Component.text("Please select a entity now.", NamedTextColor.LIGHT_PURPLE))
+                                gamePlayer.sendActionBar(Component.text("Please select a entity now.", NamedTextColor.LIGHT_PURPLE))
                             }
                         }
 
                         GamePhaseMode.MOVE_ENTITY -> {
-                            if(gamePlayer.isMoving) continue
-
                             gamePlayer.movePickedEntity()
                         }
                     }
