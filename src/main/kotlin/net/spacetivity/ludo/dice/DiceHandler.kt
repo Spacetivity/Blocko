@@ -104,7 +104,7 @@ class DiceHandler {
         gamePlayer.playSound(Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM)
         gamePlayer.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
 
-        gamePlayer.inAction = false //TODO: EXPERIMENTAL!!!
+        //gamePlayer.inAction = false //TODO: EXPERIMENTAL!!!
     }
 
     private fun rollDice(gamePlayer: GamePlayer) {

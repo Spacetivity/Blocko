@@ -62,7 +62,7 @@ class GameArena(
 
         gamePlayer.sendMessage(Component.text("You joined the arena!", NamedTextColor.GREEN))
 
-        if (this.currentPlayers.isEmpty() || this.arenaHost == null) {
+        if (!gamePlayer.isAI && (this.currentPlayers.isEmpty() || this.arenaHost == null)) {
             this.arenaHost = gamePlayer
             gamePlayer.sendMessage(Component.text("You are now the arena host!", NamedTextColor.GREEN))
         }
@@ -120,14 +120,16 @@ class GameArena(
             this.phase.clearPlayerInventory(player)
         }
 
-        this.currentPlayers.clear()
-
-        for (gameTeam: GameTeam in LudoGame.instance.gameTeamHandler.gameTeams.values()) {
-            for (teamMemberUuid: UUID in gameTeam.teamMembers) {
+        for (gameTeam: GameTeam in LudoGame.instance.gameTeamHandler.gameTeams[this.id]) {
+            val teamMembers = gameTeam.teamMembers.toMutableList()
+            for (teamMemberUuid: UUID in teamMembers) {
                 val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == teamMemberUuid } ?: continue
                 gameTeam.quit(gamePlayer)
+                println("QUIT PLAYERRRRRRRRRRRR >>>> ${gamePlayer.uuid}")
             }
         }
+
+        this.currentPlayers.clear()
 
         LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
         if (!this.phase.isIdle()) LudoGame.instance.gamePhaseHandler.initIndexPhase(this)

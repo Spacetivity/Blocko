@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
+import net.spacetivity.ludo.extensions.isDicing
 import net.spacetivity.ludo.extensions.sendActionBar
 import net.spacetivity.ludo.extensions.sendMessage
 import net.spacetivity.ludo.phase.GamePhaseMode
@@ -57,6 +58,7 @@ class GamePlayActionHandler {
 
                 gamePlayer.inAction = false
                 gamePlayer.activeEntity = null
+                gamePlayer.isMoving = false
             }
         }, 0L, 20L)
     }
@@ -66,16 +68,18 @@ class GamePlayActionHandler {
             for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas) {
                 for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
                     if (!gameArena.phase.isIngame()) continue
-                    if (gamePlayer.inAction) continue
 
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
-                    gamePlayer.sendActionBar(Component.text("Current game player >> ${ingamePhase.getControllingTeam()?.name}"))
+                    val currentGamePlayerName: String? = if (ingamePhase.getControllingTeam()?.name == gamePlayer.teamName) "you" else ingamePhase.getControllingTeam()?.name
+                    gamePlayer.sendActionBar(Component.text("Current game player >> $currentGamePlayerName"))
 
                     if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
 
                     when (ingamePhase.phaseMode) {
                         GamePhaseMode.DICE -> {
+                            if (gamePlayer.isDicing()) continue
+
                             if (gamePlayer.isAI) {
                                 gamePlayer.dice()
                             } else {
@@ -85,15 +89,18 @@ class GamePlayActionHandler {
                         }
 
                         GamePhaseMode.PICK_ENTITY -> {
+                            if(gamePlayer.isPicking) continue
+
                             if (gamePlayer.isAI) {
                                 gamePlayer.autoPickEntity(ingamePhase)
-                                ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
                             } else {
                                 gamePlayer.sendMessage(Component.text("Please select a entity now.", NamedTextColor.LIGHT_PURPLE))
                             }
                         }
 
                         GamePhaseMode.MOVE_ENTITY -> {
+                            if(gamePlayer.isMoving) continue
+
                             gamePlayer.movePickedEntity()
                         }
                     }

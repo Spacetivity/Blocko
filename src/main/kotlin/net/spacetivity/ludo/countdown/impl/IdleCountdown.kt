@@ -10,7 +10,7 @@ import org.bukkit.entity.EntityType
 import org.bukkit.scheduler.BukkitTask
 import java.util.function.Predicate
 
-class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 20, Predicate { t -> t >= 1 }) {
+class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 10, Predicate { t -> t >= 1 }) {
 
     override fun handleCountdownIdle(countdownTask: BukkitTask, remainingSeconds: Int) {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
@@ -26,13 +26,7 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 20, Predicate { t 
         // Spawns in all game entities for all teams if they have game players!
         for (gameTeamLocation in LudoGame.instance.gameTeamHandler.getLocationsOfAllTeams(this.arenaId)) {
             val gameTeam: GameTeam? = LudoGame.instance.gameTeamHandler.getTeam(gameTeamLocation.arenaId, gameTeamLocation.teamName)
-
-            println("team ${gameTeamLocation.teamName} is null? ${gameTeam == null}")
-
             if (gameTeam == null || gameTeam.teamMembers.isEmpty()) continue
-
-            println("reached team > ${gameTeam.name}")
-
             LudoGame.instance.gameEntityHandler.spawnEntity(gameTeamLocation, EntityType.VILLAGER)
         }
 

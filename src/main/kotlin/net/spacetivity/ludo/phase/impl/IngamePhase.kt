@@ -12,7 +12,7 @@ import java.util.*
 
 class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
-    private var controllingTeamId: Int = 0
+    var controllingTeamId: Int? = null
     var phaseMode: GamePhaseMode = GamePhaseMode.DICE
 
     override fun start() {
@@ -38,7 +38,8 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun setNextControllingTeam(): GameTeam? {
-        val newControllingTeam: GameTeam? = LudoGame.instance.gameTeamHandler.gameTeams.get(this.arenaId).find { it.teamId == this.controllingTeamId.inc() }
+        val availableTeams: List<GameTeam> = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.isNotEmpty() }
+        val newControllingTeam: GameTeam? = availableTeams.find { it.teamId == this.controllingTeamId?.inc() }
         val newControllingTeamId: Int = newControllingTeam?.teamId ?: 0
         this.controllingTeamId = newControllingTeamId
         println("Now team ${getControllingTeam()?.name} can play!")

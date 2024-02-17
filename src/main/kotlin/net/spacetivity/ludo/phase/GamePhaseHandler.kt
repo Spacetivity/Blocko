@@ -4,7 +4,9 @@ import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
+import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -18,8 +20,8 @@ class GamePhaseHandler {
     }
 
     fun nextPhase(gameArena: GameArena) {
-        for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
-            val player: Player = gamePlayer.toBukkitInstance() ?: return
+        for (gamePlayer: GamePlayer in gameArena.currentPlayers.filter { !it.isAI }) {
+            val player: Player = gamePlayer.toBukkitInstance() ?: continue
             gameArena.phase.clearPlayerInventory(player)
         }
 
@@ -32,6 +34,11 @@ class GamePhaseHandler {
             gameArena.reset()
             Bukkit.getConsoleSender().sendMessage(Component.text("ERROR: Phase $newPhasePriority not found for arena ${gameArena.id}!", NamedTextColor.DARK_RED))
             return
+        }
+
+        if (newGamePhase is IngamePhase) {
+            newGamePhase.controllingTeamId = LudoGame.instance.gameTeamHandler.gameTeams[gameArena.id].filter { it.teamMembers.isNotEmpty() }.random().teamId
+            println("Selected initial team to > ${newGamePhase.controllingTeamId}")
         }
 
         gameArena.phase = newGamePhase

@@ -138,7 +138,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
-                if (!ingamePhase.isInControllingTeam(player.uniqueId)) {
+                if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) {
                     player.sendMessage(Component.text("Please wait your turn!", NamedTextColor.RED))
                     return
                 }
