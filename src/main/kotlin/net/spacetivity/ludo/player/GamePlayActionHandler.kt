@@ -25,15 +25,16 @@ class GamePlayActionHandler {
             for (gameEntity: GameEntity in LudoGame.instance.gameEntityHandler.gameEntities.values()) {
                 if (!gameEntity.shouldMove) continue
 
-                val controller: GamePlayer = gameEntity.controller ?: continue
-                val dicedNumber: Int = controller.dicedNumber ?: continue
+                val gamePlayer: GamePlayer = gameEntity.controller ?: continue
+                val dicedNumber: Int = gamePlayer.dicedNumber ?: continue
 
-                val hasReachedGoal: Boolean = gameEntity.moveOneFieldForward(dicedNumber, 0.0)
+                val ignoreDicedNumber: Boolean = gamePlayer.lastEntityPickRule != null && gamePlayer.lastEntityPickRule == AIEntityPickRule.MOVABLE_OUT_OF_START
+                val hasReachedGoal: Boolean = gameEntity.moveOneFieldForward(if (ignoreDicedNumber) 1 else dicedNumber, 0.0)
                 if (!hasReachedGoal) continue
 
                 println("reached goal!")
 
-                if (controller.hasWon()) {
+                if (gamePlayer.hasWon()) {
                     println("Team ${gameEntity.teamName} has won!")
                     //TODO: Send GameWinEvent
                 }
@@ -50,14 +51,8 @@ class GamePlayActionHandler {
                 val newControllingTeam: GameTeam = ingamePhase.setNextControllingTeam() ?: continue
                 gameArena.sendArenaMessage(Component.text("${newControllingTeam.name} can now dice!"))
 
-                val gamePlayer: GamePlayer? = gameArena.currentPlayers.find { it.activeEntity!!.livingEntity!!.uniqueId == gameEntity.livingEntity!!.uniqueId }
-
-                if (gamePlayer == null) {
-                    println("Entity controller not found...")
-                    continue
-                }
-
                 gamePlayer.activeEntity = null
+                gamePlayer.lastEntityPickRule = null
             }
         }, 0L, 20L)
     }

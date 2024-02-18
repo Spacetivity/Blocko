@@ -8,6 +8,7 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
+import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
@@ -37,7 +38,10 @@ class GamePhaseHandler {
         }
 
         if (newGamePhase is IngamePhase) {
-            newGamePhase.controllingTeamId = LudoGame.instance.gameTeamHandler.gameTeams[gameArena.id].filter { it.teamMembers.isNotEmpty() }.random().teamId
+            val availableTeams: List<GameTeam> = LudoGame.instance.gameTeamHandler.gameTeams[gameArena.id].filter { it.teamMembers.isNotEmpty() }
+            val smallestTeamId: Int? = availableTeams.minOfOrNull { it.teamId }
+
+            newGamePhase.controllingTeamId = availableTeams.filter { it.teamId == smallestTeamId }.random().teamId
             println("Selected initial team to > ${newGamePhase.controllingTeamId}")
         }
 

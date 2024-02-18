@@ -14,6 +14,7 @@ import java.util.*
 class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val isAI: Boolean, var dicedNumber: Int?) {
 
     var activeEntity: GameEntity? = null
+    var lastEntityPickRule: AIEntityPickRule? = null
 
     fun dice() {
         if (isDicing()) return
@@ -24,19 +25,21 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
     fun autoPickEntity(ingamePhase: IngamePhase) {
         if (this.dicedNumber == null) return
 
-        val situation: Pair<AI_EntityPickRule, GameEntity?> = AI_EntityPickRule.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
+        val situation: Pair<AIEntityPickRule, GameEntity?> = AIEntityPickRule.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
         if (situation.second != null) this.activeEntity = situation.second!!
 
         println("TRIED PICKING A ENTITY FOR TEAM $teamName with result ${situation.first.name}")
 
         // If there is no entity available for moving forward, the game moves on to the next team to play
-        if (situation.first == AI_EntityPickRule.NOT_MOVABLE && situation.second == null) {
+        if (situation.first == AIEntityPickRule.NOT_MOVABLE && situation.second == null) {
             this.activeEntity = null
+            this.lastEntityPickRule = null
             ingamePhase.phaseMode = GamePhaseMode.DICE
             ingamePhase.setNextControllingTeam()
             return
         }
 
+        this.lastEntityPickRule = situation.first
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
     }
 

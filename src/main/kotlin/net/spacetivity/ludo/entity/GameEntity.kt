@@ -12,25 +12,24 @@ import org.bukkit.Location
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
 
-data class GameEntity(val arenaId: String, val teamName: String, val entityType: EntityType) {
+data class GameEntity(val arenaId: String, val teamName: String, val entityType: EntityType, val entityId: Int) {
 
     var newGoalFieldId: Int? = null
     var currentFieldId: Int? = null
     var livingEntity: LivingEntity? = null
 
-    private var forceYaw: Float? = null
-
     var controller: GamePlayer? = null
     var shouldMove: Boolean = false
 
+    private var forceYaw: Float? = null
+
     init {
         LudoGame.instance.gameEntityHandler.gameEntities.put(this.arenaId, this)
+        println("GAME ENTITY FOR TEAM $teamName WITH entityId > $entityId spawned!")
     }
 
     fun spawn(location: Location) {
         if (this.livingEntity != null) return
-
-        val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
 
         this.livingEntity = location.world.spawnEntity(location, this.entityType) as LivingEntity
         this.livingEntity!!.isSilent = true;
@@ -38,7 +37,9 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         this.livingEntity!!.isInvulnerable = true
         this.livingEntity!!.setAI(false)
 
+        val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
         gameTeam.scoreboardTeam.addEntity(this.livingEntity!!)
+
         MetadataUtils.set(this.livingEntity!!, "teamName", this.teamName)
     }
 

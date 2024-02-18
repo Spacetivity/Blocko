@@ -86,6 +86,8 @@ class GameArena(
         player.sendMessage(Component.text("You left the arena!", NamedTextColor.YELLOW))
         player.clearPhaseItems()
 
+        LudoGame.instance.bossbarHandler.clearBossbars(player)
+
         val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == player.uniqueId } ?: return
 
         LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(gamePlayer)
@@ -125,7 +127,6 @@ class GameArena(
             for (teamMemberUuid: UUID in teamMembers) {
                 val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == teamMemberUuid } ?: continue
                 gameTeam.quit(gamePlayer)
-                println("QUIT PLAYERRRRRRRRRRRR >>>> ${gamePlayer.uuid}")
             }
         }
 

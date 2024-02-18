@@ -10,7 +10,7 @@ import org.bukkit.entity.EntityType
 import org.bukkit.scheduler.BukkitTask
 import java.util.function.Predicate
 
-class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 10, Predicate { t -> t >= 1 }) {
+class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5, Predicate { t -> t >= 1 }) {
 
     override fun handleCountdownIdle(countdownTask: BukkitTask, remainingSeconds: Int) {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return

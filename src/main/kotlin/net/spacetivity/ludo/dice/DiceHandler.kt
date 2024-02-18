@@ -90,8 +90,6 @@ class DiceHandler {
         this.dicingPlayers.remove(gamePlayer.uuid)
 
         gamePlayer.dicedNumber = dicedNumber
-
-        gamePlayer.clearSlot(4)
         gamePlayer.playSound(Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM)
         gamePlayer.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
     }

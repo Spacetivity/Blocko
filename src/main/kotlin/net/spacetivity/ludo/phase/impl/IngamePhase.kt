@@ -38,11 +38,14 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun setNextControllingTeam(): GameTeam? {
-        val availableTeams: List<GameTeam> = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.isNotEmpty() }
-        val newControllingTeam: GameTeam? = availableTeams.find { it.teamId == this.controllingTeamId?.inc() }
-        val newControllingTeamId: Int = newControllingTeam?.teamId ?: 0
+        val availableTeams: List<GameTeam> = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 }
+        val newControllingTeam: GameTeam? = availableTeams.find { it.teamId > this.controllingTeamId!! }
+
+        // If no available team with a higher teamId is found, the team with the smallest teamId is used
+        val newControllingTeamId: Int = newControllingTeam?.teamId ?: availableTeams.minOf { it.teamId }
+
         this.controllingTeamId = newControllingTeamId
-        println("Now team ${getControllingTeam()?.name} can play!")
+
         return getControllingTeam()
     }
 
