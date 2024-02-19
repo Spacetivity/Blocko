@@ -130,7 +130,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                         .filter { it.teamMembers.isEmpty() }
                         .random()
 
-                    gameArena.join(UUID.randomUUID(), aiPlayerTeam,true)
+                    gameArena.join(UUID.randomUUID(), aiPlayerTeam, true)
                 }
             }
 
@@ -157,19 +157,26 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
             }
 
             Material.ARMOR_STAND -> {
+                if (!event.action.isRightClick) return
+
                 val gameArena: GameArena = player.getArena() ?: return
                 if (!gameArena.phase.isIngame()) return
 
-                if (!event.action.isRightClick) return
-
+                val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
                 val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
+
+                if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) {
+                    player.sendMessage(Component.text("You cannot pick an entity now!", NamedTextColor.RED))
+                    return
+                }
 
                 if (!PersistentDataUtils.hasData(itemInHand.itemMeta, "entitySelector")) return
 
                 val entityId: Int = PersistentDataUtils.getData(itemInHand.itemMeta, "entitySelector", Int::class.java)
-                val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId } ?: return
+                val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId }
+                    ?: return
 
-                gamePlayer.manuallyPickEntity(gameArena.phase as IngamePhase, gameEntity)
+                gamePlayer.manuallyPickEntity(ingamePhase, gameEntity)
 
                 val dicedNumber: Int = gamePlayer.dicedNumber ?: return
                 player.sendMessage(Component.text("Game entity selected to move $dicedNumber fields."))
@@ -208,15 +215,19 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
         val gameArena: GameArena = player.getArena() ?: return
         if (!gameArena.phase.isIngame()) return
 
+        val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
+
+        if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) return
+
         val heldItemStack: ItemStack = player.inventory.getItem(event.newSlot) ?: return
         if (heldItemStack.type != Material.ARMOR_STAND) return
-
-        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
 
         if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, "entitySelector")) return
 
         val entityId: Int = PersistentDataUtils.getData(heldItemStack.itemMeta, "entitySelector", Int::class.java)
-        val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId } ?: return
+        val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId }
+            ?: return
 
         gameEntity.toggleHighlighting(true)
     }
