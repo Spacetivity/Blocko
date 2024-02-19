@@ -13,6 +13,7 @@ import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
 
 class GamePlayActionHandler {
@@ -33,6 +34,9 @@ class GamePlayActionHandler {
                 if (!hasReachedGoal) continue
 
                 println("reached goal!")
+
+                val p: Player
+
 
                 if (gamePlayer.hasWon()) {
                     gameEntity.toggleHighlighting(false)

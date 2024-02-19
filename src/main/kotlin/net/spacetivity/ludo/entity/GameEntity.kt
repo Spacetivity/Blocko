@@ -40,10 +40,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
         this.livingEntity!!.customName(Component.text(this.teamName.uppercase(), gameTeam.color, TextDecoration.BOLD))
-
-        // gameTeam.scoreboardTeam.addEntity(this.livingEntity!!)
-
-        MetadataUtils.set(this.livingEntity!!, "teamName", this.teamName)
+        MetadataUtils.apply(this.livingEntity!!, "teamName", this.teamName)
     }
 
     fun toggleHighlighting(active: Boolean) {
@@ -155,14 +152,12 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         newField.isTaken = true
 
         val worldPosition: Location = newField.getWorldPosition(fieldHeight)
-
         val rotation: PathFace? = newField.properties.rotation
+        val teamEntranceName: String? = newField.properties.teamEntrance
 
-        if (rotation != null) {
-            val teamEntranceName: String? = newField.properties.teamEntrance
-            val isTurnAllowed: Boolean = teamEntranceName.equals(this.teamName, true) || teamEntranceName == null
-            if (isTurnAllowed) this.forceYaw = rotation.radians
-        }
+        // decides if the entity needs to rotate
+        if (rotation != null || (teamEntranceName != null && teamEntranceName == this.teamName))
+            this.forceYaw = rotation!!.radians
 
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
         this.livingEntity!!.teleport(worldPosition)

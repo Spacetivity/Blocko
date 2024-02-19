@@ -13,7 +13,7 @@ object MetadataUtils {
         entity.setMetadata(key, FixedMetadataValue(LudoGame.instance, value))
     }
 
-    fun set(entity: LivingEntity, key: String, value: Any) {
+    fun apply(entity: LivingEntity, key: String, value: Any) {
         if (has(entity, key)) remove(entity, key)
         entity.setMetadata(key, FixedMetadataValue(LudoGame.instance, value))
     }

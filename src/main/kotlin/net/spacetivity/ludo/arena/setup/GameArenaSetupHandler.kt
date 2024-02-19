@@ -204,7 +204,7 @@ class GameArenaSetupHandler {
         displayEntity.isGlowing = true
         displayEntity.setAI(false)
         displayEntity.setGravity(false)
-        MetadataUtils.set(displayEntity, "displayEntity", arenaSetupData.arenaId)
+        MetadataUtils.apply(displayEntity, "displayEntity", arenaSetupData.arenaId)
 
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
         player.sendActionBar(Component.text("Game field #${arenaSetupData.gameFields.size - 1} at (${x} | ${z}) added."))

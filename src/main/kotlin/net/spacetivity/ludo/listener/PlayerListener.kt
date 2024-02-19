@@ -29,6 +29,7 @@ import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerKickEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import java.util.*
 
 class PlayerListener(private val ludoGame: LudoGame) : Listener {
@@ -177,6 +178,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                     ?: return
 
                 gamePlayer.manuallyPickEntity(ingamePhase, gameEntity)
+                getOtherHighlightedEntities(gamePlayer, gameArena, gameEntity).forEach { it.toggleHighlighting(false) }
 
                 val dicedNumber: Int = gamePlayer.dicedNumber ?: return
                 player.sendMessage(Component.text("Game entity selected to move $dicedNumber fields."))
@@ -223,6 +225,8 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
         val heldItemStack: ItemStack = player.inventory.getItem(event.newSlot) ?: return
         if (heldItemStack.type != Material.ARMOR_STAND) return
 
+        getLastHighlightedEntity(gamePlayer, gameArena, heldItemStack.itemMeta)?.toggleHighlighting(false)
+
         if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, "entitySelector")) return
 
         val entityId: Int = PersistentDataUtils.getData(heldItemStack.itemMeta, "entitySelector", Int::class.java)
@@ -230,6 +234,17 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
             ?: return
 
         gameEntity.toggleHighlighting(true)
+    }
+
+    private fun getLastHighlightedEntity(gamePlayer: GamePlayer, gameArena: GameArena, itemMeta: ItemMeta): GameEntity? {
+        if (!PersistentDataUtils.hasData(itemMeta, "entitySelector")) return null
+
+        val entityId: Int = PersistentDataUtils.getData(itemMeta, "entitySelector", Int::class.java)
+        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId }
+    }
+
+    private fun getOtherHighlightedEntities(gamePlayer: GamePlayer, gameArena: GameArena, highlightedEntity: GameEntity): List<GameEntity> {
+        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).filter { it.livingEntity?.uniqueId != highlightedEntity.livingEntity?.uniqueId }
     }
 
 }
