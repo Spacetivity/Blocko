@@ -19,14 +19,19 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
     fun dice() {
         if (isDicing()) return
         this.startDicing()
+    }
 
+    fun manuallyPickEntity(ingamePhase: IngamePhase, gameEntity: GameEntity) {
+        if (this.dicedNumber == null) return
+        this.activeEntity = gameEntity
+
+        ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
     }
 
     fun autoPickEntity(ingamePhase: IngamePhase) {
         if (this.dicedNumber == null) return
 
         val situation: Pair<AIEntityPickRule, GameEntity?> = AIEntityPickRule.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
-        if (situation.second != null) this.activeEntity = situation.second!!
 
         println("TRIED PICKING A ENTITY FOR TEAM $teamName with result ${situation.first.name}")
 
@@ -39,6 +44,8 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
             return
         }
 
+        this.activeEntity = situation.second!!
+        this.activeEntity!!.toggleHighlighting(true)
         this.lastEntityPickRule = situation.first
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
     }

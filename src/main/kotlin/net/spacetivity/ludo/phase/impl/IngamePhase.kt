@@ -29,6 +29,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         for ((entityIndex, i) in (2..5).withIndex()) {
             hotbarItems[i] = ItemBuilder(Material.ARMOR_STAND)
                 .setName(Component.text("Move Entity #$entityIndex"))
+                .setData("entitySelector", entityIndex)
                 .build()
         }
     }

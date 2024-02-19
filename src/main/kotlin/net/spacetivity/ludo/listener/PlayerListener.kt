@@ -7,12 +7,14 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.sign.GameArenaSign
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
+import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.extensions.getArena
 import net.spacetivity.ludo.extensions.toGamePlayerInstance
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.team.GameTeam
+import net.spacetivity.ludo.utils.PersistentDataUtils
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
@@ -23,8 +25,10 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerKickEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.ItemStack
 import java.util.*
 
 class PlayerListener(private val ludoGame: LudoGame) : Listener {
@@ -97,7 +101,9 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
         val player: Player = event.player
         val block: Block? = event.clickedBlock
 
-        when (player.inventory.itemInMainHand.type) {
+        val itemInHand: ItemStack = player.inventory.itemInMainHand
+
+        when (itemInHand.type) {
             Material.AIR -> {
                 if (block == null) return
                 if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
@@ -132,10 +138,9 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 val gameArena: GameArena = player.getArena() ?: return
                 if (!gameArena.phase.isIngame()) return
 
-                val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
-
                 if (!event.action.isRightClick) return
 
+                val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
                 if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) {
@@ -149,6 +154,25 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 }
 
                 gamePlayer.dice()
+            }
+
+            Material.ARMOR_STAND -> {
+                val gameArena: GameArena = player.getArena() ?: return
+                if (!gameArena.phase.isIngame()) return
+
+                if (!event.action.isRightClick) return
+
+                val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
+
+                if (!PersistentDataUtils.hasData(itemInHand.itemMeta, "entitySelector")) return
+
+                val entityId: Int = PersistentDataUtils.getData(itemInHand.itemMeta, "entitySelector", Int::class.java)
+                val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId } ?: return
+
+                gamePlayer.manuallyPickEntity(gameArena.phase as IngamePhase, gameEntity)
+
+                val dicedNumber: Int = gamePlayer.dicedNumber ?: return
+                player.sendMessage(Component.text("Game entity selected to move $dicedNumber fields."))
             }
 
             Material.DIAMOND_HOE -> {
@@ -175,6 +199,26 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
             else -> {}
         }
 
+    }
+
+    @EventHandler
+    fun onChangeHeldItem(event: PlayerItemHeldEvent) {
+        val player: Player = event.player
+
+        val gameArena: GameArena = player.getArena() ?: return
+        if (!gameArena.phase.isIngame()) return
+
+        val heldItemStack: ItemStack = player.inventory.getItem(event.newSlot) ?: return
+        if (heldItemStack.type != Material.ARMOR_STAND) return
+
+        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
+
+        if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, "entitySelector")) return
+
+        val entityId: Int = PersistentDataUtils.getData(heldItemStack.itemMeta, "entitySelector", Int::class.java)
+        val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId } ?: return
+
+        gameEntity.toggleHighlighting(true)
     }
 
 }

@@ -35,6 +35,7 @@ class GamePlayActionHandler {
                 println("reached goal!")
 
                 if (gamePlayer.hasWon()) {
+                    gameEntity.toggleHighlighting(false)
                     println("Team ${gameEntity.teamName} has won!")
                     //TODO: Send GameWinEvent
                 }

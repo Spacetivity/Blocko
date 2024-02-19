@@ -1,6 +1,7 @@
 package net.spacetivity.ludo.entity
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.field.GameField
@@ -33,14 +34,24 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         this.livingEntity = location.world.spawnEntity(location, this.entityType) as LivingEntity
         this.livingEntity!!.isSilent = true;
-        this.livingEntity!!.isGlowing = true
         this.livingEntity!!.isInvulnerable = true
         this.livingEntity!!.setAI(false)
+        this.livingEntity!!.isCustomNameVisible = true
 
         val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
-        gameTeam.scoreboardTeam.addEntity(this.livingEntity!!)
+        this.livingEntity!!.customName(Component.text(this.teamName.uppercase(), gameTeam.color, TextDecoration.BOLD))
+
+        // gameTeam.scoreboardTeam.addEntity(this.livingEntity!!)
 
         MetadataUtils.set(this.livingEntity!!, "teamName", this.teamName)
+    }
+
+    fun toggleHighlighting(active: Boolean) {
+        this.livingEntity!!.isGlowing = active
+
+        val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
+        if (active) gameTeam.scoreboardTeam.addEntity(this.livingEntity!!)
+        else gameTeam.scoreboardTeam.removeEntity(this.livingEntity!!)
     }
 
     fun despawn() {
