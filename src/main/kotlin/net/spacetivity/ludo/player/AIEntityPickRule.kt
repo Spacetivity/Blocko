@@ -41,17 +41,17 @@ enum class AIEntityPickRule(val weight: Int, val probability: Double) {
                 val availableRules: MutableList<Pair<AIEntityPickRule, GameEntity?>> = mutableListOf()
 
                 for (gameEntity: GameEntity in gameEntities) {
-                    if (gameEntity.isInGarage() && gameEntity.isMovable(dicedNumber)) {
+                    if (gameEntity.isInGarage() && gameEntity.isMovableTo(dicedNumber)) {
                         availableRules.add(Pair(GARAGE_MOVABLE, gameEntity))
-                    } else if (gameEntity.isMovable(dicedNumber)) {
+                    } else if (gameEntity.isMovableTo(dicedNumber)) {
                         availableRules.add(Pair(MOVABLE, gameEntity))
-                    } else if (gameEntity.isMovable(dicedNumber) && gameEntity.landsAfterOpponent(dicedNumber)) {
+                    } else if (gameEntity.isMovableTo(dicedNumber) && gameEntity.landsAfterOpponent(dicedNumber)) {
                         availableRules.add(Pair(MOVABLE_BUT_LANDS_AFTER_OPPONENT, gameEntity))
-                    } else if (gameEntity.isMovable(dicedNumber) && gameEntity.hasTargetAtGoalField(dicedNumber)) {
+                    } else if (gameEntity.isMovableTo(dicedNumber) && gameEntity.hasTargetAtGoalField(dicedNumber)) {
                         availableRules.add(Pair(MOVABLE_AND_TARGET_IN_SIGHT, gameEntity))
-                    } else if (gameEntity.isMovable(dicedNumber) && gameEntity.isGarageInSight(dicedNumber)) {
+                    } else if (gameEntity.isMovableTo(dicedNumber) && gameEntity.isGarageInSight(dicedNumber)) {
                         availableRules.add(Pair(MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE, gameEntity))
-                    } else if (gameEntity.isInGarage() && !gameEntity.isMovable(dicedNumber)) {
+                    } else if (gameEntity.isInGarage() && !gameEntity.isMovableTo(dicedNumber)) {
                         rule = Pair(NOT_MOVABLE, null)
                     } else {
                         rule = Pair(NOT_MOVABLE, null)

@@ -13,7 +13,6 @@ import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
 
 class GamePlayActionHandler {
@@ -33,13 +32,11 @@ class GamePlayActionHandler {
                 val hasReachedGoal: Boolean = gameEntity.moveOneFieldForward(if (ignoreDicedNumber) 1 else dicedNumber, 0.0)
                 if (!hasReachedGoal) continue
 
+                gameEntity.lastStartField = null
+                gameEntity.toggleHighlighting(false)
                 println("reached goal!")
 
-                val p: Player
-
-
                 if (gamePlayer.hasWon()) {
-                    gameEntity.toggleHighlighting(false)
                     println("Team ${gameEntity.teamName} has won!")
                     //TODO: Send GameWinEvent
                 }

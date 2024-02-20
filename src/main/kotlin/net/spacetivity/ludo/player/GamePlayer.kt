@@ -64,7 +64,7 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
     }
 
     fun hasWon(): Boolean {
-        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(this.arenaId, this.teamName).all { it.isInGarage() && !it.isMovable(1) }
+        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(this.arenaId, this.teamName).all { it.isInGarage() && !it.isMovableTo(1) }
     }
 
     fun toBukkitInstance(): Player? {
@@ -73,6 +73,7 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
 
     fun inAction(): Boolean {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return false
+        if (!gameArena.phase.isIngame()) return false
         val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
         return ingamePhase.isInControllingTeam(this.uuid)
     }

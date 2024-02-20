@@ -21,22 +21,20 @@ class GameField(
     var isTaken: Boolean = false
 ) {
 
-    fun checkForOpponent(newHolder: LivingEntity) {
+    fun trowOutOldHolder(newHolder: LivingEntity) {
         val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
 
         if (!this.isTaken) return
         if (gameArena == null) return
 
         val gameTeamHandler: GameTeamHandler = LudoGame.instance.gameTeamHandler
-        val holder: GameEntity = getCurrentHolder() ?: return
+        val oldHolder: GameEntity = getCurrentHolder() ?: return
 
-        if (holder.livingEntity!!.uniqueId == newHolder.uniqueId) return
-
-        val holderGameTeam: GameTeam = gameTeamHandler.getTeam(this.arenaId, holder.teamName) ?: return
+        val holderGameTeam: GameTeam = gameTeamHandler.getTeam(this.arenaId, oldHolder.teamName) ?: return
         val teamSpawnLocation: GameTeamLocation = holderGameTeam.getFreeSpawnLocation()
             ?: throw NullPointerException("No empty team spawn was found for $holderGameTeam.name")
 
-        holder.livingEntity?.teleport(teamSpawnLocation.getWorldPosition())
+        oldHolder.livingEntity?.teleport(teamSpawnLocation.getWorldPosition())
         teamSpawnLocation.isTaken = true
 
         val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolder) ?: return
@@ -51,7 +49,8 @@ class GameField(
     }
 
     fun getCurrentHolder(): GameEntity? {
-        return LudoGame.instance.gameEntityHandler.getEntityAtField(arenaId, this.x, this.z)
+        val worldPosition = getWorldPosition(0.0)
+        return LudoGame.instance.gameEntityHandler.getEntityAtField(arenaId, worldPosition.x, worldPosition.z)
     }
 
 }

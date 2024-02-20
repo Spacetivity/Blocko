@@ -36,8 +36,19 @@ class GameFieldHandler {
         return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == 0 }
     }
 
-    fun getLastFieldForTeam(arenaId: String, teamName: String): GameField {
-        return this.cachedGameFields[arenaId].maxBy { it.properties.getFieldId(teamName)!! }
+    fun getLastFieldForTeam(arenaId: String, teamName: String): GameField? {
+        return this.cachedGameFields[arenaId].maxByOrNull { gameField: GameField? ->
+            if (gameField == null) {
+                println("GAME FIELD IS NULL")
+                return null
+            }
+            val fieldId: Int? = gameField.properties.getFieldId(teamName)
+            if (fieldId == null) {
+                println("FIELD ID IS NULL")
+                return null
+            }
+            fieldId
+        }
     }
 
     fun getFieldForTeam(arenaId: String, teamName: String, id: Int): GameField? {

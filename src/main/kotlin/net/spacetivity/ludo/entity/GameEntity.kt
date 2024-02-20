@@ -22,11 +22,12 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
     var controller: GamePlayer? = null
     var shouldMove: Boolean = false
 
+    var lastStartField: Int? = null
+
     private var forceYaw: Float? = null
 
     init {
         LudoGame.instance.gameEntityHandler.gameEntities.put(this.arenaId, this)
-        println("GAME ENTITY FOR TEAM $teamName WITH entityId > $entityId spawned!")
     }
 
     fun spawn(location: Location) {
@@ -97,16 +98,21 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         return containsGarageField
     }
 
-    fun isMovable(dicedNumber: Int): Boolean {
-        val startFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!!
-        val goalFieldId: Int = startFieldId + dicedNumber
+    fun isMovableTo(dicedNumber: Int): Boolean {
+        if (dicedNumber != 6 && this.currentFieldId == null)
+            return false
+
+        val goalFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + dicedNumber
 
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
 
         if (isBlockedByTeamMember(goalField))
             return false
 
-        if (startFieldId == LudoGame.instance.gameFieldHandler.getLastFieldForTeam(this.arenaId, this.teamName).properties.getFieldId(this.teamName))
+        val lastFieldForTeam: GameField = LudoGame.instance.gameFieldHandler.getLastFieldForTeam(this.arenaId, this.teamName) ?: throw NullPointerException("Last field cannot be found for team $teamName")
+        val lastFieldId = lastFieldForTeam.properties.getFieldId(this.teamName)
+
+        if (this.currentFieldId != null && this.currentFieldId == lastFieldId)
             return false
 
         return true
@@ -130,11 +136,16 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
             oldField.isTaken = false
         }
 
-        val teamStartFieldId = 0
+        if (this.lastStartField == null) {
+            if (this.currentFieldId == null)
+                this.lastStartField = 0
+            else
+                this.lastStartField = this.currentFieldId
+        }
 
-        val newFieldId: Int = if (this.currentFieldId == null) teamStartFieldId else this.currentFieldId!! + 1
+        val newFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + 1
 
-        val goalFieldId: Int = if (dicedNumber == 1 || this.currentFieldId == null) newFieldId else this.currentFieldId!! + dicedNumber
+        val goalFieldId: Int = if (dicedNumber == 1 || this.currentFieldId == null) newFieldId else this.lastStartField!! + dicedNumber
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
 
         this.currentFieldId = newFieldId
@@ -147,8 +158,18 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
             return false
         }
 
+        // checks if the current field has already a holder, if yes and the new field is not the goal field, the field will be skipped.
+        if ((newFieldId != goalFieldId) && newField.isTaken) {
+            println("==> Field is skipped!!!")
+            return false
+        }
+
         // checks if the new field contains already a new entity. If 'yes' it throws the entity out.
-        newField.checkForOpponent(this.livingEntity!!)
+        if ((newFieldId == goalFieldId) && (goalField.isTaken && goalField.getCurrentHolder()!!.teamName != this.teamName)) {
+            println("Throws out old holder!")
+            newField.trowOutOldHolder(this.livingEntity!!)
+        }
+
         newField.isTaken = true
 
         val worldPosition: Location = newField.getWorldPosition(fieldHeight)
@@ -156,13 +177,17 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         val teamEntranceName: String? = newField.properties.teamEntrance
 
         // decides if the entity needs to rotate
-        if (rotation != null || (teamEntranceName != null && teamEntranceName == this.teamName))
-            this.forceYaw = rotation!!.radians
+        if (rotation != null && teamEntranceName == null) {
+            this.forceYaw = rotation.radians
+        } else if (rotation != null && teamEntranceName == this.teamName) {
+            this.forceYaw = rotation.radians
+            println("Turn possible >> (EntranceName)${teamEntranceName}:${this.teamName}(EntityName)")
+        }
 
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
         this.livingEntity!!.teleport(worldPosition)
 
-        return this.newGoalFieldId == goalFieldId
+        return this.currentFieldId == goalFieldId
     }
 
     private fun getTeamField(id: Int): GameField? {
@@ -174,6 +199,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
     }
 
     private fun isBlockedByTeamMember(field: GameField): Boolean {
+        if (field.getCurrentHolder() == null) return false
         return field.isTaken && field.getCurrentHolder()!!.teamName == this.teamName
     }
 

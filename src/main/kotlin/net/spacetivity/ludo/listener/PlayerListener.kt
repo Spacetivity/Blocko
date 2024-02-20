@@ -105,6 +105,22 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
         val itemInHand: ItemStack = player.inventory.itemInMainHand
 
         when (itemInHand.type) {
+            Material.STICK -> {
+                if (block == null) return
+                if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
+
+                val field = LudoGame.instance.gameFieldHandler.getField(player.getArena()!!.id, block.location.x, block.location.z)
+                if (field == null) {
+                    player.sendMessage("no field...")
+                    return
+                }
+                val entranceName = if (field.properties.teamEntrance == null) "-/-" else field.properties.teamEntrance
+
+                val teamIds = LudoGame.GSON.toJson(field.properties.teamFieldIds)
+
+                player.sendMessage(Component.text("IsTaken: ${field.isTaken} | IsTeamEntrance: ${field.properties.teamEntrance != null} EntranceName: $entranceName | teamIds: ${teamIds}"))
+            }
+
             Material.AIR -> {
                 if (block == null) return
                 if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
