@@ -2,7 +2,7 @@ name: Blocko
 version: 1.0
 api-version: "1.20"
 main: net.spacetivity.ludo.LudoGame
-description: Blocko is a Kotlin-based inspiration of the classic board game 'Mensch Ärgere dich nicht!' (Ludo) in Minecraft.
+description: Blocko is a inspiration of the classic board game 'Mensch Ärgere dich nicht!' (Ludo) in Minecraft.
 website: https://builtbybit.com/creators/spacetivity.301580/
 author:
   - TGamings

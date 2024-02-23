@@ -156,7 +156,7 @@ class LudoGame : JavaPlugin() {
     }
 
     private fun createOrLoadDatabaseProperties(): DatabaseFile {
-        return createOrLoadFile("database", "mysql", DatabaseFile::class, DatabaseFile("37.114.34.28", 3306, "ludo_game", "root", "-"))
+        return createOrLoadFile("database", "mysql", DatabaseFile::class, DatabaseFile("-", 3306, "blocko_game", "-", "-"))
     }
 
     private fun createOrLoadDiceSidesFile(): DiceSidesFile {

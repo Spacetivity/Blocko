@@ -3,7 +3,6 @@ package net.spacetivity.ludo.entity
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.team.GameTeam
@@ -109,7 +108,8 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         if (isBlockedByTeamMember(goalField))
             return false
 
-        val lastFieldForTeam: GameField = LudoGame.instance.gameFieldHandler.getLastFieldForTeam(this.arenaId, this.teamName) ?: throw NullPointerException("Last field cannot be found for team $teamName")
+        val lastFieldForTeam: GameField = LudoGame.instance.gameFieldHandler.getLastFieldForTeam(this.arenaId, this.teamName)
+            ?: throw NullPointerException("Last field cannot be found for team $teamName")
         val lastFieldId = lastFieldForTeam.properties.getFieldId(this.teamName)
 
         if (this.currentFieldId != null && this.currentFieldId == lastFieldId)
@@ -144,40 +144,13 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         }
 
         val newFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + 1
-
-        //val goalFieldId: Int = if (dicedNumber == 1 || this.currentFieldId == null) newFieldId else this.lastStartField!! + dicedNumber
-
-        var goalFieldId: Int
-
-        if (this.currentFieldId == null) {
-            goalFieldId = 0
-        } else if (dicedNumber == 1) {
-            goalFieldId = newFieldId
-        } else {
-            goalFieldId = this.lastStartField!! + dicedNumber
-        }
+        val goalFieldId: Int = if (this.currentFieldId == null) 0 else if (dicedNumber == 1) newFieldId else this.lastStartField!! + dicedNumber
 
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
-
-        if (isBlockedByTeamMember(goalField)) {
-            val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return false
-            gameArena.sendArenaMessage(Component.text("Cannot move entity. Target field is blocked!"))
-            return false //TODO: Handle that correctly!!!
-        }
 
         this.currentFieldId = newFieldId
 
         val newField: GameField = getTeamField(this.currentFieldId!!) ?: return false
-
-        // checks if the current field has already a holder, if yes and the new field is not the goal field, the field will be skipped.
-        if ((newFieldId != goalFieldId) && newField.isTaken) {
-            println("==> Field is skipped!!!")
-            return false
-        }
-
-        newField.isTaken = true
-
-        val worldPosition: Location = newField.getWorldPosition(fieldHeight)
         val rotation: PathFace? = newField.properties.rotation
         val teamEntranceName: String? = newField.properties.teamEntrance
 
@@ -189,12 +162,25 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
             println("Turn possible >> (EntranceName)${teamEntranceName}:${this.teamName}(EntityName)")
         }
 
+        // checks if the current field has already a holder, if yes and the new field is not the goal field, the field will be skipped.
+        if ((newFieldId != goalFieldId) && newField.isTaken) {
+            println("==> Field is skipped!!!")
+            return false
+        }
+
+        newField.isTaken = true
+
+        val worldPosition: Location = newField.getWorldPosition(fieldHeight)
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
         this.livingEntity!!.teleport(worldPosition)
 
+        val currentHolder: GameEntity? = newField.getCurrentHolder()
+        val currentHolderTeamName = currentHolder?.teamName ?: "-/-"
+
         // checks if the new field contains already a new entity. If 'yes' it throws the entity out.
-        println(">> Moving (newFieldId: $newFieldId) (goalFieldId: $goalFieldId [${goalField.properties.getFieldId(teamName)}]) (isGoalTaken: ${goalField.isTaken}")
-        if ((newFieldId == goalFieldId) && (goalField.isTaken && goalField.getCurrentHolder()!!.teamName != this.teamName)) {
+        println(">> Moving (newFieldId: $newFieldId) (goalFieldId: $goalFieldId [${goalField.properties.getFieldId(teamName)}]) (isGoalTaken: ${goalField.isTaken}, holder: $currentHolderTeamName")
+
+        if ((newFieldId == goalFieldId) && (newField.isTaken && currentHolder!!.teamName != this.teamName)) {
             println("Throws out old holder!")
             goalField.trowOutOldHolder(this.livingEntity!!)
         }

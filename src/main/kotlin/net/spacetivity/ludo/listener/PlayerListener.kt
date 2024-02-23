@@ -30,7 +30,6 @@ import org.bukkit.event.player.PlayerKickEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
-import java.util.*
 
 class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
@@ -109,7 +108,9 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 if (block == null) return
                 if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
 
-                val field = LudoGame.instance.gameFieldHandler.getField(player.getArena()!!.id, block.location.x, block.location.z)
+                val gameArena: GameArena = LudoGame.instance.gameArenaHandler.cachedArenas.firstOrNull() ?: return
+                val field = LudoGame.instance.gameFieldHandler.getField(gameArena.id, block.location.x, block.location.z)
+
                 if (field == null) {
                     player.sendMessage("no field...")
                     return
@@ -118,7 +119,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
                 val teamIds = LudoGame.GSON.toJson(field.properties.teamFieldIds)
 
-                player.sendMessage(Component.text("IsTaken: ${field.isTaken} | IsTeamEntrance: ${field.properties.teamEntrance != null} EntranceName: $entranceName | teamIds: ${teamIds}"))
+                player.sendMessage(Component.text("IsTaken: ${field.isTaken} | IsTeamEntrance: ${field.properties.teamEntrance != null} EntranceName: $entranceName | teamIds: $teamIds"))
             }
 
             Material.AIR -> {
@@ -139,15 +140,8 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                     gameArena.quit(player)
                 } else {
                     //TODO: Implement actual team selection later...
-                    val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[gameArena.id].random()
+                    val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[gameArena.id].filter { it.teamMembers.isEmpty() }.random()
                     gameArena.join(player.uniqueId, gameTeam, false)
-
-                    //TODO: Remove the 2 lines below after testing!!!
-                    val aiPlayerTeam = LudoGame.instance.gameTeamHandler.gameTeams[gameArena.id]
-                        .filter { it.teamMembers.isEmpty() }
-                        .random()
-
-                    gameArena.join(UUID.randomUUID(), aiPlayerTeam, true)
                 }
             }
 

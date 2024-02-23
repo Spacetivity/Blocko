@@ -20,6 +20,20 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5, Predicate { t -
             gameArena.sendArenaMessage(Component.text("Game starts in ${if (isOne) "one" else remainingSeconds} ${if (isOne) "second" else "seconds"}."))
             gameArena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP)
         }
+
+        //TODO: Remove the lines below after testing!!!
+//        if (remainingSeconds == 2) {
+//            val currentPlayerSize: Int = gameArena.currentPlayers.size
+//            val maxPlayerSize: Int = gameArena.maxPlayers
+//
+//            val missingPlayerCount: Int = (maxPlayerSize - currentPlayerSize) //-1
+//
+//            for (i in 0..<missingPlayerCount) {
+//                val randomGameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].first { it.teamMembers.isEmpty() }
+//                gameArena.join(UUID.randomUUID(), randomGameTeam, true)
+//            }
+//        }
+
     }
 
     override fun handleCountdownEnd() {

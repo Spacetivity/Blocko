@@ -22,6 +22,7 @@ class GameField(
 ) {
 
     fun trowOutOldHolder(newHolder: LivingEntity) {
+        println("==> reached throwout logic!!!!!!!!!!!!")
         val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
 
         if (!this.isTaken) return
@@ -34,6 +35,7 @@ class GameField(
         val teamSpawnLocation: GameTeamLocation = holderGameTeam.getFreeSpawnLocation()
             ?: throw NullPointerException("No empty team spawn was found for $holderGameTeam.name")
 
+        oldHolder.currentFieldId = null
         oldHolder.livingEntity?.teleport(teamSpawnLocation.getWorldPosition())
         teamSpawnLocation.isTaken = true
 
