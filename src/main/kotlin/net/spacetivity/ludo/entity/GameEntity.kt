@@ -145,13 +145,24 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         val newFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + 1
 
-        val goalFieldId: Int = if (dicedNumber == 1 || this.currentFieldId == null) newFieldId else this.lastStartField!! + dicedNumber
+        //val goalFieldId: Int = if (dicedNumber == 1 || this.currentFieldId == null) newFieldId else this.lastStartField!! + dicedNumber
+
+        var goalFieldId: Int
+
+        if (this.currentFieldId == null) {
+            goalFieldId = 0
+        } else if (dicedNumber == 1) {
+            goalFieldId = newFieldId
+        } else {
+            goalFieldId = this.lastStartField!! + dicedNumber
+        }
+
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
 
         if (isBlockedByTeamMember(goalField)) {
             val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return false
             gameArena.sendArenaMessage(Component.text("Cannot move entity. Target field is blocked!"))
-            return false
+            return false //TODO: Handle that correctly!!!
         }
 
         this.currentFieldId = newFieldId
@@ -182,6 +193,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         this.livingEntity!!.teleport(worldPosition)
 
         // checks if the new field contains already a new entity. If 'yes' it throws the entity out.
+        println(">> Moving (newFieldId: $newFieldId) (goalFieldId: $goalFieldId [${goalField.properties.getFieldId(teamName)}]) (isGoalTaken: ${goalField.isTaken}")
         if ((newFieldId == goalFieldId) && (goalField.isTaken && goalField.getCurrentHolder()!!.teamName != this.teamName)) {
             println("Throws out old holder!")
             goalField.trowOutOldHolder(this.livingEntity!!)

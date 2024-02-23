@@ -37,18 +37,28 @@ class GameFieldHandler {
     }
 
     fun getLastFieldForTeam(arenaId: String, teamName: String): GameField? {
-        return this.cachedGameFields[arenaId].maxByOrNull { gameField: GameField? ->
-            if (gameField == null) {
-                println("GAME FIELD IS NULL")
-                return null
-            }
-            val fieldId: Int? = gameField.properties.getFieldId(teamName)
-            if (fieldId == null) {
-                println("FIELD ID IS NULL")
-                return null
-            }
-            fieldId
+        val gameFieldsForTeam: MutableCollection<GameField> = this.cachedGameFields[arenaId]
+        val validTeamFieldIds: MutableList<Int> = mutableListOf()
+
+        for (gameField in gameFieldsForTeam) {
+            val fieldId: Int = gameField.properties.getFieldId(teamName) ?: continue
+            validTeamFieldIds.add(fieldId)
         }
+
+        val highestTeamFieldId: Int? = validTeamFieldIds.maxOrNull()
+        if (highestTeamFieldId == null) {
+            println("Last fieldId cannot be found for team $teamName")
+            println(validTeamFieldIds.joinToString(", "))
+            return null
+        }
+
+        val lastGameField: GameField? = gameFieldsForTeam.find { it.properties.getFieldId(teamName) == highestTeamFieldId }
+        if (lastGameField == null) {
+            println("Last field with id $highestTeamFieldId cannot be found for team $teamName")
+            return null
+        }
+
+        return lastGameField
     }
 
     fun getFieldForTeam(arenaId: String, teamName: String, id: Int): GameField? {
