@@ -95,6 +95,18 @@ class GamePlayActionHandler {
                                 gamePlayer.autoPickEntity(ingamePhase)
                             } else {
                                 gamePlayer.sendActionBar(Component.text("Please select a entity now.", NamedTextColor.LIGHT_PURPLE))
+
+                                val dicedNumber: Int = gamePlayer.dicedNumber ?: continue
+                                val entitiesFromTeam: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName)
+
+                                // Move to the next player is GamePlayer cannot move out an entity or move any other entity at the field
+                                if (entitiesFromTeam.all { (dicedNumber != 6 && it.currentFieldId == null) || !it.isMovableTo(gamePlayer.dicedNumber!!) }) {
+                                    gamePlayer.activeEntity = null
+                                    gamePlayer.lastEntityPickRule = null
+                                    ingamePhase.phaseMode = GamePhaseMode.DICE
+                                    ingamePhase.setNextControllingTeam()
+                                }
+
                             }
                         }
 

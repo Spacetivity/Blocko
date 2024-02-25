@@ -57,9 +57,9 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         this.livingEntity = null
     }
 
-    fun landsAfterOpponent(dicedNumber: Int): Boolean {
+    fun landsAfterOpponent(dicedNumber: Int): Boolean { //TODO: test this!!!
         val startFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!!
-        val goalFieldId: Int = startFieldId + dicedNumber
+        val goalFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + dicedNumber
 
         if (isTeamGarageField(startFieldId)) return false
 
@@ -69,7 +69,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
             val field: GameField = getTeamField(currentFieldId) ?: continue
             if (currentFieldId == goalFieldId) continue //if the field is the goal field
 
-            if (field.isTaken && field.getCurrentHolder()!!.teamName != this.teamName) isAfterOpponent = true
+            if (field.isTaken && field.currentHolder?.teamName != this.teamName) isAfterOpponent = true
         }
 
         return isAfterOpponent
@@ -105,8 +105,11 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
 
-        if (isBlockedByTeamMember(goalField))
+        println("Goal field blocked by team member: ${isBlockedByTeamMember(goalField)}")
+
+        if (isBlockedByTeamMember(goalField)) {
             return false
+        }
 
         val lastFieldForTeam: GameField = LudoGame.instance.gameFieldHandler.getLastFieldForTeam(this.arenaId, this.teamName)
             ?: throw NullPointerException("Last field cannot be found for team $teamName")
@@ -125,7 +128,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         if (isTeamGarageField(startFieldId)) return false
 
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
-        return goalField.isTaken && goalField.getCurrentHolder()!!.teamName != this.teamName
+        return goalField.isTaken && goalField.currentHolder?.teamName != this.teamName
     }
 
     fun moveOneFieldForward(dicedNumber: Int, fieldHeight: Double): Boolean {
@@ -133,7 +136,11 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         if (this.currentFieldId != null) {
             val oldField: GameField = getTeamField(this.currentFieldId!!)!!
-            oldField.isTaken = false
+
+            if (oldField.isTaken && oldField.currentHolder != null && oldField.currentHolder?.teamName == this.teamName) {
+                oldField.isTaken = false
+                oldField.currentHolder = null
+            }
         }
 
         if (this.lastStartField == null) {
@@ -147,43 +154,38 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         val goalFieldId: Int = if (this.currentFieldId == null) 0 else if (dicedNumber == 1) newFieldId else this.lastStartField!! + dicedNumber
 
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
+        val newField: GameField = getTeamField(newFieldId) ?: return false
 
-        this.currentFieldId = newFieldId
-
-        val newField: GameField = getTeamField(this.currentFieldId!!) ?: return false
         val rotation: PathFace? = newField.properties.rotation
         val teamEntranceName: String? = newField.properties.teamEntrance
 
-        // decides if the entity needs to rotate
-        if (rotation != null && teamEntranceName == null) {
+        this.currentFieldId = newFieldId
+
+        // decides if the entity needs to rotate (old statement in notepad...)
+        if (rotation != null && (teamEntranceName == null || teamEntranceName == this.teamName))
             this.forceYaw = rotation.radians
-        } else if (rotation != null && teamEntranceName == this.teamName) {
-            this.forceYaw = rotation.radians
-            println("Turn possible >> (EntranceName)${teamEntranceName}:${this.teamName}(EntityName)")
-        }
 
         // checks if the current field has already a holder, if yes and the new field is not the goal field, the field will be skipped.
-        if ((newFieldId != goalFieldId) && newField.isTaken) {
-            println("==> Field is skipped!!!")
+        if ((newFieldId != goalFieldId) && newField.isTaken)
             return false
-        }
-
-        newField.isTaken = true
 
         val worldPosition: Location = newField.getWorldPosition(fieldHeight)
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
         this.livingEntity!!.teleport(worldPosition)
 
-        val currentHolder: GameEntity? = newField.getCurrentHolder()
-        val currentHolderTeamName = currentHolder?.teamName ?: "-/-"
+        val currentHolderTeamName: String = newField.currentHolder?.teamName ?: "-/-"
 
         // checks if the new field contains already a new entity. If 'yes' it throws the entity out.
-        println(">> Moving (newFieldId: $newFieldId) (goalFieldId: $goalFieldId [${goalField.properties.getFieldId(teamName)}]) (isGoalTaken: ${goalField.isTaken}, holder: $currentHolderTeamName")
+        println(">> Moving (newFieldId: $newFieldId) (goalFieldId: $goalFieldId [${goalField.properties.getFieldId(teamName)}]) " +
+                "(isGoalTaken: ${goalField.isTaken}, holderTeam: $currentHolderTeamName | thisTeam: $teamName")
 
-        if ((newFieldId == goalFieldId) && (newField.isTaken && currentHolder!!.teamName != this.teamName)) {
+        if ((newFieldId == goalFieldId) && (newField.isTaken && currentHolderTeamName != this.teamName)) {
             println("Throws out old holder!")
             goalField.trowOutOldHolder(this.livingEntity!!)
         }
+
+        newField.isTaken = true
+        newField.currentHolder = this
 
         return this.currentFieldId == goalFieldId
     }
@@ -197,8 +199,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
     }
 
     private fun isBlockedByTeamMember(field: GameField): Boolean {
-        if (field.getCurrentHolder() == null) return false
-        return field.isTaken && field.getCurrentHolder()!!.teamName == this.teamName
+        return field.isTaken && field.currentHolder?.teamName == this.teamName
     }
 
 }

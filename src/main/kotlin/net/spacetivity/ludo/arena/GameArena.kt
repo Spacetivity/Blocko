@@ -51,12 +51,12 @@ class GameArena(
         }
 
         if (!this.phase.isIdle()) {
-            gamePlayer.sendMessage(Component.text("The game is already running!"))
+            gamePlayer.sendMessage(Component.text("The game is already running!", NamedTextColor.DARK_RED))
             return
         }
 
         if (this.currentPlayers.size >= this.maxPlayers) {
-            gamePlayer.sendMessage(Component.text("Arena is full!"))
+            gamePlayer.sendMessage(Component.text("Arena is full!", NamedTextColor.DARK_RED))
             return
         }
 

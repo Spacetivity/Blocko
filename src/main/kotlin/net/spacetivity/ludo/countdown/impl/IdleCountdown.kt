@@ -8,6 +8,7 @@ import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Sound
 import org.bukkit.entity.EntityType
 import org.bukkit.scheduler.BukkitTask
+import java.util.*
 import java.util.function.Predicate
 
 class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5, Predicate { t -> t >= 1 }) {
@@ -22,17 +23,17 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5, Predicate { t -
         }
 
         //TODO: Remove the lines below after testing!!!
-//        if (remainingSeconds == 2) {
-//            val currentPlayerSize: Int = gameArena.currentPlayers.size
-//            val maxPlayerSize: Int = gameArena.maxPlayers
-//
-//            val missingPlayerCount: Int = (maxPlayerSize - currentPlayerSize) //-1
-//
-//            for (i in 0..<missingPlayerCount) {
-//                val randomGameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].first { it.teamMembers.isEmpty() }
-//                gameArena.join(UUID.randomUUID(), randomGameTeam, true)
-//            }
-//        }
+        if (remainingSeconds == 2) {
+            val currentPlayerSize: Int = gameArena.currentPlayers.size
+            val maxPlayerSize: Int = gameArena.maxPlayers
+
+            val missingPlayerCount: Int = (maxPlayerSize - currentPlayerSize) //-1
+
+            for (i in 0..<missingPlayerCount) {
+                val randomGameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].first { it.teamMembers.isEmpty() }
+                gameArena.join(UUID.randomUUID(), randomGameTeam, true)
+            }
+        }
 
     }
 

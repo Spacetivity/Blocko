@@ -21,6 +21,8 @@ class GameField(
     var isTaken: Boolean = false
 ) {
 
+    var currentHolder: GameEntity? = null
+
     fun trowOutOldHolder(newHolder: LivingEntity) {
         println("==> reached throwout logic!!!!!!!!!!!!")
         val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
@@ -29,7 +31,7 @@ class GameField(
         if (gameArena == null) return
 
         val gameTeamHandler: GameTeamHandler = LudoGame.instance.gameTeamHandler
-        val oldHolder: GameEntity = getCurrentHolder() ?: return
+        val oldHolder: GameEntity = this.currentHolder ?: return
 
         val holderGameTeam: GameTeam = gameTeamHandler.getTeam(this.arenaId, oldHolder.teamName) ?: return
         val teamSpawnLocation: GameTeamLocation = holderGameTeam.getFreeSpawnLocation()
@@ -48,11 +50,6 @@ class GameField(
         val fixedLocation: Location = location.clone().toCenterLocation()
         fixedLocation.y = fieldHeight
         return fixedLocation
-    }
-
-    fun getCurrentHolder(): GameEntity? {
-        val worldPosition = getWorldPosition(0.0)
-        return LudoGame.instance.gameEntityHandler.getEntityAtField(arenaId, worldPosition.x, worldPosition.z)
     }
 
 }

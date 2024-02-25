@@ -23,12 +23,12 @@ enum class AIEntityPickRule(val weight: Int, val probability: Double) {
 
     companion object {
 
-        fun analyzeCurrentRuleSituation(aiPlayer: GamePlayer, dicedNumber: Int): Pair<AIEntityPickRule, GameEntity?> {
-            val gameEntities: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(aiPlayer.arenaId, aiPlayer.teamName)
+        fun analyzeCurrentRuleSituation(gamePlayer: GamePlayer, dicedNumber: Int): Pair<AIEntityPickRule, GameEntity?> {
+            val gameEntities: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName)
 
             var rule: Pair<AIEntityPickRule, GameEntity?> = Pair(NOT_MOVABLE, null)
 
-            if (gameEntities.any { it.currentFieldId == null } && dicedNumber == 6 && !LudoGame.instance.gameFieldHandler.getFieldForTeam(aiPlayer.arenaId, aiPlayer.teamName, 0)!!.isTaken) {
+            if (gameEntities.any { it.currentFieldId == null } && dicedNumber == 6 && !LudoGame.instance.gameFieldHandler.getFieldForTeam(gamePlayer.arenaId, gamePlayer.teamName, 0)!!.isTaken) {
                 rule = Pair(MOVABLE_OUT_OF_START, gameEntities.find { it.currentFieldId == null })
             } else if (gameEntities.all { it.currentFieldId == null } && dicedNumber == 6) {
                 rule = Pair(MOVABLE_OUT_OF_START, gameEntities.random())

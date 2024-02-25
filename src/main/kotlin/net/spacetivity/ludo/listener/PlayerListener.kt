@@ -126,6 +126,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 if (block == null) return
                 if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
                 if (!block.type.name.contains("WALL_SIGN", true)) return
+
                 event.isCancelled = true
 
                 val arenaSign: GameArenaSign = LudoGame.instance.gameArenaSignHandler.getSign(block.location) ?: return
@@ -138,10 +139,12 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
                 if (player.getArena() != null && player.getArena()!!.id == gameArena.id) {
                     gameArena.quit(player)
-                } else {
+                } else if (player.getArena() == null) {
                     //TODO: Implement actual team selection later...
                     val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[gameArena.id].filter { it.teamMembers.isEmpty() }.random()
                     gameArena.join(player.uniqueId, gameTeam, false)
+                } else {
+                    player.sendMessage(Component.text("Error : No sign action found...", NamedTextColor.DARK_RED))
                 }
             }
 
@@ -186,6 +189,11 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 val entityId: Int = PersistentDataUtils.getData(itemInHand.itemMeta, "entitySelector", Int::class.java)
                 val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId }
                     ?: return
+
+                if (gamePlayer.dicedNumber!! != 6 && gameEntity.currentFieldId == null) {
+                    player.sendMessage(Component.text("You cannot move a entity into the field without dicing 6 first!", NamedTextColor.RED))
+                    return
+                }
 
                 gamePlayer.manuallyPickEntity(ingamePhase, gameEntity)
                 getOtherHighlightedEntities(gamePlayer, gameArena, gameEntity).forEach { it.toggleHighlighting(false) }
