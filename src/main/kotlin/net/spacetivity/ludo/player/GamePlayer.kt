@@ -11,10 +11,11 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
 
-class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val isAI: Boolean, var dicedNumber: Int?) {
+class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val isAI: Boolean) {
 
+    var dicedNumber: Int? = null
     var activeEntity: GameEntity? = null
-    var lastEntityPickRule: AIEntityPickRule? = null
+    var lastEntityPickRule: EntityPickRule? = null
 
     fun dice() {
         if (isDicing()) return
@@ -31,12 +32,12 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
     fun autoPickEntity(ingamePhase: IngamePhase) {
         if (this.dicedNumber == null) return
 
-        val situation: Pair<AIEntityPickRule, GameEntity?> = AIEntityPickRule.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
+        val situation: Pair<EntityPickRule, GameEntity?> = EntityPickRule.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
 
         println("TRIED PICKING A ENTITY FOR TEAM $teamName with result ${situation.first.name}")
 
         // If there is no entity available for moving forward, the game moves on to the next team to play
-        if (situation.first == AIEntityPickRule.NOT_MOVABLE && situation.second == null) {
+        if (situation.first == EntityPickRule.NOT_MOVABLE && situation.second == null) {
             this.activeEntity = null
             this.lastEntityPickRule = null
             ingamePhase.phaseMode = GamePhaseMode.DICE

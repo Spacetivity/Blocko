@@ -28,7 +28,7 @@ class GamePlayActionHandler {
                 val gamePlayer: GamePlayer = gameEntity.controller ?: continue
                 val dicedNumber: Int = gamePlayer.dicedNumber ?: continue
 
-                val ignoreDicedNumber: Boolean = gamePlayer.lastEntityPickRule != null && gamePlayer.lastEntityPickRule == AIEntityPickRule.MOVABLE_OUT_OF_START
+                val ignoreDicedNumber: Boolean = gamePlayer.lastEntityPickRule != null && gamePlayer.lastEntityPickRule == EntityPickRule.MOVABLE_OUT_OF_START
                 val hasReachedGoal: Boolean = gameEntity.moveOneFieldForward(if (ignoreDicedNumber) 1 else dicedNumber, 0.0)
                 if (!hasReachedGoal) continue
 
@@ -51,10 +51,16 @@ class GamePlayActionHandler {
                 gameEntity.shouldMove = false
 
                 val newControllingTeam: GameTeam = ingamePhase.setNextControllingTeam() ?: continue
-                gameArena.sendArenaMessage(Component.text("${newControllingTeam.name} can now dice!"))
+
+                if (ingamePhase.lastControllingTeamId == ingamePhase.controllingTeamId) {
+                    gameArena.sendArenaMessage(Component.text("${newControllingTeam.name} can now dice again!"))
+                } else {
+                    gameArena.sendArenaMessage(Component.text("${newControllingTeam.name} can now dice!"))
+                }
 
                 gamePlayer.activeEntity = null
                 gamePlayer.lastEntityPickRule = null
+                gamePlayer.dicedNumber = null //TODO: maybe this causes errors
             }
         }, 0L, 20L)
     }

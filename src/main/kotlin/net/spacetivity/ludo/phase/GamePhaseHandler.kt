@@ -42,6 +42,8 @@ class GamePhaseHandler {
             val smallestTeamId: Int? = availableTeams.minOfOrNull { it.teamId }
 
             newGamePhase.controllingTeamId = availableTeams.filter { it.teamId == smallestTeamId }.random().teamId
+            newGamePhase.lastControllingTeamId = newGamePhase.controllingTeamId
+
             println("Selected initial team to > ${newGamePhase.controllingTeamId}")
         }
 

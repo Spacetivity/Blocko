@@ -43,7 +43,7 @@ class GameArena(
     }
 
     fun join(uuid: UUID, gameTeam: GameTeam, isAI: Boolean) {
-        val gamePlayer = GamePlayer(uuid, this.id, gameTeam.name, isAI, null)
+        val gamePlayer = GamePlayer(uuid, this.id, gameTeam.name, isAI)
 
         if (this.currentPlayers.any { it.uuid == gamePlayer.uuid }) {
             gamePlayer.sendMessage(Component.text("Already in arena!"))

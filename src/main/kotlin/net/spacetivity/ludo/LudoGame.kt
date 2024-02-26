@@ -122,8 +122,6 @@ class LudoGame : JavaPlugin() {
         this.gamePlayActionHandler.startMovementTask()
         this.gamePlayActionHandler.startPlayerTask()
 
-        //TODO: Load all worlds from all game arenas!
-
         registerCommand(LudoCommand())
         PlayerSetupListener(this)
         PlayerListener(this)

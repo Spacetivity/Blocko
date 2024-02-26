@@ -3,7 +3,7 @@ package net.spacetivity.ludo.player
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.entity.GameEntity
 
-enum class AIEntityPickRule(val weight: Int, val probability: Double) {
+enum class EntityPickRule(val weight: Int, val probability: Double) {
 
     // Weight of the rule (Int) and its corresponding probability (Double)
     // If the weights of two rules are equal, a random number from 1 to 10 is generated. If it's greater than 5, the one with the higher probability wins.
@@ -23,10 +23,10 @@ enum class AIEntityPickRule(val weight: Int, val probability: Double) {
 
     companion object {
 
-        fun analyzeCurrentRuleSituation(gamePlayer: GamePlayer, dicedNumber: Int): Pair<AIEntityPickRule, GameEntity?> {
+        fun analyzeCurrentRuleSituation(gamePlayer: GamePlayer, dicedNumber: Int): Pair<EntityPickRule, GameEntity?> {
             val gameEntities: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName)
 
-            var rule: Pair<AIEntityPickRule, GameEntity?> = Pair(NOT_MOVABLE, null)
+            var rule: Pair<EntityPickRule, GameEntity?> = Pair(NOT_MOVABLE, null)
 
             if (gameEntities.any { it.currentFieldId == null } && dicedNumber == 6 && !LudoGame.instance.gameFieldHandler.getFieldForTeam(gamePlayer.arenaId, gamePlayer.teamName, 0)!!.isTaken) {
                 rule = Pair(MOVABLE_OUT_OF_START, gameEntities.find { it.currentFieldId == null })
@@ -38,7 +38,7 @@ enum class AIEntityPickRule(val weight: Int, val probability: Double) {
                 rule = Pair(MOVABLE_AWAY_FROM_FIRST_FIELD, gameEntities.find { it.currentFieldId != null && it.currentFieldId == 0 })
             } else {
 
-                val availableRules: MutableList<Pair<AIEntityPickRule, GameEntity?>> = mutableListOf()
+                val availableRules: MutableList<Pair<EntityPickRule, GameEntity?>> = mutableListOf()
 
                 for (gameEntity: GameEntity in gameEntities) {
                     if (gameEntity.isInGarage() && gameEntity.isMovableTo(dicedNumber)) {
@@ -59,13 +59,13 @@ enum class AIEntityPickRule(val weight: Int, val probability: Double) {
 
                     // find the highest weighted rule | if two have the same weight, do the number game!
                     if (availableRules.size > 1) {
-                        val rulesWithEqualWeight: List<Pair<AIEntityPickRule, GameEntity?>> = availableRules.filter { it.first.weight == availableRules[0].first.weight }
+                        val rulesWithEqualWeight: List<Pair<EntityPickRule, GameEntity?>> = availableRules.filter { it.first.weight == availableRules[0].first.weight }
 
                         if (rulesWithEqualWeight.size > 1) {
                             val randomNumber: Int = (1..10).random()
 
                             if (randomNumber > 5) {
-                                val possibleRule: Pair<AIEntityPickRule, GameEntity?>? = availableRules.maxByOrNull { it.first.probability }
+                                val possibleRule: Pair<EntityPickRule, GameEntity?>? = availableRules.maxByOrNull { it.first.probability }
                                 if (possibleRule != null) rule = possibleRule
                             } else {
                                 rule = rulesWithEqualWeight.random()
