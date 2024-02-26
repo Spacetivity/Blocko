@@ -87,12 +87,12 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
         val builder = MiniMessage.builder()
         val build = builder.tags(TagResolver.builder().resolver(StandardTags.color()).build()).build()
 
-        if (message == null) {
-            return listOf(build.deserialize("<red>$key not found..."))
-        }
+        if (message == null) return listOf(build.deserialize("<red>$key not found..."))
 
         val components: MutableList<Component> = ArrayList()
-        val tagBuilder: TagResolver.Builder = TagResolver.builder().resolvers(this.defaultResolvers).resolvers(*toReplace)
+        val tagBuilder: TagResolver.Builder = TagResolver.builder()
+            .resolvers(this.defaultResolvers)
+            .resolvers(*toReplace)
 
         if (!hasMultipleLines(key)) {
             if (message.contains("<prefix")) tagBuilder.resolver(extractPrefix(message))
