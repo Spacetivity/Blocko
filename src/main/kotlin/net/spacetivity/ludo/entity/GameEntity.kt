@@ -105,8 +105,6 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
 
-        println("Goal field blocked by team member: ${isBlockedByTeamMember(goalField)}")
-
         if (isBlockedByTeamMember(goalField)) {
             return false
         }
@@ -176,8 +174,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         val currentHolderTeamName: String = newField.currentHolder?.teamName ?: "-/-"
 
         // checks if the new field contains already a new entity. If 'yes' it throws the entity out.
-        println(">> Moving (newFieldId: $newFieldId) (goalFieldId: $goalFieldId [${goalField.properties.getFieldId(teamName)}]) " +
-                "(isGoalTaken: ${goalField.isTaken}, holderTeam: $currentHolderTeamName | thisTeam: $teamName")
+        println(">> Moving (newFieldId: $newFieldId) (goalFieldId: $goalFieldId [${goalField.properties.getFieldId(teamName)}]) oldHolderTeam: $currentHolderTeamName | thisTeam: $teamName")
 
         if ((newFieldId == goalFieldId) && (newField.isTaken && currentHolderTeamName != this.teamName)) {
             println("Throws out old holder!")

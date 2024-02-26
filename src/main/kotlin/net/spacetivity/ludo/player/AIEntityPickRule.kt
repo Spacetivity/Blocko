@@ -34,7 +34,7 @@ enum class AIEntityPickRule(val weight: Int, val probability: Double) {
                 rule = Pair(MOVABLE_OUT_OF_START, gameEntities.random())
             } else if (gameEntities.all { it.currentFieldId == null } && dicedNumber != 6) {
                 rule = Pair(NOT_MOVABLE, null)
-            } else if (gameEntities.any { it.currentFieldId == 0 }) {
+            } else if (gameEntities.any { it.currentFieldId == 0 && it.isMovableTo(dicedNumber) }) { // vielleicht war hier der bug, dass entities sich überschrieben haben, da nicht überprüft wurde, ob das entity auch wirklich movable ist.
                 rule = Pair(MOVABLE_AWAY_FROM_FIRST_FIELD, gameEntities.find { it.currentFieldId != null && it.currentFieldId == 0 })
             } else {
 
