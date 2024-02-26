@@ -3,6 +3,7 @@ package net.spacetivity.ludo.listener
 import io.papermc.paper.event.player.PlayerOpenSignEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.sign.GameArenaSign
@@ -10,6 +11,7 @@ import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.extensions.getArena
 import net.spacetivity.ludo.extensions.toGamePlayerInstance
+import net.spacetivity.ludo.extensions.translateMessage
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
@@ -24,10 +26,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerItemHeldEvent
-import org.bukkit.event.player.PlayerKickEvent
-import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
@@ -37,6 +36,13 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
     init {
         this.ludoGame.server.pluginManager.registerEvents(this, this.ludoGame)
+    }
+
+    @EventHandler
+    fun onJoin(event: PlayerJoinEvent) {
+        val player: Player = event.player
+        event.joinMessage(null)
+        player.translateMessage("hello.world", Placeholder.parsed("name", player.name))
     }
 
     @EventHandler
