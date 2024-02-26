@@ -24,7 +24,6 @@ import net.spacetivity.ludo.field.GameFieldProperties
 import net.spacetivity.ludo.field.GameFieldPropertiesTypeAdapter
 import net.spacetivity.ludo.files.DatabaseFile
 import net.spacetivity.ludo.files.GlobalConfigFile
-import net.spacetivity.ludo.files.SpaceFile
 import net.spacetivity.ludo.listener.PlayerListener
 import net.spacetivity.ludo.listener.PlayerSetupListener
 import net.spacetivity.ludo.phase.GamePhaseHandler
@@ -38,16 +37,11 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.scheduler.BukkitTask
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
-import kotlin.reflect.KClass
 
 class LudoGame : JavaPlugin() {
 
@@ -66,9 +60,7 @@ class LudoGame : JavaPlugin() {
     lateinit var gameFieldHandler: GameFieldHandler
     lateinit var gameArenaSignHandler: GameArenaSignHandler
 
-    lateinit var gamePlayActionHandler: GamePlayActionHandler
-
-    private var idleTask: BukkitTask? = null
+    private lateinit var gamePlayActionHandler: GamePlayActionHandler
 
     override fun onEnable() {
         instance = this
@@ -128,7 +120,6 @@ class LudoGame : JavaPlugin() {
     }
 
     override fun onDisable() {
-        this.idleTask?.cancel()
         this.gameArenaHandler.resetArenas()
         this.diceHandler.stopDiceAnimation()
         this.gamePlayActionHandler.stopTasks()
@@ -160,11 +151,11 @@ class LudoGame : JavaPlugin() {
     }
 
     private fun createOrLoadDatabaseProperties(): DatabaseFile {
-        return createOrLoadFile("global", "mysql", DatabaseFile::class, DatabaseFile("-", 3306, "blocko_game", "-", "-"))
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile("-", 3306, "blocko_game", "-", "-"))
     }
 
     private fun createOrLoadDiceSidesFile(): DiceSidesFile {
-        return createOrLoadFile("dice", "dice_sides", DiceSidesFile::class, DiceSidesFile(mutableMapOf(
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "dice", "dice_sides", DiceSidesFile::class, DiceSidesFile(mutableMapOf(
             Pair(1, HeadUtils.DICE_ONE),
             Pair(2, HeadUtils.DICE_TWO),
             Pair(3, HeadUtils.DICE_THREE),
@@ -177,42 +168,7 @@ class LudoGame : JavaPlugin() {
     private fun createOrLoadGlobalConfigFile(): GlobalConfigFile {
         val availableTranslationLanguages: List<String> = this.translationHandler.cachedTranslations.map { it.name }
         val languageName: String = if (availableTranslationLanguages.contains("en_US")) "en_US" else availableTranslationLanguages[0]
-        return createOrLoadFile("global", "config", GlobalConfigFile::class, GlobalConfigFile(languageName, Material.GOLDEN_HOE.name))
-    }
-
-    fun <T : SpaceFile> createOrLoadFile(subFolderName: String, fileName: String, clazz: KClass<T>, content: T): T {
-        val filePath = File("${dataFolder.toPath()}/$subFolderName")
-        val result: T
-
-        if (!Files.exists(filePath.toPath())) Files.createDirectories(filePath.toPath())
-        val file: File = Paths.get("${filePath}/$fileName.json").toFile()
-
-        if (!Files.exists(file.toPath())) {
-            result = content
-            FileUtils.save(file, result)
-        } else {
-            result = FileUtils.read(file, clazz.java)!!
-        }
-
-        return result
-    }
-
-    fun <T : SpaceFile> readFile(subFolderName: String, fileName: String, clazz: KClass<T>): T? {
-        val filePath = File("${dataFolder.toPath()}/$subFolderName")
-
-        if (!Files.exists(filePath.toPath())) return null
-        val file: File = Paths.get("${filePath}/$fileName.json").toFile()
-
-        return FileUtils.read(file, clazz.java)
-    }
-
-    fun readRawFile(subFolderName: String, fileName: String): File? {
-        val filePath = File("${dataFolder.toPath()}/$subFolderName")
-
-        if (!Files.exists(filePath.toPath())) return null
-        val file: File = Paths.get("${filePath}/$fileName.json").toFile()
-
-        return file
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(languageName, Material.GOLDEN_HOE.name))
     }
 
 }

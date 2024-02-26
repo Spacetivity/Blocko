@@ -116,7 +116,7 @@ class DiceHandler {
         gamePlayer.setCurrentDiceNumber(diceSide.first)
         gamePlayer.sendActionBar(Component.text("Current number: ${diceSide.first}", NamedTextColor.AQUA, TextDecoration.BOLD))
 
-        println("ROLLED THE DICE: >> ${diceSide.first}")
+        println("${gamePlayer.teamName} ROLES THE DICE: >> ${diceSide.first}")
     }
 
     private fun getDiceDisplayName(diceNumber: Int): Component {
