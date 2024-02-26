@@ -23,7 +23,7 @@ class GameArenaSetupTool(private val holder: Player) {
 
     var currentMode: ToolMode = ToolMode.ADD_FIELD
 
-    val itemStack: ItemStack = ItemBuilder(Material.entries.find { it.name == LudoGame.instance.itemsFile.setupItemType }
+    val itemStack: ItemStack = ItemBuilder(Material.entries.find { it.name == LudoGame.instance.globalConfigFile.setupItemType }
         ?: throw NullPointerException("Invalid setup item type!"))
         .setName(Component.text("Setup Tool", NamedTextColor.AQUA, TextDecoration.BOLD))
         .setLoreByComponent(fetchLore())

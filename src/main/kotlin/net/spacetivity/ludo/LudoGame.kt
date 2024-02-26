@@ -23,7 +23,7 @@ import net.spacetivity.ludo.field.GameFieldHandler
 import net.spacetivity.ludo.field.GameFieldProperties
 import net.spacetivity.ludo.field.GameFieldPropertiesTypeAdapter
 import net.spacetivity.ludo.files.DatabaseFile
-import net.spacetivity.ludo.files.ItemsFile
+import net.spacetivity.ludo.files.GlobalConfigFile
 import net.spacetivity.ludo.files.SpaceFile
 import net.spacetivity.ludo.listener.PlayerListener
 import net.spacetivity.ludo.listener.PlayerSetupListener
@@ -31,6 +31,7 @@ import net.spacetivity.ludo.phase.GamePhaseHandler
 import net.spacetivity.ludo.player.GamePlayActionHandler
 import net.spacetivity.ludo.team.GameTeamHandler
 import net.spacetivity.ludo.team.GameTeamLocationDAO
+import net.spacetivity.ludo.translation.TranslationHandler
 import net.spacetivity.ludo.utils.FileUtils
 import net.spacetivity.ludo.utils.HeadUtils
 import org.bukkit.Bukkit
@@ -51,8 +52,9 @@ import kotlin.reflect.KClass
 class LudoGame : JavaPlugin() {
 
     lateinit var diceSidesFile: DiceSidesFile
-    lateinit var itemsFile: ItemsFile
+    lateinit var globalConfigFile: GlobalConfigFile
 
+    lateinit var translationHandler: TranslationHandler
     lateinit var commandHandler: LudoCommandHandler
     lateinit var bossbarHandler: BossbarHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
@@ -97,7 +99,11 @@ class LudoGame : JavaPlugin() {
         }
 
         this.diceSidesFile = createOrLoadDiceSidesFile()
-        this.itemsFile = createOrLoadItemsFile()
+
+        this.translationHandler = TranslationHandler()
+        this.translationHandler.generateTranslations(this::class.java)
+
+        this.globalConfigFile = createOrLoadGlobalConfigFile()
 
         this.commandHandler = LudoCommandHandler()
         this.bossbarHandler = BossbarHandler()
@@ -156,7 +162,7 @@ class LudoGame : JavaPlugin() {
     }
 
     private fun createOrLoadDatabaseProperties(): DatabaseFile {
-        return createOrLoadFile("database", "mysql", DatabaseFile::class, DatabaseFile("-", 3306, "blocko_game", "-", "-"))
+        return createOrLoadFile("global", "mysql", DatabaseFile::class, DatabaseFile("-", 3306, "blocko_game", "-", "-"))
     }
 
     private fun createOrLoadDiceSidesFile(): DiceSidesFile {
@@ -170,11 +176,13 @@ class LudoGame : JavaPlugin() {
         )))
     }
 
-    private fun createOrLoadItemsFile(): ItemsFile {
-        return createOrLoadFile("items", "items", ItemsFile::class, ItemsFile(Material.GOLDEN_HOE.name))
+    private fun createOrLoadGlobalConfigFile(): GlobalConfigFile {
+        val availableTranslationLanguages: List<String> = this.translationHandler.cachedTranslations.map { it.name }
+        val languageName: String = if (availableTranslationLanguages.contains("en_US")) "en_US" else availableTranslationLanguages[0]
+        return createOrLoadFile("global", "config", GlobalConfigFile::class, GlobalConfigFile(languageName, Material.GOLDEN_HOE.name))
     }
 
-    private fun <T : SpaceFile> createOrLoadFile(subFolderName: String, fileName: String, clazz: KClass<T>, content: T): T {
+    fun <T : SpaceFile> createOrLoadFile(subFolderName: String, fileName: String, clazz: KClass<T>, content: T): T {
         val filePath = File("${dataFolder.toPath()}/$subFolderName")
         val result: T
 
@@ -189,6 +197,24 @@ class LudoGame : JavaPlugin() {
         }
 
         return result
+    }
+
+    fun <T : SpaceFile> readFile(subFolderName: String, fileName: String, clazz: KClass<T>): T? {
+        val filePath = File("${dataFolder.toPath()}/$subFolderName")
+
+        if (!Files.exists(filePath.toPath())) return null
+        val file: File = Paths.get("${filePath}/$fileName.json").toFile()
+
+        return FileUtils.read(file, clazz.java)
+    }
+
+    fun readRawFile(subFolderName: String, fileName: String): File? {
+        val filePath = File("${dataFolder.toPath()}/$subFolderName")
+
+        if (!Files.exists(filePath.toPath())) return null
+        val file: File = Paths.get("${filePath}/$fileName.json").toFile()
+
+        return file
     }
 
 }
