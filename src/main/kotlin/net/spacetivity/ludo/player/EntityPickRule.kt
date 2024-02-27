@@ -39,14 +39,14 @@ enum class EntityPickRule(val weight: Int, val probability: Double) {
 
         fun analyzeCurrentRuleSituation(gamePlayer: GamePlayer, dicedNumber: Int): Pair<EntityPickRule, GameEntity?> {
             val gameEntities: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName)
-            var bestRule: Pair<EntityPickRule, GameEntity?> = Pair(EntityPickRule.NOT_MOVABLE, null)
+            var bestRule: Pair<EntityPickRule, GameEntity?> = Pair(NOT_MOVABLE, null)
 
             val startFieldForTeam: GameField = LudoGame.instance.gameFieldHandler.getFirstFieldForTeam(gamePlayer.arenaId, gamePlayer.teamName)!!
 
             for (gameEntity: GameEntity in gameEntities) {
                 val rule: Pair<EntityPickRule, GameEntity?> = when {
                     gameEntity.isAtSpawn() && dicedNumber == 6 && (startFieldForTeam.currentHolder == null || startFieldForTeam.currentHolder?.teamName != gamePlayer.teamName) -> {
-                        Pair(EntityPickRule.MOVABLE_OUT_OF_START, gameEntity)
+                        Pair(MOVABLE_OUT_OF_START, gameEntity)
                     }
 
                     gameEntity.currentFieldId == 0 && gameEntity.isMovableTo(dicedNumber) -> {
@@ -76,31 +76,21 @@ enum class EntityPickRule(val weight: Int, val probability: Double) {
 
                     else -> {
                         println("!!!<==>>>>>>> REACHED NOT_MOVABLE <<<<<<<==>!!!")
-                        Pair(EntityPickRule.NOT_MOVABLE, null)
+                        Pair(NOT_MOVABLE, null)
                     }
                 }
 
                 if (bestRule.first.weight < rule.first.weight || (bestRule.first.weight == rule.first.weight && (1..10).random() > 5 && bestRule.first.probability < rule.first.probability)) {
                     bestRule = rule
                 }
-
-//                if (bestRule.first.weight < rule.first.weight) {
-//                    bestRule = rule;
-//                } else if (bestRule.first.weight == rule.first.weight) {
-//                    // Bei gleicher Gewichtung kann die Wahrscheinlichkeit oder ein anderer Faktor als Tie-Breaker dienen
-//                    if (bestRule.first.probability < rule.first.probability) {
-//                        bestRule = rule;
-//                    }
-//                }
-
             }
 
             // Fallback für spezielle Fälle außerhalb der Schleife
             if (gameEntities.all { it.isAtSpawn() }) {
                 if (dicedNumber == 6) {
-                    return Pair(EntityPickRule.MOVABLE_OUT_OF_START, gameEntities.random())
+                    return Pair(MOVABLE_OUT_OF_START, gameEntities.random())
                 } else {
-                    return Pair(EntityPickRule.NOT_MOVABLE, null)
+                    return Pair(NOT_MOVABLE, null)
                 }
             }
 

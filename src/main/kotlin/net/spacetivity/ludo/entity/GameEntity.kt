@@ -150,13 +150,15 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         val newField: GameField = getTeamField(newFieldId) ?: return false
 
         // clears holder from old field
-        if (this.currentFieldId != null) {
-            val oldField: GameField = getTeamField(this.currentFieldId!!)!!
+        val oldField: GameField = getTeamField(this.currentFieldId!!)!!
 
+        if (this.currentFieldId != null) {
             if (oldField.isTaken && (oldField.currentHolder != null && oldField.currentHolder?.teamName == this.teamName && oldField.currentHolder?.livingEntity?.uniqueId == this.livingEntity?.uniqueId)) {
                 oldField.isTaken = false
                 oldField.currentHolder = null
             }
+        } else {
+            LudoGame.instance.gameTeamHandler.getLocationOfTeam(this.arenaId, this.teamName, oldField.x, 0.0, oldField.z)?.isTaken = false
         }
 
         val rotation: PathFace? = newField.properties.rotation

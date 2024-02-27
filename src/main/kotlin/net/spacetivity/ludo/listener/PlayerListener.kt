@@ -53,12 +53,6 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
     }
 
     @EventHandler
-    fun onKick(event: PlayerKickEvent) {
-        val player: Player = event.player
-        player.getArena()?.quit(player)
-    }
-
-    @EventHandler
     fun openSignEvent(event: PlayerOpenSignEvent) {
         val player: Player = event.player
 
@@ -198,7 +192,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                     ?: return
 
                 if (gamePlayer.dicedNumber!! != 6 && gameEntity.currentFieldId == null) {
-                    player.sendMessage(Component.text("You cannot move a entity into the field without dicing 6 first!", NamedTextColor.RED))
+                    player.sendMessage(Component.text("You cannot move this entity into the field without dicing 6 first!", NamedTextColor.RED))
                     return
                 }
 

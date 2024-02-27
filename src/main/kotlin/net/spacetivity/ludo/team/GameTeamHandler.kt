@@ -94,4 +94,8 @@ class GameTeamHandler {
         return locations
     }
 
+    fun getLocationOfTeam(arenaId: String, teamName: String, x: Double, z: Double, y: Double): GameTeamLocation? {
+        return getLocationsOfAllTeams(arenaId).filter { it.teamName == teamName }.find { it.x == x && it.z == z && it.y == y }
+    }
+
 }

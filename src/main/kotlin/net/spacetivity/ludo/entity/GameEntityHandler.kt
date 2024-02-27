@@ -35,6 +35,7 @@ class GameEntityHandler {
     fun spawnEntity(gameTeamLocation: GameTeamLocation, type: EntityType) {
         val entityId: Int = this.gameEntities[gameTeamLocation.arenaId].filter { it.teamName == gameTeamLocation.teamName }.size
         GameEntity(gameTeamLocation.arenaId, gameTeamLocation.teamName, type, entityId).spawn(gameTeamLocation.getWorldPosition())
+        gameTeamLocation.isTaken = true
     }
 
 }
