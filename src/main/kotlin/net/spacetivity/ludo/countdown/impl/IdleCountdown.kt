@@ -43,7 +43,14 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5, Predicate { t -
             val gameTeam: GameTeam? = LudoGame.instance.gameTeamHandler.getTeam(gameTeamLocation.arenaId, gameTeamLocation.teamName)
             if (gameTeam == null || gameTeam.teamMembers.isEmpty()) continue
             LudoGame.instance.gameEntityHandler.spawnEntity(gameTeamLocation, EntityType.VILLAGER)
+            gameTeamLocation.isTaken = true
         }
+
+
+        for (teamLocation in LudoGame.instance.gameTeamHandler.gameTeams[arenaId].find { it.name == "red" }!!.teamLocations) {
+            println("isTeamLoc taken: ${teamLocation.isTaken}")
+        }
+
 
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
         LudoGame.instance.gamePhaseHandler.nextPhase(gameArena)

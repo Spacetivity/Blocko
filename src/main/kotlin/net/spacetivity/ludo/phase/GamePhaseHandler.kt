@@ -43,8 +43,6 @@ class GamePhaseHandler {
 
             newGamePhase.controllingTeamId = availableTeams.filter { it.teamId == smallestTeamId }.random().teamId
             newGamePhase.lastControllingTeamId = newGamePhase.controllingTeamId
-
-            println("Selected initial team to > ${newGamePhase.controllingTeamId}")
         }
 
         gameArena.phase = newGamePhase

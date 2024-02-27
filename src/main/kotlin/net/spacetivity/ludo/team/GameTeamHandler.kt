@@ -23,9 +23,9 @@ class GameTeamHandler {
     init {
         for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas) {
             addTeam(gameArena.id, GameTeam("red", NamedTextColor.RED, 0))
-            addTeam(gameArena.id, GameTeam("green", NamedTextColor.GREEN, 1))
-            addTeam(gameArena.id, GameTeam("blue", NamedTextColor.BLUE, 2))
-            addTeam(gameArena.id, GameTeam("yellow", NamedTextColor.YELLOW, 3))
+            addTeam(gameArena.id, GameTeam("blue", NamedTextColor.BLUE, 1))
+            addTeam(gameArena.id, GameTeam("yellow", NamedTextColor.YELLOW, 2))
+            addTeam(gameArena.id, GameTeam("green", NamedTextColor.GREEN, 3))
         }
 
         transaction {
@@ -94,8 +94,18 @@ class GameTeamHandler {
         return locations
     }
 
-    fun getLocationOfTeam(arenaId: String, teamName: String, x: Double, z: Double, y: Double): GameTeamLocation? {
-        return getLocationsOfAllTeams(arenaId).filter { it.teamName == teamName }.find { it.x == x && it.z == z && it.y == y }
+    fun getLocationOfTeam(arenaId: String, teamName: String, x: Double, y: Double, z: Double): GameTeamLocation? {
+        val teamLocations: List<GameTeamLocation> = getLocationsOfAllTeams(arenaId).filter { it.teamName == teamName }
+
+        var result: GameTeamLocation? = null
+
+        for (teamLocation: GameTeamLocation in teamLocations) {
+            val worldPosition = teamLocation.getWorldPosition()
+            if (worldPosition.x != x && worldPosition.y != y && worldPosition.z != z) continue
+            result = teamLocation
+        }
+
+        return result
     }
 
 }

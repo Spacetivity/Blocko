@@ -32,7 +32,6 @@ class DiceHandler {
     fun startDiceAnimation() {
         this.diceAnimationTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {
             for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas) {
-
                 if (!gameArena.phase.isIngame()) continue
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
@@ -48,7 +47,6 @@ class DiceHandler {
                         ingamePhase.phaseMode = GamePhaseMode.PICK_ENTITY
 
                         println("STOPPED DICING AND DICED NUM IS > ${gamePlayer.dicedNumber}")
-
                         continue
                     }
 
@@ -59,7 +57,9 @@ class DiceHandler {
     }
 
     fun stopDiceAnimation() {
-        if (this.diceAnimationTask != null) this.diceAnimationTask!!.cancel()
+        if (this.diceAnimationTask != null) {
+            this.diceAnimationTask!!.cancel()
+        }
     }
 
     fun getDiceItem(): ItemStack {
@@ -75,6 +75,7 @@ class DiceHandler {
             return
         }
 
+        if (this.dicingPlayers.any { it.key != gamePlayer.uuid }) return
         this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 4))
     }
 

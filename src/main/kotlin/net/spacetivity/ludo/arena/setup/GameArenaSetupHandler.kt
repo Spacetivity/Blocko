@@ -81,9 +81,9 @@ class GameArenaSetupHandler {
         arenaSetupData.gameTeams.addAll(
             listOf(
                 GameTeam("red", NamedTextColor.RED, 0),
-                GameTeam("green", NamedTextColor.GREEN, 1),
-                GameTeam("blue", NamedTextColor.BLUE, 2),
-                GameTeam("yellow", NamedTextColor.YELLOW, 3),
+                GameTeam("blue", NamedTextColor.BLUE, 1),
+                GameTeam("yellow", NamedTextColor.YELLOW, 2),
+                GameTeam("green", NamedTextColor.GREEN, 3),
             )
         )
 
@@ -188,7 +188,7 @@ class GameArenaSetupHandler {
                 location.world,
                 x,
                 z,
-                GameFieldProperties(mutableMapOf(), null, null,null),
+                GameFieldProperties(mutableMapOf(), null, null, null),
                 false,
                 false
             )

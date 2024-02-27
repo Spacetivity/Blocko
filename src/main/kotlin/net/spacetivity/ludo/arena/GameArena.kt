@@ -3,6 +3,7 @@ package net.spacetivity.ludo.arena
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.dice.DiceHandler
 import net.spacetivity.ludo.extensions.clearPhaseItems
 import net.spacetivity.ludo.extensions.sendMessage
 import net.spacetivity.ludo.phase.GamePhase
@@ -90,6 +91,9 @@ class GameArena(
 
         val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == player.uniqueId } ?: return
 
+        if (LudoGame.instance.diceHandler.dicingPlayers.containsKey(gamePlayer.uuid))
+            LudoGame.instance.diceHandler.dicingPlayers.remove(gamePlayer.uuid)
+
         LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(gamePlayer)
         this.currentPlayers.removeIf { it.uuid == player.uniqueId }
 
@@ -128,6 +132,13 @@ class GameArena(
                 val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == teamMemberUuid } ?: continue
                 gameTeam.quit(gamePlayer)
             }
+        }
+
+        val diceHandler: DiceHandler = LudoGame.instance.diceHandler
+
+        for (currentPlayer in this.currentPlayers) {
+            if (!diceHandler.dicingPlayers.containsKey(currentPlayer.uuid)) continue
+            diceHandler.dicingPlayers.remove(currentPlayer.uuid)
         }
 
         this.currentPlayers.clear()

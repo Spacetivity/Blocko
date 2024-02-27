@@ -6,6 +6,7 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.team.GameTeam
+import net.spacetivity.ludo.utils.LocationUtils
 import net.spacetivity.ludo.utils.MetadataUtils
 import net.spacetivity.ludo.utils.PathFace
 import org.bukkit.Location
@@ -149,16 +150,17 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
         val newField: GameField = getTeamField(newFieldId) ?: return false
 
-        // clears holder from old field
-        val oldField: GameField = getTeamField(this.currentFieldId!!)!!
-
         if (this.currentFieldId != null) {
+            val oldField: GameField = getTeamField(this.currentFieldId!!)!!
             if (oldField.isTaken && (oldField.currentHolder != null && oldField.currentHolder?.teamName == this.teamName && oldField.currentHolder?.livingEntity?.uniqueId == this.livingEntity?.uniqueId)) {
                 oldField.isTaken = false
                 oldField.currentHolder = null
             }
         } else {
-            LudoGame.instance.gameTeamHandler.getLocationOfTeam(this.arenaId, this.teamName, oldField.x, 0.0, oldField.z)?.isTaken = false
+            val location: Location = LocationUtils.centerLocation(this.livingEntity!!.location)
+            val spawnLocation = LudoGame.instance.gameTeamHandler.getLocationOfTeam(this.arenaId, this.teamName, location.x, location.y, location.z)
+            if (spawnLocation == null) println("Spawn location of team ${this.teamName} is not found!")
+            else spawnLocation.isTaken = false
         }
 
         val rotation: PathFace? = newField.properties.rotation
@@ -166,11 +168,9 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         this.currentFieldId = newFieldId
 
-        // decides if the entity needs to rotate (old statement in notepad...)
         if (rotation != null && (teamEntranceName == null || teamEntranceName == this.teamName))
             this.forceYaw = rotation.radians
 
-        // checks if the current field has already a holder, if yes and the new field is not the goal field, the field will be skipped.
         if ((newFieldId != goalFieldId) && newField.isTaken)
             return false
 
@@ -180,13 +180,8 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         val currentHolderTeamName: String = newField.currentHolder?.teamName ?: "-/-"
 
-        // checks if the new field contains already a new entity. If 'yes' it throws the entity out.
-        println(">> Moving (newFieldId: $newFieldId) (goalFieldId: $goalFieldId [${goalField.properties.getFieldId(teamName)}]) oldHolderTeam: $currentHolderTeamName | thisTeam: $teamName")
-
-        if ((newFieldId == goalFieldId) && (newField.isTaken && currentHolderTeamName != this.teamName)) {
-            println("Throws out old holder!")
+        if ((newFieldId == goalFieldId) && (newField.isTaken && currentHolderTeamName != this.teamName))
             goalField.trowOutOldHolder(this.livingEntity!!)
-        }
 
         newField.isTaken = true
         newField.currentHolder = this

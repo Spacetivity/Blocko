@@ -111,6 +111,7 @@ class LudoGame : JavaPlugin() {
         this.gameArenaSignHandler.loadArenaSigns()
 
         this.gamePlayActionHandler = GamePlayActionHandler()
+        this.gamePlayActionHandler.startMainTask()
         this.gamePlayActionHandler.startMovementTask()
         this.gamePlayActionHandler.startPlayerTask()
 

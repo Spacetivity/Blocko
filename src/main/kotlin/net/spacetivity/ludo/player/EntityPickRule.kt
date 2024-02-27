@@ -51,27 +51,27 @@ enum class EntityPickRule(val weight: Int, val probability: Double) {
 
                     gameEntity.currentFieldId == 0 && gameEntity.isMovableTo(dicedNumber) -> {
                         println("!!!<==>>>>>>> REACHED AWAY FROM FIRST FIELD <<<<<<<==>!!!")
-                        Pair(EntityPickRule.MOVABLE_AWAY_FROM_FIRST_FIELD, gameEntity)
+                        Pair(MOVABLE_AWAY_FROM_FIRST_FIELD, gameEntity)
                     }
 
                     gameEntity.isMovableTo(dicedNumber) && gameEntity.landsAfterOpponent(dicedNumber) -> {
                         println("!!!<==>>>>>>> REACHED MOVABLE_BUT_LANDS_AFTER_OPPONENT <<<<<<<==>!!!")
-                        Pair(EntityPickRule.MOVABLE_BUT_LANDS_AFTER_OPPONENT, gameEntity)
+                        Pair(MOVABLE_BUT_LANDS_AFTER_OPPONENT, gameEntity)
                     }
 
                     gameEntity.isMovableTo(dicedNumber) && gameEntity.hasTargetAtGoalField(dicedNumber) -> {
                         println("!!!<==>>>>>>> REACHED MOVABLE_AND_TARGET_IN_SIGHT <<<<<<<==>!!!")
-                        Pair(EntityPickRule.MOVABLE_AND_TARGET_IN_SIGHT, gameEntity)
+                        Pair(MOVABLE_AND_TARGET_IN_SIGHT, gameEntity)
                     }
 
                     gameEntity.isMovableTo(dicedNumber) && gameEntity.isGarageInSight(dicedNumber) -> {
                         println("!!!<==>>>>>>> REACHED MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE <<<<<<<==>!!!")
-                        Pair(EntityPickRule.MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE, gameEntity)
+                        Pair(MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE, gameEntity)
                     }
 
                     gameEntity.isMovableTo(dicedNumber) -> {
                         println("!!!<==>>>>>>> REACHED MOVABLE <<<<<<<==>!!!")
-                        Pair(EntityPickRule.MOVABLE, gameEntity)
+                        Pair(MOVABLE, gameEntity)
                     }
 
                     else -> {

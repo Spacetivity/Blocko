@@ -27,7 +27,10 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.player.*
+import org.bukkit.event.player.PlayerInteractAtEntityEvent
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
@@ -164,7 +167,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 }
 
                 if (ingamePhase.phaseMode != GamePhaseMode.DICE) {
-                    player.sendMessage(Component.text("You cannot dice now!", NamedTextColor.RED))
+                    player.sendMessage(Component.text("You cannot dice now (${ingamePhase.phaseMode.name})!", NamedTextColor.RED))
                     return
                 }
 
@@ -202,6 +205,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 }
 
                 gamePlayer.manuallyPickEntity(ingamePhase, gameEntity)
+
                 getOtherHighlightedEntities(gamePlayer, gameArena, gameEntity).forEach { it.toggleHighlighting(false) }
 
                 val dicedNumber: Int = gamePlayer.dicedNumber ?: return
@@ -251,31 +255,31 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
         player.sendMessage(Component.text("currentFieldId ${gameEntity.currentFieldId}"))
     }
 
-    @EventHandler
-    fun onChangeHeldItem(event: PlayerItemHeldEvent) {
-        val player: Player = event.player
-
-        val gameArena: GameArena = player.getArena() ?: return
-        if (!gameArena.phase.isIngame()) return
-
-        val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
-        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
-
-        if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) return
-
-        val heldItemStack: ItemStack = player.inventory.getItem(event.newSlot) ?: return
-        if (heldItemStack.type != Material.ARMOR_STAND) return
-
-        getLastHighlightedEntity(gamePlayer, gameArena, heldItemStack.itemMeta)?.toggleHighlighting(false)
-
-        if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, "entitySelector")) return
-
-        val entityId: Int = PersistentDataUtils.getData(heldItemStack.itemMeta, "entitySelector", Int::class.java)
-        val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId }
-            ?: return
-
-        gameEntity.toggleHighlighting(true)
-    }
+//    @EventHandler
+//    fun onChangeHeldItem(event: PlayerItemHeldEvent) {
+//        val player: Player = event.player
+//
+//        val gameArena: GameArena = player.getArena() ?: return
+//        if (!gameArena.phase.isIngame()) return
+//
+//        val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+//        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
+//
+//        if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) return
+//
+//        val heldItemStack: ItemStack = player.inventory.getItem(event.newSlot) ?: return
+//        if (heldItemStack.type != Material.ARMOR_STAND) return
+//
+//        getLastHighlightedEntity(gamePlayer, gameArena, heldItemStack.itemMeta)?.toggleHighlighting(false)
+//
+//        if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, "entitySelector")) return
+//
+//        val entityId: Int = PersistentDataUtils.getData(heldItemStack.itemMeta, "entitySelector", Int::class.java)
+//        val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId }
+//            ?: return
+//
+//        gameEntity.toggleHighlighting(true)
+//    }
 
     private fun getLastHighlightedEntity(gamePlayer: GamePlayer, gameArena: GameArena, itemMeta: ItemMeta): GameEntity? {
         if (!PersistentDataUtils.hasData(itemMeta, "entitySelector")) return null

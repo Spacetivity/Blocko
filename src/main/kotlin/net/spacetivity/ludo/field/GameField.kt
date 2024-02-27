@@ -24,25 +24,27 @@ class GameField(
     var currentHolder: GameEntity? = null
 
     fun trowOutOldHolder(newHolder: LivingEntity) {
-        println("==> reached throwout logic!!!!!!!!!!!!")
-        val gameArena: GameArena? = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)
+        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
 
         if (!this.isTaken) return
-        if (gameArena == null) return
 
         val gameTeamHandler: GameTeamHandler = LudoGame.instance.gameTeamHandler
         val oldHolder: GameEntity = this.currentHolder ?: return
 
-        val holderGameTeam: GameTeam = gameTeamHandler.getTeam(this.arenaId, oldHolder.teamName) ?: return
-        val teamSpawnLocation: GameTeamLocation = holderGameTeam.getFreeSpawnLocation()
-            ?: throw NullPointerException("No empty team spawn was found for $holderGameTeam.name")
+        val oldHolderGameTeam: GameTeam = gameTeamHandler.getTeam(this.arenaId, oldHolder.teamName) ?: return
+        val teamSpawnLocation: GameTeamLocation = oldHolderGameTeam.getFreeSpawnLocation()
+            ?: throw NullPointerException("No empty team spawn was found for $oldHolderGameTeam.name")
+
+        for (teamLocation in oldHolderGameTeam.teamLocations) {
+            println("isTeamLoc taken: ${teamLocation.isTaken}")
+        }
 
         oldHolder.currentFieldId = null
         oldHolder.livingEntity?.teleport(teamSpawnLocation.getWorldPosition())
         teamSpawnLocation.isTaken = true
 
         val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolder) ?: return
-        gameArena.sendArenaMessage(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${holderGameTeam.name}."))
+        gameArena.sendArenaMessage(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${oldHolderGameTeam.name}."))
     }
 
     fun getWorldPosition(fieldHeight: Double): Location {

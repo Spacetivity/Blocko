@@ -12,13 +12,44 @@ import net.spacetivity.ludo.extensions.sendActionBar
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.team.GameTeam
+import net.spacetivity.ludo.utils.PersistentDataUtils
 import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitTask
 
 class GamePlayActionHandler {
 
+    private var mainTask: BukkitTask? = null
     private var movementTask: BukkitTask? = null
     private var playerTask: BukkitTask? = null
+
+    fun startMainTask() {
+        this.mainTask = Bukkit.getScheduler().runTaskTimerAsynchronously(LudoGame.instance, Runnable {
+            for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas) {
+                for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+                    val player: Player = gamePlayer.toBukkitInstance() ?: continue
+
+                    if (!gameArena.phase.isIngame()) continue
+
+                    val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+                    if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) continue
+
+                    val currentItemStack: ItemStack = player.inventory.itemInMainHand
+                    if (currentItemStack.type != Material.ARMOR_STAND) continue
+
+                    if (!PersistentDataUtils.hasData(currentItemStack.itemMeta, "entitySelector")) continue
+
+                    val entityId: Int = PersistentDataUtils.getData(currentItemStack.itemMeta, "entitySelector", Int::class.java)
+                    val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId } ?: continue
+
+                    getOtherHighlightedEntities(gamePlayer, gameArena, gameEntity).forEach { it.toggleHighlighting(false) }
+                    gameEntity.toggleHighlighting(true)
+                }
+            }
+        }, 0L, 20L)
+    }
 
     fun startMovementTask() {
         this.movementTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {
@@ -60,9 +91,9 @@ class GamePlayActionHandler {
 
                 gamePlayer.activeEntity = null
                 gamePlayer.lastEntityPickRule = null
-                gamePlayer.dicedNumber = null //TODO: maybe this causes errors
+                gamePlayer.dicedNumber = null
             }
-        }, 0L, 20L)
+        }, 0L, 10L)
     }
 
     fun startPlayerTask() {
@@ -127,6 +158,11 @@ class GamePlayActionHandler {
     }
 
     fun stopTasks() {
+        if (this.mainTask != null) {
+            this.mainTask!!.cancel()
+            this.mainTask = null
+        }
+
         if (this.playerTask != null) {
             this.playerTask!!.cancel()
             this.playerTask = null
@@ -136,6 +172,10 @@ class GamePlayActionHandler {
             this.movementTask!!.cancel()
             this.movementTask = null
         }
+    }
+
+    private fun getOtherHighlightedEntities(gamePlayer: GamePlayer, gameArena: GameArena, highlightedEntity: GameEntity): List<GameEntity> {
+        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).filter { it.livingEntity?.uniqueId != highlightedEntity.livingEntity?.uniqueId }
     }
 
 }
