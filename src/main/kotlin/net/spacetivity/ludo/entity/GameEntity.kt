@@ -80,6 +80,10 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         return getTeamField(this.currentFieldId!!)!!.isGarageField
     }
 
+    fun isAtSpawn(): Boolean {
+        return this.currentFieldId == null
+    }
+
     fun isGarageInSight(dicedNumber: Int): Boolean {
         if (this.currentFieldId == null) return false
 
@@ -132,15 +136,6 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
     fun moveOneFieldForward(dicedNumber: Int, fieldHeight: Double): Boolean {
         if (this.livingEntity == null) return false
 
-        if (this.currentFieldId != null) {
-            val oldField: GameField = getTeamField(this.currentFieldId!!)!!
-
-            if (oldField.isTaken && oldField.currentHolder != null && oldField.currentHolder?.teamName == this.teamName) {
-                oldField.isTaken = false
-                oldField.currentHolder = null
-            }
-        }
-
         if (this.lastStartField == null) {
             if (this.currentFieldId == null)
                 this.lastStartField = 0
@@ -153,6 +148,16 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
         val newField: GameField = getTeamField(newFieldId) ?: return false
+
+        // clears holder from old field
+        if (this.currentFieldId != null) {
+            val oldField: GameField = getTeamField(this.currentFieldId!!)!!
+
+            if (oldField.isTaken && (oldField.currentHolder != null && oldField.currentHolder?.teamName == this.teamName && oldField.currentHolder?.livingEntity?.uniqueId == this.livingEntity?.uniqueId)) {
+                oldField.isTaken = false
+                oldField.currentHolder = null
+            }
+        }
 
         val rotation: PathFace? = newField.properties.rotation
         val teamEntranceName: String? = newField.properties.teamEntrance

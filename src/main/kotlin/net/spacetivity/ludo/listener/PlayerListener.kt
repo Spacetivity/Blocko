@@ -22,6 +22,7 @@ import org.bukkit.block.Block
 import org.bukkit.block.Sign
 import org.bukkit.block.sign.Side
 import org.bukkit.entity.Player
+import org.bukkit.entity.Villager
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
@@ -201,6 +202,11 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                     return
                 }
 
+                if (!gameEntity.isMovableTo(gamePlayer.dicedNumber!!)) {
+                    player.sendMessage(Component.text("You cannot move this entity!"))
+                    return
+                }
+
                 gamePlayer.manuallyPickEntity(ingamePhase, gameEntity)
                 getOtherHighlightedEntities(gamePlayer, gameArena, gameEntity).forEach { it.toggleHighlighting(false) }
 
@@ -232,6 +238,23 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
             else -> {}
         }
 
+    }
+
+    @EventHandler
+    fun onInteractWithGameEntity(event: PlayerInteractAtEntityEvent) {
+        val player: Player = event.player
+
+        val gameArena: GameArena = player.getArena() ?: return
+        if (event.rightClicked !is Villager) return
+
+        val gameEntity: GameEntity? = LudoGame.instance.gameEntityHandler.getEntity(gameArena.id, event.rightClicked.uniqueId)
+
+        if (gameEntity == null) {
+            player.sendMessage(Component.text("GameEntity not found..."))
+            return
+        }
+
+        player.sendMessage(Component.text("currentFieldId ${gameEntity.currentFieldId}"))
     }
 
     @EventHandler

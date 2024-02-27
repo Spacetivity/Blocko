@@ -4,6 +4,7 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.translation.file.TranslationFile
 import net.spacetivity.ludo.utils.FileUtils
 import java.io.File
+import java.nio.file.Path
 
 
 class TranslationHandler {
@@ -18,7 +19,7 @@ class TranslationHandler {
         return this.cachedTranslations.find { it.name == name }
     }
 
-    fun generateTranslations(mainClass: Class<*>) {
+    fun generateTranslations(dataFolderPath: Path, mainClass: Class<*>) {
         for (translationFileName in TranslationFileLoader.getLangFileNamesFromJar("lang", mainClass)) {
             val splittedName: List<String> = translationFileName.split("/")
             val validatedLanguageFileName = splittedName[splittedName.size - 1].split(".")[0]
@@ -27,7 +28,7 @@ class TranslationHandler {
             this.cachedTranslations.add(Translation(validatedLanguageFileName, mutableMapOf()))
 
             val cachedMessages: Map<String, String> = TranslationFileLoader.getFileContent(mainClass, validatedFilePath)
-            val translationFileResult: TranslationFile = LudoGame.instance.createOrLoadFile("translation", validatedLanguageFileName, TranslationFile::class, TranslationFile(mutableMapOf()))
+            val translationFileResult: TranslationFile = FileUtils.createOrLoadFile(dataFolderPath, "translation", validatedLanguageFileName, TranslationFile::class, TranslationFile(mutableMapOf()))
 
             val translation: Translation = this.cachedTranslations.find { it.name == validatedLanguageFileName }
                 ?: continue
@@ -39,7 +40,7 @@ class TranslationHandler {
                 val oldMessages: MutableMap<String, String> = getOldMessages(cachedMessages, translationFileResult.messages)
                 oldMessages.forEach { translationFileResult.messages.remove(it.key) }
 
-                val rawFile: File = LudoGame.instance.readRawFile("translation", validatedLanguageFileName) ?: continue
+                val rawFile: File = FileUtils.readRawFile(dataFolderPath,"translation", validatedLanguageFileName) ?: continue
                 FileUtils.save(rawFile, translationFileResult)
 
                 translation.cachedMessages.putAll(missingMessages)

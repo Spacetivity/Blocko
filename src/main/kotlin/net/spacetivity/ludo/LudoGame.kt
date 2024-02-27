@@ -93,7 +93,7 @@ class LudoGame : JavaPlugin() {
         this.diceSidesFile = createOrLoadDiceSidesFile()
 
         this.translationHandler = TranslationHandler()
-        this.translationHandler.generateTranslations(this::class.java)
+        this.translationHandler.generateTranslations(this.dataFolder.toPath(), this::class.java)
 
         this.globalConfigFile = createOrLoadGlobalConfigFile()
 
