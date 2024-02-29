@@ -36,6 +36,7 @@ class DiceHandler {
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
                 for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+                    if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
                     if (!gamePlayer.isDicing()) continue
                     val diceSession: DiceSession = gamePlayer.getDiceSession() ?: continue
 
@@ -43,14 +44,25 @@ class DiceHandler {
                     val currentTimestamp: Long = System.currentTimeMillis()
 
                     if (currentTimestamp >= endTimestamp) {
-                        stopDicing(gamePlayer)
                         ingamePhase.phaseMode = GamePhaseMode.PICK_ENTITY
+                        //stopDicing(gamePlayer)
 
-                        println("STOPPED DICING AND DICED NUM IS > ${gamePlayer.dicedNumber}")
+                        val dicedNumber: Int = diceSession.currentDiceNumber
+
+                        gamePlayer.dicedNumber = dicedNumber
+                        gamePlayer.playSound(Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM)
+                        gamePlayer.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
+
+                        this.dicingPlayers.remove(gamePlayer.uuid)
+
+                        if (this.dicingPlayers.containsKey(gamePlayer.uuid))
+                            this.dicingPlayers.remove(gamePlayer.uuid, diceSession)
+
+                        println("STOPPED DICING AND DICED NUM IS > ${gamePlayer.dicedNumber} DicingPlayersSize: >> ${this.dicingPlayers.size}")
                         continue
                     }
 
-                    rollDice(gamePlayer)
+                    rollDice(gamePlayer, diceSession)
                 }
             }
         }, 0L, 4L)
@@ -69,14 +81,29 @@ class DiceHandler {
             .build()
     }
 
-    fun startDicing(gamePlayer: GamePlayer) {
+    fun startDicing(gamePlayer: GamePlayer, ingamePhase: IngamePhase) {
+        if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) return
+
         if (gamePlayer.isDicing()) {
             gamePlayer.sendMessage(Component.text("You are already dicing!"))
             return
         }
 
-        if (this.dicingPlayers.any { it.key != gamePlayer.uuid }) return
-        this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 4))
+        if (this.dicingPlayers.isNotEmpty()) {
+
+            val stillDicing: MutableList<GamePlayer> = mutableListOf()
+
+            for (uuid in this.dicingPlayers.keys) {
+                val currentGp = LudoGame.instance.gameArenaHandler.getArena(gamePlayer.arenaId)!!.currentPlayers.find { it.uuid == uuid }
+                    ?: continue
+                stillDicing.add(currentGp)
+            }
+
+            Bukkit.broadcast(Component.text("ERROR!!!! THERE IS ALREADY A DICING PLAYER >> ${this.dicingPlayers.keys} ${stillDicing.map { it.teamName }}"))
+            return
+        }
+
+        this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 2))
     }
 
     fun stopDicing(gamePlayer: GamePlayer) {
@@ -88,17 +115,22 @@ class DiceHandler {
         val diceSession: DiceSession = this.dicingPlayers[gamePlayer.uuid] ?: return
         val dicedNumber: Int = diceSession.currentDiceNumber
 
-        this.dicingPlayers.remove(gamePlayer.uuid)
+        println(">>> Dicing players remaining (${dicingPlayers.size}) ${dicingPlayers.keys}") //TODO: remove that
 
         gamePlayer.dicedNumber = dicedNumber
         gamePlayer.playSound(Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM)
         gamePlayer.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
+
+        this.dicingPlayers.remove(gamePlayer.uuid)
+
+        if (this.dicingPlayers.containsKey(gamePlayer.uuid))
+            this.dicingPlayers.remove(gamePlayer.uuid, diceSession)
     }
 
-    private fun rollDice(gamePlayer: GamePlayer) {
+    private fun rollDice(gamePlayer: GamePlayer, diceSession: DiceSession) {
         if (!gamePlayer.isDicing()) return
 
-        val blockNumber: Int? = gamePlayer.getCurrentDiceNumber()
+        val blockNumber: Int = diceSession.currentDiceNumber
         val diceSide: Pair<Int, String> = getDiceSide(blockNumber)
 
         if (!gamePlayer.isAI) {
@@ -114,7 +146,8 @@ class DiceHandler {
         }
 
         gamePlayer.playSound(Sound.BLOCK_BAMBOO_BREAK)
-        gamePlayer.setCurrentDiceNumber(diceSide.first)
+        diceSession.currentDiceNumber = diceSide.first
+
         gamePlayer.sendActionBar(Component.text("Current number: ${diceSide.first}", NamedTextColor.AQUA, TextDecoration.BOLD))
 
         println("${gamePlayer.teamName} ROLES THE DICE: >> ${diceSide.first}")
@@ -124,7 +157,7 @@ class DiceHandler {
         return Component.text("$diceNumber", NamedTextColor.YELLOW, TextDecoration.BOLD)
     }
 
-    private fun getDiceSide(blockedDiceNumber: Number?): Pair<Int, String> {
+    private fun getDiceSide(blockedDiceNumber: Number): Pair<Int, String> {
         val randomNumber: Int = ThreadLocalRandom.current().nextInt(1, 7)
         val diceSide: Pair<Int, String>? = this.diceSides.entries.find { it.key == randomNumber }?.toPair()
 
@@ -133,7 +166,7 @@ class DiceHandler {
             return Pair(1, HeadUtils.DICE_ONE)
         }
 
-        if (blockedDiceNumber != null && diceSide.first == blockedDiceNumber) return getDiceSide(blockedDiceNumber)
+        if (diceSide.first == blockedDiceNumber) return getDiceSide(blockedDiceNumber)
         return diceSide
     }
 

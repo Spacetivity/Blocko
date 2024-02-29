@@ -27,17 +27,19 @@ class GamePlayActionHandler {
 
     fun startMainTask() {
         this.mainTask = Bukkit.getScheduler().runTaskTimerAsynchronously(LudoGame.instance, Runnable {
-            for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas) {
+            for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
                 for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
                     val player: Player = gamePlayer.toBukkitInstance() ?: continue
-
-                    if (!gameArena.phase.isIngame()) continue
 
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
                     if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) continue
 
                     val currentItemStack: ItemStack = player.inventory.itemInMainHand
-                    if (currentItemStack.type != Material.ARMOR_STAND) continue
+
+                    if (currentItemStack.type != Material.ARMOR_STAND) {
+                        getHighlightedEntities(gamePlayer, gameArena).forEach { it.toggleHighlighting(false) }
+                        continue
+                    }
 
                     if (!PersistentDataUtils.hasData(currentItemStack.itemMeta, "entitySelector")) continue
 
@@ -48,7 +50,7 @@ class GamePlayActionHandler {
                     gameEntity.toggleHighlighting(true)
                 }
             }
-        }, 0L, 20L)
+        }, 0L, 1L)
     }
 
     fun startMovementTask() {
@@ -75,13 +77,15 @@ class GamePlayActionHandler {
                 val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(gameEntity.arenaId) ?: continue
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
-                ingamePhase.phaseMode = GamePhaseMode.DICE
-                println("phase mode is now: ${ingamePhase.phaseMode.name}")
-
                 gameEntity.controller = null
                 gameEntity.shouldMove = false
 
+                gamePlayer.activeEntity = null
+                gamePlayer.lastEntityPickRule = null
+
                 val newControllingTeam: GameTeam = ingamePhase.setNextControllingTeam() ?: continue
+
+                gamePlayer.dicedNumber = null
 
                 if (ingamePhase.lastControllingTeamId == ingamePhase.controllingTeamId) {
                     gameArena.sendArenaMessage(Component.text("${newControllingTeam.name} can now dice again!"))
@@ -89,9 +93,8 @@ class GamePlayActionHandler {
                     gameArena.sendArenaMessage(Component.text("${newControllingTeam.name} can now dice!"))
                 }
 
-                gamePlayer.activeEntity = null
-                gamePlayer.lastEntityPickRule = null
-                gamePlayer.dicedNumber = null
+                ingamePhase.phaseMode = GamePhaseMode.DICE
+                println("phase mode is now: ${ingamePhase.phaseMode.name}")
             }
         }, 0L, 10L)
     }
@@ -101,7 +104,6 @@ class GamePlayActionHandler {
             for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas) {
                 for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
                     if (!gameArena.phase.isIngame()) continue
-
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
                     val bossbarHandler: BossbarHandler = LudoGame.instance.bossbarHandler
@@ -116,12 +118,12 @@ class GamePlayActionHandler {
                         }
                     }
 
-                    if (!gamePlayer.inAction()) continue
+                    if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
 
                     when (ingamePhase.phaseMode) {
                         GamePhaseMode.DICE -> {
                             if (gamePlayer.isAI) {
-                                gamePlayer.dice()
+                                gamePlayer.dice(ingamePhase)
                             } else {
                                 gamePlayer.sendActionBar(Component.text("Please dice now.", NamedTextColor.LIGHT_PURPLE))
                             }
@@ -140,6 +142,7 @@ class GamePlayActionHandler {
                                 if (entitiesFromTeam.all { (dicedNumber != 6 && it.currentFieldId == null) || !it.isMovableTo(gamePlayer.dicedNumber!!) }) {
                                     gamePlayer.activeEntity = null
                                     gamePlayer.lastEntityPickRule = null
+                                    gamePlayer.dicedNumber = null
                                     ingamePhase.phaseMode = GamePhaseMode.DICE
                                     ingamePhase.setNextControllingTeam()
                                 }
@@ -172,6 +175,10 @@ class GamePlayActionHandler {
             this.movementTask!!.cancel()
             this.movementTask = null
         }
+    }
+
+    private fun getHighlightedEntities(gamePlayer: GamePlayer, gameArena: GameArena): List<GameEntity> {
+        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).filter { it.isHighlighted }
     }
 
     private fun getOtherHighlightedEntities(gamePlayer: GamePlayer, gameArena: GameArena, highlightedEntity: GameEntity): List<GameEntity> {

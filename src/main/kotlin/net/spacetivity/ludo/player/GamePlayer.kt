@@ -1,10 +1,8 @@
 package net.spacetivity.ludo.player
 
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.extensions.isDicing
-import net.spacetivity.ludo.extensions.startDicing
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import org.bukkit.Bukkit
@@ -17,9 +15,9 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
     var activeEntity: GameEntity? = null
     var lastEntityPickRule: EntityPickRule? = null
 
-    fun dice() {
+    fun dice(ingamePhase: IngamePhase) {
         if (isDicing()) return
-        this.startDicing()
+        LudoGame.instance.diceHandler.startDicing(this, ingamePhase)
     }
 
     fun manuallyPickEntity(ingamePhase: IngamePhase, gameEntity: GameEntity) {
@@ -42,6 +40,8 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
             this.lastEntityPickRule = null
             ingamePhase.phaseMode = GamePhaseMode.DICE
             ingamePhase.setNextControllingTeam()
+            this.dicedNumber = null
+            println(2)
             return
         }
 
@@ -56,8 +56,8 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
         if (this.activeEntity == null) return
 
         val currentFieldId: Int? = this.activeEntity!!.currentFieldId
-
         val teamStartPoint = 0
+
         this.activeEntity?.newGoalFieldId = if (currentFieldId == null) teamStartPoint + this.dicedNumber!! else currentFieldId + this.dicedNumber!!
 
         if (!this.activeEntity!!.shouldMove) this.activeEntity!!.shouldMove = true
@@ -70,13 +70,6 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
 
     fun toBukkitInstance(): Player? {
         return Bukkit.getPlayer(this.uuid)
-    }
-
-    fun inAction(): Boolean {
-        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return false
-        if (!gameArena.phase.isIngame()) return false
-        val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
-        return ingamePhase.isInControllingTeam(this.uuid)
     }
 
 }

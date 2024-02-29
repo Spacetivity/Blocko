@@ -40,7 +40,7 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
     }
 
     fun getFreeSpawnLocation(): GameTeamLocation? {
-        return this.teamLocations.filter { !it.isTaken }.randomOrNull()
+        return this.teamLocations.filter { it.isTaken }.randomOrNull()
     }
 
     private fun isFull(): Boolean = this.teamMembers.isNotEmpty()

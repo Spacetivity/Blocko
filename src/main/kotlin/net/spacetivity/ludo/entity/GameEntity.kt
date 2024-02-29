@@ -23,6 +23,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
     var shouldMove: Boolean = false
 
     var lastStartField: Int? = null
+    var isHighlighted = false
 
     private var forceYaw: Float? = null
 
@@ -45,7 +46,10 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
     }
 
     fun toggleHighlighting(active: Boolean) {
+        if (this.isHighlighted == active) return
+
         this.livingEntity!!.isGlowing = active
+        this.isHighlighted = active
 
         val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
         if (active) gameTeam.scoreboardTeam.addEntity(this.livingEntity!!)

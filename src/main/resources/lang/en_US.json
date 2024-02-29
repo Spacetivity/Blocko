@@ -1,6 +1,4 @@
 {
-  "blocko.prefix.global": "<green>Blocko <gray>|",
-  "blocko.prefix": "<green><prefix_text> <gray>|",
-
-  "hello.world": "<prefix> <gray>Welcome <aqua><name> <gray>on the Blocko test server!"
+  "blocko.prefix.global": "<green>Blocko <gray>»",
+  "blocko.prefix": "<green><prefix_text> <gray>»"
 }
