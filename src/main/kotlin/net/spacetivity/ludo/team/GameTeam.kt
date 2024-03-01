@@ -11,10 +11,10 @@ import java.util.*
 class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
 
     val scoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam( "team_${this.name}", this.color)
-    val teamMembers: MutableSet<UUID> = mutableSetOf() //TODO: Change this to a GamePlayer instance, so that AI can be a team holder
+    val teamMembers: MutableSet<UUID> = mutableSetOf()
     val teamLocations: MutableSet<GameTeamLocation> = mutableSetOf()
 
-    var deactivated: Boolean = false // Indicates if the player has already all entities saved!
+    var deactivated: Boolean = false
 
     fun join(gamePlayer: GamePlayer) {
         if (isFull()) {
@@ -49,10 +49,7 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
             freeSpawns.add(teamLocation)
         }
 
-        val teamLocation: GameTeamLocation? = freeSpawns.randomOrNull() //TODO: make this a one liner!!!
-        println(">>>>>>> | ooo=== = - Returning teams spawn : (isTaken: ${teamLocation?.isTaken})")
-
-        return teamLocation
+        return freeSpawns.randomOrNull()
     }
 
     private fun isFull(): Boolean = this.teamMembers.isNotEmpty()

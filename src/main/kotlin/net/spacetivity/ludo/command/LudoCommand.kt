@@ -11,7 +11,6 @@ import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
 import net.spacetivity.ludo.command.api.CommandProperties
 import net.spacetivity.ludo.command.api.LudoCommandExecutor
 import net.spacetivity.ludo.command.api.LudoCommandSender
-import net.spacetivity.ludo.extensions.getArena
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.WorldCreator
@@ -35,15 +34,6 @@ class LudoCommand : LudoCommandExecutor {
 
         if (!player.hasPermission("ludo.command")) {
             player.sendMessage(Component.text("No perms! :("))
-            return
-        }
-
-        //TODO: remove that after testing
-        if (args.size == 2 && args[0].equals("spawns", true)) {
-            val teamName = args[1]
-            val gameArena: GameArena = player.getArena() ?: return
-            val gameTeam = LudoGame.instance.gameTeamHandler.getTeam(gameArena.id, teamName) ?: return
-            player.sendMessage(Component.text(">> $teamName: ${gameTeam.teamLocations.map { it.isTaken }}"))
             return
         }
 

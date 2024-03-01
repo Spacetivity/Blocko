@@ -6,6 +6,7 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.team.GameTeam
+import net.spacetivity.ludo.team.GameTeamLocation
 import net.spacetivity.ludo.utils.LocationUtils
 import net.spacetivity.ludo.utils.MetadataUtils
 import net.spacetivity.ludo.utils.PathFace
@@ -72,7 +73,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         for (currentFieldId: Int in startFieldId..goalFieldId) {
             val field: GameField = getTeamField(currentFieldId) ?: continue
-            if (currentFieldId == goalFieldId) continue //if the field is the goal field
+            if (currentFieldId == goalFieldId) continue
 
             if (field.isTaken && field.currentHolder?.teamName != this.teamName) isAfterOpponent = true
         }
@@ -151,9 +152,10 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
             }
         } else {
             val location: Location = LocationUtils.centerLocation(this.livingEntity!!.location)
-            val spawnLocation = LudoGame.instance.gameTeamHandler.getLocationOfTeam(this.arenaId, this.teamName, location.x, location.y, location.z)
-            if (spawnLocation == null) println("Spawn location of team ${this.teamName} is not found!")
-            else spawnLocation.isTaken = false
+            val spawnLocation: GameTeamLocation = LudoGame.instance.gameTeamHandler.getLocationOfTeam(this.arenaId, this.teamName, location.x, location.y, location.z)
+                ?: throw NullPointerException("Spawn location of team ${this.teamName} is not found!")
+
+            spawnLocation.isTaken = false
         }
 
         val rotation: PathFace? = newField.properties.rotation
@@ -179,7 +181,6 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         newField.isTaken = true
         newField.currentHolder = this
 
-        println(">> Moving | currentFieldId: ${this.currentFieldId} goalFieldId: $goalFieldId [${this.currentFieldId}/$goalFieldId]")
         return this.currentFieldId == goalFieldId
     }
 

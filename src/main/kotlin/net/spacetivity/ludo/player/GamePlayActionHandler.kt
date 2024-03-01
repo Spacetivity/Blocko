@@ -61,7 +61,7 @@ class GamePlayActionHandler {
         this.movementTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {
             for (gameEntity: GameEntity in LudoGame.instance.gameEntityHandler.gameEntities.values()) {
                 val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(gameEntity.arenaId) ?: continue
-                if (!gameArena.phase.isIngame()) continue //TODO: check if this causes bugs
+                if (!gameArena.phase.isIngame()) continue
                 if (!gameEntity.shouldMove) continue
 
                 val gamePlayer: GamePlayer = gameEntity.controller ?: continue
@@ -77,8 +77,6 @@ class GamePlayActionHandler {
 
                 gameEntity.lastStartField = null
                 gameEntity.toggleHighlighting(false)
-
-                println("${gameTeam.name} reached goal!")
 
                 if (gamePlayer.hasSavedAllEntities() && !gameArena.isGameOver() && !gameTeam.deactivated) {
                     gameTeam.deactivated = true
@@ -109,7 +107,6 @@ class GamePlayActionHandler {
                 }
 
                 ingamePhase.phaseMode = GamePhaseMode.DICE
-                println("phase mode is now: ${ingamePhase.phaseMode.name}")
             }
         }, 0L, 10L)
     }
@@ -152,7 +149,6 @@ class GamePlayActionHandler {
                                 val dicedNumber: Int = gamePlayer.dicedNumber ?: continue
                                 val entitiesFromTeam: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName)
 
-                                // Move to the next player is GamePlayer cannot move out an entity or move any other entity at the field
                                 if (entitiesFromTeam.all { (dicedNumber != 6 && it.currentFieldId == null) || !it.isMovableTo(gamePlayer.dicedNumber!!) }) {
                                     gamePlayer.activeEntity = null
                                     gamePlayer.lastEntityPickRule = null

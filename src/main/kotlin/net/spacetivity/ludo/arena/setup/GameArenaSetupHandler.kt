@@ -46,7 +46,6 @@ class GameArenaSetupHandler {
                 }
 
                 if (System.currentTimeMillis() < arenaSetupData.timeoutTimestamp) continue
-
                 handleSetupEnd(player, false)
             }
         }, 0L, 20L)
@@ -88,7 +87,7 @@ class GameArenaSetupHandler {
             )
         )
 
-        this.arenaSetupCache.put(player.uniqueId, arenaSetupData)
+        this.arenaSetupCache[player.uniqueId] = arenaSetupData
     }
 
     fun handleSetupEnd(player: Player, success: Boolean) {
@@ -260,6 +259,7 @@ class GameArenaSetupHandler {
 
         if (possibleField.isGarageField) {
             player.sendMessage(Component.text("This field is already a garage field!"))
+            return
         }
 
         if (possibleField.properties.rotation != null) {

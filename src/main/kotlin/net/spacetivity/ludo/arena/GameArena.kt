@@ -112,12 +112,10 @@ class GameArena(
             this.arenaHost = findNewHost()
 
             if (this.arenaHost == null) {
-                println("No new host for arena $id could be determined!")
                 reset()
             } else {
                 this.arenaHost?.sendMessage(Component.text("You are now the new Game-Host!", NamedTextColor.YELLOW))
             }
-
         }
     }
 

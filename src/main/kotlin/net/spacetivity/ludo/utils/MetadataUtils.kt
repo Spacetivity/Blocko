@@ -8,11 +8,6 @@ import org.bukkit.metadata.FixedMetadataValue
 
 object MetadataUtils {
 
-    fun setIfAbsent(entity: LivingEntity, key: String, value: Any) {
-        if (has(entity, key)) return
-        entity.setMetadata(key, FixedMetadataValue(LudoGame.instance, value))
-    }
-
     fun apply(entity: LivingEntity, key: String, value: Any) {
         if (has(entity, key)) remove(entity, key)
         entity.setMetadata(key, FixedMetadataValue(LudoGame.instance, value))

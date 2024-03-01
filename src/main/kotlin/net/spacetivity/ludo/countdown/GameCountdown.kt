@@ -10,11 +10,11 @@ import java.util.function.Predicate
 
 abstract class GameCountdown(protected val arenaId: String, private val duration: Int, private val startCondition: Predicate<Int>?) {
 
-    var fallbackDuration: Int = this.duration
-    var modifiableDuration: Int = this.duration
+    private var fallbackDuration: Int = this.duration
+    private var modifiableDuration: Int = this.duration
 
-    var countdownTask: BukkitTask? = null
-    var isRunning: Boolean = false
+    private var countdownTask: BukkitTask? = null
+    private var isRunning: Boolean = false
 
     fun tryStartup() {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return

@@ -32,7 +32,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         hotbarItems[0] = LudoGame.instance.diceHandler.getDiceItem()
         for ((entityIndex, i) in (2..5).withIndex()) {
             hotbarItems[i] = ItemBuilder(Material.ARMOR_STAND)
-                .setName(Component.text("Move Entity #$entityIndex"))
+                .setName(Component.text("Move Entity #${entityIndex + 1}"))
                 .setData("entitySelector", entityIndex)
                 .build()
         }
@@ -46,11 +46,9 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         val availableTeams: List<GameTeam> = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
         val newControllingTeam: GameTeam? = if (hasControllingTeamMemberDicedSix()) this.getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
 
-        // If no available team with a higher teamId is found, the team with the smallest teamId is used
         val newControllingTeamId: Int = newControllingTeam?.teamId ?: availableTeams.minOf { it.teamId }
 
-        this.lastControllingTeamId = if (this.controllingTeamId == null) null else this.controllingTeamId //TODO: test that
-
+        this.lastControllingTeamId = if (this.controllingTeamId == null) null else this.controllingTeamId
         this.controllingTeamId = newControllingTeamId
 
         return getControllingTeam()

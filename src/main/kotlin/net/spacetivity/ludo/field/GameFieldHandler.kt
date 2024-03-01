@@ -15,7 +15,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class GameFieldHandler {
 
-    val cachedGameFields: Multimap<String, GameField> = ArrayListMultimap.create()
+    private val cachedGameFields: Multimap<String, GameField> = ArrayListMultimap.create()
 
     init {
         transaction {
@@ -45,19 +45,8 @@ class GameFieldHandler {
             validTeamFieldIds.add(fieldId)
         }
 
-        val highestTeamFieldId: Int? = validTeamFieldIds.maxOrNull()
-        if (highestTeamFieldId == null) {
-            println("Last fieldId cannot be found for team $teamName")
-            println(validTeamFieldIds.joinToString(", "))
-            return null
-        }
-
+        val highestTeamFieldId: Int = validTeamFieldIds.maxOrNull() ?: return null
         val lastGameField: GameField? = gameFieldsForTeam.find { it.properties.getFieldId(teamName) == highestTeamFieldId }
-        if (lastGameField == null) {
-            println("Last field with id $highestTeamFieldId cannot be found for team $teamName")
-            println(validTeamFieldIds.joinToString(", "))
-            return null
-        }
 
         return lastGameField
     }

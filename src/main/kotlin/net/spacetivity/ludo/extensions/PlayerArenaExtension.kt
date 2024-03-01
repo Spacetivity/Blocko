@@ -5,10 +5,6 @@ import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.player.GamePlayer
 import org.bukkit.entity.Player
 
-fun Player.isPlaying(): Boolean {
-    return getArena() != null
-}
-
 fun Player.getArena(): GameArena? {
     return LudoGame.instance.gameArenaHandler.getArenaOfPlayer(uniqueId)
 }

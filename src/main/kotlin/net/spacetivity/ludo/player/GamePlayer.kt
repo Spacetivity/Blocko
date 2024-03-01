@@ -23,7 +23,6 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
     fun manuallyPickEntity(ingamePhase: IngamePhase, gameEntity: GameEntity) {
         if (this.dicedNumber == null) return
         this.activeEntity = gameEntity
-
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
     }
 
@@ -32,9 +31,6 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
 
         val situation: Pair<EntityPickRule, GameEntity?> = EntityPickRule.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
 
-        println("TRIED PICKING A ENTITY FOR TEAM $teamName with result ${situation.first.name}")
-
-        // If there is no entity available for moving forward, the game moves on to the next team to play
         if (situation.first == EntityPickRule.NOT_MOVABLE && situation.second == null) {
             this.activeEntity = null
             this.lastEntityPickRule = null

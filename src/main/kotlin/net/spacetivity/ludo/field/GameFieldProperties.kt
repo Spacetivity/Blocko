@@ -12,8 +12,4 @@ data class GameFieldProperties(val teamFieldIds: MutableMap<String, Int>, var ga
         this.teamFieldIds[teamName] = id
     }
 
-    fun isTurnNeeded(): Boolean {
-        return this.rotation != null
-    }
-
 }
