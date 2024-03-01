@@ -32,12 +32,9 @@ class GameField(
         val oldHolder: GameEntity = this.currentHolder ?: return
 
         val oldHolderGameTeam: GameTeam = gameTeamHandler.getTeam(this.arenaId, oldHolder.teamName) ?: return
+
         val teamSpawnLocation: GameTeamLocation = oldHolderGameTeam.getFreeSpawnLocation()
             ?: throw NullPointerException("No empty team spawn was found for $oldHolderGameTeam.name")
-
-        for (teamLocation in oldHolderGameTeam.teamLocations) {
-            println("isTeamLoc taken: ${teamLocation.isTaken}")
-        }
 
         oldHolder.currentFieldId = null
         oldHolder.livingEntity?.teleport(teamSpawnLocation.getWorldPosition())

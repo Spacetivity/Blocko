@@ -42,7 +42,17 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
     }
 
     fun getFreeSpawnLocation(): GameTeamLocation? {
-        return this.teamLocations.filter { it.isTaken }.randomOrNull()
+        val freeSpawns: MutableList<GameTeamLocation> = mutableListOf()
+
+        for (teamLocation: GameTeamLocation in this.teamLocations) {
+            if (teamLocation.isTaken) continue
+            freeSpawns.add(teamLocation)
+        }
+
+        val teamLocation: GameTeamLocation? = freeSpawns.randomOrNull() //TODO: make this a one liner!!!
+        println(">>>>>>> | ooo=== = - Returning teams spawn : (isTaken: ${teamLocation?.isTaken})")
+
+        return teamLocation
     }
 
     private fun isFull(): Boolean = this.teamMembers.isNotEmpty()

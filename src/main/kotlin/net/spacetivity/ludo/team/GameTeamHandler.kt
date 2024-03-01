@@ -85,7 +85,7 @@ class GameTeamHandler {
     }
 
     fun getTeam(arenaId: String, name: String): GameTeam? {
-        return this.gameTeams.get(arenaId).find { it.name == name }
+        return this.gameTeams.get(arenaId).find { it.name.equals(name, true) }
     }
 
     fun getLocationsOfAllTeams(arenaId: String): Collection<GameTeamLocation> {
@@ -101,7 +101,7 @@ class GameTeamHandler {
 
         for (teamLocation: GameTeamLocation in teamLocations) {
             val worldPosition = teamLocation.getWorldPosition()
-            if (worldPosition.x != x && worldPosition.y != y && worldPosition.z != z) continue
+            if (!(worldPosition.x == x && worldPosition.y == y && worldPosition.z == z)) continue
             result = teamLocation
         }
 

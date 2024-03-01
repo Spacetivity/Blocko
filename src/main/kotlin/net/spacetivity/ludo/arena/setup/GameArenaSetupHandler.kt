@@ -8,6 +8,7 @@ import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.field.GameFieldProperties
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamLocation
+import net.spacetivity.ludo.utils.LocationUtils
 import net.spacetivity.ludo.utils.MetadataUtils
 import net.spacetivity.ludo.utils.PathFace
 import net.spacetivity.ludo.utils.ScoreboardUtils
@@ -150,13 +151,15 @@ class GameArenaSetupHandler {
             return
         }
 
+        val centeredLocation: Location = LocationUtils.centerLocation(location)
+
         val teamSpawn = GameTeamLocation(
             arenaSetupData.arenaId,
             teamName,
             location.world.name,
-            location.x,
-            location.y,
-            location.z,
+            centeredLocation.x,
+            0.0,
+            centeredLocation.z,
             location.yaw,
             location.pitch,
             false

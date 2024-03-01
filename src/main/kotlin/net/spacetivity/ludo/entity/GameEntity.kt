@@ -62,7 +62,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         this.livingEntity = null
     }
 
-    fun landsAfterOpponent(dicedNumber: Int): Boolean { //TODO: test this!!!
+    fun landsAfterOpponent(dicedNumber: Int): Boolean {
         val startFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!!
         val goalFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + dicedNumber
 
@@ -107,25 +107,16 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
     }
 
     fun isMovableTo(dicedNumber: Int): Boolean {
-        if (dicedNumber != 6 && this.currentFieldId == null)
-            return false
+        if (dicedNumber != 6 && this.currentFieldId == null) return false
 
         val goalFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + dicedNumber
-
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
-
-        if (isBlockedByTeamMember(goalField)) {
-            return false
-        }
+        if (goalField.isTaken && goalField.currentHolder?.teamName == this.teamName) return false
 
         val lastFieldForTeam: GameField = LudoGame.instance.gameFieldHandler.getLastFieldForTeam(this.arenaId, this.teamName)
             ?: throw NullPointerException("Last field cannot be found for team $teamName")
-        val lastFieldId = lastFieldForTeam.properties.getFieldId(this.teamName)
 
-        if (this.currentFieldId != null && this.currentFieldId == lastFieldId)
-            return false
-
-        return true
+        return !(this.currentFieldId != null && this.currentFieldId == lastFieldForTeam.properties.getFieldId(this.teamName))
     }
 
     fun hasTargetAtGoalField(dicedNumber: Int): Boolean {
@@ -142,10 +133,8 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         if (this.livingEntity == null) return false
 
         if (this.lastStartField == null) {
-            if (this.currentFieldId == null)
-                this.lastStartField = 0
-            else
-                this.lastStartField = this.currentFieldId
+            if (this.currentFieldId == null) this.lastStartField = 0
+            else this.lastStartField = this.currentFieldId
         }
 
         val newFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + 1
@@ -180,10 +169,10 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         val worldPosition: Location = newField.getWorldPosition(fieldHeight)
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
+
         this.livingEntity!!.teleport(worldPosition)
 
         val currentHolderTeamName: String = newField.currentHolder?.teamName ?: "-/-"
-
         if ((newFieldId == goalFieldId) && (newField.isTaken && currentHolderTeamName != this.teamName))
             goalField.trowOutOldHolder(this.livingEntity!!)
 
@@ -199,10 +188,6 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
     private fun isTeamGarageField(id: Int): Boolean {
         return getTeamField(id)?.isGarageField ?: false
-    }
-
-    private fun isBlockedByTeamMember(field: GameField): Boolean {
-        return field.isTaken && field.currentHolder?.teamName == this.teamName
     }
 
 }

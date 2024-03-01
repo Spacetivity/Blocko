@@ -45,7 +45,6 @@ class DiceHandler {
 
                     if (currentTimestamp >= endTimestamp) {
                         ingamePhase.phaseMode = GamePhaseMode.PICK_ENTITY
-                        //stopDicing(gamePlayer)
 
                         val dicedNumber: Int = diceSession.currentDiceNumber
 
@@ -58,7 +57,7 @@ class DiceHandler {
                         if (this.dicingPlayers.containsKey(gamePlayer.uuid))
                             this.dicingPlayers.remove(gamePlayer.uuid, diceSession)
 
-                        println("STOPPED DICING AND DICED NUM IS > ${gamePlayer.dicedNumber} DicingPlayersSize: >> ${this.dicingPlayers.size}")
+                        println("STOPPED DICING AND DICED NUM IS > ${gamePlayer.dicedNumber}")
                         continue
                     }
 
@@ -104,27 +103,6 @@ class DiceHandler {
         }
 
         this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 2))
-    }
-
-    fun stopDicing(gamePlayer: GamePlayer) {
-        if (!gamePlayer.isDicing()) {
-            gamePlayer.sendMessage(Component.text("You are not dicing!"))
-            return
-        }
-
-        val diceSession: DiceSession = this.dicingPlayers[gamePlayer.uuid] ?: return
-        val dicedNumber: Int = diceSession.currentDiceNumber
-
-        println(">>> Dicing players remaining (${dicingPlayers.size}) ${dicingPlayers.keys}") //TODO: remove that
-
-        gamePlayer.dicedNumber = dicedNumber
-        gamePlayer.playSound(Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM)
-        gamePlayer.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
-
-        this.dicingPlayers.remove(gamePlayer.uuid)
-
-        if (this.dicingPlayers.containsKey(gamePlayer.uuid))
-            this.dicingPlayers.remove(gamePlayer.uuid, diceSession)
     }
 
     private fun rollDice(gamePlayer: GamePlayer, diceSession: DiceSession) {

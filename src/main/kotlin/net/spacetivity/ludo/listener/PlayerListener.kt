@@ -15,7 +15,10 @@ import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.team.GameTeam
+import net.spacetivity.ludo.team.GameTeamLocation
+import net.spacetivity.ludo.utils.LocationUtils
 import net.spacetivity.ludo.utils.PersistentDataUtils
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
@@ -29,6 +32,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
@@ -99,9 +103,37 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
         val itemInHand: ItemStack = player.inventory.itemInMainHand
 
         when (itemInHand.type) {
+            Material.BLAZE_ROD -> {
+                if (block == null) return
+                if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
+                if (event.hand != EquipmentSlot.HAND) return
+
+                val gameArena: GameArena = LudoGame.instance.gameArenaHandler.cachedArenas.firstOrNull() ?: return
+
+                if (block.type.name.contains("WOOL").not()) {
+                    player.sendMessage(Component.text("Team spawns have to be a wool block!"))
+                    return
+                }
+
+                val teamName: String = block.type.name.split("_")[0]
+                val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(gameArena.id, teamName) ?: return
+
+                val location: Location = LocationUtils.centerLocation(block.location)
+                location.y = 0.0
+                val spawnLocation: GameTeamLocation? = LudoGame.instance.gameTeamHandler.getLocationOfTeam(gameArena.id, gameTeam.name, location.x, location.y, location.z)
+
+                if (spawnLocation == null) {
+                    player.sendMessage(Component.text("Cannot find team spawn for team $teamName at (${location.x}:${location.y}:${location.z})!"))
+                    return
+                }
+
+                player.sendMessage(Component.text("Spawn for team $teamName | isTaken: ${spawnLocation.isTaken}"))
+            }
+
             Material.STICK -> {
                 if (block == null) return
                 if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
+                if (event.hand != EquipmentSlot.HAND) return
 
                 val gameArena: GameArena = LudoGame.instance.gameArenaHandler.cachedArenas.firstOrNull() ?: return
                 val field = LudoGame.instance.gameFieldHandler.getField(gameArena.id, block.location.x, block.location.z)
@@ -110,9 +142,9 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                     player.sendMessage("no field...")
                     return
                 }
-                val entranceName = if (field.properties.teamEntrance == null) "-/-" else field.properties.teamEntrance
 
-                val teamIds = LudoGame.GSON.toJson(field.properties.teamFieldIds)
+                val entranceName: String? = if (field.properties.teamEntrance == null) "-/-" else field.properties.teamEntrance
+                val teamIds: String = LudoGame.GSON.toJson(field.properties.teamFieldIds)
 
                 player.sendMessage(Component.text("IsTaken: ${field.isTaken} | IsTeamEntrance: ${field.properties.teamEntrance != null} EntranceName: $entranceName | teamIds: $teamIds"))
             }

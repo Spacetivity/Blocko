@@ -91,10 +91,10 @@ class GameArenaHandler {
     }
 
     fun deleteArena(id: String) {
-        LudoGame.instance.gameTeamHandler.gameTeams.removeAll(id)
         LudoGame.instance.gameFieldHandler.deleteFields(id)
         LudoGame.instance.gameTeamHandler.deleteTeamSpawns(id)
         LudoGame.instance.gamePhaseHandler.deletePhases(id)
+        LudoGame.instance.gameTeamHandler.gameTeams.removeAll(id)
 
         transaction {
             GameArenaDAO.deleteWhere { GameArenaDAO.id eq id }
