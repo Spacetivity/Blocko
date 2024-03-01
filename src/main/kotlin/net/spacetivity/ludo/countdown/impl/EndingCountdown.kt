@@ -13,7 +13,7 @@ class EndingCountdown(arenaId: String) : GameCountdown(arenaId, 5, null) {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
         val isOne = remainingSeconds == 1
 
-        gameArena.sendArenaMessage(Component.text("Game starts in ${if (isOne) "one" else remainingSeconds} ${if (isOne) "second" else "seconds"}."))
+        gameArena.sendArenaMessage(Component.text("Game stops in ${if (isOne) "one" else remainingSeconds} ${if (isOne) "second" else "seconds"}."))
         gameArena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP)
     }
 

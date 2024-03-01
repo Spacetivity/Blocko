@@ -9,6 +9,8 @@ import org.bukkit.inventory.ItemStack
 class EndingPhase(arenaId: String) : GamePhase(arenaId, "ending", 2, EndingCountdown(arenaId)) {
 
     override fun start() {
+        println("Phase $name started in arena $arenaId!")
+
         val gameArena: GameArena = getArena()
         gameArena.sendArenaMessage(Component.text("The game ends now..."))
 
@@ -16,7 +18,7 @@ class EndingPhase(arenaId: String) : GamePhase(arenaId, "ending", 2, EndingCount
     }
 
     override fun stop() {
-
+        println("Phase $name stopped in arena $arenaId!")
     }
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {

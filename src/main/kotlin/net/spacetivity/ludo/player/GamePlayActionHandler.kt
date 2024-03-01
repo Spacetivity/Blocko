@@ -118,7 +118,6 @@ class GamePlayActionHandler {
         this.playerTask = Bukkit.getScheduler().runTaskTimerAsynchronously(LudoGame.instance, Runnable {
             for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
                 for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
-                    if (gamePlayer.getTeam().deactivated) continue
 
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
@@ -134,6 +133,7 @@ class GamePlayActionHandler {
                         }
                     }
 
+                    if (gamePlayer.getTeam().deactivated) continue
                     if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
 
                     when (ingamePhase.phaseMode) {
