@@ -61,8 +61,7 @@ class GamePlayActionHandler {
         this.movementTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {
             for (gameEntity: GameEntity in LudoGame.instance.gameEntityHandler.gameEntities.values()) {
                 val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(gameEntity.arenaId) ?: continue
-                if (gameArena.phase.isIngame()) //TODO: check if this causes bugs
-
+                if (!gameArena.phase.isIngame()) continue //TODO: check if this causes bugs
                 if (!gameEntity.shouldMove) continue
 
                 val gamePlayer: GamePlayer = gameEntity.controller ?: continue
@@ -78,16 +77,16 @@ class GamePlayActionHandler {
 
                 gameEntity.lastStartField = null
                 gameEntity.toggleHighlighting(false)
-                println("reached goal!")
+
+                println("${gameTeam.name} reached goal!")
 
                 if (gamePlayer.hasSavedAllEntities() && !gameArena.isGameOver() && !gameTeam.deactivated) {
                     gameTeam.deactivated = true
                     gameArena.sendArenaMessage(Component.text("TEAM ${gameTeam.name.uppercase()} HAS FINISHED!", NamedTextColor.YELLOW, TextDecoration.BOLD))
-                    println("Team ${gameEntity.teamName} has saved all entities!")
                 }
 
-                if (gameArena.isGameOver()) { //TODO: Vielleicht muss das woanders hin!!!!111!! LOL XD ROFL DU KEK AMK TAFNIES !!!"132h3h34fgbh2tgbh4TBh4tgbvh$TGB4htgb4hfgb4hefb4hB!H§F1bh3
-                    LudoGame.instance.gamePhaseHandler.nextPhase(gameArena) //TODO: check if this causes bugs
+                if (gameArena.isGameOver()) {
+                    LudoGame.instance.gamePhaseHandler.nextPhase(gameArena)
                     continue
                 }
 
@@ -150,8 +149,6 @@ class GamePlayActionHandler {
                             if (gamePlayer.isAI) {
                                 gamePlayer.autoPickEntity(ingamePhase)
                             } else {
-                                gamePlayer.sendActionBar(Component.text("Please select a entity now.", NamedTextColor.LIGHT_PURPLE))
-
                                 val dicedNumber: Int = gamePlayer.dicedNumber ?: continue
                                 val entitiesFromTeam: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName)
 
@@ -162,8 +159,9 @@ class GamePlayActionHandler {
                                     gamePlayer.dicedNumber = null
                                     ingamePhase.phaseMode = GamePhaseMode.DICE
                                     ingamePhase.setNextControllingTeam()
+                                } else {
+                                    gamePlayer.sendActionBar(Component.text("Please select a entity now.", NamedTextColor.LIGHT_PURPLE))
                                 }
-
                             }
                         }
 

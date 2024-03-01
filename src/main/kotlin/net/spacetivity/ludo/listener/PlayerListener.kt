@@ -24,17 +24,15 @@ import org.bukkit.block.Block
 import org.bukkit.block.Sign
 import org.bukkit.block.sign.Side
 import org.bukkit.entity.Player
-import org.bukkit.entity.Villager
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
 
 class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
@@ -95,7 +93,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     fun onInteract(event: PlayerInteractEvent) {
         val player: Player = event.player
         val block: Block? = event.clickedBlock
@@ -103,7 +101,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
         val itemInHand: ItemStack = player.inventory.itemInMainHand
 
         when (itemInHand.type) {
-            Material.BLAZE_ROD -> {
+            Material.BLAZE_ROD -> { //TODO: Remove that...
                 if (block == null) return
                 if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
                 if (event.hand != EquipmentSlot.HAND) return
@@ -130,7 +128,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 player.sendMessage(Component.text("Spawn for team $teamName | isTaken: ${spawnLocation.isTaken}"))
             }
 
-            Material.STICK -> {
+            Material.STICK -> { //TODO: Remove that...
                 if (block == null) return
                 if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
                 if (event.hand != EquipmentSlot.HAND) return
@@ -139,7 +137,7 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 val field = LudoGame.instance.gameFieldHandler.getField(gameArena.id, block.location.x, block.location.z)
 
                 if (field == null) {
-                    player.sendMessage("no field...")
+                    player.sendMessage("No field...")
                     return
                 }
 
@@ -247,7 +245,6 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
             }
 
             Material.DIAMOND_HOE -> {
-
                 if (block == null) return
                 if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
 
@@ -269,57 +266,6 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
             else -> {}
         }
-
-    }
-
-    @EventHandler
-    fun onInteractWithGameEntity(event: PlayerInteractAtEntityEvent) {
-        val player: Player = event.player
-
-        val gameArena: GameArena = player.getArena() ?: return
-        if (event.rightClicked !is Villager) return
-
-        val gameEntity: GameEntity? = LudoGame.instance.gameEntityHandler.getEntity(gameArena.id, event.rightClicked.uniqueId)
-
-        if (gameEntity == null) {
-            player.sendMessage(Component.text("GameEntity not found..."))
-            return
-        }
-
-        player.sendMessage(Component.text("currentFieldId ${gameEntity.currentFieldId}"))
-    }
-
-//    @EventHandler
-//    fun onChangeHeldItem(event: PlayerItemHeldEvent) {
-//        val player: Player = event.player
-//
-//        val gameArena: GameArena = player.getArena() ?: return
-//        if (!gameArena.phase.isIngame()) return
-//
-//        val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
-//        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
-//
-//        if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) return
-//
-//        val heldItemStack: ItemStack = player.inventory.getItem(event.newSlot) ?: return
-//        if (heldItemStack.type != Material.ARMOR_STAND) return
-//
-//        getLastHighlightedEntity(gamePlayer, gameArena, heldItemStack.itemMeta)?.toggleHighlighting(false)
-//
-//        if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, "entitySelector")) return
-//
-//        val entityId: Int = PersistentDataUtils.getData(heldItemStack.itemMeta, "entitySelector", Int::class.java)
-//        val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId }
-//            ?: return
-//
-//        gameEntity.toggleHighlighting(true)
-//    }
-
-    private fun getLastHighlightedEntity(gamePlayer: GamePlayer, gameArena: GameArena, itemMeta: ItemMeta): GameEntity? {
-        if (!PersistentDataUtils.hasData(itemMeta, "entitySelector")) return null
-
-        val entityId: Int = PersistentDataUtils.getData(itemMeta, "entitySelector", Int::class.java)
-        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId }
     }
 
     private fun getOtherHighlightedEntities(gamePlayer: GamePlayer, gameArena: GameArena, highlightedEntity: GameEntity): List<GameEntity> {

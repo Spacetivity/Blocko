@@ -62,6 +62,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
     private fun hasControllingTeamMemberDicedSix(): Boolean {
         val controllingTeam: GameTeam = getControllingTeam() ?: return false
+        if (controllingTeam.deactivated) return false
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return false
 
         var hasDicedSix = false

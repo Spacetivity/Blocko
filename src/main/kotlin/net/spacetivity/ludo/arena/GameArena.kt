@@ -4,12 +4,11 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.dice.DiceHandler
-import net.spacetivity.ludo.extensions.clearPhaseItems
-import net.spacetivity.ludo.extensions.getTeam
-import net.spacetivity.ludo.extensions.sendMessage
+import net.spacetivity.ludo.extensions.*
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.team.GameTeam
+import org.bukkit.GameMode
 import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.entity.Player
@@ -62,6 +61,8 @@ class GameArena(
             return
         }
 
+        gamePlayer.setGameMode(GameMode.ADVENTURE)
+        gamePlayer.setFlying(true)
         gamePlayer.sendMessage(Component.text("You joined the arena!", NamedTextColor.GREEN))
 
         if (!gamePlayer.isAI && (this.currentPlayers.isEmpty() || this.arenaHost == null)) {
@@ -91,6 +92,7 @@ class GameArena(
         LudoGame.instance.bossbarHandler.clearBossbars(player)
 
         val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == player.uniqueId } ?: return
+        gamePlayer.setFlying(false)
 
         if (LudoGame.instance.diceHandler.dicingPlayers.containsKey(gamePlayer.uuid))
             LudoGame.instance.diceHandler.dicingPlayers.remove(gamePlayer.uuid)

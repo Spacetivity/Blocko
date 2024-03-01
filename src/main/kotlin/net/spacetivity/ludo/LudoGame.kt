@@ -2,8 +2,6 @@ package net.spacetivity.ludo
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.arena.GameArenaDAO
 import net.spacetivity.ludo.arena.GameArenaHandler
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
@@ -26,6 +24,7 @@ import net.spacetivity.ludo.files.DatabaseFile
 import net.spacetivity.ludo.files.GlobalConfigFile
 import net.spacetivity.ludo.listener.PlayerListener
 import net.spacetivity.ludo.listener.PlayerSetupListener
+import net.spacetivity.ludo.listener.ProtectionListener
 import net.spacetivity.ludo.phase.GamePhaseHandler
 import net.spacetivity.ludo.player.GamePlayActionHandler
 import net.spacetivity.ludo.team.GameTeamHandler
@@ -65,29 +64,23 @@ class LudoGame : JavaPlugin() {
     override fun onEnable() {
         instance = this
 
-        try {
-            val dbProperties: DatabaseFile = createOrLoadDatabaseProperties()
-            Database.connect(
-                "jdbc:mariadb://${dbProperties.hostname}:${dbProperties.port}/${dbProperties.database}",
-                driver = "org.mariadb.jdbc.Driver",
-                user = dbProperties.user,
-                password = dbProperties.password,
-            )
+        val dbProperties: DatabaseFile = createOrLoadDatabaseProperties()
 
-            transaction {
-                addLogger(StdOutSqlLogger)
-                SchemaUtils.create(
-                    GameArenaDAO,
-                    GameFieldDAO,
-                    GameTeamLocationDAO,
-                    GameArenaSignDAO
-                )
-            }
-        } catch (e: Exception) {
-            val message = Component.text("Database connection failed für LudoGame!", NamedTextColor.RED)
-            Bukkit.getConsoleSender().sendMessage(message)
-            Bukkit.getPluginManager().disablePlugin(this)
-            return
+        Database.connect(
+            "jdbc:mariadb://${dbProperties.hostname}:${dbProperties.port}/${dbProperties.database}",
+            driver = "org.mariadb.jdbc.Driver",
+            user = dbProperties.user,
+            password = dbProperties.password,
+        )
+
+        transaction {
+            addLogger(StdOutSqlLogger)
+            SchemaUtils.create(
+                GameArenaDAO,
+                GameFieldDAO,
+                GameTeamLocationDAO,
+                GameArenaSignDAO
+            )
         }
 
         this.diceSidesFile = createOrLoadDiceSidesFile()
@@ -118,6 +111,7 @@ class LudoGame : JavaPlugin() {
         registerCommand(LudoCommand())
         PlayerSetupListener(this)
         PlayerListener(this)
+        ProtectionListener(this)
     }
 
     override fun onDisable() {

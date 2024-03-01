@@ -179,6 +179,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         newField.isTaken = true
         newField.currentHolder = this
 
+        println(">> Moving | currentFieldId: ${this.currentFieldId} goalFieldId: $goalFieldId [${this.currentFieldId}/$goalFieldId]")
         return this.currentFieldId == goalFieldId
     }
 
