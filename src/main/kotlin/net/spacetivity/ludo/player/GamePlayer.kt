@@ -41,7 +41,6 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
             ingamePhase.phaseMode = GamePhaseMode.DICE
             ingamePhase.setNextControllingTeam()
             this.dicedNumber = null
-            println(2)
             return
         }
 
@@ -64,7 +63,7 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
         if (this.activeEntity!!.controller == null) this.activeEntity!!.controller = this
     }
 
-    fun hasWon(): Boolean {
+    fun hasSavedAllEntities(): Boolean {
         return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(this.arenaId, this.teamName).all { it.isInGarage() && !it.isMovableTo(1) }
     }
 

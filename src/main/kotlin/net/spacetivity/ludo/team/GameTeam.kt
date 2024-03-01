@@ -14,6 +14,8 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
     val teamMembers: MutableSet<UUID> = mutableSetOf() //TODO: Change this to a GamePlayer instance, so that AI can be a team holder
     val teamLocations: MutableSet<GameTeamLocation> = mutableSetOf()
 
+    var deactivated: Boolean = false // Indicates if the player has already all entities saved!
+
     fun join(gamePlayer: GamePlayer) {
         if (isFull()) {
             gamePlayer.sendMessage(Component.text("This team is already full!"))

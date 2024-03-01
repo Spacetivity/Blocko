@@ -8,7 +8,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.function.Predicate
 
-abstract class GameCountdown(protected val arenaId: String, private val duration: Int, private val startCondition: Predicate<Int>) {
+abstract class GameCountdown(protected val arenaId: String, private val duration: Int, private val startCondition: Predicate<Int>?) {
 
     var fallbackDuration: Int = this.duration
     var modifiableDuration: Int = this.duration
@@ -18,7 +18,8 @@ abstract class GameCountdown(protected val arenaId: String, private val duration
 
     fun tryStartup() {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
-        if (this.countdownTask != null || !this.startCondition.test(gameArena.currentPlayers.size)) return
+        if (this.countdownTask != null) return
+        if (this.startCondition != null && !this.startCondition.test(gameArena.currentPlayers.size)) return
 
         isRunning = true
         this.countdownTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {

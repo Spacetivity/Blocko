@@ -4,10 +4,12 @@ import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.bossbar.BossbarHandler
 import net.spacetivity.ludo.entity.GameEntity
+import net.spacetivity.ludo.extensions.getTeam
 import net.spacetivity.ludo.extensions.sendActionBar
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
@@ -29,6 +31,7 @@ class GamePlayActionHandler {
         this.mainTask = Bukkit.getScheduler().runTaskTimerAsynchronously(LudoGame.instance, Runnable {
             for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
                 for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+                    if (gamePlayer.getTeam().deactivated) continue
                     val player: Player = gamePlayer.toBukkitInstance() ?: continue
 
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
@@ -44,7 +47,8 @@ class GamePlayActionHandler {
                     if (!PersistentDataUtils.hasData(currentItemStack.itemMeta, "entitySelector")) continue
 
                     val entityId: Int = PersistentDataUtils.getData(currentItemStack.itemMeta, "entitySelector", Int::class.java)
-                    val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId } ?: continue
+                    val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId }
+                        ?: continue
 
                     getOtherHighlightedEntities(gamePlayer, gameArena, gameEntity).forEach { it.toggleHighlighting(false) }
                     gameEntity.toggleHighlighting(true)
@@ -56,9 +60,16 @@ class GamePlayActionHandler {
     fun startMovementTask() {
         this.movementTask = Bukkit.getScheduler().runTaskTimer(LudoGame.instance, Runnable {
             for (gameEntity: GameEntity in LudoGame.instance.gameEntityHandler.gameEntities.values()) {
+                val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(gameEntity.arenaId) ?: continue
+                if (gameArena.phase.isIngame()) //TODO: check if this causes bugs
+
                 if (!gameEntity.shouldMove) continue
 
                 val gamePlayer: GamePlayer = gameEntity.controller ?: continue
+                val gameTeam: GameTeam = gamePlayer.getTeam()
+
+                if (gameTeam.deactivated) continue
+
                 val dicedNumber: Int = gamePlayer.dicedNumber ?: continue
 
                 val ignoreDicedNumber: Boolean = gamePlayer.lastEntityPickRule != null && gamePlayer.lastEntityPickRule == EntityPickRule.MOVABLE_OUT_OF_START
@@ -69,12 +80,17 @@ class GamePlayActionHandler {
                 gameEntity.toggleHighlighting(false)
                 println("reached goal!")
 
-                if (gamePlayer.hasWon()) {
-                    println("Team ${gameEntity.teamName} has won!")
-                    //TODO: Send GameWinEvent
+                if (gamePlayer.hasSavedAllEntities() && !gameArena.isGameOver() && !gameTeam.deactivated) {
+                    gameTeam.deactivated = true
+                    gameArena.sendArenaMessage(Component.text("TEAM ${gameTeam.name.uppercase()} HAS FINISHED!", NamedTextColor.YELLOW, TextDecoration.BOLD))
+                    println("Team ${gameEntity.teamName} has saved all entities!")
                 }
 
-                val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(gameEntity.arenaId) ?: continue
+                if (gameArena.isGameOver()) { //TODO: Vielleicht muss das woanders hin!!!!111!! LOL XD ROFL DU KEK AMK TAFNIES !!!"132h3h34fgbh2tgbh4TBh4tgbvh$TGB4htgb4hfgb4hefb4hB!H§F1bh3
+                    LudoGame.instance.gamePhaseHandler.nextPhase(gameArena) //TODO: check if this causes bugs
+                    continue
+                }
+
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
                 gameEntity.controller = null
@@ -101,9 +117,10 @@ class GamePlayActionHandler {
 
     fun startPlayerTask() {
         this.playerTask = Bukkit.getScheduler().runTaskTimerAsynchronously(LudoGame.instance, Runnable {
-            for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas) {
+            for (gameArena: GameArena in LudoGame.instance.gameArenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
                 for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
-                    if (!gameArena.phase.isIngame()) continue
+                    if (gamePlayer.getTeam().deactivated) continue
+
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
                     val bossbarHandler: BossbarHandler = LudoGame.instance.bossbarHandler

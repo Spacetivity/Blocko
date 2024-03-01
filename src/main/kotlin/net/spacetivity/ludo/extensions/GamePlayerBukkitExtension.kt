@@ -1,10 +1,16 @@
 package net.spacetivity.ludo.extensions
 
 import net.kyori.adventure.text.Component
+import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.player.GamePlayer
+import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+
+fun GamePlayer.getTeam(): GameTeam {
+    return LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.arenaId, this.uuid)!!
+}
 
 fun GamePlayer.sendMessage(component: Component) {
     if (!isAI) {

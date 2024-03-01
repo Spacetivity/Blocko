@@ -9,6 +9,7 @@ import net.spacetivity.ludo.arena.sign.GameArenaSign
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.extensions.getArena
+import net.spacetivity.ludo.extensions.getTeam
 import net.spacetivity.ludo.extensions.toGamePlayerInstance
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
@@ -149,6 +150,12 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
                 if (!event.action.isRightClick) return
 
                 val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
+
+                if (gamePlayer.getTeam().deactivated) {
+                    player.sendMessage(Component.text("You have already saved all your entities!", NamedTextColor.GOLD))
+                    return
+                }
+
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
                 if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) {
@@ -172,6 +179,11 @@ class PlayerListener(private val ludoGame: LudoGame) : Listener {
 
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
                 val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
+
+                if (gamePlayer.getTeam().deactivated) {
+                    player.sendMessage(Component.text("You have already saved all your entities!", NamedTextColor.GOLD))
+                    return
+                }
 
                 if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) {
                     player.sendMessage(Component.text("You cannot pick an entity now!", NamedTextColor.RED))

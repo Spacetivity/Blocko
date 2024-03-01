@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.dice.DiceHandler
 import net.spacetivity.ludo.extensions.clearPhaseItems
+import net.spacetivity.ludo.extensions.getTeam
 import net.spacetivity.ludo.extensions.sendMessage
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.player.GamePlayer
@@ -147,6 +148,12 @@ class GameArena(
         if (!this.phase.isIdle()) LudoGame.instance.gamePhaseHandler.initIndexPhase(this)
 
         println("Arena ${this.id} was reset! Phase is now: ${this.phase.name}")
+    }
+
+    fun isGameOver(): Boolean {
+        val finishedGamePlayers: List<GamePlayer> = this.currentPlayers.filter { it.getTeam().deactivated }.toList()
+        val enoughGamePlayersFinished: Boolean = finishedGamePlayers.size == (this.maxPlayers - 1)
+        return enoughGamePlayersFinished
     }
 
     private fun findNewHost(): GamePlayer? {
