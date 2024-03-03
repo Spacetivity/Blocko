@@ -27,21 +27,29 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 
-class PlayerListener(private val ludoGame: LudoGame) : Listener {
+class PlayerListener(private val plugin: LudoGame) : Listener {
 
     private val gameArenaSignHandler: GameArenaSignHandler = LudoGame.instance.gameArenaSignHandler
 
     init {
-        this.ludoGame.server.pluginManager.registerEvents(this, this.ludoGame)
+        this.plugin.server.pluginManager.registerEvents(this, this.plugin)
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onJoin(event: PlayerJoinEvent) {
+        val player: Player = event.player
+        this.plugin.achievementHandler.createOrLoadAchievementPlayer(player.uniqueId)
     }
 
     @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
         val player: Player = event.player
         player.getArena()?.quit(player)
+        this.plugin.achievementHandler.unloadAchievementPlayer(player.uniqueId)
     }
 
     @EventHandler

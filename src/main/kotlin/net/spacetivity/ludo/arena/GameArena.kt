@@ -73,6 +73,7 @@ class GameArena(
         this.currentPlayers.add(gamePlayer)
 
         if (!isAI) {
+            LudoGame.instance.achievementHandler.getAchievement("FirstJoin")?.grantIfCompletedBy(gamePlayer)
             this.phase.setupPlayerInventory(gamePlayer.toBukkitInstance()!!)
             this.phase.countdown?.tryStartup()
         }

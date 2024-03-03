@@ -2,6 +2,9 @@ package net.spacetivity.ludo
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import net.spacetivity.ludo.advancement.AchievementHandler
+import net.spacetivity.ludo.advancement.AchievementPlayerDAO
+import net.spacetivity.ludo.advancement.impl.FirstJoinAchievement
 import net.spacetivity.ludo.arena.GameArenaDAO
 import net.spacetivity.ludo.arena.GameArenaHandler
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
@@ -59,6 +62,8 @@ class LudoGame : JavaPlugin() {
     lateinit var gameFieldHandler: GameFieldHandler
     lateinit var gameArenaSignHandler: GameArenaSignHandler
 
+    lateinit var achievementHandler: AchievementHandler
+
     private lateinit var gamePlayActionHandler: GamePlayActionHandler
 
     override fun onEnable() {
@@ -79,7 +84,8 @@ class LudoGame : JavaPlugin() {
                 GameArenaDAO,
                 GameFieldDAO,
                 GameTeamLocationDAO,
-                GameArenaSignDAO
+                GameArenaSignDAO,
+                AchievementPlayerDAO
             )
         }
 
@@ -102,6 +108,9 @@ class LudoGame : JavaPlugin() {
         this.gameFieldHandler = GameFieldHandler()
         this.gameArenaSignHandler = GameArenaSignHandler()
         this.gameArenaSignHandler.loadArenaSigns()
+
+        this.achievementHandler = AchievementHandler()
+        this.achievementHandler.registerAchievement(FirstJoinAchievement())
 
         this.gamePlayActionHandler = GamePlayActionHandler()
         this.gamePlayActionHandler.startMainTask()
