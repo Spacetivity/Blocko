@@ -8,7 +8,7 @@ open class Achievement(val name: String, val description: String, val rewardedCo
 
     fun getIconType(gamePlayer: GamePlayer): Material {
         val hasAchievementUnlocked: Boolean = LudoGame.instance.achievementHandler.hasAchievementUnlocked(gamePlayer.uuid, this.name)
-        return if (hasAchievementUnlocked) Material.LIME_DYE else Material.LIGHT_GRAY_DYE
+        return if (hasAchievementUnlocked) Material.LIME_DYE else Material.GRAY_DYE
     }
 
     fun grantIfCompletedBy(gamePlayer: GamePlayer) {

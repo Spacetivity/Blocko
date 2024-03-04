@@ -2,8 +2,10 @@ package net.spacetivity.ludo.field
 
 import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.achievement.container.Achievement
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
+import net.spacetivity.ludo.extensions.addCoins
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.stats.StatsPlayer
 import net.spacetivity.ludo.stats.UpdateOperator
@@ -49,14 +51,10 @@ class GameField(
 
         handleStatsReward(newHolder, true)
 
-        val oldHolder: GamePlayer = gameArena.currentPlayers.firstOrNull { it.teamName == oldHolderEntity.teamName } ?: return
-        handleStatsReward(oldHolder, false)
-    }
+        val oldHolder: GamePlayer = gameArena.currentPlayers.firstOrNull { it.teamName == oldHolderEntity.teamName }
+            ?: return
 
-    private fun handleStatsReward(gamePlayer: GamePlayer, isReward: Boolean) {
-        val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getCachedStatsPlayer(gamePlayer.uuid) ?: return
-        val updateType: UpdateType = if (isReward) UpdateType.ELIMINATED_OPPONENTS else UpdateType.KNOCKED_OUT_BY_OPPONENTS
-        statsPlayer.update(updateType, UpdateOperator.INCREASE, 1)
+        handleStatsReward(oldHolder, false)
     }
 
     fun getWorldPosition(fieldHeight: Double): Location {
@@ -64,6 +62,23 @@ class GameField(
         val fixedLocation: Location = location.clone().toCenterLocation()
         fixedLocation.y = fieldHeight
         return fixedLocation
+    }
+
+    private fun handleStatsReward(gamePlayer: GamePlayer, isReward: Boolean) {
+        if (gamePlayer.isAI) return
+
+        val possibleAchievement: Achievement?
+
+        if (isReward) possibleAchievement = LudoGame.instance.achievementHandler.getAchievement("FirstElimination")
+        else possibleAchievement = LudoGame.instance.achievementHandler.getAchievement("FirstKnockout")
+
+        possibleAchievement?.grantIfCompletedBy(gamePlayer)
+
+        val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
+        val updateType: UpdateType = if (isReward) UpdateType.ELIMINATED_OPPONENTS else UpdateType.KNOCKED_OUT_BY_OPPONENTS
+        statsPlayer.update(updateType, UpdateOperator.INCREASE, 1)
+
+        if (isReward) gamePlayer.toBukkitInstance()?.addCoins(20, true)
     }
 
 }

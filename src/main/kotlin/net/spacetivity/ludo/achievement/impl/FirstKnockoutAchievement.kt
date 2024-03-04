@@ -6,12 +6,11 @@ import net.spacetivity.ludo.achievement.container.Requirement
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.stats.StatsPlayer
 
-class PlayFirstGameAchievement : Achievement("First Game", "Play your first Blocko round!", 25, listOf(PlayFirstGameRequirement()))
+class FirstKnockoutAchievement : Achievement("First Knockout", "Get knocked out by an opponent!", 0, listOf(FirstKnockoutRequirement()))
 
-class PlayFirstGameRequirement : Requirement {
+class FirstKnockoutRequirement : Requirement {
     override fun isCompletedBy(gamePlayer: GamePlayer): Boolean {
-        val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)
-            ?: return false
-        return statsPlayer.playedGames == 0
+        val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return false
+        return statsPlayer.knockedOutByOpponents == 0
     }
 }

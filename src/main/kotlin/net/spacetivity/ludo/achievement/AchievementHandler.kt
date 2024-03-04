@@ -77,7 +77,7 @@ class AchievementHandler {
         val player: Player = Bukkit.getPlayer(uuid) ?: return
         player.translateMessage("blocko.achievement.unlocked", Placeholder.parsed("name", achievementName))
         player.playSound(player.location, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1.0F)
-        player.addCoins(achievement.rewardedCoins)
+        if (achievement.rewardedCoins > 0) player.addCoins(achievement.rewardedCoins, false)
     }
 
 }

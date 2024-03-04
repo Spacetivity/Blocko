@@ -26,13 +26,13 @@ class StatsPlayerHandler {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun createOrLoadStatsPlayer(uuid: UUID) {
-        transaction {
-            val resultRow: ResultRow? = StatsPlayerDAO.select { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
-            val statsPlayer: StatsPlayer
+        GlobalScope.launch {
+            transaction {
+                val resultRow: ResultRow? = StatsPlayerDAO.select { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
+                val statsPlayer: StatsPlayer
 
-            if (resultRow == null) {
-                statsPlayer = StatsPlayer(uuid, 0, 0, 0, 0)
-                GlobalScope.launch {
+                if (resultRow == null) {
+                    statsPlayer = StatsPlayer(uuid, 0, 0, 0, 0)
                     StatsPlayerDAO.insert { statement: InsertStatement<Number> ->
                         statement[StatsPlayerDAO.uuid] = uuid.toString()
                         statement[eliminatedOpponents] = 0
@@ -40,18 +40,21 @@ class StatsPlayerHandler {
                         statement[playedGames] = 0
                         statement[coins] = 0
                     }
-                }
-            } else {
-                statsPlayer = StatsPlayer(
-                    uuid,
-                    resultRow[StatsPlayerDAO.eliminatedOpponents],
-                    resultRow[StatsPlayerDAO.knockedOutByOpponents],
-                    resultRow[StatsPlayerDAO.playedGames],
-                    resultRow[StatsPlayerDAO.coins]
-                )
-            }
 
-            cachedStatsPlayers.add(statsPlayer)
+                } else {
+                    statsPlayer = StatsPlayer(
+                        uuid,
+                        resultRow[StatsPlayerDAO.eliminatedOpponents],
+                        resultRow[StatsPlayerDAO.knockedOutByOpponents],
+                        resultRow[StatsPlayerDAO.playedGames],
+                        resultRow[StatsPlayerDAO.coins]
+                    )
+                }
+
+                synchronized(cachedStatsPlayers) {
+                    cachedStatsPlayers.add(statsPlayer)
+                }
+            }
         }
     }
 
@@ -73,7 +76,7 @@ class StatsPlayerHandler {
         }
     }
 
-    fun getCachedStatsPlayer(uuid: UUID): StatsPlayer? {
+    fun getStatsPlayer(uuid: UUID): StatsPlayer? {
         return this.cachedStatsPlayers.find { it.uuid == uuid }
     }
 

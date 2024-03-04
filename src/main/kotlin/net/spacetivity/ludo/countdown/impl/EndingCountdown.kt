@@ -25,9 +25,8 @@ class EndingCountdown(arenaId: String) : GameCountdown(arenaId, 5, null) {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
 
         for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
-            val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getCachedStatsPlayer(gamePlayer.uuid) ?: continue
+            val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: continue
             statsPlayer.update(UpdateType.PLAYED_GAMES, UpdateOperator.INCREASE, 1)
-            statsPlayer.updateDbEntry()
         }
 
         gameArena.sendArenaMessage(Component.text("Game arena resets now... You are teleported to spawn!"))

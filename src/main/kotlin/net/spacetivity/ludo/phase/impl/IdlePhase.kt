@@ -18,14 +18,8 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
     }
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
-        hotbarItems[0] = ItemBuilder(Material.ALLAY_SPAWN_EGG)
-            .setName(Component.text("Entity Menu [Right-click]"))
-            .setLoreByComponent(mutableListOf(Component.text("Select and buy entities with your gained coins")))
-            .build()
-
-        hotbarItems[1] = ItemBuilder(Material.COMPARATOR)
-            .setName(Component.text("Host Settings [Right-click]"))
-            .setLoreByComponent(mutableListOf(Component.text("If you are the Game-Host, you"), Component.text("can control the arena here.")))
+        hotbarItems[0] = ItemBuilder(Material.CLOCK)
+            .setName(Component.text("Profile [Right-click]"))
             .build()
 
         hotbarItems[8] = ItemBuilder(Material.SLIME_BALL)

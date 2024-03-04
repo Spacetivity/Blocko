@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder
 import net.spacetivity.ludo.achievement.AchievementHandler
 import net.spacetivity.ludo.achievement.AchievementPlayerDAO
 import net.spacetivity.ludo.achievement.impl.FairPlayAchievement
+import net.spacetivity.ludo.achievement.impl.FirstEliminationAchievement
+import net.spacetivity.ludo.achievement.impl.FirstKnockoutAchievement
 import net.spacetivity.ludo.achievement.impl.PlayFirstGameAchievement
 import net.spacetivity.ludo.arena.GameArenaDAO
 import net.spacetivity.ludo.arena.GameArenaHandler
@@ -119,6 +121,8 @@ class LudoGame : JavaPlugin() {
         this.achievementHandler = AchievementHandler()
         this.achievementHandler.registerAchievement(PlayFirstGameAchievement())
         this.achievementHandler.registerAchievement(FairPlayAchievement())
+        this.achievementHandler.registerAchievement(FirstKnockoutAchievement())
+        this.achievementHandler.registerAchievement(FirstEliminationAchievement())
 
         this.gamePlayActionHandler = GamePlayActionHandler()
         this.gamePlayActionHandler.startMainTask()
