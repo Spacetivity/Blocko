@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder
 import net.spacetivity.ludo.achievement.AchievementHandler
 import net.spacetivity.ludo.achievement.AchievementPlayerDAO
 import net.spacetivity.ludo.achievement.impl.FairPlayAchievement
-import net.spacetivity.ludo.achievement.impl.FirstJoinAchievement
+import net.spacetivity.ludo.achievement.impl.PlayFirstGameAchievement
 import net.spacetivity.ludo.arena.GameArenaDAO
 import net.spacetivity.ludo.arena.GameArenaHandler
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
@@ -31,6 +31,8 @@ import net.spacetivity.ludo.listener.PlayerSetupListener
 import net.spacetivity.ludo.listener.ProtectionListener
 import net.spacetivity.ludo.phase.GamePhaseHandler
 import net.spacetivity.ludo.player.GamePlayActionHandler
+import net.spacetivity.ludo.stats.StatsPlayerDAO
+import net.spacetivity.ludo.stats.StatsPlayerHandler
 import net.spacetivity.ludo.team.GameTeamHandler
 import net.spacetivity.ludo.team.GameTeamLocationDAO
 import net.spacetivity.ludo.translation.TranslationHandler
@@ -63,6 +65,7 @@ class LudoGame : JavaPlugin() {
     lateinit var gameFieldHandler: GameFieldHandler
     lateinit var gameArenaSignHandler: GameArenaSignHandler
 
+    lateinit var statsPlayerHandler: StatsPlayerHandler
     lateinit var achievementHandler: AchievementHandler
 
     private lateinit var gamePlayActionHandler: GamePlayActionHandler
@@ -86,7 +89,8 @@ class LudoGame : JavaPlugin() {
                 GameFieldDAO,
                 GameTeamLocationDAO,
                 GameArenaSignDAO,
-                AchievementPlayerDAO
+                AchievementPlayerDAO,
+                StatsPlayerDAO
             )
         }
 
@@ -110,8 +114,10 @@ class LudoGame : JavaPlugin() {
         this.gameArenaSignHandler = GameArenaSignHandler()
         this.gameArenaSignHandler.loadArenaSigns()
 
+        this.statsPlayerHandler = StatsPlayerHandler()
+
         this.achievementHandler = AchievementHandler()
-        this.achievementHandler.registerAchievement(FirstJoinAchievement())
+        this.achievementHandler.registerAchievement(PlayFirstGameAchievement())
         this.achievementHandler.registerAchievement(FairPlayAchievement())
 
         this.gamePlayActionHandler = GamePlayActionHandler()

@@ -45,6 +45,7 @@ class PlayerListener(private val plugin: LudoGame) : Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     fun onJoin(event: PlayerJoinEvent) {
         val player: Player = event.player
+        this.plugin.statsPlayerHandler.createOrLoadStatsPlayer(player.uniqueId)
         this.plugin.achievementHandler.createOrLoadAchievementPlayer(player.uniqueId)
     }
 
@@ -52,6 +53,7 @@ class PlayerListener(private val plugin: LudoGame) : Listener {
     fun onQuit(event: PlayerQuitEvent) {
         val player: Player = event.player
         player.getArena()?.quit(player)
+        this.plugin.statsPlayerHandler.unloadStatsPlayer(player.uniqueId)
         this.plugin.achievementHandler.unloadAchievementPlayer(player.uniqueId)
     }
 

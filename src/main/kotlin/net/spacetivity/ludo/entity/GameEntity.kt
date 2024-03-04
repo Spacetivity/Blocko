@@ -175,8 +175,9 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         this.livingEntity!!.teleport(worldPosition)
 
         val currentHolderTeamName: String = newField.currentHolder?.teamName ?: "-/-"
+
         if ((newFieldId == goalFieldId) && (newField.isTaken && currentHolderTeamName != this.teamName))
-            goalField.trowOutOldHolder(this.livingEntity!!)
+            goalField.trowOutOldHolder(controller!!, this.livingEntity!!)
 
         newField.isTaken = true
         newField.currentHolder = this

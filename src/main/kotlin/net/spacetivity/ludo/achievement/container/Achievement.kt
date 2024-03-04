@@ -12,7 +12,7 @@ open class Achievement(val name: String, val description: String, private val re
     }
 
     fun grantIfCompletedBy(gamePlayer: GamePlayer) {
-        if (!isCompletedBy(gamePlayer) || LudoGame.instance.achievementHandler.hasAchievementUnlocked(gamePlayer.uuid, this.name)) return
+        if (gamePlayer.isAI || !isCompletedBy(gamePlayer) || LudoGame.instance.achievementHandler.hasAchievementUnlocked(gamePlayer.uuid, this.name)) return
         LudoGame.instance.achievementHandler.grantAchievement(gamePlayer.uuid, this.name)
     }
 

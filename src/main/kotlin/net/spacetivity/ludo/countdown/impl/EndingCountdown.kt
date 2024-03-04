@@ -4,6 +4,10 @@ import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.countdown.GameCountdown
+import net.spacetivity.ludo.player.GamePlayer
+import net.spacetivity.ludo.stats.StatsPlayer
+import net.spacetivity.ludo.stats.UpdateOperator
+import net.spacetivity.ludo.stats.UpdateType
 import org.bukkit.Sound
 import org.bukkit.scheduler.BukkitTask
 
@@ -19,6 +23,13 @@ class EndingCountdown(arenaId: String) : GameCountdown(arenaId, 5, null) {
 
     override fun handleCountdownEnd() {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
+
+        for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+            val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getCachedStatsPlayer(gamePlayer.uuid) ?: continue
+            statsPlayer.update(UpdateType.PLAYED_GAMES, UpdateOperator.INCREASE, 1)
+            statsPlayer.updateDbEntry()
+        }
+
         gameArena.sendArenaMessage(Component.text("Game arena resets now... You are teleported to spawn!"))
         gameArena.reset()
     }
