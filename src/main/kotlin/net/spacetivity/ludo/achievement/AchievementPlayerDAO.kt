@@ -1,4 +1,4 @@
-package net.spacetivity.ludo.advancement
+package net.spacetivity.ludo.achievement
 
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table

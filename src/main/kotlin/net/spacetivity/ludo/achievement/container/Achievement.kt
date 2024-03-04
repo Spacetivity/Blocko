@@ -1,10 +1,15 @@
-package net.spacetivity.ludo.advancement.container
+package net.spacetivity.ludo.achievement.container
 
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.player.GamePlayer
 import org.bukkit.Material
 
-open class Achievement(val name: String, val description: String, val icon: Material, private val requirements: List<Requirement>) {
+open class Achievement(val name: String, val description: String, private val requirements: List<Requirement>) {
+
+    fun getIconType(gamePlayer: GamePlayer): Material {
+        val hasAchievementUnlocked: Boolean = LudoGame.instance.achievementHandler.hasAchievementUnlocked(gamePlayer.uuid, this.name)
+        return if (hasAchievementUnlocked) Material.LIME_DYE else Material.LIGHT_GRAY_DYE
+    }
 
     fun grantIfCompletedBy(gamePlayer: GamePlayer) {
         if (!isCompletedBy(gamePlayer) || LudoGame.instance.achievementHandler.hasAchievementUnlocked(gamePlayer.uuid, this.name)) return

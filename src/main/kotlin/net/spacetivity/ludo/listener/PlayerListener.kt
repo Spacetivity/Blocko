@@ -1,9 +1,12 @@
 package net.spacetivity.ludo.listener
 
+import io.papermc.paper.event.player.AsyncChatEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.achievement.container.Achievement
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.sign.GameArenaSign
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
@@ -50,6 +53,17 @@ class PlayerListener(private val plugin: LudoGame) : Listener {
         val player: Player = event.player
         player.getArena()?.quit(player)
         this.plugin.achievementHandler.unloadAchievementPlayer(player.uniqueId)
+    }
+
+    @EventHandler
+    fun onChat(event: AsyncChatEvent) {
+        val gamePlayer: GamePlayer = event.player.toGamePlayerInstance() ?: return
+
+        val rawMessage: String = PlainTextComponentSerializer.plainText().serialize(event.message())
+        if (!rawMessage.contains("gg", true)) return
+
+        val achievement: Achievement = this.plugin.achievementHandler.getAchievement("FairPlay") ?: return
+        achievement.grantIfCompletedBy(gamePlayer)
     }
 
     @EventHandler

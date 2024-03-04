@@ -1,7 +1,7 @@
-package net.spacetivity.ludo.advancement
+package net.spacetivity.ludo.achievement
 
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.advancement.container.Achievement
+import net.spacetivity.ludo.achievement.container.Achievement
 import java.util.*
 
 data class AchievementPlayer(val uuid: UUID, val achievementNames: MutableList<String>) {

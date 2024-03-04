@@ -1,4 +1,4 @@
-package net.spacetivity.ludo.advancement.container
+package net.spacetivity.ludo.achievement.container
 
 import net.spacetivity.ludo.player.GamePlayer
 

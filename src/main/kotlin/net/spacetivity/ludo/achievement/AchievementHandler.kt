@@ -1,7 +1,7 @@
-package net.spacetivity.ludo.advancement
+package net.spacetivity.ludo.achievement
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.ludo.advancement.container.Achievement
+import net.spacetivity.ludo.achievement.container.Achievement
 import net.spacetivity.ludo.extensions.translateMessage
 import org.bukkit.Bukkit
 import org.bukkit.Sound
