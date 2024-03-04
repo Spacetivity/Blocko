@@ -4,7 +4,7 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.player.GamePlayer
 import org.bukkit.Material
 
-open class Achievement(val name: String, val description: String, private val requirements: List<Requirement>) {
+open class Achievement(val name: String, val description: String, val rewardedCoins: Int, private val requirements: List<Requirement>) {
 
     fun getIconType(gamePlayer: GamePlayer): Material {
         val hasAchievementUnlocked: Boolean = LudoGame.instance.achievementHandler.hasAchievementUnlocked(gamePlayer.uuid, this.name)

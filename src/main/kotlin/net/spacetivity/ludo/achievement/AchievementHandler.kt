@@ -2,6 +2,7 @@ package net.spacetivity.ludo.achievement
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.ludo.achievement.container.Achievement
+import net.spacetivity.ludo.extensions.addCoins
 import net.spacetivity.ludo.extensions.translateMessage
 import org.bukkit.Bukkit
 import org.bukkit.Sound
@@ -55,7 +56,7 @@ class AchievementHandler {
     }
 
     fun grantAchievement(uuid: UUID, achievementName: String) {
-        if (getAchievement(achievementName) == null) return
+        val achievement: Achievement = getAchievement(achievementName) ?: return
 
         transaction {
             AchievementPlayerDAO.insert { statement: InsertStatement<Number> ->
@@ -76,6 +77,7 @@ class AchievementHandler {
         val player: Player = Bukkit.getPlayer(uuid) ?: return
         player.translateMessage("blocko.achievement.unlocked", Placeholder.parsed("name", achievementName))
         player.playSound(player.location, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1.0F)
+        player.addCoins(achievement.rewardedCoins)
     }
 
 }
