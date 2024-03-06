@@ -2,6 +2,7 @@ package net.spacetivity.ludo.extensions
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.stats.StatsPlayer
 import net.spacetivity.ludo.stats.UpdateOperator
 import net.spacetivity.ludo.stats.UpdateType
@@ -18,4 +19,8 @@ fun Player.addCoins(amount: Int, elimination: Boolean) {
 fun Player.removeCoins(amount: Int) {
     val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(this.uniqueId) ?: return
     statsPlayer.update(UpdateType.COINS, UpdateOperator.DECREASE, amount)
+}
+
+fun GamePlayer.toStatsPlayerInstance(): StatsPlayer? {
+    return LudoGame.instance.statsPlayerHandler.getStatsPlayer(this.uuid)
 }

@@ -23,8 +23,12 @@ class AchievementHandler {
         this.cachedAchievements.add(achievement)
     }
 
-    fun getAchievement(name: String): Achievement? {
-        return this.cachedAchievements.find { it.name == name }
+    fun <T : Achievement> getAchievement(clazz: Class<T>): Achievement? {
+        return this.cachedAchievements.find { it.javaClass.name == clazz.name }
+    }
+
+    fun getAchievementByKey(translationKey: String): Achievement? {
+        return this.cachedAchievements.find { it.translationKey == translationKey }
     }
 
     fun createOrLoadAchievementPlayer(uuid: UUID) {
@@ -34,8 +38,8 @@ class AchievementHandler {
             cachedAchievementPlayers.add(achievementPlayer)
 
             if (resultRow != null) {
-                val achievementName: String = resultRow[AchievementPlayerDAO.achievementName]
-                if (cachedAchievements.none { it.name == achievementName }) return@transaction
+                val achievementName: String = resultRow[AchievementPlayerDAO.achievementId]
+                if (cachedAchievements.none { it.translationKey == achievementName }) return@transaction
                 achievementPlayer.achievementNames.add(achievementName)
             }
         }
@@ -49,33 +53,33 @@ class AchievementHandler {
         return this.cachedAchievementPlayers.find { it.uuid == uuid }
     }
 
-    fun hasAchievementUnlocked(uuid: UUID, name: String): Boolean {
-        if (this.cachedAchievements.none { it.name == name }) return false
+    fun hasAchievementUnlocked(uuid: UUID, translationKey: String): Boolean {
+        if (this.cachedAchievements.none { it.translationKey == translationKey }) return false
         val achievementPlayer: AchievementPlayer = getAchievementPlayer(uuid) ?: return false
-        return achievementPlayer.achievementNames.contains(name)
+        return achievementPlayer.achievementNames.contains(translationKey)
     }
 
-    fun grantAchievement(uuid: UUID, achievementName: String) {
-        val achievement: Achievement = getAchievement(achievementName) ?: return
+    fun <T : Achievement> grantAchievement(uuid: UUID, achievementClass: Class<T>) {
+        val achievement: Achievement = getAchievement(achievementClass) ?: return
 
         transaction {
             AchievementPlayerDAO.insert { statement: InsertStatement<Number> ->
                 statement[AchievementPlayerDAO.uuid] = uuid.toString()
-                statement[AchievementPlayerDAO.achievementName] = achievementName
+                statement[achievementId] = achievement.translationKey
             }
         }
 
         var achievementPlayer: AchievementPlayer? = getAchievementPlayer(uuid)
 
         if (achievementPlayer == null) {
-           achievementPlayer = AchievementPlayer(uuid, mutableListOf(achievementName))
+           achievementPlayer = AchievementPlayer(uuid, mutableListOf(achievement.translationKey))
             this.cachedAchievementPlayers.add(achievementPlayer)
         } else {
-            achievementPlayer.achievementNames.add(achievementName)
+            achievementPlayer.achievementNames.add(achievement.translationKey)
         }
 
         val player: Player = Bukkit.getPlayer(uuid) ?: return
-        player.translateMessage("blocko.achievement.unlocked", Placeholder.parsed("name", achievementName))
+        player.translateMessage("blocko.achievement.unlocked", Placeholder.parsed("name", achievement.name))
         player.playSound(player.location, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1.0F)
         if (achievement.rewardedCoins > 0) player.addCoins(achievement.rewardedCoins, false)
     }

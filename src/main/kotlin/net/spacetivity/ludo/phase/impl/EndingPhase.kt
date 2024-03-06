@@ -2,6 +2,7 @@ package net.spacetivity.ludo.phase.impl
 
 import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.achievement.impl.PlayFirstGameAchievement
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.countdown.impl.EndingCountdown
 import net.spacetivity.ludo.phase.GamePhase
@@ -17,7 +18,7 @@ class EndingPhase(arenaId: String) : GamePhase(arenaId, "ending", 2, EndingCount
         gameArena.sendArenaMessage(Component.text("The game ends now..."))
 
         for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
-            LudoGame.instance.achievementHandler.getAchievement("FirstGame")?.grantIfCompletedBy(gamePlayer)
+            LudoGame.instance.achievementHandler.getAchievement(PlayFirstGameAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
         }
 
         countdown?.tryStartup()

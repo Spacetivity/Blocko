@@ -2,5 +2,21 @@
   "blocko.prefix.global": "<green>Blocko <gray>»",
   "blocko.achievement.unlocked": "<obfuscated><gradient:blue:green>==============================================</obfuscated>\n\n<gold>Nice! <green>You unlocked the achievement \"<yellow><name><green>\"!\n\n<obfuscated><gradient:green:blue>==============================================</obfuscated>",
   "blocko.coins.receive": "<gold>+ <green><amount> <gray>Coins",
-  "blocko.coins.receive.on_kill": "<gold>+ <green><amount> <gray>Coins <dark_gray>(<yellow>Elimination<dark_gray>)"
+  "blocko.coins.receive.on_kill": "<gold>+ <green><amount> <gray>Coins <dark_gray>(<yellow>Elimination<dark_gray>)",
+
+  "blocko.achievement.first_game.display_name": "First Game",
+  "blocko.achievement.first_game.requirement": "<gray>Play your first Blocko game",
+
+  "blocko.achievement.fair_play.display_name": "Fair Play",
+  "blocko.achievement.fair_play.requirement": "<gray>Write gg in the chat, after a Blocko round",
+
+  "blocko.achievement.first_knockout.display_name": "First Knockout",
+  "blocko.achievement.first_knockout.requirement": "<gray>Get knocked out by an opponent the first time",
+
+  "blocko.achievement.first_elimination.display_name": "First Elimination",
+  "blocko.achievement.first_elimination.requirement": "<gray>Make you first elimination",
+
+  "blocko.achievement.master_eliminator.display_name": "Master Eliminator",
+  "blocko.achievement.master_eliminator.requirement": "<gray>Eliminate <green><amount> <gray>opponents (<yellow><progress>%<gray>)"
+
 }

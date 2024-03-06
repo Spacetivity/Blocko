@@ -2,6 +2,8 @@ package net.spacetivity.ludo.listener
 
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.extensions.getArena
+import net.spacetivity.ludo.utils.ItemBuilder
+import net.spacetivity.ludo.utils.PersistentDataUtils
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -18,11 +20,26 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.event.weather.WeatherChangeEvent
+import org.bukkit.inventory.ItemStack
+import java.util.*
 
 class ProtectionListener(private val plugin: LudoGame) : Listener {
 
     init {
         this.plugin.server.pluginManager.registerEvents(this, this.plugin)
+    }
+
+    @EventHandler
+    fun onInteractWithClickableItem(event: PlayerInteractEvent) {
+        val item: ItemStack = event.item ?: return
+
+        if (item.itemMeta == null) return
+        if (!PersistentDataUtils.hasData(item.itemMeta, "clickableItem")) return
+
+        val clickableItemId: UUID = PersistentDataUtils.getData(item.itemMeta, "clickableItem", UUID::class.java)
+
+        val itemBuilder: ItemBuilder = this.plugin.clickableItems[clickableItemId] ?: return
+        itemBuilder.action.invoke(event)
     }
 
     @EventHandler
@@ -91,6 +108,13 @@ class ProtectionListener(private val plugin: LudoGame) : Listener {
     @EventHandler
     fun onItemDropInArenaWorld(event: PlayerDropItemEvent) {
         val player: Player = event.player
+        val item: ItemStack = event.itemDrop.itemStack
+
+        if (item.itemMeta != null && PersistentDataUtils.hasData(item.itemMeta, "clickableItem")) {
+            val clickableItemId: UUID = PersistentDataUtils.getData(item.itemMeta, "clickableItem", UUID::class.java)
+            LudoGame.instance.clickableItems.remove(clickableItemId)
+        }
+
         if (player.getArena() == null || player.getArena()!!.gameWorld.name != player.world.name) return
         event.isCancelled = true
     }

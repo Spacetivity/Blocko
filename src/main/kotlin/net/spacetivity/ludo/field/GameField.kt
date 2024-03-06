@@ -3,6 +3,9 @@ package net.spacetivity.ludo.field
 import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.achievement.container.Achievement
+import net.spacetivity.ludo.achievement.impl.FirstEliminationAchievement
+import net.spacetivity.ludo.achievement.impl.FirstKnockoutAchievement
+import net.spacetivity.ludo.achievement.impl.MasterEliminatorAchievement
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.extensions.addCoins
@@ -67,12 +70,17 @@ class GameField(
     private fun handleStatsReward(gamePlayer: GamePlayer, isReward: Boolean) {
         if (gamePlayer.isAI) return
 
-        val possibleAchievement: Achievement?
+        val possibleAchievements: MutableSet<Achievement?> = mutableSetOf()
 
-        if (isReward) possibleAchievement = LudoGame.instance.achievementHandler.getAchievement("FirstElimination")
-        else possibleAchievement = LudoGame.instance.achievementHandler.getAchievement("FirstKnockout")
+        if (isReward) {
+            possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java))
+            possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(MasterEliminatorAchievement::class.java))
+        }
+        else {
+            possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(FirstKnockoutAchievement::class.java))
+        }
 
-        possibleAchievement?.grantIfCompletedBy(gamePlayer)
+        possibleAchievements.forEach { it?.grantIfCompletedBy(gamePlayer) }
 
         val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
         val updateType: UpdateType = if (isReward) UpdateType.ELIMINATED_OPPONENTS else UpdateType.KNOCKED_OUT_BY_OPPONENTS

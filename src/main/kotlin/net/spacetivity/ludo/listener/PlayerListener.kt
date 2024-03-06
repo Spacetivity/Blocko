@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.achievement.container.Achievement
+import net.spacetivity.ludo.achievement.impl.FairPlayAchievement
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.arena.sign.GameArenaSign
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
@@ -64,7 +65,7 @@ class PlayerListener(private val plugin: LudoGame) : Listener {
         val rawMessage: String = PlainTextComponentSerializer.plainText().serialize(event.message())
         if (!rawMessage.contains("gg", true)) return
 
-        val achievement: Achievement = this.plugin.achievementHandler.getAchievement("FairPlay") ?: return
+        val achievement: Achievement = this.plugin.achievementHandler.getAchievement(FairPlayAchievement::class.java) ?: return
         achievement.grantIfCompletedBy(gamePlayer)
     }
 

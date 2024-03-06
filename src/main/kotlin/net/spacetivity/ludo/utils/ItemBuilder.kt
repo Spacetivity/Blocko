@@ -3,10 +3,12 @@ package net.spacetivity.ludo.utils
 import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.Component
+import net.spacetivity.ludo.LudoGame
 import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
@@ -17,7 +19,9 @@ import java.util.*
 class ItemBuilder(material: Material) {
 
     private var itemStack: ItemStack = ItemStack(material)
+
     private lateinit var itemMeta: ItemMeta
+    lateinit var action: (PlayerInteractEvent) -> (Unit)
 
     init {
         if (itemStack.type != Material.AIR) itemMeta = itemStack.itemMeta
@@ -88,6 +92,14 @@ class ItemBuilder(material: Material) {
 
     fun setData(key: String, value: Any): ItemBuilder {
         PersistentDataUtils.setData(this.itemStack, this.itemMeta, key, value)
+        return this
+    }
+
+    fun onInteract(action: (PlayerInteractEvent) -> (Unit)): ItemBuilder {
+        this.action = action
+        val clickableItemId: UUID = UUID.randomUUID()
+        setData("clickableItem", clickableItemId)
+        LudoGame.instance.clickableItems[clickableItemId] = this
         return this
     }
 

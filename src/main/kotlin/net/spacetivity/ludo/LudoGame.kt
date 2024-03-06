@@ -4,10 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import net.spacetivity.ludo.achievement.AchievementHandler
 import net.spacetivity.ludo.achievement.AchievementPlayerDAO
-import net.spacetivity.ludo.achievement.impl.FairPlayAchievement
-import net.spacetivity.ludo.achievement.impl.FirstEliminationAchievement
-import net.spacetivity.ludo.achievement.impl.FirstKnockoutAchievement
-import net.spacetivity.ludo.achievement.impl.PlayFirstGameAchievement
+import net.spacetivity.ludo.achievement.impl.*
 import net.spacetivity.ludo.arena.GameArenaDAO
 import net.spacetivity.ludo.arena.GameArenaHandler
 import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
@@ -40,6 +37,7 @@ import net.spacetivity.ludo.team.GameTeamLocationDAO
 import net.spacetivity.ludo.translation.TranslationHandler
 import net.spacetivity.ludo.utils.FileUtils
 import net.spacetivity.ludo.utils.HeadUtils
+import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Entity
@@ -49,8 +47,11 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.*
 
 class LudoGame : JavaPlugin() {
+
+    val clickableItems: MutableMap<UUID, ItemBuilder> = mutableMapOf()
 
     lateinit var diceSidesFile: DiceSidesFile
     lateinit var globalConfigFile: GlobalConfigFile
@@ -119,10 +120,11 @@ class LudoGame : JavaPlugin() {
         this.statsPlayerHandler = StatsPlayerHandler()
 
         this.achievementHandler = AchievementHandler()
-        this.achievementHandler.registerAchievement(PlayFirstGameAchievement())
-        this.achievementHandler.registerAchievement(FairPlayAchievement())
-        this.achievementHandler.registerAchievement(FirstKnockoutAchievement())
-        this.achievementHandler.registerAchievement(FirstEliminationAchievement())
+        this.achievementHandler.registerAchievement(PlayFirstGameAchievement("first_game"))
+        this.achievementHandler.registerAchievement(FairPlayAchievement("fair_play"))
+        this.achievementHandler.registerAchievement(FirstKnockoutAchievement("first_knockout"))
+        this.achievementHandler.registerAchievement(FirstEliminationAchievement("first_elimination"))
+        this.achievementHandler.registerAchievement(MasterEliminatorAchievement("master_eliminator"))
 
         this.gamePlayActionHandler = GamePlayActionHandler()
         this.gamePlayActionHandler.startMainTask()
@@ -164,6 +166,10 @@ class LudoGame : JavaPlugin() {
         @JvmStatic
         lateinit var instance: LudoGame
             private set
+    }
+
+    fun getAchievementKey(isName: Boolean, title: String): String {
+        return "blocko.achievement.$title.${if (isName) "display_name" else "requirement"}"
     }
 
     private fun createOrLoadDatabaseProperties(): DatabaseFile {
