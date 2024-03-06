@@ -9,6 +9,7 @@ import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Material
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
 
@@ -20,12 +21,14 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     var phaseMode: GamePhaseMode = GamePhaseMode.DICE
 
     override fun start() {
-        println("Phase $name started in arena $arenaId!")
         getArena().currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance()!! }.forEach { setupPlayerInventory(it) }
     }
 
     override fun stop() {
-        println("Phase $name stopped in arena $arenaId!")
+        for (gamePlayer: GamePlayer in getArena().currentPlayers) {
+            val player: Player = gamePlayer.toBukkitInstance() ?: return
+            LudoGame.instance.bossbarHandler.unregisterBossbar(player, "currentPlayerInfo")
+        }
     }
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {

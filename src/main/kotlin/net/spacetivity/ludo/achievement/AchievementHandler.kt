@@ -1,9 +1,13 @@
 package net.spacetivity.ludo.achievement
 
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.spacetivity.ludo.achievement.container.Achievement
 import net.spacetivity.ludo.extensions.addCoins
+import net.spacetivity.ludo.extensions.toGamePlayerInstance
 import net.spacetivity.ludo.extensions.translateMessage
+import net.spacetivity.ludo.player.GamePlayer
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -79,7 +83,13 @@ class AchievementHandler {
         }
 
         val player: Player = Bukkit.getPlayer(uuid) ?: return
-        player.translateMessage("blocko.achievement.unlocked", Placeholder.parsed("name", achievement.name))
+        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
+
+        //val hoverText: Component = LudoGame.instance.combineComponents(achievement.getDescription(gamePlayer, false))
+        val hoverText: Component = achievement.getDescription(gamePlayer, false)[0]
+        println(PlainTextComponentSerializer.plainText().serialize(hoverText))
+
+        player.translateMessage("blocko.achievement.unlocked", Placeholder.parsed("name", achievement.name), Placeholder.component("hover_text", hoverText))
         player.playSound(player.location, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1.0F)
         if (achievement.rewardedCoins > 0) player.addCoins(achievement.rewardedCoins, false)
     }

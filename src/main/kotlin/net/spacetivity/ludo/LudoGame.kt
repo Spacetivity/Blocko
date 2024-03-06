@@ -2,6 +2,7 @@ package net.spacetivity.ludo
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.achievement.AchievementHandler
 import net.spacetivity.ludo.achievement.AchievementPlayerDAO
 import net.spacetivity.ludo.achievement.impl.*
@@ -170,6 +171,12 @@ class LudoGame : JavaPlugin() {
 
     fun getAchievementKey(isName: Boolean, title: String): String {
         return "blocko.achievement.$title.${if (isName) "display_name" else "requirement"}"
+    }
+
+    fun combineComponents(components: List<Component>): Component {
+        val combinedComponent: Component = Component.empty()
+        components.forEach(combinedComponent::append)
+        return combinedComponent
     }
 
     private fun createOrLoadDatabaseProperties(): DatabaseFile {

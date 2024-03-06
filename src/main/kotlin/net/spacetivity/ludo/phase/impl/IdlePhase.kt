@@ -15,11 +15,11 @@ import org.bukkit.inventory.ItemStack
 class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown(arenaId)) {
 
     override fun start() {
-        println("Phase $name started in arena ${this.arenaId}!")
+
     }
 
     override fun stop() {
-        println("Phase $name stopped in arena ${this.arenaId}")
+
     }
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {

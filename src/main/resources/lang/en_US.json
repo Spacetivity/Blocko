@@ -1,6 +1,6 @@
 {
   "blocko.prefix.global": "<green>Blocko <gray>»",
-  "blocko.achievement.unlocked": "<obfuscated><gradient:blue:green>==============================================</obfuscated>\n\n<gold>Nice! <green>You unlocked the achievement \"<yellow><name><green>\"!\n\n<obfuscated><gradient:green:blue>==============================================</obfuscated>",
+  "blocko.achievement.unlocked": "<obfuscated><gradient:blue:green>==============================================</obfuscated>\n\n<gold>Nice! <green>You unlocked the achievement \"<hover:show_text:'<hover_text>'><yellow><name><green></hover>\"!\n\n<obfuscated><gradient:green:blue>==============================================</obfuscated>",
   "blocko.coins.receive": "<gold>+ <green><amount> <gray>Coins",
   "blocko.coins.receive.on_kill": "<gold>+ <green><amount> <gray>Coins <dark_gray>(<yellow>Elimination<dark_gray>)",
 
@@ -18,5 +18,4 @@
 
   "blocko.achievement.master_eliminator.display_name": "Master Eliminator",
   "blocko.achievement.master_eliminator.requirement": "<gray>Eliminate <green><amount> <gray>opponents (<yellow><progress>%<gray>)"
-
 }

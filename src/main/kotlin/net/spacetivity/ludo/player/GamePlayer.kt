@@ -55,7 +55,11 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
 
         this.activeEntity?.newGoalFieldId = if (currentFieldId == null) teamStartPoint + this.dicedNumber!! else currentFieldId + this.dicedNumber!!
 
-        if (!this.activeEntity!!.shouldMove) this.activeEntity!!.shouldMove = true
+        val activeEntity1: GameEntity = this.activeEntity ?: throw NullPointerException("ACTIVE ENTITY IS NULL")
+
+        if (!activeEntity1.shouldMove)
+            this.activeEntity!!.shouldMove = true
+
         if (this.activeEntity!!.controller == null) this.activeEntity!!.controller = this
     }
 

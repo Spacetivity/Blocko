@@ -7,8 +7,7 @@ import org.bukkit.Material
 
 open class Achievement(val translationKey: String, val rewardedCoins: Int, private val requirements: List<Requirement>) {
 
-    val name: String
-        get() = LudoGame.instance.translationHandler.getSelectedTranslation().validateLineAsString(LudoGame.instance.getAchievementKey(true, this.translationKey))
+    val name: String = LudoGame.instance.translationHandler.getSelectedTranslation().validateLineAsString(LudoGame.instance.getAchievementKey(true, this.translationKey))
 
     fun getDescription(gamePlayer: GamePlayer, displayedInLore: Boolean): MutableList<Component> {
         val description: MutableList<Component> = mutableListOf()
