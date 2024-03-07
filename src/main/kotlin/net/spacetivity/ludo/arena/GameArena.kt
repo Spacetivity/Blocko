@@ -9,6 +9,7 @@ import net.spacetivity.ludo.extensions.getTeam
 import net.spacetivity.ludo.extensions.sendMessage
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.player.GamePlayer
+import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Sound
 import org.bukkit.World
@@ -76,6 +77,8 @@ class GameArena(
         if (!isAI) {
             this.phase.setupPlayerInventory(gamePlayer.toBukkitInstance()!!)
             this.phase.countdown?.tryStartup()
+
+            GameScoreboardUtils.setGameSidebar(gamePlayer) //TODO: Maybe remove that
         }
 
         gameTeam.join(gamePlayer)
@@ -98,7 +101,11 @@ class GameArena(
         if (LudoGame.instance.diceHandler.dicingPlayers.containsKey(gamePlayer.uuid))
             LudoGame.instance.diceHandler.dicingPlayers.remove(gamePlayer.uuid)
 
-        if (!gamePlayer.isAI) LudoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)?.updateDbEntry()
+        if (!gamePlayer.isAI) {
+            LudoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)?.updateDbEntry()
+            GameScoreboardUtils.removeGameSidebar(player) //TODO: Maybe remove that
+        }
+
         LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(gamePlayer)
 
         this.currentPlayers.removeIf { it.uuid == player.uniqueId }

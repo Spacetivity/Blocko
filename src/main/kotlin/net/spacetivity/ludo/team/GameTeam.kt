@@ -4,13 +4,10 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.extensions.sendMessage
 import net.spacetivity.ludo.player.GamePlayer
-import net.spacetivity.ludo.utils.ScoreboardUtils
-import org.bukkit.scoreboard.Team
 import java.util.*
 
 class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
 
-    val scoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam( "team_${this.name}", this.color)
     val teamMembers: MutableSet<UUID> = mutableSetOf()
     val teamLocations: MutableSet<GameTeamLocation> = mutableSetOf()
 

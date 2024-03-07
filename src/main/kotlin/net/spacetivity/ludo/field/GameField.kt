@@ -8,6 +8,7 @@ import net.spacetivity.ludo.achievement.impl.FirstKnockoutAchievement
 import net.spacetivity.ludo.achievement.impl.MasterEliminatorAchievement
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
+import net.spacetivity.ludo.entity.GameEntityStatus
 import net.spacetivity.ludo.extensions.addCoins
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.stats.StatsPlayer
@@ -47,6 +48,7 @@ class GameField(
 
         oldHolderEntity.currentFieldId = null
         oldHolderEntity.livingEntity?.teleport(teamSpawnLocation.getWorldPosition())
+        oldHolderEntity.entityStatus = GameEntityStatus.AT_SPAWN
         teamSpawnLocation.isTaken = true
 
         val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolderEntity) ?: return

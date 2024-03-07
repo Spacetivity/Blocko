@@ -1,5 +1,6 @@
 package net.spacetivity.ludo.utils
 
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.scoreboard.Scoreboard
@@ -17,6 +18,16 @@ object ScoreboardUtils {
 
         sbTeam.color(color)
         sbTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER)
+        return sbTeam
+    }
+
+    fun registerScoreboardTeamWithContent(scoreboard: Scoreboard, teamName: String, prefix: Component, suffix: Component): Team {
+        var sbTeam: Team? = scoreboard.getTeam(teamName)
+        if (sbTeam == null) sbTeam = scoreboard.registerNewTeam(teamName)
+
+        sbTeam.prefix(prefix)
+        sbTeam.suffix(suffix)
+
         return sbTeam
     }
 

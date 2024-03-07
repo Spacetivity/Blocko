@@ -8,6 +8,7 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
+import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -43,6 +44,9 @@ class GamePhaseHandler {
 
             newGamePhase.controllingTeamId = availableTeams.filter { it.teamId == smallestTeamId }.random().teamId
             newGamePhase.lastControllingTeamId = newGamePhase.controllingTeamId
+
+            val controllingTeam: GameTeam = newGamePhase.getControllingTeam() ?: return
+            GameScoreboardUtils.updateControllingTeamLine(gameArena, controllingTeam)
         }
 
         gameArena.phase = newGamePhase

@@ -6,6 +6,7 @@ import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.player.GamePlayer
+import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Material
@@ -21,7 +22,10 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     var phaseMode: GamePhaseMode = GamePhaseMode.DICE
 
     override fun start() {
-        getArena().currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance()!! }.forEach { setupPlayerInventory(it) }
+        for (gamePlayer: GamePlayer in getArena().currentPlayers.filter { !it.isAI }) {
+            val player: Player = gamePlayer.toBukkitInstance() ?: continue
+            setupPlayerInventory(player)
+        }
     }
 
     override fun stop() {
@@ -46,6 +50,8 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun setNextControllingTeam(): GameTeam? {
+        GameScoreboardUtils.updateDicedNumberLine(this.arenaId, null)
+
         val availableTeams: List<GameTeam> = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
         val newControllingTeam: GameTeam? = if (hasControllingTeamMemberDicedSix()) this.getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
 
@@ -53,6 +59,14 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
         this.lastControllingTeamId = if (this.controllingTeamId == null) null else this.controllingTeamId
         this.controllingTeamId = newControllingTeamId
+
+        val controllingTeam: GameTeam? = getControllingTeam()
+
+        if (controllingTeam != null) {
+            GameScoreboardUtils.updateControllingTeamLine(getArena(), controllingTeam)
+            //GameScoreboardUtils.updateDicedNumberLine(this.arenaId)
+            GameScoreboardUtils.updateAllEntityStatusLines(this.arenaId, controllingTeam)
+        }
 
         return getControllingTeam()
     }

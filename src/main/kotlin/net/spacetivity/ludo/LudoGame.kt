@@ -31,6 +31,7 @@ import net.spacetivity.ludo.listener.PlayerSetupListener
 import net.spacetivity.ludo.listener.ProtectionListener
 import net.spacetivity.ludo.phase.GamePhaseHandler
 import net.spacetivity.ludo.player.GamePlayActionHandler
+import net.spacetivity.ludo.scoreboard.SidebarHandler
 import net.spacetivity.ludo.stats.StatsPlayerDAO
 import net.spacetivity.ludo.stats.StatsPlayerHandler
 import net.spacetivity.ludo.team.GameTeamHandler
@@ -58,6 +59,7 @@ class LudoGame : JavaPlugin() {
     lateinit var globalConfigFile: GlobalConfigFile
 
     lateinit var translationHandler: TranslationHandler
+    lateinit var sidebarHandler: SidebarHandler
     lateinit var commandHandler: LudoCommandHandler
     lateinit var bossbarHandler: BossbarHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
@@ -104,6 +106,8 @@ class LudoGame : JavaPlugin() {
         this.translationHandler.generateTranslations(this.dataFolder.toPath(), this::class.java)
 
         this.globalConfigFile = createOrLoadGlobalConfigFile()
+
+        this.sidebarHandler = SidebarHandler()
 
         this.commandHandler = LudoCommandHandler()
         this.bossbarHandler = BossbarHandler()

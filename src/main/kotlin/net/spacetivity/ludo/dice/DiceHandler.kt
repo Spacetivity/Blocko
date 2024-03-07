@@ -11,6 +11,7 @@ import net.spacetivity.ludo.extensions.*
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
+import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.utils.HeadUtils
 import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Bukkit
@@ -128,6 +129,7 @@ class DiceHandler {
 
         gamePlayer.sendActionBar(Component.text("Current number: ${diceSide.first}", NamedTextColor.AQUA, TextDecoration.BOLD))
 
+        GameScoreboardUtils.updateDicedNumberLine(gamePlayer.arenaId, diceSession.currentDiceNumber)
         println("${gamePlayer.teamName} ROLES THE DICE: >> ${diceSide.first}")
     }
 

@@ -62,16 +62,13 @@ class StatsPlayerHandler {
         this.cachedStatsPlayers.removeIf { it.uuid == uuid }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     fun updateStatsPlayer(statsPlayer: StatsPlayer) {
-        GlobalScope.launch {
-            transaction {
-                StatsPlayerDAO.update({ StatsPlayerDAO.uuid eq statsPlayer.uuid.toString() }) {
-                    it[eliminatedOpponents] = statsPlayer.eliminatedOpponents
-                    it[knockedOutByOpponents] = statsPlayer.knockedOutByOpponents
-                    it[playedGames] = statsPlayer.playedGames
-                    it[coins] = statsPlayer.coins
-                }
+        transaction {
+            StatsPlayerDAO.update({ StatsPlayerDAO.uuid eq statsPlayer.uuid.toString() }) {
+                it[eliminatedOpponents] = statsPlayer.eliminatedOpponents
+                it[knockedOutByOpponents] = statsPlayer.knockedOutByOpponents
+                it[playedGames] = statsPlayer.playedGames
+                it[coins] = statsPlayer.coins
             }
         }
     }

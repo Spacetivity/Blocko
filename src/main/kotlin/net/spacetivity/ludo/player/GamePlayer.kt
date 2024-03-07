@@ -2,9 +2,11 @@ package net.spacetivity.ludo.player
 
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.entity.GameEntity
+import net.spacetivity.ludo.entity.GameEntityStatus
 import net.spacetivity.ludo.extensions.isDicing
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
+import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
@@ -23,6 +25,9 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
     fun manuallyPickEntity(ingamePhase: IngamePhase, gameEntity: GameEntity) {
         if (this.dicedNumber == null) return
         this.activeEntity = gameEntity
+        this.activeEntity!!.entityStatus = GameEntityStatus.MOVING
+
+        GameScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
     }
 
@@ -41,8 +46,11 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
         }
 
         this.activeEntity = situation.second!!
+        this.activeEntity!!.entityStatus = GameEntityStatus.MOVING
         this.activeEntity!!.toggleHighlighting(true)
         this.lastEntityPickRule = situation.first
+
+        GameScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
     }
 

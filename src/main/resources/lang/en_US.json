@@ -17,5 +17,17 @@
   "blocko.achievement.first_elimination.requirement": "<gray>Make you first elimination",
 
   "blocko.achievement.master_eliminator.display_name": "Master Eliminator",
-  "blocko.achievement.master_eliminator.requirement": "<gray>Eliminate <green><amount> <gray>opponents (<yellow><progress>%<gray>)"
+  "blocko.achievement.master_eliminator.requirement": "<gray>Eliminate <green><amount> <gray>opponents (<yellow><progress>%<gray>)",
+
+  "blocko.sidebar.title": "<gradient:green:yellow><bold>Blocko Game</bold></gradient>",
+
+  "blocko.sidebar.line.team_name": "<white>Your team: <team_color><team_name>",
+
+  "blocko.sidebar.line.turn": "<white>It's <team_color><team_name><white>'s turn",
+  "blocko.sidebar.line.turn.notIngame": "<gray>Not started yet...",
+
+  "blocko.sidebar.line.dice_status": "<white>Diced number: <yellow><number>",
+
+  "blocko.sidebar.line.entity_status": "<white>Entity <id>: <gray><status>"
+
 }

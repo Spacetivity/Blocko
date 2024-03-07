@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.player.GamePlayer
+import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamLocation
 import net.spacetivity.ludo.utils.LocationUtils
@@ -25,6 +26,8 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
     var lastStartField: Int? = null
     var isHighlighted = false
+
+    var entityStatus: GameEntityStatus = GameEntityStatus.AT_SPAWN
 
     private var forceYaw: Float? = null
 
@@ -51,10 +54,6 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         this.livingEntity!!.isGlowing = active
         this.isHighlighted = active
-
-        val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
-        if (active) gameTeam.scoreboardTeam.addEntity(this.livingEntity!!)
-        else gameTeam.scoreboardTeam.removeEntity(this.livingEntity!!)
     }
 
     fun despawn() {
@@ -182,7 +181,15 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         newField.isTaken = true
         newField.currentHolder = this
 
-        return this.currentFieldId == goalFieldId
+        val reachedGoal: Boolean = this.currentFieldId == goalFieldId
+
+        if (reachedGoal) {
+            if (goalField.isGarageField) this.entityStatus = GameEntityStatus.SAVED
+            else this.entityStatus = GameEntityStatus.ON_FIELD
+            GameScoreboardUtils.updateEntityStatusLine(this)
+        }
+
+        return reachedGoal
     }
 
     private fun getTeamField(id: Int): GameField? {
