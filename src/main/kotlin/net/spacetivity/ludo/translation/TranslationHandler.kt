@@ -20,8 +20,6 @@ class TranslationHandler {
             val splittedName: List<String> = translationFileName.split("/")
             val validatedLanguageFileName = splittedName[splittedName.size - 1].split(".")[0]
 
-            println("$translationFileName - $validatedLanguageFileName")
-
             val translation = Translation(validatedLanguageFileName, mutableMapOf())
             this.cachedTranslations.add(translation)
 

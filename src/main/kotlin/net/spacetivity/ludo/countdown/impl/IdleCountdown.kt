@@ -19,7 +19,7 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5, Predicate { t -
 
         if (remainingSeconds % 10 == 0 || remainingSeconds < 6) {
             gameArena.sendArenaMessage(Component.text("Game starts in ${if (isOne) "one" else remainingSeconds} ${if (isOne) "second" else "seconds"}."))
-            gameArena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP)
+            gameArena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP,0.2F)
         }
 
         //TODO: Remove the lines below after testing!!!

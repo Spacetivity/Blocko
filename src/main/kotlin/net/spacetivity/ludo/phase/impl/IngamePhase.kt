@@ -3,6 +3,7 @@ package net.spacetivity.ludo.phase.impl
 import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
+import net.spacetivity.ludo.extensions.playSound
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.player.GamePlayer
@@ -10,6 +11,7 @@ import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
@@ -64,9 +66,11 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         if (controllingTeam != null) {
             GameScoreboardUtils.updateControllingTeamLine(getArena(), controllingTeam)
             GameScoreboardUtils.updateAllEntityStatusLines(this.arenaId, controllingTeam)
+
+            getArena().currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }?.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
         }
 
-        return getControllingTeam()
+        return controllingTeam
     }
 
     fun getControllingTeam(): GameTeam? {

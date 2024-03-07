@@ -3,15 +3,17 @@ package net.spacetivity.ludo.entity
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.ludo.LudoGame
+import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.field.GameField
+import net.spacetivity.ludo.field.PathFace
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamLocation
 import net.spacetivity.ludo.utils.LocationUtils
 import net.spacetivity.ludo.utils.MetadataUtils
-import net.spacetivity.ludo.field.PathFace
 import org.bukkit.Location
+import org.bukkit.Sound
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
 
@@ -180,6 +182,9 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         newField.isTaken = true
         newField.currentHolder = this
+
+        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)!!
+        gameArena.sendArenaSound(Sound.BLOCK_BONE_BLOCK_STEP, 1.0F)
 
         val reachedGoal: Boolean = this.currentFieldId == goalFieldId
 

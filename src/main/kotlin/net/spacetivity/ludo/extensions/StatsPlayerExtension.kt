@@ -12,7 +12,7 @@ import org.bukkit.entity.Player
 fun Player.addCoins(amount: Int, elimination: Boolean) {
     val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(this.uniqueId) ?: return
     statsPlayer.update(UpdateType.COINS, UpdateOperation.INCREASE, amount)
-    translateMessage(if (elimination) "blocko.coins.receive.on_kill" else "blocko.coins.receive", Placeholder.parsed("amount", amount.toString()))
+    translateMessage(if (elimination) "blocko.coins.receive.on_kill" else "blocko.coins.receive.normal", Placeholder.parsed("amount", amount.toString()))
     playSound(this.location, Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 1.0F, 1.0F)
 }
 

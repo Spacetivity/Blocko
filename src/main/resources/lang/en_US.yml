@@ -6,7 +6,9 @@ blocko.prefix.global: "<green>Blocko <gray>»"
 # Utilizes Minecraft's formatting codes for colors and styles, including gradients and obfuscation.
 blocko.achievement.unlocked: |
   <obfuscated><gradient:blue:green>==============================================</obfuscated>
+  
   <gold>Nice! <green>You unlocked the achievement "<hover:show_text:'<hover_text>'><yellow><name><green></hover>"!
+  
   <obfuscated><gradient:green:blue>==============================================</obfuscated>
 
 # Configuration for coin receipt messages, supporting different contexts.

@@ -134,8 +134,8 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
     }
 
     fun hasMultipleLines(key: String?): Boolean {
-        return cachedMessages[key]!!.contains("\n")
+        val message: String = cachedMessages[key] ?: return false
+        return message.contains("\n")
     }
-
 
 }

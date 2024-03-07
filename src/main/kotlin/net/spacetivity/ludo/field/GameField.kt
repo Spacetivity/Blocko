@@ -18,6 +18,7 @@ import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamHandler
 import net.spacetivity.ludo.team.GameTeamLocation
 import org.bukkit.Location
+import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.entity.LivingEntity
 
@@ -53,6 +54,7 @@ class GameField(
 
         val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolderEntity) ?: return
         gameArena.sendArenaMessage(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${oldHolderGameTeam.name}."))
+        gameArena.sendArenaSound(Sound.ENTITY_WITHER_DEATH,0.2F)
 
         handleStatsReward(newHolder, true)
 

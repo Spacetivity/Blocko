@@ -16,7 +16,6 @@ class SidebarHandler {
         val sidebar: Sidebar = getSidebar(uuid) ?: return
         sidebar.reset()
         this.cachedSidebars.removeIf { it.viewer.uniqueId == uuid }
-        println(this.cachedSidebars.size)
     }
 
 }

@@ -38,10 +38,10 @@ class GameArena(
         }
     }
 
-    fun sendArenaSound(sound: Sound) {
+    fun sendArenaSound(sound: Sound, volume: Float) {
         for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
             if (player == null) continue
-            player.playSound(player.location, sound, 0.2F, 1F)
+            player.playSound(player.location, sound, volume, 1F)
         }
     }
 
@@ -103,7 +103,7 @@ class GameArena(
 
         if (!gamePlayer.isAI) {
             LudoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)?.updateDbEntry()
-            GameScoreboardUtils.removeGameSidebar(player) //TODO: Maybe remove that
+            GameScoreboardUtils.removeGameSidebar(player)
         }
 
         LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(gamePlayer)
@@ -134,6 +134,7 @@ class GameArena(
 
         for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
             if (player == null) continue
+            GameScoreboardUtils.removeGameSidebar(player)
             this.phase.clearPlayerInventory(player)
         }
 
@@ -148,7 +149,7 @@ class GameArena(
 
         val diceHandler: DiceHandler = LudoGame.instance.diceHandler
 
-        for (currentPlayer in this.currentPlayers) {
+        for (currentPlayer: GamePlayer in this.currentPlayers) {
             if (!diceHandler.dicingPlayers.containsKey(currentPlayer.uuid)) continue
             diceHandler.dicingPlayers.remove(currentPlayer.uuid)
         }
@@ -157,8 +158,6 @@ class GameArena(
 
         LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
         if (!this.phase.isIdle()) LudoGame.instance.gamePhaseHandler.initIndexPhase(this)
-
-        println("Arena ${this.id} was reset! Phase is now: ${this.phase.name}")
     }
 
     fun isGameOver(): Boolean {

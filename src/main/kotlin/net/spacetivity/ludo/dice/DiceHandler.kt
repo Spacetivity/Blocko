@@ -58,7 +58,6 @@ class DiceHandler {
                         if (this.dicingPlayers.containsKey(gamePlayer.uuid))
                             this.dicingPlayers.remove(gamePlayer.uuid, diceSession)
 
-                        println("STOPPED DICING AND DICED NUM IS > ${gamePlayer.dicedNumber}")
                         continue
                     }
 
@@ -124,13 +123,12 @@ class DiceHandler {
             itemStack.itemMeta = skullMeta
         }
 
-        gamePlayer.playSound(Sound.BLOCK_BAMBOO_BREAK)
+        LudoGame.instance.gameArenaHandler.getArena(gamePlayer.arenaId)?.sendArenaSound(Sound.BLOCK_BAMBOO_BREAK, 0.2F)
         diceSession.currentDiceNumber = diceSide.first
 
         gamePlayer.sendActionBar(Component.text("Current number: ${diceSide.first}", NamedTextColor.AQUA, TextDecoration.BOLD))
 
         GameScoreboardUtils.updateDicedNumberLine(gamePlayer.arenaId, diceSession.currentDiceNumber)
-        println("${gamePlayer.teamName} ROLES THE DICE: >> ${diceSide.first}")
     }
 
     private fun getDiceDisplayName(diceNumber: Int): Component {

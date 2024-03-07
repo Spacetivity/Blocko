@@ -6,11 +6,13 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
+import net.spacetivity.ludo.extensions.playSound
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 
 class GamePhaseHandler {
@@ -47,6 +49,8 @@ class GamePhaseHandler {
 
             val controllingTeam: GameTeam = newGamePhase.getControllingTeam() ?: return
             GameScoreboardUtils.updateControllingTeamLine(gameArena, controllingTeam)
+
+            gameArena.currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }?.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
         }
 
         gameArena.phase = newGamePhase
