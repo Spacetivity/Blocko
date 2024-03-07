@@ -6,7 +6,6 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.utils.PathFace
 
 class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
 

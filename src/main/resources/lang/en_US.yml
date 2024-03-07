@@ -1,0 +1,59 @@
+# This section defines the global prefix used across all in-game messages.
+# It combines color codes to style the prefix text.
+blocko.prefix.global: "<green>Blocko <gray>»"
+
+# Defines the message format for when a player unlocks an achievement.
+# Utilizes Minecraft's formatting codes for colors and styles, including gradients and obfuscation.
+blocko.achievement.unlocked: |
+  <obfuscated><gradient:blue:green>==============================================</obfuscated>
+  <gold>Nice! <green>You unlocked the achievement "<hover:show_text:'<hover_text>'><yellow><name><green></hover>"!
+  <obfuscated><gradient:green:blue>==============================================</obfuscated>
+
+# Configuration for coin receipt messages, supporting different contexts.
+# - normal: Displayed when coins are received in standard scenarios.
+# - on_kill: Shown when coins are awarded for eliminating another player, including an "Elimination" tag.
+blocko.coins.receive:
+  normal: "<gold>+ <green><amount> <gray>Coins"
+  on_kill: "<gold>+ <green><amount> <gray>Coins <dark_gray>(<yellow>Elimination<dark_gray>)"
+
+# Achievement sections define individual achievements players can unlock.
+# Each achievement has a display name and a specific requirement to be met.
+
+# Achievement for playing the first game in Blocko.
+blocko.achievement.first_game:
+  display_name: "First Game"
+  requirement: "<gray>Play your first Blocko game"
+
+# Encourages sportsmanship by rewarding players for positive in-game behavior.
+blocko.achievement.fair_play:
+  display_name: "Fair Play"
+  requirement: "<gray>Write gg in the chat, after a Blocko round"
+
+# Awarded upon experiencing a knockout by an opponent for the first time.
+blocko.achievement.first_knockout:
+  display_name: "First Knockout"
+  requirement: "<gray>Get knocked out by an opponent the first time"
+
+# Recognizes the player's first elimination of another player in the game.
+blocko.achievement.first_elimination:
+  display_name: "First Elimination"
+  requirement: "<gray>Make you first elimination"
+
+# A high-tier achievement for players who eliminate a significant number of opponents.
+blocko.achievement.master_eliminator:
+  display_name: "Master Eliminator"
+  requirement: "<gray>Eliminate <green><amount> <gray>opponents (<yellow><progress>%<gray>)"
+
+# Sidebar settings for the Blocko game interface, including titles and dynamic lines for game status.
+
+# Sets the title displayed in the game's sidebar, with gradient color styling.
+blocko.sidebar.title: "<gradient:green:yellow><bold>Blocko Game</bold></gradient>"
+
+# Sidebar lines section includes various game status indicators.
+blocko.sidebar.line:
+  team_name: "<white>Your team: <team_color><team_name>"
+  controlling_team_name:
+    ingame: "<white>It's <team_color><team_name><white>'s turn"
+    not_ingame: "<gray>Not started yet..."
+  dice_status: "<white>Diced number: <yellow><number>"
+  entity_status: "<white>Entity <id>: <gray><status>"

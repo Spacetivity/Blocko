@@ -9,12 +9,12 @@ data class StatsPlayer(val uuid: UUID, var eliminatedOpponents: Int, var knocked
         LudoGame.instance.statsPlayerHandler.updateStatsPlayer(this)
     }
 
-    fun update(type: UpdateType, operator: UpdateOperator, newValue: Int) {
+    fun update(type: UpdateType, operation: UpdateOperation, newValue: Int) {
         when (type) {
-            UpdateType.ELIMINATED_OPPONENTS -> if (operator == UpdateOperator.INCREASE) this.eliminatedOpponents += newValue else this.eliminatedOpponents -= newValue
-            UpdateType.KNOCKED_OUT_BY_OPPONENTS -> if (operator == UpdateOperator.INCREASE) this.knockedOutByOpponents += newValue else this.knockedOutByOpponents -= newValue
-            UpdateType.PLAYED_GAMES -> if (operator == UpdateOperator.INCREASE) this.playedGames += newValue else this.playedGames -= newValue
-            UpdateType.COINS -> if (operator == UpdateOperator.INCREASE) this.coins += newValue else this.coins -= newValue
+            UpdateType.ELIMINATED_OPPONENTS -> if (operation == UpdateOperation.INCREASE) this.eliminatedOpponents += newValue else this.eliminatedOpponents -= newValue
+            UpdateType.KNOCKED_OUT_BY_OPPONENTS -> if (operation == UpdateOperation.INCREASE) this.knockedOutByOpponents += newValue else this.knockedOutByOpponents -= newValue
+            UpdateType.PLAYED_GAMES -> if (operation == UpdateOperation.INCREASE) this.playedGames += newValue else this.playedGames -= newValue
+            UpdateType.COINS -> if (operation == UpdateOperation.INCREASE) this.coins += newValue else this.coins -= newValue
         }
     }
 
@@ -27,7 +27,7 @@ enum class UpdateType {
     COINS;
 }
 
-enum class UpdateOperator {
+enum class UpdateOperation {
     INCREASE,
     DECREASE;
 }

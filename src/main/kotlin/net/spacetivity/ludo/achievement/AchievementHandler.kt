@@ -85,7 +85,6 @@ class AchievementHandler {
         val player: Player = Bukkit.getPlayer(uuid) ?: return
         val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
 
-        //val hoverText: Component = LudoGame.instance.combineComponents(achievement.getDescription(gamePlayer, false))
         val hoverText: Component = achievement.getDescription(gamePlayer, false)[0]
         println(PlainTextComponentSerializer.plainText().serialize(hoverText))
 

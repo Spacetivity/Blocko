@@ -18,7 +18,6 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
     var lastControllingTeamId: Int? = null
     var controllingTeamId: Int? = null
-
     var phaseMode: GamePhaseMode = GamePhaseMode.DICE
 
     override fun start() {
@@ -53,8 +52,8 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         GameScoreboardUtils.updateDicedNumberLine(this.arenaId, null)
 
         val availableTeams: List<GameTeam> = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
-        val newControllingTeam: GameTeam? = if (hasControllingTeamMemberDicedSix()) this.getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
 
+        val newControllingTeam: GameTeam? = if (hasControllingTeamMemberDicedSix()) this.getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
         val newControllingTeamId: Int = newControllingTeam?.teamId ?: availableTeams.minOf { it.teamId }
 
         this.lastControllingTeamId = if (this.controllingTeamId == null) null else this.controllingTeamId
@@ -64,7 +63,6 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
         if (controllingTeam != null) {
             GameScoreboardUtils.updateControllingTeamLine(getArena(), controllingTeam)
-            //GameScoreboardUtils.updateDicedNumberLine(this.arenaId)
             GameScoreboardUtils.updateAllEntityStatusLines(this.arenaId, controllingTeam)
         }
 

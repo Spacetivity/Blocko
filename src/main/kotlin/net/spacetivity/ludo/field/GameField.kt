@@ -12,7 +12,7 @@ import net.spacetivity.ludo.entity.GameEntityStatus
 import net.spacetivity.ludo.extensions.addCoins
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.stats.StatsPlayer
-import net.spacetivity.ludo.stats.UpdateOperator
+import net.spacetivity.ludo.stats.UpdateOperation
 import net.spacetivity.ludo.stats.UpdateType
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamHandler
@@ -86,7 +86,7 @@ class GameField(
 
         val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
         val updateType: UpdateType = if (isReward) UpdateType.ELIMINATED_OPPONENTS else UpdateType.KNOCKED_OUT_BY_OPPONENTS
-        statsPlayer.update(updateType, UpdateOperator.INCREASE, 1)
+        statsPlayer.update(updateType, UpdateOperation.INCREASE, 1)
 
         if (isReward) gamePlayer.toBukkitInstance()?.addCoins(20, true)
     }

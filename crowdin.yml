@@ -7,8 +7,8 @@
 
 "files": [
   {
-    "source": "src/main/resources/lang/en_US.json",
-    "translation": "src/main/resources/lang/%locale_with_underscore%.json",
-    "dest": "/blocko/game_translation.json"
+    "source": "src/main/resources/lang/en_US.yml",
+    "translation": "src/main/resources/lang/%locale_with_underscore%.yml",
+    "dest": "/blocko/game_translation.yml"
   }
 ]

@@ -10,7 +10,7 @@ import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamLocation
 import net.spacetivity.ludo.utils.LocationUtils
 import net.spacetivity.ludo.utils.MetadataUtils
-import net.spacetivity.ludo.utils.PathFace
+import net.spacetivity.ludo.field.PathFace
 import org.bukkit.Location
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity

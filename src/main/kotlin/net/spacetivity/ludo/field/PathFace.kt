@@ -1,4 +1,6 @@
-package net.spacetivity.ludo.utils
+package net.spacetivity.ludo.field
+
+import net.spacetivity.ludo.utils.HeadUtils
 
 enum class PathFace(val headValue: String, val radians: Float) {
 

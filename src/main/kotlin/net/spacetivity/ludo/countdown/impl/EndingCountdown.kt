@@ -6,7 +6,7 @@ import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.countdown.GameCountdown
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.stats.StatsPlayer
-import net.spacetivity.ludo.stats.UpdateOperator
+import net.spacetivity.ludo.stats.UpdateOperation
 import net.spacetivity.ludo.stats.UpdateType
 import org.bukkit.Sound
 import org.bukkit.scheduler.BukkitTask
@@ -26,7 +26,7 @@ class EndingCountdown(arenaId: String) : GameCountdown(arenaId, 5, null) {
 
         for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
             val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: continue
-            statsPlayer.update(UpdateType.PLAYED_GAMES, UpdateOperator.INCREASE, 1)
+            statsPlayer.update(UpdateType.PLAYED_GAMES, UpdateOperation.INCREASE, 1)
         }
 
         gameArena.sendArenaMessage(Component.text("Game arena resets now... You are teleported to spawn!"))

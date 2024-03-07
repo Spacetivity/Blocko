@@ -11,7 +11,7 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.setup.GameArenaSetupData
 import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.utils.ItemBuilder
-import net.spacetivity.ludo.utils.PathFace
+import net.spacetivity.ludo.field.PathFace
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player

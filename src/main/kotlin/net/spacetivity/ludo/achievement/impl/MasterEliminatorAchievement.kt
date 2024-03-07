@@ -8,7 +8,7 @@ import net.spacetivity.ludo.extensions.toStatsPlayerInstance
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.stats.StatsPlayer
 
-class MasterEliminatorAchievement(translationKey: String) : Achievement(translationKey, 150, listOf(MasterEliminatorRequirement(translationKey, 2)))
+class MasterEliminatorAchievement(translationKey: String) : Achievement(translationKey, 300, listOf(MasterEliminatorRequirement(translationKey, 50)))
 
 class MasterEliminatorRequirement(override val translationKey: String, override val neededCount: Int) : ProgressRequirement<Int> {
 

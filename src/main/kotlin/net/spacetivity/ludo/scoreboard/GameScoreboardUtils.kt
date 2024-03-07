@@ -7,7 +7,6 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.entity.GameEntityStatus
-import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.translation.Translation
@@ -72,10 +71,6 @@ object GameScoreboardUtils {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(arenaId) ?: return
 
         if (!gameArena.phase.isIngame()) return
-        val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
-
-        val controllingTeam: GameTeam = ingamePhase.getControllingTeam() ?: return
-        //val controllingPlayer: GamePlayer = gameArena.currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() } ?: return
 
         for (gamePlayer: GamePlayer in gameArena.currentPlayers.filter { !it.isAI }) {
             val sidebar: Sidebar = LudoGame.instance.sidebarHandler.getSidebar(gamePlayer.uuid) ?: continue
@@ -88,8 +83,8 @@ object GameScoreboardUtils {
     }
 
     private fun getControllingTeamComponent(translation: Translation, gameTeam: GameTeam?): Component {
-        if (gameTeam == null) return translation.validateLine("blocko.sidebar.line.turn.notIngame")
-        return translation.validateLine("blocko.sidebar.line.turn", Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"), Placeholder.parsed("team_name", gameTeam.name))
+        if (gameTeam == null) return translation.validateLine("blocko.sidebar.line.controlling_team_name.not_ingame")
+        return translation.validateLine("blocko.sidebar.line.controlling_team_name.ingame", Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"), Placeholder.parsed("team_name", gameTeam.name))
     }
 
     private fun getDicedNumberComponent(translation: Translation, dicedNumber: Int?): Component {
