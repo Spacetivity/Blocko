@@ -2,7 +2,6 @@ package net.spacetivity.ludo
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import net.kyori.adventure.text.Component
 import net.spacetivity.ludo.achievement.AchievementHandler
 import net.spacetivity.ludo.achievement.AchievementPlayerDAO
 import net.spacetivity.ludo.achievement.impl.*
@@ -49,9 +48,6 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 import java.util.*
 
 class LudoGame : JavaPlugin() {
@@ -144,33 +140,6 @@ class LudoGame : JavaPlugin() {
         PlayerSetupListener(this)
         PlayerListener(this)
         ProtectionListener(this)
-
-//        val path = Paths.get(dataFolder.path, "en_US.yml")
-//        saveResource("en_US.yml", false)
-
-//        val localesDir = File(dataFolder, "locales")
-//        // Ensure the subdirectory exists
-//        if (!localesDir.exists()) {
-//            localesDir.mkdirs()
-//        }
-//
-//        val file = File(localesDir, "lang/en_US.yml")
-//        // Check if the file does not exist
-//        if (!file.exists()) {
-//            // Copy the file from the JAR
-//            resourceToFile("lang/en_US.yml", file)
-//        }
-    }
-
-    private fun resourceToFile(resourceName: String, file: File) {
-        // Obtain the resource as an InputStream
-        val inputStream: InputStream? = getResource(resourceName)
-        inputStream?.use { source ->
-            FileOutputStream(file).use { output ->
-                // Copy the resource to the file
-                source.copyTo(output)
-            }
-        }
     }
 
     override fun onDisable() {
@@ -206,12 +175,6 @@ class LudoGame : JavaPlugin() {
 
     fun getAchievementKey(isName: Boolean, title: String): String {
         return "blocko.achievement.$title.${if (isName) "display_name" else "requirement"}"
-    }
-
-    fun combineComponents(components: List<Component>): Component {
-        val combinedComponent: Component = Component.empty()
-        components.forEach(combinedComponent::append)
-        return combinedComponent
     }
 
     private fun createOrLoadDatabaseProperties(): DatabaseFile {
