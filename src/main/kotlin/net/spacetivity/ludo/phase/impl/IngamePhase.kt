@@ -52,11 +52,13 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
                 val timeString = "$hoursString:$minutesString:$secondsString"
 
+                val positionString: String = if (gamePlayer.matchStats.position == null) "4" else gamePlayer.matchStats.position!!.toString()
+
                 gamePlayer.toBukkitInstance()?.translateMessage("blocko.stats.show_match_stats",
                     Placeholder.parsed("eliminations", gamePlayer.matchStats.eliminations.toString()),
                     Placeholder.parsed("knockouts", gamePlayer.matchStats.knockedOutByOpponent.toString()),
                     Placeholder.parsed("coins", gamePlayer.matchStats.gainedCoins.toString()),
-                    Placeholder.parsed("place", gamePlayer.matchStats.position!!.toString()),
+                    Placeholder.parsed("place", positionString),
                     Placeholder.parsed("time", timeString))
             }
         }
