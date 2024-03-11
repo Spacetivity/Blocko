@@ -47,7 +47,15 @@ blocko.achievement.master_eliminator:
   display_name: "Master Eliminator"
   requirement: "<gray>Eliminate <green><amount> <gray>opponents (<yellow><progress>%<gray>)"
 
-# Sidebar settings for the Blocko game interface, including titles and dynamic lines for game status.
+blocko.stats.show_match_stats: |
+  <st><gray>-----</st> <gradient:green:yellow>Ludo Match<dark_gray>-</dark_gray>Stats</gradient> <st><gray>-----</st>
+  <dark_gray><bold>»</bold> <gray>Eliminations: <yellow><eliminations>
+  <dark_gray><bold>»</bold> <gray>Thrown out: <yellow><knockouts><gray>*
+  <dark_gray><bold>»</bold> <gray>Gained coins: <yellow><coins><gray>
+  <dark_gray><bold>»</bold> <gray>Your place: <yellow>#<place>
+  
+  <dark_gray><bold>»</bold> <gray>Time played: <yellow><time>
+  <st><gray>--------------------------</st>
 
 # Sets the title displayed in the game's sidebar, with gradient color styling.
 blocko.sidebar.title: "<gradient:green:yellow><bold>Blocko Game</bold></gradient>"

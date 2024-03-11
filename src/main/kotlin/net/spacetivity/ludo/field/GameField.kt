@@ -54,7 +54,7 @@ class GameField(
 
         val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolderEntity) ?: return
         gameArena.sendArenaMessage(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${oldHolderGameTeam.name}."))
-        gameArena.sendArenaSound(Sound.ENTITY_WITHER_DEATH,0.2F)
+        gameArena.sendArenaSound(Sound.ENTITY_WITHER_DEATH, 0.05F)
 
         handleStatsReward(newHolder, true)
 
@@ -79,8 +79,7 @@ class GameField(
         if (isReward) {
             possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java))
             possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(MasterEliminatorAchievement::class.java))
-        }
-        else {
+        } else {
             possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(FirstKnockoutAchievement::class.java))
         }
 
@@ -90,7 +89,13 @@ class GameField(
         val updateType: UpdateType = if (isReward) UpdateType.ELIMINATED_OPPONENTS else UpdateType.KNOCKED_OUT_BY_OPPONENTS
         statsPlayer.update(updateType, UpdateOperation.INCREASE, 1)
 
-        if (isReward) gamePlayer.toBukkitInstance()?.addCoins(20, true)
+        if (isReward) {
+            gamePlayer.toBukkitInstance()?.addCoins(20, true)
+            gamePlayer.matchStats.eliminations += 1
+            gamePlayer.matchStats.gainedCoins += 20
+        } else {
+            gamePlayer.matchStats.knockedOutByOpponent += 1
+        }
     }
 
 }

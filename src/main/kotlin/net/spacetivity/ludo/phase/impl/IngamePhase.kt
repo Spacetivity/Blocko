@@ -1,9 +1,11 @@
 package net.spacetivity.ludo.phase.impl
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.extensions.playSound
+import net.spacetivity.ludo.extensions.translateMessage
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.player.GamePlayer
@@ -25,7 +27,11 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     var controllingTeamId: Int? = null
     var phaseMode: GamePhaseMode = GamePhaseMode.DICE
 
+    var matchStartTime: Long? = null
+
     override fun start() {
+        if (this.matchStartTime == null) this.matchStartTime = System.currentTimeMillis()
+
         for (gamePlayer: GamePlayer in getArena().currentPlayers.filter { !it.isAI }) {
             val player: Player = gamePlayer.toBukkitInstance() ?: continue
             setupPlayerInventory(player)
@@ -35,8 +41,27 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     override fun stop() {
         for (gamePlayer: GamePlayer in getArena().currentPlayers) {
             val player: Player = gamePlayer.toBukkitInstance() ?: return
-            LudoGame.instance.bossbarHandler.unregisterBossbar(player, "currentPlayerInfo")
+            LudoGame.instance.bossbarHandler.unregisterBossbar(player, "timeoutBar")
+
+            val matchDuration: kotlin.time.Duration = (System.currentTimeMillis() - this.matchStartTime!!).toDuration(DurationUnit.MILLISECONDS)
+
+            matchDuration.toComponents { hours, minutes, seconds, _ ->
+                val hoursString: String = if (hours != 0L && hours != 1L) hours.toString() else "0$hours"
+                val minutesString: String = if (minutes != 0 && minutes != 1) minutes.toString() else "0$minutes"
+                val secondsString: String = if (seconds != 0 && seconds != 1) seconds.toString() else "0$seconds"
+
+                val timeString = "$hoursString:$minutesString:$secondsString"
+
+                gamePlayer.toBukkitInstance()?.translateMessage("blocko.stats.show_match_stats",
+                    Placeholder.parsed("eliminations", gamePlayer.matchStats.eliminations.toString()),
+                    Placeholder.parsed("knockouts", gamePlayer.matchStats.knockedOutByOpponent.toString()),
+                    Placeholder.parsed("coins", gamePlayer.matchStats.gainedCoins.toString()),
+                    Placeholder.parsed("place", gamePlayer.matchStats.position!!.toString()),
+                    Placeholder.parsed("time", timeString))
+            }
         }
+
+        this.matchStartTime = null
     }
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
@@ -112,6 +137,10 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         val timeoutTimestamp: Long = controllingGamePlayer.actionTimeoutTimestamp ?: return 0L
         val timeLeft: Long = timeoutTimestamp - System.currentTimeMillis()
         return timeLeft.toDuration(DurationUnit.MILLISECONDS).inWholeSeconds
+    }
+
+    fun getAmountOfFinishedTeams(): Int {
+        return getArena().currentPlayers.filter { it.hasSavedAllEntities() }.size
     }
 
     private fun hasControllingTeamMemberDicedSix(): Boolean {

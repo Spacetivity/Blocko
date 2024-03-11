@@ -7,11 +7,14 @@ import net.spacetivity.ludo.extensions.isDicing
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
+import net.spacetivity.ludo.stats.GamePlayerMatchStats
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
 
 class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val isAI: Boolean) {
+
+    val matchStats: GamePlayerMatchStats = GamePlayerMatchStats()
 
     var dicedNumber: Int? = null
     var activeEntity: GameEntity? = null

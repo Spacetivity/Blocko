@@ -2,6 +2,7 @@ package net.spacetivity.ludo.arena
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.dice.DiceHandler
 import net.spacetivity.ludo.extensions.clearPhaseItems
@@ -11,6 +12,7 @@ import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
+import net.spacetivity.ludo.translation.Translation
 import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.entity.Player
@@ -35,6 +37,13 @@ class GameArena(
         for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
             if (player == null) continue
             player.sendMessage(message)
+        }
+    }
+
+    fun sendArenaMessage(key: String, vararg toReplace: TagResolver) {
+        val translation: Translation = LudoGame.instance.translationHandler.getSelectedTranslation()
+        for (gamePlayer: GamePlayer in this.currentPlayers.filter { !it.isAI }) {
+            gamePlayer.sendMessage(translation.validateLine(key, *toReplace))
         }
     }
 

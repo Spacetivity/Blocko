@@ -64,7 +64,7 @@ class DiceHandler {
                     rollDice(gamePlayer, diceSession)
                 }
             }
-        }, 0L, 4L)
+        }, 0L, 3L)
     }
 
     fun stopDiceAnimation() {
@@ -89,7 +89,6 @@ class DiceHandler {
         }
 
         if (this.dicingPlayers.isNotEmpty()) {
-
             val stillDicing: MutableList<GamePlayer> = mutableListOf()
 
             for (uuid in this.dicingPlayers.keys) {
@@ -102,7 +101,7 @@ class DiceHandler {
             return
         }
 
-        this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 2))
+        this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 1500))
     }
 
     private fun rollDice(gamePlayer: GamePlayer, diceSession: DiceSession) {

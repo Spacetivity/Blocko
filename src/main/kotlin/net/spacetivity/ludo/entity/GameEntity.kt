@@ -145,6 +145,9 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
         val goalField: GameField = getTeamField(goalFieldId) ?: return false
         val newField: GameField = getTeamField(newFieldId) ?: return false
 
+        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)!!
+        gameArena.sendArenaSound(Sound.BLOCK_BONE_BLOCK_STEP, 1.0F)
+
         if (this.currentFieldId != null) {
             val oldField: GameField = getTeamField(this.currentFieldId!!)!!
             if (oldField.isTaken && (oldField.currentHolder != null && oldField.currentHolder?.teamName == this.teamName && oldField.currentHolder?.livingEntity?.uniqueId == this.livingEntity?.uniqueId)) {
@@ -182,9 +185,6 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
 
         newField.isTaken = true
         newField.currentHolder = this
-
-        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId)!!
-        gameArena.sendArenaSound(Sound.BLOCK_BONE_BLOCK_STEP, 1.0F)
 
         val reachedGoal: Boolean = this.currentFieldId == goalFieldId
 

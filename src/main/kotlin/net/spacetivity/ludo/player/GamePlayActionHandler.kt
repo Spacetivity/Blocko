@@ -65,6 +65,9 @@ class GamePlayActionHandler {
             for (gameEntity: GameEntity in LudoGame.instance.gameEntityHandler.gameEntities.values()) {
                 val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(gameEntity.arenaId) ?: continue
                 if (!gameArena.phase.isIngame()) continue
+
+                val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+
                 if (!gameEntity.shouldMove) continue
 
                 val gamePlayer: GamePlayer = gameEntity.controller ?: continue
@@ -83,15 +86,17 @@ class GamePlayActionHandler {
 
                 if (gamePlayer.hasSavedAllEntities() && !gameArena.isGameOver() && !gameTeam.deactivated) {
                     gameTeam.deactivated = true
-                    gameArena.sendArenaMessage(Component.text("TEAM ${gameTeam.name.uppercase()} HAS FINISHED!", NamedTextColor.YELLOW, TextDecoration.BOLD))
+
+                    val position: Int = ingamePhase.getAmountOfFinishedTeams()
+
+                    gamePlayer.matchStats.position = position
+                    gameArena.sendArenaMessage(Component.text("TEAM ${gameTeam.name.uppercase()} HAS FINISHED (#$position)!", NamedTextColor.YELLOW, TextDecoration.BOLD))
                 }
 
                 if (gameArena.isGameOver()) {
                     LudoGame.instance.gamePhaseHandler.nextPhase(gameArena)
                     continue
                 }
-
-                val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
                 gameEntity.controller = null
                 gameEntity.shouldMove = false
