@@ -2,6 +2,8 @@
 # It combines color codes to style the prefix text.
 blocko.prefix.global: "<gradient:green:yellow><bold>Blocko</gradient> <dark_gray><bold>»</bold>"
 
+blocko.motd: "        <gray><st>------</st> <gradient:green:yellow>Blocko Game<dark_gray>-</dark_gray>testserver</gradient> <gray><st>-----</st>\n          <gradient:gold:blue>-= https://discord.spacetivity.net =-</gradient>"
+
 # Defines the message format for when a player unlocks an achievement.
 # Utilizes Minecraft's formatting codes for colors and styles, including gradients and obfuscation.
 blocko.achievement.unlocked: |

@@ -2,6 +2,7 @@ package net.spacetivity.ludo.listener
 
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.extensions.getArena
+import net.spacetivity.ludo.translation.Translation
 import net.spacetivity.ludo.utils.ItemBuilder
 import net.spacetivity.ludo.utils.PersistentDataUtils
 import org.bukkit.entity.Player
@@ -19,6 +20,7 @@ import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
+import org.bukkit.event.server.ServerListPingEvent
 import org.bukkit.event.weather.WeatherChangeEvent
 import org.bukkit.inventory.ItemStack
 import java.util.*
@@ -27,6 +29,13 @@ class ProtectionListener(private val plugin: LudoGame) : Listener {
 
     init {
         this.plugin.server.pluginManager.registerEvents(this, this.plugin)
+    }
+
+    @EventHandler
+    fun onServerListPing(event: ServerListPingEvent) {
+        val translation: Translation = this.plugin.translationHandler.getSelectedTranslation()
+
+        event.motd(translation.validateLine("blocko.motd"))
     }
 
     @EventHandler
