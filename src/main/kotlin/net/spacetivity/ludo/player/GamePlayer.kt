@@ -17,6 +17,8 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
     var activeEntity: GameEntity? = null
     var lastEntityPickRule: EntityPickRule? = null
 
+    var actionTimeoutTimestamp: Long? = null
+
     fun dice(ingamePhase: IngamePhase) {
         if (isDicing()) return
         LudoGame.instance.diceHandler.startDicing(this, ingamePhase)
@@ -26,6 +28,8 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
         if (this.dicedNumber == null) return
         this.activeEntity = gameEntity
         this.activeEntity!!.entityStatus = GameEntityStatus.MOVING
+        this.actionTimeoutTimestamp = null
+        LudoGame.instance.bossbarHandler.unregisterBossbar(toBukkitInstance()!!, "timeoutBar")
 
         GameScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY

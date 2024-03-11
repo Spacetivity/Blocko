@@ -14,7 +14,10 @@ import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.time.Duration
 import java.util.*
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
@@ -67,7 +70,12 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
             GameScoreboardUtils.updateControllingTeamLine(getArena(), controllingTeam)
             GameScoreboardUtils.updateAllEntityStatusLines(this.arenaId, controllingTeam)
 
-            getArena().currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }?.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
+            val gamePlayer: GamePlayer? = getArena().currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
+
+            if (gamePlayer != null){
+                gamePlayer.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
+                if (gamePlayer.actionTimeoutTimestamp == null) gamePlayer.actionTimeoutTimestamp = System.currentTimeMillis() + Duration.ofMinutes(1).toMillis()
+            }
         }
 
         return controllingTeam
@@ -75,6 +83,35 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
     fun getControllingTeam(): GameTeam? {
         return LudoGame.instance.gameTeamHandler.gameTeams.get(this.arenaId).find { it.teamId == this.controllingTeamId }
+    }
+
+    fun getControllingGamePlayer(): GamePlayer? {
+        val controllingTeam: GameTeam = getControllingTeam() ?: return null
+        return getArena().currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
+    }
+
+    fun getControllingGamePlayerTimeLeftFraction(): Float {
+        val totalActionTime = 60_000L // Total action time in milliseconds (60 seconds)
+        val controllingGamePlayer: GamePlayer = getControllingGamePlayer() ?: return 0f
+        val timeoutTimestamp: Long = controllingGamePlayer.actionTimeoutTimestamp ?: return 0f
+        val currentTimeMillis = System.currentTimeMillis()
+        val timeLeftMillis: Long = timeoutTimestamp - currentTimeMillis
+
+        // Ensure time left is not negative
+        val positiveTimeLeftMillis = if (timeLeftMillis > 0) timeLeftMillis else 0L
+
+        // Calculate the fraction of time left
+        val timeLeftFraction = positiveTimeLeftMillis.toFloat() / totalActionTime.toFloat()
+
+        // Ensure the fraction is within 0.0 to 1.0
+        return timeLeftFraction.coerceIn(0.0f, 1.0f)
+    }
+
+    fun getControllingGamePlayerTimeLeft(): Long {
+        val controllingGamePlayer: GamePlayer = getControllingGamePlayer() ?: return 0L
+        val timeoutTimestamp: Long = controllingGamePlayer.actionTimeoutTimestamp ?: return 0L
+        val timeLeft: Long = timeoutTimestamp - System.currentTimeMillis()
+        return timeLeft.toDuration(DurationUnit.MILLISECONDS).inWholeSeconds
     }
 
     private fun hasControllingTeamMemberDicedSix(): Boolean {

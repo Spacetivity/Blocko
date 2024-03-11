@@ -1,6 +1,6 @@
 # This section defines the global prefix used across all in-game messages.
 # It combines color codes to style the prefix text.
-blocko.prefix.global: "<green>Blocko <gray>»"
+blocko.prefix.global: "<gradient:green:yellow><bold>Blocko</gradient> <dark_gray><bold>»</bold>"
 
 # Defines the message format for when a player unlocks an achievement.
 # Utilizes Minecraft's formatting codes for colors and styles, including gradients and obfuscation.
@@ -18,8 +18,7 @@ blocko.coins.receive:
   normal: "<gold>+ <green><amount> <gray>Coins"
   on_kill: "<gold>+ <green><amount> <gray>Coins <dark_gray>(<yellow>Elimination<dark_gray>)"
 
-# Achievement sections define individual achievements players can unlock.
-# Each achievement has a display name and a specific requirement to be met.
+blocko.bossbar.timeout: "<gray>Time left to dice & pick: <time_color><time> <unit><dark_gray>"
 
 # Achievement for playing the first game in Blocko.
 blocko.achievement.first_game:

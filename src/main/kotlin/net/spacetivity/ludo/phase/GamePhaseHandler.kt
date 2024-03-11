@@ -14,6 +14,7 @@ import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.entity.Player
+import java.time.Duration
 
 class GamePhaseHandler {
 
@@ -50,7 +51,12 @@ class GamePhaseHandler {
             val controllingTeam: GameTeam = newGamePhase.getControllingTeam() ?: return
             GameScoreboardUtils.updateControllingTeamLine(gameArena, controllingTeam)
 
-            gameArena.currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }?.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
+            val controllingPlayer: GamePlayer? = gameArena.currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
+
+            if (controllingPlayer != null) {
+                if (controllingPlayer.actionTimeoutTimestamp == null) controllingPlayer.actionTimeoutTimestamp = System.currentTimeMillis() + Duration.ofMinutes(1).toMillis()
+                controllingPlayer.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
+            }
         }
 
         gameArena.phase = newGamePhase

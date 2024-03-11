@@ -2,21 +2,24 @@ package net.spacetivity.ludo.player
 
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.bossbar.BossbarHandler
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.extensions.getTeam
+import net.spacetivity.ludo.extensions.playSound
 import net.spacetivity.ludo.extensions.sendActionBar
+import net.spacetivity.ludo.extensions.sendMessage
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.utils.PersistentDataUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitTask
@@ -95,6 +98,7 @@ class GamePlayActionHandler {
 
                 gamePlayer.activeEntity = null
                 gamePlayer.lastEntityPickRule = null
+                gamePlayer.actionTimeoutTimestamp = null
 
                 val newControllingTeam: GameTeam = ingamePhase.setNextControllingTeam() ?: continue
 
@@ -118,20 +122,48 @@ class GamePlayActionHandler {
 
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
-                    val bossbarHandler: BossbarHandler = LudoGame.instance.bossbarHandler
-                    val currentGamePlayerName: String? = if (ingamePhase.getControllingTeam()?.name == gamePlayer.teamName) "you" else ingamePhase.getControllingTeam()?.name
-                    val bossbarText: TextComponent = Component.text("Current game player >> $currentGamePlayerName")
+                    if (gamePlayer.getTeam().deactivated) continue
+                    if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
 
-                    if (!gamePlayer.isAI) {
-                        if (bossbarHandler.getBossbars(gamePlayer.uuid).none { it.first == "currentPlayerInfo" }) {
-                            bossbarHandler.registerBossbar(gamePlayer.toBukkitInstance()!!, "currentPlayerInfo", bossbarText, 1.0F, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
+                    if (!gamePlayer.isAI && ingamePhase.isInControllingTeam(gamePlayer.uuid) && gamePlayer.actionTimeoutTimestamp != null) {
+                        val bossbarHandler: BossbarHandler = LudoGame.instance.bossbarHandler
+
+                        val timeLeft: Long = ingamePhase.getControllingGamePlayerTimeLeft()
+
+                        val timePlaceholder = Placeholder.parsed("time", if (timeLeft == 1L) "one" else timeLeft.toString())
+                        val unitPlaceholder = Placeholder.parsed("unit", if (timeLeft == 1L) "second" else "seconds")
+
+                        val timeColor: String = if (timeLeft >= 30) NamedTextColor.GREEN.asHexString() else if (timeLeft >= 10) NamedTextColor.YELLOW.asHexString() else NamedTextColor.DARK_RED.asHexString()
+                        val timeColorPlaceholder = Placeholder.parsed("time_color", "<$timeColor>")
+
+                        val bossbarText: Component = LudoGame.instance.translationHandler.getSelectedTranslation().validateLine("blocko.bossbar.timeout", timeColorPlaceholder, timePlaceholder, unitPlaceholder)
+
+                        if (bossbarHandler.getBossbars(gamePlayer.uuid).none { it.first == "timeoutBar" }) {
+                            bossbarHandler.registerBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar", bossbarText, 1.0F, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
                         } else {
-                            bossbarHandler.updateBossbar(gamePlayer.uuid, "currentPlayerInfo", BossbarHandler.BossBarUpdate.NAME, bossbarText)
+                            val progress: Float = ingamePhase.getControllingGamePlayerTimeLeftFraction()
+                            bossbarHandler.updateBossbar(gamePlayer.uuid, "timeoutBar", BossbarHandler.BossBarUpdate.PROGRESS, progress)
+                            bossbarHandler.updateBossbar(gamePlayer.uuid, "timeoutBar", BossbarHandler.BossBarUpdate.NAME, bossbarText)
+
+                            val barColor: BossBar.Color = if (timeLeft >= 30) BossBar.Color.GREEN else if (timeLeft >= 10) BossBar.Color.YELLOW else BossBar.Color.RED
+                            bossbarHandler.updateBossbar(gamePlayer.uuid, "timeoutBar", BossbarHandler.BossBarUpdate.COLOR, barColor)
                         }
                     }
 
-                    if (gamePlayer.getTeam().deactivated) continue
-                    if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
+                    if (!gamePlayer.isAI && gamePlayer.actionTimeoutTimestamp != null && (ingamePhase.phaseMode == GamePhaseMode.DICE || ingamePhase.phaseMode == GamePhaseMode.PICK_ENTITY)) {
+                        if (System.currentTimeMillis() >= gamePlayer.actionTimeoutTimestamp!!) {
+                            gamePlayer.activeEntity = null
+                            gamePlayer.lastEntityPickRule = null
+                            gamePlayer.dicedNumber = null
+                            gamePlayer.actionTimeoutTimestamp = null
+                            ingamePhase.phaseMode = GamePhaseMode.DICE
+                            ingamePhase.setNextControllingTeam()
+                            gamePlayer.sendMessage(Component.text("You waited to long. Your turn is over!", NamedTextColor.DARK_RED))
+                            gamePlayer.playSound(Sound.BLOCK_SCULK_SHRIEKER_HIT)
+                            LudoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
+                            continue
+                        }
+                    }
 
                     when (ingamePhase.phaseMode) {
                         GamePhaseMode.DICE -> {
@@ -153,6 +185,8 @@ class GamePlayActionHandler {
                                     gamePlayer.activeEntity = null
                                     gamePlayer.lastEntityPickRule = null
                                     gamePlayer.dicedNumber = null
+                                    gamePlayer.actionTimeoutTimestamp = null
+                                    LudoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
                                     ingamePhase.phaseMode = GamePhaseMode.DICE
                                     ingamePhase.setNextControllingTeam()
                                 } else {

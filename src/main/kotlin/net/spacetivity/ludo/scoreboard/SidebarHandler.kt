@@ -15,7 +15,7 @@ class SidebarHandler {
     fun unregisterSidebar(uuid: UUID) {
         val sidebar: Sidebar = getSidebar(uuid) ?: return
         sidebar.reset()
-        this.cachedSidebars.removeIf { it.viewer.uniqueId == uuid }
+        this.cachedSidebars.remove(sidebar)
     }
 
 }
