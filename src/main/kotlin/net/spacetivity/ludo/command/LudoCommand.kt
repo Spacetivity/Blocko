@@ -49,8 +49,8 @@ class LudoCommand : LudoCommandExecutor {
 
             cachedArenas.forEach { gameArena: GameArena ->
                 val currentPlayerAmount: Int = gameArena.currentPlayers.size
-                val maxPlayerAmount: Int = gameArena.maxPlayers
-                player.sendMessage(Component.text("> ArenaId: ${gameArena.id} [JOIN] ($currentPlayerAmount/$maxPlayerAmount)"))
+                val maxPlayerAmount: Int = gameArena.teamOptions.playerCount
+                player.sendMessage(Component.text("> ArenaId: ${gameArena.id} [DELETE] [RESET] ($currentPlayerAmount/$maxPlayerAmount)"))
             }
 
             return

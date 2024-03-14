@@ -1,8 +1,22 @@
 # This section defines the global prefix used across all in-game messages.
 # It combines color codes to style the prefix text.
 blocko.prefix.global: "<gradient:green:yellow><bold>Blocko</gradient> <dark_gray><bold>»</bold>"
-
 blocko.motd: "        <gray><st>------</st> <gradient:green:yellow>Blocko Game<dark_gray>-</dark_gray>testserver</gradient> <gray><st>-----</st>\n          <gradient:gold:blue>-= https://discord.spacetivity.net =-</gradient>"
+
+blocko.arena.arena_invite_command.usage: |
+  <prefix> <gray>Invitation usage:
+  <dark_gray>- <gray>/arenainvite send <name>
+  <dark_gray>- <gray>/arenainvite accept <id>
+  <dark_gray>- <gray>/arenainvite deny <id>
+
+blocko.arena.invite_sent: "<prefix> <gray>You invited <yellow><name> <gray>to join your arena."
+blocko.arena.invite_received: |
+  <obfuscated><gradient:blue:green>==============================================</obfuscated>
+  
+  <dark_gray><bold>»</bold> <gray>Arena invite from <yellow><name><dark_gray>.
+  <dark_gray><bold>»</bold> <click:run_command:'/arenainvite accept <id>'><hover:show_text:'<gray>Accept invitation'><green>[ACCEPT]</hover></click> <click:run_command:'/arenainvite deny <id>'><hover:show_text:'<gray>Deny invitation'><red>[DENY]</hover></click>
+  
+  <obfuscated><gradient:blue:green>==============================================</obfuscated>
 
 # Defines the message format for when a player unlocks an achievement.
 # Utilizes Minecraft's formatting codes for colors and styles, including gradients and obfuscation.

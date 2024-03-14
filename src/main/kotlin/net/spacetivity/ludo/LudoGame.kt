@@ -11,6 +11,7 @@ import net.spacetivity.ludo.arena.setup.GameArenaSetupHandler
 import net.spacetivity.ludo.arena.sign.GameArenaSignDAO
 import net.spacetivity.ludo.arena.sign.GameArenaSignHandler
 import net.spacetivity.ludo.bossbar.BossbarHandler
+import net.spacetivity.ludo.command.ArenaInviteCommand
 import net.spacetivity.ludo.command.LudoCommand
 import net.spacetivity.ludo.command.api.CommandProperties
 import net.spacetivity.ludo.command.api.LudoCommandExecutor
@@ -39,7 +40,6 @@ import net.spacetivity.ludo.translation.TranslationHandler
 import net.spacetivity.ludo.utils.FileUtils
 import net.spacetivity.ludo.utils.HeadUtils
 import net.spacetivity.ludo.utils.ItemBuilder
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.plugin.java.JavaPlugin
@@ -136,6 +136,7 @@ class LudoGame : JavaPlugin() {
         this.gamePlayActionHandler.startPlayerTask()
 
         registerCommand(LudoCommand())
+        registerCommand(ArenaInviteCommand())
 
         PlayerSetupListener(this)
         PlayerListener(this)
@@ -144,16 +145,10 @@ class LudoGame : JavaPlugin() {
 
     override fun onDisable() {
         this.gameArenaHandler.resetArenas()
+        this.gameArenaHandler.cachedArenas.map { it.gameWorld }.map { it.entities }.forEach { it.forEach(Entity::remove) }
         this.diceHandler.stopDiceAnimation()
         this.gamePlayActionHandler.stopTasks()
         this.gameArenaSetupHandler.stopTask()
-
-        for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {
-            for (entity: Entity in entities) {
-                if (!entity.hasMetadata("displayEntity")) continue
-                entity.remove()
-            }
-        }
     }
 
     private fun registerCommand(commandExecutor: LudoCommandExecutor) {

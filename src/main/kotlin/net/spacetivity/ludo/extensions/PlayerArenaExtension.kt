@@ -14,6 +14,10 @@ fun Player.clearPhaseItems() {
     gameArena.phase.clearPlayerInventory(this)
 }
 
+fun Player.getPossibleInvitationDestination(): GameArena? {
+    return LudoGame.instance.gameArenaHandler.cachedArenas.firstOrNull { it.invitedPlayers.contains(this.uniqueId) }
+}
+
 fun Player.toGamePlayerInstance(): GamePlayer? {
     return getArena()?.currentPlayers?.find { it.uuid == this.uniqueId }
 }

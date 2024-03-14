@@ -22,19 +22,7 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5, Predicate { t -
             gameArena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP,0.2F)
         }
 
-        //TODO: Remove the lines below after testing!!!
-        if (remainingSeconds == 2) {
-            val currentPlayerSize: Int = gameArena.currentPlayers.size
-            val maxPlayerSize: Int = gameArena.maxPlayers
-
-            val missingPlayerCount: Int = (maxPlayerSize - currentPlayerSize) //-1
-
-            for (i in 0..<missingPlayerCount) {
-                val randomGameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].first { it.teamMembers.isEmpty() }
-                gameArena.join(UUID.randomUUID(), randomGameTeam, true)
-            }
-        }
-
+        if (remainingSeconds == 2) addMissingPlayers(gameArena)
     }
 
     override fun handleCountdownEnd() {
@@ -46,7 +34,18 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5, Predicate { t -
         }
 
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
+        gameArena.invitedPlayers.clear()
+
         LudoGame.instance.gamePhaseHandler.nextPhase(gameArena)
+    }
+
+    private fun addMissingPlayers(gameArena: GameArena) {
+        val missingPlayerCount: Int = gameArena.teamOptions.playerCount - gameArena.currentPlayers.size
+        if (missingPlayerCount <= 0) return
+
+        for (i in 0..<missingPlayerCount) {
+            gameArena.join(UUID.randomUUID(), true)
+        }
     }
 
 }

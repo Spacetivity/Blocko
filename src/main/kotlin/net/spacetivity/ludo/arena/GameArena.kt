@@ -2,17 +2,18 @@ package net.spacetivity.ludo.arena
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.dice.DiceHandler
-import net.spacetivity.ludo.extensions.clearPhaseItems
-import net.spacetivity.ludo.extensions.getTeam
-import net.spacetivity.ludo.extensions.sendMessage
+import net.spacetivity.ludo.extensions.*
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
+import net.spacetivity.ludo.team.GameTeamOptions
 import net.spacetivity.ludo.translation.Translation
+import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.entity.Player
@@ -22,12 +23,16 @@ class GameArena(
     val id: String,
     val gameWorld: World,
     var status: GameArenaStatus,
-    var phase: GamePhase
+    var phase: GamePhase,
 ) {
 
-    val maxPlayers: Int = 4
+    var locked: Boolean = false
+    var teamOptions: GameTeamOptions = GameTeamOptions.TWO_BY_ONE
+
     val currentPlayers: MutableSet<GamePlayer> = mutableSetOf()
     var arenaHost: GamePlayer? = null
+
+    val invitedPlayers: MutableSet<UUID> = mutableSetOf()
 
     init {
         if (this.status == GameArenaStatus.READY) this.phase.start()
@@ -54,22 +59,61 @@ class GameArena(
         }
     }
 
-    fun join(uuid: UUID, gameTeam: GameTeam, isAI: Boolean) {
+    fun sendArenaInvite(sender: GamePlayer, receiverName: String) {
+        val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(sender.arenaId) ?: return
+
+        if (!gameArena.phase.isIdle()) {
+            sender.sendMessage(Component.text("Your game has already started!", NamedTextColor.RED))
+            return
+        }
+
+        val senderBukkitPlayer: Player = sender.toBukkitInstance() ?: return
+        val receiverBukkitPlayer: Player? = Bukkit.getPlayer(receiverName)
+
+        if (receiverBukkitPlayer == null) {
+            sender.sendMessage(Component.text("This player does not exist!", NamedTextColor.RED))
+            return
+        }
+
+        val receiverGamePlayer: GamePlayer? = receiverBukkitPlayer.toGamePlayerInstance()
+        if (receiverGamePlayer != null && receiverGamePlayer.arenaId == sender.arenaId) {
+            sender.sendMessage(Component.text("This player is already in your arena!", NamedTextColor.RED))
+            return
+        }
+
+        if (this.invitedPlayers.contains(receiverBukkitPlayer.uniqueId)) {
+            sender.sendMessage(Component.text("This player was already invited!", NamedTextColor.RED))
+            return
+        }
+
+        this.invitedPlayers.add(receiverBukkitPlayer.uniqueId)
+
+        senderBukkitPlayer.translateMessage("blocko.arena.invite_sent", Placeholder.parsed("name", receiverName))
+        receiverBukkitPlayer.translateMessage("blocko.arena.invite_received", Placeholder.parsed("name", senderBukkitPlayer.name), Placeholder.parsed("id", sender.arenaId))
+    }
+
+    fun join(uuid: UUID, isAI: Boolean): Boolean {
+        val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[this.id].filter { it.teamMembers.isEmpty() }.random()
         val gamePlayer = GamePlayer(uuid, this.id, gameTeam.name, isAI)
 
         if (this.currentPlayers.any { it.uuid == gamePlayer.uuid }) {
             gamePlayer.sendMessage(Component.text("Already in arena!"))
-            return
+            return false
         }
 
         if (!this.phase.isIdle()) {
             gamePlayer.sendMessage(Component.text("The game is already running!", NamedTextColor.DARK_RED))
-            return
+            return false
         }
 
-        if (this.currentPlayers.size >= this.maxPlayers) {
+        if (this.currentPlayers.size >= this.teamOptions.playerCount) {
             gamePlayer.sendMessage(Component.text("Arena is full!", NamedTextColor.DARK_RED))
-            return
+            return false
+        }
+
+        if (this.locked && !this.invitedPlayers.contains(uuid)) { //make check if player is invited
+            gamePlayer.sendMessage(Component.text("This arena can only be entered by invitation of the host."))
+            return false
         }
 
         //gamePlayer.setGameMode(GameMode.ADVENTURE)
@@ -91,6 +135,7 @@ class GameArena(
         }
 
         gameTeam.join(gamePlayer)
+        return true
     }
 
     fun quit(player: Player) {
@@ -117,6 +162,7 @@ class GameArena(
 
         LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(gamePlayer)
 
+        this.invitedPlayers.removeIf { it == player.uniqueId }
         this.currentPlayers.removeIf { it.uuid == player.uniqueId }
 
         if (this.currentPlayers.isEmpty()) this.phase.countdown?.cancel()
@@ -163,6 +209,7 @@ class GameArena(
             diceHandler.dicingPlayers.remove(currentPlayer.uuid)
         }
 
+        this.invitedPlayers.clear()
         this.currentPlayers.clear()
 
         LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
@@ -171,7 +218,7 @@ class GameArena(
 
     fun isGameOver(): Boolean {
         val finishedGamePlayers: List<GamePlayer> = this.currentPlayers.filter { it.getTeam().deactivated }.toList()
-        val enoughGamePlayersFinished: Boolean = finishedGamePlayers.size == (this.maxPlayers - 1)
+        val enoughGamePlayersFinished: Boolean = finishedGamePlayers.size == (this.teamOptions.playerCount - 1)
         return enoughGamePlayersFinished
     }
 

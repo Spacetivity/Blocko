@@ -133,7 +133,7 @@ class GameArenaHandler {
 
             val statusLine: Component = when (arenaStatus) {
                 GameArenaStatus.READY -> when (arenaPhase) {
-                    is IdlePhase -> Component.text("${gameArena.currentPlayers.size}/${gameArena.maxPlayers}", NamedTextColor.YELLOW)
+                    is IdlePhase -> Component.text("${gameArena.currentPlayers.size}/${gameArena.teamOptions.playerCount}", NamedTextColor.YELLOW)
                     is IngamePhase -> Component.text("Ingame...", NamedTextColor.RED)
                     is EndingPhase -> Component.text("Ending...", NamedTextColor.RED)
                     else -> Component.text("Phase 404", NamedTextColor.RED)

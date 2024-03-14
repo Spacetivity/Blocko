@@ -18,7 +18,6 @@ import net.spacetivity.ludo.extensions.toGamePlayerInstance
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.player.GamePlayer
-import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.utils.PersistentDataUtils
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -140,8 +139,7 @@ class PlayerListener(private val plugin: LudoGame) : Listener {
                 if (player.getArena() != null && player.getArena()!!.id == gameArena.id) {
                     gameArena.quit(player)
                 } else if (player.getArena() == null) {
-                    val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[gameArena.id].filter { it.teamMembers.isEmpty() }.random()
-                    gameArena.join(player.uniqueId, gameTeam, false)
+                    gameArena.join(player.uniqueId, false)
                 } else {
                     player.sendMessage(Component.text("Error : No sign action found...", NamedTextColor.DARK_RED))
                 }
