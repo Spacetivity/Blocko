@@ -64,7 +64,7 @@ class DiceHandler {
                     rollDice(gamePlayer, diceSession)
                 }
             }
-        }, 0L, 5L)
+        }, 0L, 4L)
     }
 
     fun stopDiceAnimation() {

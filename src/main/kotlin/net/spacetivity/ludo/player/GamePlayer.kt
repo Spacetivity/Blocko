@@ -12,7 +12,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
 
-class GamePlayer(val uuid: UUID, val arenaId: String, var teamName: String? = null, val isAI: Boolean) {
+class GamePlayer(val uuid: UUID, val arenaId: String, var teamName: String?, val isAI: Boolean) {
 
     val matchStats: GamePlayerMatchStats = GamePlayerMatchStats()
 

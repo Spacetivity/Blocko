@@ -96,7 +96,6 @@ class GameArena(
     }
 
     fun join(uuid: UUID, isAI: Boolean): Boolean {
-        // val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[this.id].filter { it.teamMembers.isEmpty() }.random()
         val gamePlayer = GamePlayer(uuid, this.id, null, isAI)
 
         if (this.currentPlayers.any { it.uuid == gamePlayer.uuid }) {
