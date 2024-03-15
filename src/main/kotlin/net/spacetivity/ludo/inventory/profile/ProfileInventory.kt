@@ -1,4 +1,4 @@
-package net.spacetivity.ludo.inventory
+package net.spacetivity.ludo.inventory.profile
 
 import net.spacetivity.inventory.api.annotation.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryController

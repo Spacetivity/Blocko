@@ -1,14 +1,45 @@
-# This section defines the global prefix used across all in-game messages.
-# It combines color codes to style the prefix text.
+# Blocko Plugin Configuration
+# This file allows server administrators to customize in-game messages, titles, and other text elements.
+# Text formatting uses Minecraft's rich text formatting codes, including color codes, gradients, and styles.
+
+# Global Settings
+# ------------------------------
+# Defines a global prefix for all in-game messages, styled with gradients and bold text.
 blocko.prefix.global: "<gradient:green:yellow><bold>Blocko</gradient> <dark_gray><bold>»</bold>"
+
+# Sets the message of the day (MOTD) for the server, incorporating gradients and strikethrough text.
 blocko.motd: "        <gray><st>------</st> <gradient:green:yellow>Blocko Game<dark_gray>-</dark_gray>testserver</gradient> <gray><st>-----</st>\n          <gradient:gold:blue>-= https://discord.spacetivity.net =-</gradient>"
 
+# Host Inventory Menu
+# ------------------------------
+# Customizes titles and options within the host settings inventory menu.
+blocko.inventory.host.title: "Host Settings"
+
+# Configures display properties for team mode, invite players, and manage bots options.
+blocko.inventory.host.team_mode_changer:
+  display_name: "<gray>Team mode: <yellow><mode>"
+  lore_line_format: "<mode_color><mode>"
+blocko.inventory.host.invite_players.display_name: "<gray>Invite players"
+blocko.inventory.host.manage_bots.display_name: "<gray>Manage Bots"
+
+# Configures display properties for arena status and player wait settings.
+blocko.inventory.host.arena_status:
+  display_name: "<gray>Arena status: <yellow><status>"
+  active: "Private"
+  not_active: "Open"
+blocko.inventory.host.wait_for_players:
+  display_name: "<gray>Wait for players: <yellow><status>"
+  active: "On"
+  not_active: "Off"
+
+# Arena Invitations
+# ------------------------------
+# Defines usage, invitation sent, and invitation received messages for arena invites.
 blocko.arena.arena_invite_command.usage: |
   <prefix> <gray>Invitation usage:
   <dark_gray>- <gray>/arenainvite send <name>
   <dark_gray>- <gray>/arenainvite accept <id>
   <dark_gray>- <gray>/arenainvite deny <id>
-
 blocko.arena.invite_sent: "<prefix> <gray>You invited <yellow><name> <gray>to join your arena."
 blocko.arena.invite_received: |
   <obfuscated><gradient:blue:green>==============================================</obfuscated>
@@ -18,22 +49,14 @@ blocko.arena.invite_received: |
   
   <obfuscated><gradient:blue:green>==============================================</obfuscated>
 
-# Defines the message format for when a player unlocks an achievement.
-# Utilizes Minecraft's formatting codes for colors and styles, including gradients and obfuscation.
-blocko.achievement.unlocked: |
-  <obfuscated><gradient:blue:green>==============================================</obfuscated>
-  
-  <gold>Nice! <green>You unlocked the achievement "<hover:show_text:'<hover_text>'><yellow><name><green></hover>"!
-  
-  <obfuscated><gradient:green:blue>==============================================</obfuscated>
-
-# Configuration for coin receipt messages, supporting different contexts.
-# - normal: Displayed when coins are received in standard scenarios.
-# - on_kill: Shown when coins are awarded for eliminating another player, including an "Elimination" tag.
+# Configures messages for receiving coins, both normally and upon player elimination.
 blocko.coins.receive:
   normal: "<gold>+ <green><amount> <gray>Coins"
   on_kill: "<gold>+ <green><amount> <gray>Coins <dark_gray>(<yellow>Elimination<dark_gray>)"
 
+# In-game
+# ------------------------------
+# Sets the boss bar timeout message and various achievements with their requirements.
 blocko.bossbar.timeout: "<gray>Time left to dice & pick: <time_color><time> <unit><dark_gray>"
 
 # Achievement for playing the first game in Blocko.
@@ -73,6 +96,16 @@ blocko.stats.show_match_stats: |
 
 # Sets the title displayed in the game's sidebar, with gradient color styling.
 blocko.sidebar.title: "<gradient:green:yellow><bold>Blocko Game</bold></gradient>"
+
+# Achievements and Rewards
+# ------------------------------
+# Describes achievement unlock messages and formats for various in-game achievements.
+blocko.achievement.unlocked: |
+  <obfuscated><gradient:blue:green>==============================================</obfuscated>
+  
+  <gold>Nice! <green>You unlocked the achievement "<hover:show_text:'<hover_text>'><yellow><name><green></hover>"!
+  
+  <obfuscated><gradient:green:blue>==============================================</obfuscated>
 
 # Sidebar lines section includes various game status indicators.
 blocko.sidebar.line:

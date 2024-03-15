@@ -64,7 +64,7 @@ class DiceHandler {
                     rollDice(gamePlayer, diceSession)
                 }
             }
-        }, 0L, 3L)
+        }, 0L, 5L)
     }
 
     fun stopDiceAnimation() {
@@ -101,7 +101,7 @@ class DiceHandler {
             return
         }
 
-        this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 1500))
+        this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 2))
     }
 
     private fun rollDice(gamePlayer: GamePlayer, diceSession: DiceSession) {

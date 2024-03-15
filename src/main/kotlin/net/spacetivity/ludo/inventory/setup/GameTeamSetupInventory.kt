@@ -1,4 +1,4 @@
-package net.spacetivity.ludo.inventory
+package net.spacetivity.ludo.inventory.setup
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor

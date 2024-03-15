@@ -9,8 +9,3 @@ author:
   - realFallenBreak
 depend:
   - SpaceInventories
-commands:
-  ludo:
-  arenainvite:
-    aliases:
-      - ai

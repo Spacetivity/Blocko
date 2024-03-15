@@ -52,7 +52,8 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
                 val timeString = "$hoursString:$minutesString:$secondsString"
 
-                val positionString: String = if (gamePlayer.matchStats.position == null) "4" else gamePlayer.matchStats.position!!.toString()
+                val lastPosition: Int = getArena().teamOptions.playerCount
+                val positionString: String = if (gamePlayer.matchStats.position == null) lastPosition.toString() else gamePlayer.matchStats.position!!.toString()
 
                 gamePlayer.toBukkitInstance()?.translateMessage("blocko.stats.show_match_stats",
                     Placeholder.parsed("eliminations", gamePlayer.matchStats.eliminations.toString()),

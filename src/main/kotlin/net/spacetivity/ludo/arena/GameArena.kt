@@ -10,6 +10,7 @@ import net.spacetivity.ludo.extensions.*
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
+import net.spacetivity.ludo.stats.StatsPlayer
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamOptions
 import net.spacetivity.ludo.translation.Translation
@@ -18,6 +19,7 @@ import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.entity.Player
 import java.util.*
+import java.util.function.Predicate
 
 class GameArena(
     val id: String,
@@ -27,6 +29,7 @@ class GameArena(
 ) {
 
     var locked: Boolean = false
+    var waitForActualPlayers: Boolean = true
     var teamOptions: GameTeamOptions = GameTeamOptions.TWO_BY_ONE
 
     val currentPlayers: MutableSet<GamePlayer> = mutableSetOf()
@@ -111,7 +114,7 @@ class GameArena(
             return false
         }
 
-        if (this.locked && !this.invitedPlayers.contains(uuid)) { //make check if player is invited
+        if (!isAI && this.locked && !this.invitedPlayers.contains(uuid)) { //make check if player is invited
             gamePlayer.sendMessage(Component.text("This arena can only be entered by invitation of the host."))
             return false
         }
@@ -129,7 +132,9 @@ class GameArena(
 
         if (!isAI) {
             this.phase.setupPlayerInventory(gamePlayer.toBukkitInstance()!!)
-            this.phase.countdown?.tryStartup()
+
+            val neededPlayerCount: Int = if (this.waitForActualPlayers) this.teamOptions.playerCount else 1
+            this.phase.countdown?.tryStartup(Predicate { playerCount -> playerCount == neededPlayerCount })
 
             GameScoreboardUtils.setGameSidebar(gamePlayer) //TODO: Maybe remove that
         }
@@ -167,8 +172,8 @@ class GameArena(
 
         if (this.currentPlayers.isEmpty()) this.phase.countdown?.cancel()
 
-        if (this.phase.isIngame() && this.currentPlayers.isEmpty()) {
-            reset()
+        if (this.phase.isIngame() && (this.currentPlayers.isEmpty() || this.currentPlayers.size == 1)) {
+            reset(false)
             return
         }
 
@@ -177,27 +182,30 @@ class GameArena(
             this.arenaHost = findNewHost()
 
             if (this.arenaHost == null) {
-                reset()
+                reset(false)
             } else {
                 this.arenaHost?.sendMessage(Component.text("You are now the new Game-Host!", NamedTextColor.YELLOW))
             }
         }
     }
 
-    fun reset() {
+    fun reset(shutdown: Boolean) {
         this.phase.countdown?.cancel()
 
         for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
             if (player == null) continue
+
             GameScoreboardUtils.removeGameSidebar(player)
+            LudoGame.instance.bossbarHandler.clearBossbars(player)
+
             this.phase.clearPlayerInventory(player)
         }
 
-        for (gameTeam: GameTeam in LudoGame.instance.gameTeamHandler.gameTeams[this.id]) {
-            val teamMembers = gameTeam.teamMembers.toMutableList()
-            for (teamMemberUuid: UUID in teamMembers) {
-                val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == teamMemberUuid } ?: continue
-                if (!gamePlayer.isAI) LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)?.updateDbEntry()
+        for (gamePlayer: GamePlayer in this.currentPlayers) {
+            val statsPlayer: StatsPlayer? = LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)
+            if (!gamePlayer.isAI && statsPlayer != null && !shutdown) statsPlayer.updateDbEntry()
+
+            for (gameTeam: GameTeam in LudoGame.instance.gameTeamHandler.gameTeams[this.id]) {
                 gameTeam.quit(gamePlayer)
             }
         }
@@ -211,6 +219,11 @@ class GameArena(
 
         this.invitedPlayers.clear()
         this.currentPlayers.clear()
+
+        this.locked = false
+        this.waitForActualPlayers = true
+        this.teamOptions = GameTeamOptions.TWO_BY_ONE
+        this.arenaHost = null
 
         LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
         if (!this.phase.isIdle()) LudoGame.instance.gamePhaseHandler.initIndexPhase(this)

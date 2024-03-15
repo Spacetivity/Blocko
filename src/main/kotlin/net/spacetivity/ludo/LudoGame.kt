@@ -42,6 +42,7 @@ import net.spacetivity.ludo.utils.HeadUtils
 import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Material
 import org.bukkit.entity.Entity
+import org.bukkit.entity.EntityType
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -81,7 +82,7 @@ class LudoGame : JavaPlugin() {
         val dbProperties: DatabaseFile = createOrLoadDatabaseProperties()
 
         Database.connect(
-            "jdbc:mariadb://${dbProperties.hostname}:${dbProperties.port}/${dbProperties.database}",
+            url = "jdbc:mariadb://${dbProperties.hostname}:${dbProperties.port}/${dbProperties.database}",
             driver = "org.mariadb.jdbc.Driver",
             user = dbProperties.user,
             password = dbProperties.password,
@@ -144,11 +145,11 @@ class LudoGame : JavaPlugin() {
     }
 
     override fun onDisable() {
-        this.gameArenaHandler.resetArenas()
-        this.gameArenaHandler.cachedArenas.map { it.gameWorld }.map { it.entities }.forEach { it.forEach(Entity::remove) }
         this.diceHandler.stopDiceAnimation()
         this.gamePlayActionHandler.stopTasks()
         this.gameArenaSetupHandler.stopTask()
+        this.gameArenaHandler.resetArenas(true)
+        this.gameArenaHandler.cachedArenas.map { it.gameWorld }.map { it.entities }.forEach { it.filter { entity -> entity.type != EntityType.PLAYER }.forEach(Entity::remove) }
     }
 
     private fun registerCommand(commandExecutor: LudoCommandExecutor) {

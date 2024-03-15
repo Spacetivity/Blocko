@@ -9,10 +9,7 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.bossbar.BossbarHandler
 import net.spacetivity.ludo.entity.GameEntity
-import net.spacetivity.ludo.extensions.getTeam
-import net.spacetivity.ludo.extensions.playSound
-import net.spacetivity.ludo.extensions.sendActionBar
-import net.spacetivity.ludo.extensions.sendMessage
+import net.spacetivity.ludo.extensions.*
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
 import net.spacetivity.ludo.team.GameTeam
@@ -161,6 +158,9 @@ class GamePlayActionHandler {
                             gamePlayer.lastEntityPickRule = null
                             gamePlayer.dicedNumber = null
                             gamePlayer.actionTimeoutTimestamp = null
+                            
+                            if (gamePlayer.isDicing()) LudoGame.instance.diceHandler.dicingPlayers.remove(gamePlayer.uuid)
+
                             ingamePhase.phaseMode = GamePhaseMode.DICE
                             ingamePhase.setNextControllingTeam()
                             gamePlayer.sendMessage(Component.text("You waited to long. Your turn is over!", NamedTextColor.DARK_RED))

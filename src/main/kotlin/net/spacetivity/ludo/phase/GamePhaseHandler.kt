@@ -36,7 +36,7 @@ class GamePhaseHandler {
         val newGamePhase: GamePhase? = this.cachedGamePhases[gameArena.id].find { it.priority == newPhasePriority }
 
         if (newGamePhase == null) {
-            gameArena.reset()
+            gameArena.reset(false)
             Bukkit.getConsoleSender().sendMessage(Component.text("ERROR: Phase $newPhasePriority not found for arena ${gameArena.id}!", NamedTextColor.DARK_RED))
             return
         }

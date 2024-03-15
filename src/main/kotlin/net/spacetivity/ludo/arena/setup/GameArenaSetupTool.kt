@@ -5,9 +5,9 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.inventory.api.extension.openStaticInventory
 import net.spacetivity.ludo.LudoGame
-import net.spacetivity.ludo.inventory.GameFieldTurnSetupInventory
-import net.spacetivity.ludo.inventory.GameTeamSetupInventory
-import net.spacetivity.ludo.inventory.InvType
+import net.spacetivity.ludo.inventory.setup.GameFieldTurnSetupInventory
+import net.spacetivity.ludo.inventory.setup.GameTeamSetupInventory
+import net.spacetivity.ludo.inventory.setup.InvType
 import net.spacetivity.ludo.utils.ItemBuilder
 import net.spacetivity.ludo.utils.PersistentDataUtils
 import org.bukkit.Bukkit

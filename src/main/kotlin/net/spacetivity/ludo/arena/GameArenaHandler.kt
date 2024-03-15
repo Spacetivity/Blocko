@@ -9,6 +9,7 @@ import net.spacetivity.ludo.phase.GamePhaseHandler
 import net.spacetivity.ludo.phase.impl.EndingPhase
 import net.spacetivity.ludo.phase.impl.IdlePhase
 import net.spacetivity.ludo.phase.impl.IngamePhase
+import net.spacetivity.ludo.player.GamePlayer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -103,8 +104,10 @@ class GameArenaHandler {
         this.cachedArenas.removeIf { it.id == id }
     }
 
-    fun resetArenas() {
-        this.cachedArenas.forEach(GameArena::reset)
+    fun resetArenas(shutdown: Boolean) {
+        this.cachedArenas.forEach {
+            it.reset(shutdown)
+        }
     }
 
     fun getArena(id: String): GameArena? {
@@ -112,7 +115,7 @@ class GameArenaHandler {
     }
 
     fun getArenaOfPlayer(uuid: UUID): GameArena? {
-        return this.cachedArenas.find { it.currentPlayers.any { gp -> gp.uuid == uuid } }
+        return this.cachedArenas.find { it.currentPlayers.any { gamePlayer: GamePlayer -> gamePlayer.uuid == uuid } }
     }
 
     fun loadJoinSign(location: Location, gameArena: GameArena?) {
@@ -143,7 +146,7 @@ class GameArenaHandler {
                 GameArenaStatus.RESETTING -> Component.text("Resetting...", NamedTextColor.RED)
             }
 
-            signSide.line(1, Component.text(gameArena.gameWorld.name, NamedTextColor.AQUA))
+            signSide.line(1, Component.text(gameArena.teamOptions.getDisplayString(), NamedTextColor.AQUA))
             signSide.line(2, statusLine)
 
             if (arenaStatus == GameArenaStatus.READY && arenaPhase.isIdle()) {

@@ -59,6 +59,8 @@ class StatsPlayerHandler {
     }
 
     fun unloadStatsPlayer(uuid: UUID) {
+        val statsPlayer: StatsPlayer = getStatsPlayer(uuid) ?: return
+        statsPlayer.updateDbEntry()
         this.cachedStatsPlayers.removeIf { it.uuid == uuid }
     }
 

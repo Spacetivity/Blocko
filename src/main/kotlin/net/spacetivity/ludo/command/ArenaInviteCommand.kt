@@ -12,6 +12,7 @@ import net.spacetivity.ludo.extensions.getPossibleInvitationDestination
 import net.spacetivity.ludo.extensions.toGamePlayerInstance
 import net.spacetivity.ludo.extensions.translateMessage
 import net.spacetivity.ludo.player.GamePlayer
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
 @CommandProperties(name = "arenainvite", "blocko.arenainvite", ["ai"])
@@ -21,8 +22,6 @@ class ArenaInviteCommand : LudoCommandExecutor {
         if (!sender.isPlayer) return
 
         val player: Player = sender.castTo(Player::class.java)
-
-        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
 
         if (args.size == 2 && args[0].equals("send", true)) {
             val gameArena: GameArena? = player.getArena()
@@ -38,6 +37,7 @@ class ArenaInviteCommand : LudoCommandExecutor {
             }
 
             val name: String = args[1]
+            val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
             gameArena.sendArenaInvite(gamePlayer, name)
             return
         }
@@ -81,8 +81,7 @@ class ArenaInviteCommand : LudoCommandExecutor {
             result.addAll(listOf("send", "accept", "deny"))
 
         if (args.size == 2 && args[0].equals("send", true)) {
-            val gameArena: GameArena = player.getArena() ?: return mutableListOf()
-            result.add(gameArena.id)
+            result.addAll(Bukkit.getOnlinePlayers().filter { it.getArena() == null && it.uniqueId != player.uniqueId }.map { it.name })
         }
 
         if (args.size == 2 && (args[0].equals("accept", true) || args[0].equals("deny", true))) {
