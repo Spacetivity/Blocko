@@ -96,8 +96,8 @@ class GameArena(
     }
 
     fun join(uuid: UUID, isAI: Boolean): Boolean {
-        val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[this.id].filter { it.teamMembers.isEmpty() }.random()
-        val gamePlayer = GamePlayer(uuid, this.id, gameTeam.name, isAI)
+        // val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.gameTeams[this.id].filter { it.teamMembers.isEmpty() }.random()
+        val gamePlayer = GamePlayer(uuid, this.id, null, isAI)
 
         if (this.currentPlayers.any { it.uuid == gamePlayer.uuid }) {
             gamePlayer.sendMessage(Component.text("Already in arena!"))
@@ -139,7 +139,7 @@ class GameArena(
             GameScoreboardUtils.setGameSidebar(gamePlayer) //TODO: Maybe remove that
         }
 
-        gameTeam.join(gamePlayer)
+        //gameTeam.join(gamePlayer)
         return true
     }
 
@@ -165,7 +165,8 @@ class GameArena(
             GameScoreboardUtils.removeGameSidebar(player)
         }
 
-        LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(gamePlayer)
+        if (gamePlayer.teamName != null)
+            LudoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(gamePlayer)
 
         this.invitedPlayers.removeIf { it == player.uniqueId }
         this.currentPlayers.removeIf { it.uuid == player.uniqueId }

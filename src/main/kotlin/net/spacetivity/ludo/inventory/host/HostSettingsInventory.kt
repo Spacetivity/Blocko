@@ -70,8 +70,10 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
             if (indicatorType == IndicatorType.PRIVACY) this.gameArena.locked = !this.gameArena.locked
             else this.gameArena.waitForActualPlayers = !this.gameArena.waitForActualPlayers
 
-            if (indicatorType == IndicatorType.WAITING_PREDICATE && !this.gameArena.waitForActualPlayers)
-                gameArena.phase.countdown?.tryStartup()
+            if (indicatorType == IndicatorType.WAITING_PREDICATE) {
+                if (this.gameArena.waitForActualPlayers) gameArena.phase.countdown?.cancel()
+                else gameArena.phase.countdown?.tryStartup()
+            }
 
             item.update(controller, InteractiveItem.Modification.TYPE, getIndicatorMaterialType(indicatorType))
             item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, getIndicatorDisplayName(indicatorType, translation))

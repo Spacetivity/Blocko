@@ -81,7 +81,7 @@ class GameTeamHandler {
     }
 
     fun getTeamOfPlayer(arenaId: String, uuid: UUID): GameTeam? {
-        return this.gameTeams.get(arenaId).first { it.teamMembers.contains(uuid) }
+        return this.gameTeams.get(arenaId).firstOrNull() { it.teamMembers.contains(uuid) }
     }
 
     fun getTeam(arenaId: String, name: String): GameTeam? {

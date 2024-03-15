@@ -25,6 +25,7 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
         }
 
         this.teamMembers.add(gamePlayer.uuid)
+        gamePlayer.teamName = this.name
         gamePlayer.sendMessage(Component.text("You are now in team: ${this.name}", NamedTextColor.GREEN))
     }
 
@@ -35,6 +36,7 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
         }
 
         this.teamMembers.remove(gamePlayer.uuid)
+        gamePlayer.teamName = null
         gamePlayer.sendMessage(Component.text("You are left your team.", NamedTextColor.YELLOW))
     }
 

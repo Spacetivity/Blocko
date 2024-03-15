@@ -1,6 +1,7 @@
 package net.spacetivity.ludo.scoreboard
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.ludo.LudoGame
@@ -18,13 +19,10 @@ object GameScoreboardUtils {
         val player: Player = gamePlayer.toBukkitInstance() ?: return
         val translation: Translation = LudoGame.instance.translationHandler.getSelectedTranslation()
 
-        val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(gamePlayer.arenaId, gamePlayer.teamName)
-            ?: return
-
         LudoGame.instance.sidebarHandler.registerSidebar(SidebarBuilder(player)
             .setTitle(translation.validateLine("blocko.sidebar.title"))
             .addBlankLine()
-            .addLine(translation.validateLine("blocko.sidebar.line.team_name", Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"), Placeholder.parsed("team_name", gameTeam.name)))
+            .addLine(getTeamComponent(translation, gamePlayer))
             .addBlankLine()
             .addLine(getControllingTeamComponent(translation, null))
             .addLine(getDicedNumberComponent(translation, null))
@@ -38,6 +36,12 @@ object GameScoreboardUtils {
 
     fun removeGameSidebar(player: Player) {
         LudoGame.instance.sidebarHandler.unregisterSidebar(player.uniqueId)
+    }
+
+    fun updateTeamLine(gamePlayer: GamePlayer) {
+        val translation: Translation = LudoGame.instance.translationHandler.getSelectedTranslation()
+        val sidebar: Sidebar = LudoGame.instance.sidebarHandler.getSidebar(gamePlayer.uuid) ?: return
+        sidebar.updateLine(8, getTeamComponent(translation, gamePlayer))
     }
 
     fun updateControllingTeamLine(gameArena: GameArena, controllingTeam: GameTeam) {
@@ -76,6 +80,22 @@ object GameScoreboardUtils {
             val sidebar: Sidebar = LudoGame.instance.sidebarHandler.getSidebar(gamePlayer.uuid) ?: continue
             sidebar.updateLine(5, getDicedNumberComponent(translation, currentDicedNumber))
         }
+    }
+
+    private fun getTeamComponent(translation: Translation, gamePlayer: GamePlayer): Component {
+        val teamColorHex: String
+        val teamName: String
+
+        if (gamePlayer.teamName == null) {
+            teamColorHex = NamedTextColor.GRAY.asHexString()
+            teamName = "-/-"
+        } else {
+            val gameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!
+            teamColorHex = gameTeam.color.asHexString()
+            teamName = gameTeam.name
+        }
+
+        return translation.validateLine("blocko.sidebar.line.team_name", Placeholder.parsed("team_color", "<$teamColorHex>"), Placeholder.parsed("team_name", teamName))
     }
 
     private fun getStatusComponent(translation: Translation, entityId: Int, status: GameEntityStatus): Component {

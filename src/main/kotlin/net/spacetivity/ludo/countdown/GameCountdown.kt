@@ -38,6 +38,7 @@ abstract class GameCountdown(protected val arenaId: String, private val duration
 
     fun stop() {
         if (this.countdownTask == null) return
+        if (!this.isRunning) return
         this.isRunning = false
         this.countdownTask!!.cancel()
         this.countdownTask = null

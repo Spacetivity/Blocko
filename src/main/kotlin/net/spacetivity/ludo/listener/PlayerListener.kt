@@ -195,7 +195,7 @@ class PlayerListener(private val plugin: LudoGame) : Listener {
                 if (!PersistentDataUtils.hasData(itemInHand.itemMeta, "entitySelector")) return
 
                 val entityId: Int = PersistentDataUtils.getData(itemInHand.itemMeta, "entitySelector", Int::class.java)
-                val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).find { it.entityId == entityId }
+                val gameEntity: GameEntity = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName!!).find { it.entityId == entityId }
                     ?: return
 
                 if (gamePlayer.dicedNumber!! != 6 && gameEntity.currentFieldId == null) {
@@ -241,7 +241,7 @@ class PlayerListener(private val plugin: LudoGame) : Listener {
     }
 
     private fun getOtherHighlightedEntities(gamePlayer: GamePlayer, gameArena: GameArena, highlightedEntity: GameEntity): List<GameEntity> {
-        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName).filter { it.livingEntity?.uniqueId != highlightedEntity.livingEntity?.uniqueId }
+        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName!!).filter { it.livingEntity?.uniqueId != highlightedEntity.livingEntity?.uniqueId }
     }
 
 }

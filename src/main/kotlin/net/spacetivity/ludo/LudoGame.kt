@@ -190,8 +190,8 @@ class LudoGame : JavaPlugin() {
 
     private fun createOrLoadGlobalConfigFile(): GlobalConfigFile {
         val availableTranslationLanguages: List<String> = this.translationHandler.cachedTranslations.map { it.name }
-        val languageName: String = if (availableTranslationLanguages.contains("en_US")) "en_US" else availableTranslationLanguages[0]
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(languageName, Material.GOLDEN_HOE.name))
+        val defaultLanguageName: String = if (availableTranslationLanguages.contains("en_US")) "en_US" else availableTranslationLanguages[0]
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(defaultLanguageName, Material.GOLDEN_HOE.name))
     }
 
 }

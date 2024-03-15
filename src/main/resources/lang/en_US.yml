@@ -32,6 +32,15 @@ blocko.inventory.host.wait_for_players:
   active: "On"
   not_active: "Off"
 
+blocko.inventory.team_selector.title: "Team Selector"
+
+blocko.inventory.team_selector.team_item:
+  display_name: "<team_color>Team <team_name> <gray>(<member_count>/<max_member_count> Players)"
+  lore: |
+    <gray>- <team_color><member_name>
+    
+    <gray>Click to join <team_color>Team <team_name>
+
 # Arena Invitations
 # ------------------------------
 # Defines usage, invitation sent, and invitation received messages for arena invites.

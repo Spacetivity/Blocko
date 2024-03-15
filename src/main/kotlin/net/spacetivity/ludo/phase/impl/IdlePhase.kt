@@ -9,6 +9,7 @@ import net.spacetivity.ludo.countdown.impl.IdleCountdown
 import net.spacetivity.ludo.extensions.getArena
 import net.spacetivity.ludo.inventory.host.HostSettingsInventory
 import net.spacetivity.ludo.inventory.profile.ProfileInventory
+import net.spacetivity.ludo.inventory.team.TeamSelectorInventory
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Material
@@ -35,7 +36,19 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
             }
             .build()
 
-        hotbarItems[1] = ItemBuilder(Material.COMPARATOR)
+        hotbarItems[1] = ItemBuilder(Material.RED_BED)
+            .setName("Team Selector (Right-click)")
+            .setLoreByComponent(mutableListOf(Component.text("Choose a team for yourself")))
+            .onInteract { event: PlayerInteractEvent ->
+                val player: Player = event.player
+                val gameArena: GameArena = player.getArena() ?: return@onInteract
+
+                val title: Component = LudoGame.instance.translationHandler.getSelectedTranslation().validateLine("blocko.inventory.team_selector.title")
+                LudoGame.instance.server.openStaticInventory(player, title, TeamSelectorInventory(gameArena))
+            }
+            .build()
+
+        hotbarItems[7] = ItemBuilder(Material.COMPARATOR)
             .setName("Host Settings (Right-click)")
             .setLoreByComponent(mutableListOf(Component.text("Change the game settings")))
             .onInteract { event: PlayerInteractEvent ->

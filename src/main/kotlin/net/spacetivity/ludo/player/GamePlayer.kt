@@ -12,7 +12,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
 
-class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val isAI: Boolean) {
+class GamePlayer(val uuid: UUID, val arenaId: String, var teamName: String? = null, val isAI: Boolean) {
 
     val matchStats: GamePlayerMatchStats = GamePlayerMatchStats()
 
@@ -79,7 +79,7 @@ class GamePlayer(val uuid: UUID, val arenaId: String, val teamName: String, val 
     }
 
     fun hasSavedAllEntities(): Boolean {
-        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(this.arenaId, this.teamName).all { it.isInGarage() && !it.isMovableTo(1) }
+        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(this.arenaId, this.teamName!!).all { it.isInGarage() && !it.isMovableTo(1) }
     }
 
     fun toBukkitInstance(): Player? {

@@ -22,10 +22,10 @@ enum class EntityPickRule(val weight: Int, val probability: Double) {
     companion object {
 
         fun analyzeCurrentRuleSituation(gamePlayer: GamePlayer, dicedNumber: Int): Pair<EntityPickRule, GameEntity?> {
-            val gameEntities: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName)
+            val gameEntities: List<GameEntity> = LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
             var bestRule: Pair<EntityPickRule, GameEntity?> = Pair(NOT_MOVABLE, null)
 
-            val startFieldForTeam: GameField = LudoGame.instance.gameFieldHandler.getFirstFieldForTeam(gamePlayer.arenaId, gamePlayer.teamName)!!
+            val startFieldForTeam: GameField = LudoGame.instance.gameFieldHandler.getFirstFieldForTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!
 
             for (gameEntity: GameEntity in gameEntities) {
                 val rule: Pair<EntityPickRule, GameEntity?> = when {
