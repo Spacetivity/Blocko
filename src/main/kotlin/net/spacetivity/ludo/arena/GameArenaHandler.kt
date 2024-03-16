@@ -151,6 +151,8 @@ class GameArenaHandler {
 
             if (arenaStatus == GameArenaStatus.READY && arenaPhase.isIdle()) {
                 signSide.line(3, Component.text("[JOIN]", NamedTextColor.GREEN))
+            } else {
+                signSide.line(3, Component.text(" "))
             }
         }
 

@@ -64,6 +64,11 @@ class GameArenaSignHandler {
         recalculateSignData()
     }
 
+    fun updateArenaSign(gameArena: GameArena) {
+        val arenaSign: GameArenaSign = this.cachedArenaSigns.find { it.arenaId == gameArena.id } ?: return
+        LudoGame.instance.gameArenaHandler.loadJoinSign(arenaSign.location, gameArena)
+    }
+
     fun loadArenaSigns() {
         for (arenaSign: GameArenaSign in this.cachedArenaSigns) {
             val arenaId: String? = arenaSign.arenaId

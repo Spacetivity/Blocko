@@ -61,6 +61,8 @@ class GamePhaseHandler {
 
         gameArena.phase = newGamePhase
         newGamePhase.start()
+
+        LudoGame.instance.gameArenaSignHandler.updateArenaSign(gameArena)
     }
 
     fun initIndexPhase(gameArena: GameArena) {

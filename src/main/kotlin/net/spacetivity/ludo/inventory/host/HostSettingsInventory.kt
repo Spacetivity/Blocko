@@ -45,6 +45,8 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
 
             this.gameArena.teamOptions = nextMode
 
+            LudoGame.instance.gameArenaSignHandler.updateArenaSign(this.gameArena)
+
             item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildTeamModeSelectorDisplayName(translation))
             item.update(controller, InteractiveItem.Modification.LORE, buildTeamModeSelectorLore(translation))
 
@@ -73,7 +75,7 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
 
             if (indicatorType == IndicatorType.WAITING_PREDICATE) {
                 if (this.gameArena.waitForActualPlayers) gameArena.phase.countdown?.cancel()
-                else gameArena.phase.countdown?.tryStartup()
+                else this.gameArena.phase.countdown?.tryStartup()
             }
 
             item.update(controller, InteractiveItem.Modification.TYPE, getIndicatorMaterialType(indicatorType))

@@ -103,6 +103,8 @@ class GameArena(
 
         senderBukkitPlayer.translateMessage("blocko.arena.invite_sent", Placeholder.parsed("name", receiverName))
         receiverBukkitPlayer.translateMessage("blocko.arena.invite_received", Placeholder.parsed("name", senderBukkitPlayer.name), Placeholder.parsed("id", sender.arenaId))
+
+        LudoGame.instance.gameArenaSignHandler.updateArenaSign(this)
     }
 
     fun join(uuid: UUID, isAI: Boolean): Boolean {
@@ -148,7 +150,7 @@ class GameArena(
             GameScoreboardUtils.setGameSidebar(gamePlayer) //TODO: Maybe remove that
         }
 
-        //gameTeam.join(gamePlayer)
+        LudoGame.instance.gameArenaSignHandler.updateArenaSign(this)
         return true
     }
 
@@ -236,7 +238,9 @@ class GameArena(
         this.arenaHost = null
 
         LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
+
         if (!this.phase.isIdle()) LudoGame.instance.gamePhaseHandler.initIndexPhase(this)
+        LudoGame.instance.gameArenaSignHandler.updateArenaSign(this)
     }
 
     fun isGameOver(): Boolean {
