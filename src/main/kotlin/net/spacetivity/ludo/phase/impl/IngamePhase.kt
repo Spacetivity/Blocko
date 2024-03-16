@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
+import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.extensions.playSound
 import net.spacetivity.ludo.extensions.translateMessage
 import net.spacetivity.ludo.phase.GamePhase
@@ -84,6 +85,11 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     fun setNextControllingTeam(): GameTeam? {
         GameScoreboardUtils.updateDicedNumberLine(this.arenaId, null)
 
+        val oldControllingGamePlayer: GamePlayer? = getControllingGamePlayer()
+
+        if (this.controllingTeamId != null && oldControllingGamePlayer != null)
+            getHighlightedEntities(oldControllingGamePlayer, getArena()).forEach { it.toggleHighlighting(false) }
+
         val availableTeams: List<GameTeam> = LudoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
 
         val newControllingTeam: GameTeam? = if (hasControllingTeamMemberDicedSix()) this.getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
@@ -160,6 +166,10 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         }
 
         return hasDicedSix
+    }
+
+    private fun getHighlightedEntities(gamePlayer: GamePlayer, gameArena: GameArena): List<GameEntity> {
+        return LudoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName!!).filter { it.isHighlighted }
     }
 
 }

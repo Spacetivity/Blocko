@@ -58,6 +58,7 @@ class TeamSelectorInventory(private val gameArena: GameArena) : InventoryProvide
             } else {
                 if (gamePlayer.teamName != null) {
                     val oldTeamName: String = gamePlayer.teamName!!
+                    val oldGameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.gameArena.id, oldTeamName) ?: return@of
 
                     LudoGame.instance.gameTeamHandler.getTeamOfPlayer(gamePlayer.arenaId, gamePlayer.uuid)?.quit(gamePlayer)
 
@@ -67,8 +68,8 @@ class TeamSelectorInventory(private val gameArena: GameArena) : InventoryProvide
                         .first { PersistentDataUtils.getData(it!!.item.itemMeta, "teamName", String::class.java) == oldTeamName }
                         ?: return@of
 
-                    oldTeamItem.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildTeamItemDisplayName(gameTeam, translation))
-                    oldTeamItem.update(controller, InteractiveItem.Modification.LORE, buildTeamItemLore(gameTeam, translation))
+                    oldTeamItem.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildTeamItemDisplayName(oldGameTeam, translation))
+                    oldTeamItem.update(controller, InteractiveItem.Modification.LORE, buildTeamItemLore(oldGameTeam, translation))
                 }
 
                 gameTeam.join(gamePlayer)

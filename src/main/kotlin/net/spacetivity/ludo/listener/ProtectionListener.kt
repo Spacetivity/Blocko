@@ -116,15 +116,6 @@ class ProtectionListener(private val plugin: LudoGame) : Listener {
 
     @EventHandler
     fun onItemDropInArenaWorld(event: PlayerDropItemEvent) {
-        val player: Player = event.player
-        val item: ItemStack = event.itemDrop.itemStack
-
-        if (item.itemMeta != null && PersistentDataUtils.hasData(item.itemMeta, "clickableItem")) {
-            val clickableItemId: UUID = PersistentDataUtils.getData(item.itemMeta, "clickableItem", UUID::class.java)
-            LudoGame.instance.clickableItems.remove(clickableItemId)
-        }
-
-        if (player.getArena() == null || player.getArena()!!.gameWorld.name != player.world.name) return
         event.isCancelled = true
     }
 

@@ -41,6 +41,7 @@ class GameArena(
         if (this.status == GameArenaStatus.READY) this.phase.start()
     }
 
+    @Deprecated(level = DeprecationLevel.WARNING, message = "Will be replaced", replaceWith = ReplaceWith("sendArenaMessage(key: String, vararg toReplace: TagResolver"))
     fun sendArenaMessage(message: Component) {
         for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
             if (player == null) continue
@@ -125,7 +126,7 @@ class GameArena(
             return false
         }
 
-        if (!isAI && this.locked && !this.invitedPlayers.contains(uuid)) { //make check if player is invited
+        if (!isAI && this.locked && !this.invitedPlayers.contains(uuid)) {
             gamePlayer.sendMessage(Component.text("This arena can only be entered by invitation of the host."))
             return false
         }
@@ -147,7 +148,7 @@ class GameArena(
             val neededPlayerCount: Int = if (this.waitForActualPlayers) this.teamOptions.playerCount else 1
             this.phase.countdown?.tryStartup(Predicate { playerCount -> playerCount == neededPlayerCount })
 
-            GameScoreboardUtils.setGameSidebar(gamePlayer) //TODO: Maybe remove that
+            GameScoreboardUtils.setGameSidebar(gamePlayer)
         }
 
         LudoGame.instance.gameArenaSignHandler.updateArenaSign(this)
