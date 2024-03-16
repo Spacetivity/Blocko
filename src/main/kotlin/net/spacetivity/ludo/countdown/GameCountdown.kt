@@ -14,7 +14,7 @@ abstract class GameCountdown(protected val arenaId: String, private val duration
     private var modifiableDuration: Int = this.duration
 
     private var countdownTask: BukkitTask? = null
-    private var isRunning: Boolean = false
+    var isRunning: Boolean = false
 
     fun tryStartup(vararg startCondition: Predicate<Int>) {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return

@@ -23,11 +23,13 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5) {
             gameArena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP, 0.2F)
         }
 
-        if (remainingSeconds == 2) addMissingPlayers(gameArena)
+        // if (remainingSeconds == 2) addMissingPlayers(gameArena)
     }
 
     override fun handleCountdownEnd() {
         val gameArena: GameArena = LudoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
+
+        addMissingPlayers(gameArena)
 
         for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
             if (gamePlayer.teamName != null) continue

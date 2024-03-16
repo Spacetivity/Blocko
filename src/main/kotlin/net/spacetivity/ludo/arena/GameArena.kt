@@ -41,7 +41,7 @@ class GameArena(
         if (this.status == GameArenaStatus.READY) this.phase.start()
     }
 
-    @Deprecated(level = DeprecationLevel.WARNING, message = "Will be replaced", replaceWith = ReplaceWith("sendArenaMessage(key: String, vararg toReplace: TagResolver"))
+    @Deprecated(level = DeprecationLevel.WARNING, message = "Will be replaced")
     fun sendArenaMessage(message: Component) {
         for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
             if (player == null) continue
@@ -131,8 +131,6 @@ class GameArena(
             return false
         }
 
-        //gamePlayer.setGameMode(GameMode.ADVENTURE)
-        //gamePlayer.setFlying(true)
         gamePlayer.sendMessage(Component.text("You joined the arena!", NamedTextColor.GREEN))
 
         if (!gamePlayer.isAI && (this.currentPlayers.isEmpty() || this.arenaHost == null)) {
@@ -167,7 +165,6 @@ class GameArena(
         LudoGame.instance.bossbarHandler.clearBossbars(player)
 
         val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == player.uniqueId } ?: return
-        //gamePlayer.setFlying(false)
 
         if (LudoGame.instance.diceHandler.dicingPlayers.containsKey(gamePlayer.uuid))
             LudoGame.instance.diceHandler.dicingPlayers.remove(gamePlayer.uuid)
@@ -190,6 +187,11 @@ class GameArena(
             return
         }
 
+        if (this.phase.isIdle() && this.phase.countdown != null && this.phase.countdown!!.isRunning) {
+            this.phase.countdown!!.cancel()
+            sendArenaMessage(Component.text("Countdown stopped! To less players...", NamedTextColor.YELLOW))
+        }
+
         if (this.arenaHost != null && this.arenaHost!!.uuid == player.uniqueId) {
             this.arenaHost = null
             this.arenaHost = findNewHost()
@@ -200,6 +202,8 @@ class GameArena(
                 this.arenaHost?.sendMessage(Component.text("You are now the new Game-Host!", NamedTextColor.YELLOW))
             }
         }
+
+        LudoGame.instance.gameArenaSignHandler.updateArenaSign(this)
     }
 
     fun reset(shutdown: Boolean) {
@@ -253,7 +257,7 @@ class GameArena(
     private fun findNewHost(): GamePlayer? {
         val actualCurrentPlayers: List<GamePlayer> = this.currentPlayers.filter { !it.isAI }
 
-        if (actualCurrentPlayers.isEmpty() || actualCurrentPlayers.size == 1) return null
+        if (actualCurrentPlayers.isEmpty()) return null
 
         val newHostPlayer: GamePlayer = if (this.arenaHost == null)
             actualCurrentPlayers.random()
