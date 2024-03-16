@@ -13,6 +13,7 @@ import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.team.GameTeamOptions
 import net.spacetivity.ludo.translation.Translation
+import net.spacetivity.ludo.utils.InventoryUtils
 import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -31,7 +32,7 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
         controller.setItem(1, 1, InteractiveItem.of(ItemBuilder(Material.WRITABLE_BOOK)
             .setName(translation.validateItemName("blocko.inventory.host.invite_players.display_name"))
             .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS)
-            .build()))
+            .build()) { _, _, _ -> InventoryUtils.openInvitationInventory(player, this.gameArena) })
 
         controller.setItem(1, 2, InteractiveItem.of(ItemBuilder(Material.END_CRYSTAL)
             .setName(buildTeamModeSelectorDisplayName(translation))

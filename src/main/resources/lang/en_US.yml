@@ -15,6 +15,11 @@ blocko.motd: "        <gray><st>------</st> <gradient:green:yellow>Blocko Game<d
 # Customizes titles and options within the host settings inventory menu.
 blocko.inventory.host.title: "Host Settings"
 
+blocko.inventory_utils:
+  back_item_display_name: "<gray>Back <dark_gray>(Click)"
+  previous_page_item_display_name: "<gray>Previous page <dark_gray>(Click)"
+  next_page_item_display_name: "<gray>Next page <dark_gray>(Click)"
+
 # Configures display properties for team mode, invite players, and manage bots options.
 blocko.inventory.host.team_mode_changer:
   display_name: "<gray>Team mode: <yellow><mode>"
@@ -31,6 +36,19 @@ blocko.inventory.host.wait_for_players:
   display_name: "<gray>Wait for players: <yellow><status>"
   active: "On"
   not_active: "Off"
+
+blocko.inventory.invitation.title: "Invite a player"
+
+blocko.inventory.invitation.no_players_to_invite_found:
+  display_name: "<red>No players found!"
+  lore: | 
+    <gray>Wait until more players join the server
+    <gray>to invite someone to your arena!
+
+blocko.inventory.invitation.player_head:
+  display_name: "<yellow><name>"
+  lore: |
+    <gray>Click to invite this player
 
 blocko.inventory.team_selector.title: "Team Selector"
 

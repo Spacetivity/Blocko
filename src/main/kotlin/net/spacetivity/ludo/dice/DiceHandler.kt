@@ -70,6 +70,7 @@ class DiceHandler {
     fun stopDiceAnimation() {
         if (this.diceAnimationTask != null) {
             this.diceAnimationTask!!.cancel()
+            this.diceAnimationTask = null
         }
     }
 

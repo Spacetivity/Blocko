@@ -84,8 +84,18 @@ class GameArena(
             return
         }
 
+        if (senderBukkitPlayer.name.equals(receiverName, true)) {
+            sender.sendMessage(Component.text("You cannot invite yourself!", NamedTextColor.RED))
+            return
+        }
+
         if (this.invitedPlayers.contains(receiverBukkitPlayer.uniqueId)) {
             sender.sendMessage(Component.text("This player was already invited!", NamedTextColor.RED))
+            return
+        }
+
+        if (gameArena.currentPlayers.size >= gameArena.teamOptions.playerCount) {
+            sender.sendMessage(Component.text("Arena is already full!", NamedTextColor.RED))
             return
         }
 

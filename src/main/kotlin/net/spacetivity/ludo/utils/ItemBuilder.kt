@@ -39,13 +39,13 @@ class ItemBuilder(material: Material) {
         return this
     }
 
-    fun setLoreByString(lore: MutableList<String>): ItemBuilder {
+    fun setLoreByString(lore: List<String>): ItemBuilder {
         itemMeta.lore(lore.map { s: String -> Component.text(s) })
         itemStack.itemMeta = itemMeta
         return this
     }
 
-    fun setLoreByComponent(lore: MutableList<Component>): ItemBuilder {
+    fun setLoreByComponent(lore: List<Component>): ItemBuilder {
         itemMeta.lore(lore)
         itemStack.itemMeta = itemMeta
         return this

@@ -2,15 +2,11 @@ package net.spacetivity.ludo.phase.impl
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.spacetivity.inventory.api.extension.openStaticInventory
-import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.countdown.impl.IdleCountdown
 import net.spacetivity.ludo.extensions.getArena
-import net.spacetivity.ludo.inventory.host.HostSettingsInventory
-import net.spacetivity.ludo.inventory.profile.ProfileInventory
-import net.spacetivity.ludo.inventory.team.TeamSelectorInventory
 import net.spacetivity.ludo.phase.GamePhase
+import net.spacetivity.ludo.utils.InventoryUtils
 import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -32,7 +28,7 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
             .setName(Component.text("Profile (Right-click)"))
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
-                LudoGame.instance.server.openStaticInventory(player, Component.text("Your profile"), ProfileInventory())
+                InventoryUtils.openProfileInventory(player)
             }
             .build()
 
@@ -42,9 +38,7 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
                 val gameArena: GameArena = player.getArena() ?: return@onInteract
-
-                val title: Component = LudoGame.instance.translationHandler.getSelectedTranslation().validateLine("blocko.inventory.team_selector.title")
-                LudoGame.instance.server.openStaticInventory(player, title, TeamSelectorInventory(gameArena))
+                InventoryUtils.openTeamSelectorInventory(player, gameArena)
             }
             .build()
 
@@ -60,8 +54,7 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
                     return@onInteract
                 }
 
-                val title: Component = LudoGame.instance.translationHandler.getSelectedTranslation().validateLine("blocko.inventory.host.title")
-                LudoGame.instance.server.openStaticInventory(player, title, HostSettingsInventory(gameArena))
+                InventoryUtils.openHostSettingsInventory(player, gameArena)
             }
             .build()
 
