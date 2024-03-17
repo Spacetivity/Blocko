@@ -109,7 +109,10 @@ class GameArena(
     }
 
     fun join(uuid: UUID, isAI: Boolean): Boolean {
-        val gamePlayer = GamePlayer(uuid, this.id, null, isAI)
+        val bukkitPlayer: Player? = Bukkit.getPlayer(uuid)
+        val name: String = bukkitPlayer?.name ?: LudoGame.instance.botNamesFile.botNames.random()
+
+        val gamePlayer = GamePlayer(uuid, name, this.id, null, isAI)
 
         if (this.currentPlayers.any { it.uuid == gamePlayer.uuid }) {
             gamePlayer.sendMessage(Component.text("Already in arena!"))
@@ -147,6 +150,9 @@ class GameArena(
             this.phase.countdown?.tryStartup(Predicate { playerCount -> playerCount == neededPlayerCount })
 
             GameScoreboardUtils.setGameSidebar(gamePlayer)
+        } else {
+            val aiStatsPlayer = StatsPlayer(uuid, 0,0,0,0)
+            LudoGame.instance.statsPlayerHandler.cachedStatsPlayers.add(aiStatsPlayer)
         }
 
         LudoGame.instance.gameArenaSignHandler.updateArenaSign(this)
@@ -220,6 +226,10 @@ class GameArena(
 
         for (gamePlayer: GamePlayer in this.currentPlayers) {
             val statsPlayer: StatsPlayer? = LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)
+
+            if (gamePlayer.isAI)
+                LudoGame.instance.statsPlayerHandler.cachedStatsPlayers.removeIf { it.uuid == gamePlayer.uuid }
+
             if (!gamePlayer.isAI && statsPlayer != null && !shutdown) statsPlayer.updateDbEntry()
 
             for (gameTeam: GameTeam in LudoGame.instance.gameTeamHandler.gameTeams[this.id]) {

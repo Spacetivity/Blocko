@@ -10,6 +10,23 @@ blocko.prefix.global: "<gradient:green:yellow><bold>Blocko</gradient> <dark_gray
 # Sets the message of the day (MOTD) for the server, incorporating gradients and strikethrough text.
 blocko.motd: "        <gray><st>------</st> <gradient:green:yellow>Blocko Game<dark_gray>-</dark_gray>testserver</gradient> <gray><st>-----</st>\n          <gradient:gold:blue>-= https://discord.spacetivity.net =-</gradient>"
 
+blocko.items:
+  profile:
+    display_name: "<green>Profile <gray>(Right-click)"
+    lore: |
+      <gray>Look at your stats, buy or select entities
+      <gray>or browse through achievements
+  team_selector:
+    display_name: "<green>Team Selector <gray>(Right-click)"
+    lore: |
+      <gray>Choose a team for yourself
+  host_settings:
+    display_name: "<green>Host Settings <gray>(Right-click)"
+    lore: |
+      <gray>Change the arena settings
+  leave:
+    display_name: "<green>Leave Arena <gray>(Right-click)"
+
 # Host Inventory Menu
 # ------------------------------
 # Customizes titles and options within the host settings inventory menu.
@@ -59,6 +76,64 @@ blocko.inventory.team_selector.team_item:
     
     <gray>Click to join <team_color>Team <team_name>
 
+blocko.inventory.profile.title: "Your profile"
+
+blocko.inventory.profile.stats_item:
+  display_name: "<yellow>Statistics"
+  lore: |
+    <gray>Look at your stats from all your played Blocko
+    <gray>games or checkout other players stats
+
+blocko.inventory.profile.entity_shop_item:
+  display_name:
+    active: "<yellow>Entity Shop"
+    not_active: "<dark_gray><st>Entity Shop</st>"
+  lore:
+    active: |
+      <gray>Buy entities you can use in all Blocko 
+      <gray>matches with your gained coins
+    not_active: |
+      <red>Entity Shop is deactivated whilst being ingame
+
+blocko.inventory.profile.achievements_item:
+  display_name: "<yellow>Achievements"
+  lore: |
+    <gray>Here you can see all the available achievements
+
+blocko.inventory.stats.title:
+  matching_name: "Your Stats"
+  other_name: "<player_name>'s Stats <gray><suffix>"
+
+blocko.inventory.stats.overview_item:
+  display_name: "<yellow>Stats Overview"
+  lore: |
+    <gray><eliminations_key>: <yellow><eliminations_value>
+    <gray><knocked_out_by_opponents_key>: <yellow><knocked_out_by_opponents_value>
+    <gray><coins_key>: <yellow><coins_value>
+    <gray><played_games_key>: <yellow><played_games_value>
+
+blocko.inventory.stats.search_player_item:
+  display_name: "<yellow>Select Team"
+  lore: |
+    <gray>Select a team to look at
+    <gray>its players statistics
+
+blocko.inventory.stats_team_selector.title: "Select a team"
+
+blocko.inventory.stats_team_selector.team_item:
+  display_name:
+    active: "<gray>Stats for <team_color><team_name>"
+    not_active: "<dark_gray><st>Stats for <team_name></st>"
+  lore:
+    active: |
+      <gray>Click here to see the stats 
+      <gray>for this teams player
+    not_active: |
+      <red>You cannot select this team, it has no members
+
+blocko.inventory.stats.stats_type_item:
+  display_name: "<gray><type_name>: <yellow><value>"
+
 # Arena Invitations
 # ------------------------------
 # Defines usage, invitation sent, and invitation received messages for arena invites.
@@ -75,6 +150,12 @@ blocko.arena.invite_received: |
   <dark_gray><bold>»</bold> <click:run_command:'/arenainvite accept <id>'><hover:show_text:'<gray>Accept invitation'><green>[ACCEPT]</hover></click> <click:run_command:'/arenainvite deny <id>'><hover:show_text:'<gray>Deny invitation'><red>[DENY]</hover></click>
   
   <obfuscated><gradient:blue:green>==============================================</obfuscated>
+
+blocko.stats.type:
+  eliminations: "Eliminations"
+  knocked_out_by_opponents: "Knocked out by opponents"
+  coins: "Coins"
+  played_games: "Played games"
 
 # Configures messages for receiving coins, both normally and upon player elimination.
 blocko.coins.receive:

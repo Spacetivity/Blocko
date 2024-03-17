@@ -21,20 +21,18 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemFlag
 
-@InventoryProperties(id = "host_settings_inv", rows = 3, columns = 9)
+@InventoryProperties(id = "host_settings_inv", rows = 1, columns = 9)
 class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
         val translation: Translation = LudoGame.instance.translationHandler.getSelectedTranslation()
 
-        controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE), InventoryPosition.of(0, 0), InventoryPosition.of(2, 8))
-
-        controller.setItem(1, 1, InteractiveItem.of(ItemBuilder(Material.WRITABLE_BOOK)
+        controller.setItem(0, 1, InteractiveItem.of(ItemBuilder(Material.WRITABLE_BOOK)
             .setName(translation.validateItemName("blocko.inventory.host.invite_players.display_name"))
             .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS)
             .build()) { _, _, _ -> InventoryUtils.openInvitationInventory(player, this.gameArena) })
 
-        controller.setItem(1, 2, InteractiveItem.of(ItemBuilder(Material.END_CRYSTAL)
+        controller.setItem(0, 2, InteractiveItem.of(ItemBuilder(Material.END_CRYSTAL)
             .setName(buildTeamModeSelectorDisplayName(translation))
             .setLoreByComponent(buildTeamModeSelectorLore(translation))
             .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS)
@@ -51,17 +49,10 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
             item.update(controller, InteractiveItem.Modification.LORE, buildTeamModeSelectorLore(translation))
 
             player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)
-
-            //TODO: update arena sign
         })
 
-        controller.setItem(1, 3, InteractiveItem.of(ItemBuilder(Material.GOLDEN_BOOTS)
-            .setName(translation.validateItemName("blocko.inventory.host.manage_bots.display_name"))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS)
-            .build()))
-
-        setIndicatorItem(controller, InventoryPosition.of(1, 5), IndicatorType.PRIVACY, translation, player)
-        setIndicatorItem(controller, InventoryPosition.of(1, 7), IndicatorType.WAITING_PREDICATE, translation, player)
+        setIndicatorItem(controller, InventoryPosition.of(0, 6), IndicatorType.PRIVACY, translation, player)
+        setIndicatorItem(controller, InventoryPosition.of(0, 7), IndicatorType.WAITING_PREDICATE, translation, player)
     }
 
     private fun setIndicatorItem(controller: InventoryController, position: InventoryPosition, indicatorType: IndicatorType, translation: Translation, player: Player) {

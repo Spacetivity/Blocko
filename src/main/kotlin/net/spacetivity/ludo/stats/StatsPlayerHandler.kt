@@ -9,7 +9,7 @@ import java.util.*
 
 class StatsPlayerHandler {
 
-    private val cachedStatsPlayers: MutableList<StatsPlayer> = mutableListOf()
+    val cachedStatsPlayers: MutableList<StatsPlayer> = mutableListOf()
 
     @OptIn(DelicateCoroutinesApi::class)
     fun deleteStatsPlayer(uuid: UUID) {

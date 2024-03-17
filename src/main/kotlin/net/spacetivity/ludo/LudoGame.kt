@@ -24,6 +24,7 @@ import net.spacetivity.ludo.field.GameFieldDAO
 import net.spacetivity.ludo.field.GameFieldHandler
 import net.spacetivity.ludo.field.GameFieldProperties
 import net.spacetivity.ludo.field.GameFieldPropertiesTypeAdapter
+import net.spacetivity.ludo.files.BotNamesFile
 import net.spacetivity.ludo.files.DatabaseFile
 import net.spacetivity.ludo.files.GlobalConfigFile
 import net.spacetivity.ludo.listener.PlayerListener
@@ -57,6 +58,7 @@ class LudoGame : JavaPlugin() {
 
     lateinit var diceSidesFile: DiceSidesFile
     lateinit var globalConfigFile: GlobalConfigFile
+    lateinit var botNamesFile: BotNamesFile
 
     lateinit var translationHandler: TranslationHandler
     lateinit var sidebarHandler: SidebarHandler
@@ -106,6 +108,7 @@ class LudoGame : JavaPlugin() {
         this.translationHandler.generateTranslations(this::class.java)
 
         this.globalConfigFile = createOrLoadGlobalConfigFile()
+        this.botNamesFile = createOrLoadBotNamesFile()
 
         this.sidebarHandler = SidebarHandler()
 
@@ -192,6 +195,10 @@ class LudoGame : JavaPlugin() {
         val availableTranslationLanguages: List<String> = this.translationHandler.cachedTranslations.map { it.name }
         val defaultLanguageName: String = if (availableTranslationLanguages.contains("en_US")) "en_US" else availableTranslationLanguages[0]
         return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(defaultLanguageName, Material.GOLDEN_HOE.name))
+    }
+
+    private fun createOrLoadBotNamesFile(): BotNamesFile {
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "bot_names", BotNamesFile::class, BotNamesFile())
     }
 
 }

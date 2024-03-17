@@ -40,7 +40,7 @@ class InvitationInventory(private val gameArena: GameArena) : InventoryProvider 
             controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(ItemBuilder(Material.BARRIER)
                 .setName(translation.validateItemName("blocko.inventory.invitation.no_players_to_invite_found.display_name"))
                 .setLoreByComponent(translation.validateItemLore("blocko.inventory.invitation.no_players_to_invite_found.lore"))
-                .build()), InventoryPosition.of(1, 0), InventoryPosition.of(4, 8))
+                .build()), InventoryPosition.of(2, 3), InventoryPosition.of(3, 5))
             return
         }
 

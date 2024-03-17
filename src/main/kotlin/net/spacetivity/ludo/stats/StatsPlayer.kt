@@ -9,22 +9,29 @@ data class StatsPlayer(val uuid: UUID, var eliminatedOpponents: Int, var knocked
         LudoGame.instance.statsPlayerHandler.updateStatsPlayer(this)
     }
 
-    fun update(type: UpdateType, operation: UpdateOperation, newValue: Int) {
+    fun update(type: StatsType, operation: UpdateOperation, newValue: Int) {
         when (type) {
-            UpdateType.ELIMINATED_OPPONENTS -> if (operation == UpdateOperation.INCREASE) this.eliminatedOpponents += newValue else this.eliminatedOpponents -= newValue
-            UpdateType.KNOCKED_OUT_BY_OPPONENTS -> if (operation == UpdateOperation.INCREASE) this.knockedOutByOpponents += newValue else this.knockedOutByOpponents -= newValue
-            UpdateType.PLAYED_GAMES -> if (operation == UpdateOperation.INCREASE) this.playedGames += newValue else this.playedGames -= newValue
-            UpdateType.COINS -> if (operation == UpdateOperation.INCREASE) this.coins += newValue else this.coins -= newValue
+            StatsType.ELIMINATED_OPPONENTS -> if (operation == UpdateOperation.INCREASE) this.eliminatedOpponents += newValue else this.eliminatedOpponents -= newValue
+            StatsType.KNOCKED_OUT_BY_OPPONENTS -> if (operation == UpdateOperation.INCREASE) this.knockedOutByOpponents += newValue else this.knockedOutByOpponents -= newValue
+            StatsType.COINS -> if (operation == UpdateOperation.INCREASE) this.coins += newValue else this.coins -= newValue
+            StatsType.PLAYED_GAMES -> if (operation == UpdateOperation.INCREASE) this.playedGames += newValue else this.playedGames -= newValue
         }
+    }
+
+    fun getStatsValue(type: StatsType): Int = when (type) {
+        StatsType.ELIMINATED_OPPONENTS -> this.eliminatedOpponents
+        StatsType.KNOCKED_OUT_BY_OPPONENTS -> this.knockedOutByOpponents
+        StatsType.COINS -> this.coins
+        StatsType.PLAYED_GAMES -> this.playedGames
     }
 
 }
 
-enum class UpdateType {
-    ELIMINATED_OPPONENTS,
-    KNOCKED_OUT_BY_OPPONENTS,
-    PLAYED_GAMES,
-    COINS;
+enum class StatsType(val nameKey: String) {
+    ELIMINATED_OPPONENTS("blocko.stats.type.eliminations"),
+    KNOCKED_OUT_BY_OPPONENTS("blocko.stats.type.knocked_out_by_opponents"),
+    COINS("blocko.stats.type.coins"),
+    PLAYED_GAMES("blocko.stats.type.played_games");
 }
 
 enum class UpdateOperation {

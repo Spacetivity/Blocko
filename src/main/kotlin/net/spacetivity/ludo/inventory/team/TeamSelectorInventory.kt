@@ -58,7 +58,8 @@ class TeamSelectorInventory(private val gameArena: GameArena) : InventoryProvide
             } else {
                 if (gamePlayer.teamName != null) {
                     val oldTeamName: String = gamePlayer.teamName!!
-                    val oldGameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.gameArena.id, oldTeamName) ?: return@of
+                    val oldGameTeam: GameTeam = LudoGame.instance.gameTeamHandler.getTeam(this.gameArena.id, oldTeamName)
+                        ?: return@of
 
                     LudoGame.instance.gameTeamHandler.getTeamOfPlayer(gamePlayer.arenaId, gamePlayer.uuid)?.quit(gamePlayer)
 

@@ -12,10 +12,13 @@ import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
+import net.spacetivity.ludo.translation.Translation
+import net.spacetivity.ludo.utils.InventoryUtils
 import net.spacetivity.ludo.utils.ItemBuilder
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import java.time.Duration
 import java.util.*
@@ -69,13 +72,25 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
+        val translation: Translation = LudoGame.instance.translationHandler.getSelectedTranslation()
+
         hotbarItems[0] = LudoGame.instance.diceHandler.getDiceItem()
+
         for ((entityIndex, i) in (2..5).withIndex()) {
             hotbarItems[i] = ItemBuilder(Material.ARMOR_STAND)
                 .setName(Component.text("Move Entity #${entityIndex + 1}"))
                 .setData("entitySelector", entityIndex)
                 .build()
         }
+
+        hotbarItems[8] = ItemBuilder(Material.CLOCK)
+            .setName(translation.validateItemName("blocko.items.profile.display_name"))
+            .setLoreByComponent(translation.validateItemLore("blocko.items.profile.lore"))
+            .onInteract { event: PlayerInteractEvent ->
+                val player: Player = event.player
+                InventoryUtils.openProfileInventory(player, false)
+            }
+            .build()
     }
 
     fun isInControllingTeam(uuid: UUID): Boolean {
@@ -106,7 +121,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
             val gamePlayer: GamePlayer? = getArena().currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
 
-            if (gamePlayer != null){
+            if (gamePlayer != null) {
                 gamePlayer.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
                 if (gamePlayer.actionTimeoutTimestamp == null) gamePlayer.actionTimeoutTimestamp = System.currentTimeMillis() + Duration.ofMinutes(1).toMillis()
             }
