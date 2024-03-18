@@ -20,6 +20,7 @@ import net.spacetivity.ludo.command.api.impl.BukkitCommandExecutor
 import net.spacetivity.ludo.dice.DiceHandler
 import net.spacetivity.ludo.dice.DiceSidesFile
 import net.spacetivity.ludo.entity.GameEntityHandler
+import net.spacetivity.ludo.entity.GameEntityTypeDAO
 import net.spacetivity.ludo.field.GameFieldDAO
 import net.spacetivity.ludo.field.GameFieldHandler
 import net.spacetivity.ludo.field.GameFieldProperties
@@ -98,7 +99,8 @@ class LudoGame : JavaPlugin() {
                 GameTeamLocationDAO,
                 GameArenaSignDAO,
                 AchievementPlayerDAO,
-                StatsPlayerDAO
+                StatsPlayerDAO,
+                GameEntityTypeDAO
             )
         }
 

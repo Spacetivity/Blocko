@@ -47,6 +47,7 @@ class PlayerListener(private val plugin: LudoGame) : Listener {
         val player: Player = event.player
         this.plugin.statsPlayerHandler.createOrLoadStatsPlayer(player.uniqueId)
         this.plugin.achievementHandler.createOrLoadAchievementPlayer(player.uniqueId)
+        this.plugin.gameEntityHandler.loadUnlockedEntityTypes(player.uniqueId)
     }
 
     @EventHandler
@@ -55,6 +56,7 @@ class PlayerListener(private val plugin: LudoGame) : Listener {
         player.getArena()?.quit(player)
         this.plugin.statsPlayerHandler.unloadStatsPlayer(player.uniqueId)
         this.plugin.achievementHandler.unloadAchievementPlayer(player.uniqueId)
+        this.plugin.gameEntityHandler.unloadUnlockedEntityTypes(player.uniqueId)
     }
 
     @EventHandler
