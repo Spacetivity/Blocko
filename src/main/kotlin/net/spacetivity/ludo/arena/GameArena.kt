@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.dice.DiceHandler
 import net.spacetivity.ludo.extensions.*
+import net.spacetivity.ludo.field.GameField
 import net.spacetivity.ludo.phase.GamePhase
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
@@ -253,6 +254,11 @@ class GameArena(
         this.arenaHost = null
 
         LudoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
+
+        for (gameField: GameField in LudoGame.instance.gameFieldHandler.cachedGameFields[this.id]) {
+            gameField.isTaken = false
+            gameField.currentHolder = null
+        }
 
         if (!this.phase.isIdle()) LudoGame.instance.gamePhaseHandler.initIndexPhase(this)
         LudoGame.instance.gameArenaSignHandler.updateArenaSign(this)

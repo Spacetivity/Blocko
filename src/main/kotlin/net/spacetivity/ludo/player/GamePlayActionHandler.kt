@@ -172,11 +172,7 @@ class GamePlayActionHandler {
 
                     when (ingamePhase.phaseMode) {
                         GamePhaseMode.DICE -> {
-                            if (gamePlayer.isAI) {
-                                gamePlayer.dice(ingamePhase)
-                            } else {
-                                gamePlayer.sendActionBar(Component.text("Please dice now.", NamedTextColor.LIGHT_PURPLE))
-                            }
+                            if (gamePlayer.isAI) gamePlayer.dice(ingamePhase)
                         }
 
                         GamePhaseMode.PICK_ENTITY -> {

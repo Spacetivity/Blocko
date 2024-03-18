@@ -15,7 +15,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class GameFieldHandler {
 
-    private val cachedGameFields: Multimap<String, GameField> = ArrayListMultimap.create()
+    val cachedGameFields: Multimap<String, GameField> = ArrayListMultimap.create()
 
     init {
         transaction {

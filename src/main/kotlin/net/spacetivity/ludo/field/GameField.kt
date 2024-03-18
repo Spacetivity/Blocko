@@ -12,8 +12,8 @@ import net.spacetivity.ludo.entity.GameEntityStatus
 import net.spacetivity.ludo.extensions.addCoins
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.stats.StatsPlayer
-import net.spacetivity.ludo.stats.UpdateOperation
 import net.spacetivity.ludo.stats.StatsType
+import net.spacetivity.ludo.stats.UpdateOperation
 import net.spacetivity.ludo.team.GameTeam
 import net.spacetivity.ludo.team.GameTeamHandler
 import net.spacetivity.ludo.team.GameTeamLocation
@@ -72,27 +72,29 @@ class GameField(
     }
 
     private fun handleStatsReward(gamePlayer: GamePlayer, isReward: Boolean) {
-        if (gamePlayer.isAI) return
+        if (!gamePlayer.isAI) {
+            val possibleAchievements: MutableSet<Achievement?> = mutableSetOf()
 
-        val possibleAchievements: MutableSet<Achievement?> = mutableSetOf()
+            if (isReward) {
+                possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java))
+                possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(MasterEliminatorAchievement::class.java))
+            } else {
+                possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(FirstKnockoutAchievement::class.java))
+            }
 
-        if (isReward) {
-            possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java))
-            possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(MasterEliminatorAchievement::class.java))
-        } else {
-            possibleAchievements.add(LudoGame.instance.achievementHandler.getAchievement(FirstKnockoutAchievement::class.java))
+            possibleAchievements.forEach { it?.grantIfCompletedBy(gamePlayer) }
         }
-
-        possibleAchievements.forEach { it?.grantIfCompletedBy(gamePlayer) }
 
         val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
         val statsType: StatsType = if (isReward) StatsType.ELIMINATED_OPPONENTS else StatsType.KNOCKED_OUT_BY_OPPONENTS
         statsPlayer.update(statsType, UpdateOperation.INCREASE, 1)
 
+        val coinsPerKill = 20
+
         if (isReward) {
-            gamePlayer.toBukkitInstance()?.addCoins(20, true)
+            gamePlayer.toBukkitInstance()?.addCoins(coinsPerKill, true)
             gamePlayer.matchStats.eliminations += 1
-            gamePlayer.matchStats.gainedCoins += 20
+            gamePlayer.matchStats.gainedCoins += coinsPerKill
         } else {
             gamePlayer.matchStats.knockedOutByOpponent += 1
         }
