@@ -14,9 +14,11 @@ interface Requirement {
 
     fun isCompletedBy(gamePlayer: GamePlayer): Boolean
 
-    fun getExplanationLine(gamePlayer: GamePlayer, isNormalMessage: Boolean): Component {
+    fun getExplanationLine(gamePlayer: GamePlayer): Component {
         val translation: Translation = LudoGame.instance.translationHandler.getSelectedTranslation()
-        return if (isNormalMessage) translation.validateItemName(LudoGame.instance.getAchievementKey(false, this.translationKey), *getPlaceholders(gamePlayer).toTypedArray()) else translation.validateLine(translationKey, *getPlaceholders(gamePlayer).toTypedArray())
+        val key: String = LudoGame.instance.getAchievementKey(false, this.translationKey)
+
+        return translation.validateItemName(key, *getPlaceholders(gamePlayer).toTypedArray())
     }
 
 }

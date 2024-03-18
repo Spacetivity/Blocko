@@ -9,11 +9,11 @@ open class Achievement(val translationKey: String, val rewardedCoins: Int, priva
 
     val name: String = LudoGame.instance.translationHandler.getSelectedTranslation().validateLineAsString(LudoGame.instance.getAchievementKey(true, this.translationKey))
 
-    fun getDescription(gamePlayer: GamePlayer, displayedInLore: Boolean): MutableList<Component> {
+    fun getDescription(gamePlayer: GamePlayer): MutableList<Component> {
         val description: MutableList<Component> = mutableListOf()
 
         for (requirement: Requirement in this.requirements) {
-            val component: Component = requirement.getExplanationLine(gamePlayer, !displayedInLore)
+            val component: Component = requirement.getExplanationLine(gamePlayer)
             description.add(component)
         }
 

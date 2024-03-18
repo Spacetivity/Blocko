@@ -2,7 +2,6 @@ package net.spacetivity.ludo.achievement
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.spacetivity.ludo.achievement.container.Achievement
 import net.spacetivity.ludo.extensions.addCoins
 import net.spacetivity.ludo.extensions.toGamePlayerInstance
@@ -20,7 +19,7 @@ import java.util.*
 
 class AchievementHandler {
 
-    private val cachedAchievements: MutableList<Achievement> = mutableListOf()
+    val cachedAchievements: MutableList<Achievement> = mutableListOf()
     private val cachedAchievementPlayers: MutableList<AchievementPlayer> = mutableListOf()
 
     fun registerAchievement(achievement: Achievement) {
@@ -37,11 +36,10 @@ class AchievementHandler {
 
     fun createOrLoadAchievementPlayer(uuid: UUID) {
         transaction {
-            val resultRow: ResultRow? = AchievementPlayerDAO.select { AchievementPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
             val achievementPlayer = AchievementPlayer(uuid, mutableListOf())
             cachedAchievementPlayers.add(achievementPlayer)
 
-            if (resultRow != null) {
+            for (resultRow: ResultRow in AchievementPlayerDAO.select() { AchievementPlayerDAO.uuid eq uuid.toString() }.toMutableList()) {
                 val achievementName: String = resultRow[AchievementPlayerDAO.achievementId]
                 if (cachedAchievements.none { it.translationKey == achievementName }) return@transaction
                 achievementPlayer.achievementNames.add(achievementName)
@@ -85,7 +83,7 @@ class AchievementHandler {
         val player: Player = Bukkit.getPlayer(uuid) ?: return
         val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
 
-        val hoverText: Component = achievement.getDescription(gamePlayer, false)[0]
+        val hoverText: Component = achievement.getDescription(gamePlayer)[0]
 
         player.translateMessage("blocko.achievement.unlocked", Placeholder.parsed("name", achievement.name), Placeholder.component("hover_text", hoverText))
         player.playSound(player.location, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1.0F)

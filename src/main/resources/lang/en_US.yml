@@ -134,6 +134,15 @@ blocko.inventory.stats_team_selector.team_item:
 blocko.inventory.stats.stats_type_item:
   display_name: "<gray><type_name>: <yellow><value>"
 
+blocko.inventory.achievements.title: "Achievements"
+
+blocko.inventory.achievements.no_achievements_found:
+  display_name: "<red>No achievements found!"
+
+blocko.inventory.achievements.achievement_item:
+  display_name: "<achievement_color><achievement_name> <suffix>"
+  suffix: "✔"
+
 # Arena Invitations
 # ------------------------------
 # Defines usage, invitation sent, and invitation received messages for arena invites.

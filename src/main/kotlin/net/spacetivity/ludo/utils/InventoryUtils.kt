@@ -9,6 +9,7 @@ import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.extensions.getArena
 import net.spacetivity.ludo.inventory.host.HostSettingsInventory
 import net.spacetivity.ludo.inventory.host.InvitationInventory
+import net.spacetivity.ludo.inventory.profile.AchievementsInventory
 import net.spacetivity.ludo.inventory.profile.ProfileInventory
 import net.spacetivity.ludo.inventory.profile.StatsInventory
 import net.spacetivity.ludo.inventory.profile.StatsTeamSelectorInventory
@@ -56,6 +57,11 @@ object InventoryUtils {
 
         val showSearchPlayerItem: Boolean = gameArena.phase.isIngame()
         LudoGame.instance.server.openStaticInventory(opener, title, StatsInventory(gameArena, statsPlayer, showSearchPlayerItem))
+    }
+
+    fun openAchievementsInventory(opener: Player) {
+        val title: Component = LudoGame.instance.translationHandler.getSelectedTranslation().validateLine("blocko.inventory.achievements.title")
+        LudoGame.instance.server.openStaticInventory(opener, title, AchievementsInventory())
     }
 
 }

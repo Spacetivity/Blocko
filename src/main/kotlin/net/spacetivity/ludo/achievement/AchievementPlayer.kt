@@ -10,4 +10,8 @@ data class AchievementPlayer(val uuid: UUID, val achievementNames: MutableList<S
         return this.achievementNames.map { LudoGame.instance.achievementHandler.getAchievementByKey(it)!! }
     }
 
+    fun hasCompleted(achievement: Achievement): Boolean {
+        return LudoGame.instance.achievementHandler.hasAchievementUnlocked(this.uuid, achievement.translationKey)
+    }
+
 }

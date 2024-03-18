@@ -25,10 +25,6 @@ class ProfileInventory(private val isShopItemActive: Boolean) : InventoryProvide
             .setName(translation.validateItemName("blocko.inventory.profile.stats_item.display_name"))
             .setLoreByComponent(translation.validateItemLore("blocko.inventory.profile.stats_item.lore"))
             .build()) { _, _, _ ->
-
-            // beim klick überprüfen ob man ingame ist, und wenn ja, vorher ein auswahl inventory öffnen um auszuwählen
-            // von welchem team man die stats anschauen will
-
             val statsPlayer: StatsPlayer = LudoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)
                 ?: return@of
             InventoryUtils.openStatsInventory(player, statsPlayer)
@@ -45,7 +41,7 @@ class ProfileInventory(private val isShopItemActive: Boolean) : InventoryProvide
         controller.setItem(3, 6, InteractiveItem.of(ItemBuilder(Material.NETHER_STAR)
             .setName(translation.validateItemName("blocko.inventory.profile.achievements_item.display_name"))
             .setLoreByComponent(translation.validateItemLore("blocko.inventory.profile.achievements_item.lore"))
-            .build()))
+            .build()) { _, _, _ -> InventoryUtils.openAchievementsInventory(player) })
     }
 
 }
