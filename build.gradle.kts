@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "1.9.0"
 }
 
-group = "net.spacetivity.ludo"
+group = "net.spacetivity.blocko"
 version = "1.0-SNAPSHOT"
 
 repositories {
