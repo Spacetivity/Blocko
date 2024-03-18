@@ -3,6 +3,7 @@ package net.spacetivity.ludo.player
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.entity.GameEntity
 import net.spacetivity.ludo.entity.GameEntityStatus
+import net.spacetivity.ludo.entity.GameEntityType
 import net.spacetivity.ludo.extensions.isDicing
 import net.spacetivity.ludo.phase.GamePhaseMode
 import net.spacetivity.ludo.phase.impl.IngamePhase
@@ -21,6 +22,8 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
     var lastEntityPickRule: EntityPickRule? = null
 
     var actionTimeoutTimestamp: Long? = null
+
+    var selectedEntityType: GameEntityType = GameEntityType.VILLAGER
 
     fun dice(ingamePhase: IngamePhase) {
         if (isDicing()) return

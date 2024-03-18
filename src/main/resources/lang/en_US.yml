@@ -150,7 +150,9 @@ blocko.inventory.entity_shop.no_entity_types_found:
 
 blocko.inventory.entity_shop.entity_type_item:
   display_name: "<status_color><entity_type_name> <suffix>"
-  suffix: "✔"
+  suffix:
+    selected: "(Selected)"
+    unlocked: "✔"
   lore:
     suffix:
       buyable: "<green>Click to buy"
@@ -164,7 +166,8 @@ blocko.inventory.entity_shop.entity_type_item:
       <gray>Click to select and play 
       <gray>with this entity type
 
-blocko.entity_shop.successfully_bought_entity_type: "<prefix> You have bought the entity type <yellow><entity_type_name> <gray>for <green><amount> <gray>Coins."
+blocko.entity_shop.successfully_bought_entity_type: "<prefix> <gray>You have bought the entity type <yellow><entity_type_name> <gray>for <green><amount> <gray>Coins."
+blocko.entity_shop.selected_entity_type: "<prefix> <gray>Entity type <yellow><entity_type_name> <gray>selected."
 
 # Arena Invitations
 # ------------------------------

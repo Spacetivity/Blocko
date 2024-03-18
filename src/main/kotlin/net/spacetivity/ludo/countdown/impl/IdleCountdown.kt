@@ -8,7 +8,6 @@ import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.scoreboard.GameScoreboardUtils
 import net.spacetivity.ludo.team.GameTeam
 import org.bukkit.Sound
-import org.bukkit.entity.EntityType
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
 
@@ -40,7 +39,8 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5) {
         for (gameTeamLocation in LudoGame.instance.gameTeamHandler.getLocationsOfAllTeams(this.arenaId)) {
             val gameTeam: GameTeam? = LudoGame.instance.gameTeamHandler.getTeam(gameTeamLocation.arenaId, gameTeamLocation.teamName)
             if (gameTeam == null || gameTeam.teamMembers.isEmpty()) continue
-            LudoGame.instance.gameEntityHandler.spawnEntity(gameTeamLocation, EntityType.VILLAGER)
+            val gamePlayer: GamePlayer = gameArena.currentPlayers.find { it.uuid == gameTeam.teamMembers.first() } ?: continue
+            LudoGame.instance.gameEntityHandler.spawnEntity(gameTeamLocation, gamePlayer.selectedEntityType.bukkitEntityType)
             gameTeamLocation.isTaken = true
         }
 

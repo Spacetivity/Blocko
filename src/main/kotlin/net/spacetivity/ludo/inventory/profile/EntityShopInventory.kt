@@ -15,11 +15,16 @@ import net.spacetivity.ludo.achievement.AchievementPlayer
 import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.entity.GameEntityType
 import net.spacetivity.ludo.extensions.getArena
+import net.spacetivity.ludo.extensions.toGamePlayerInstance
+import net.spacetivity.ludo.extensions.translateMessage
+import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.stats.StatsPlayer
 import net.spacetivity.ludo.translation.Translation
 import net.spacetivity.ludo.utils.InventoryUtils
 import net.spacetivity.ludo.utils.ItemBuilder
+import net.spacetivity.ludo.utils.PersistentDataUtils
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 
@@ -70,10 +75,29 @@ class EntityShopInventory : InventoryProvider {
             items.add(InteractiveItem.of(ItemBuilder(buildEntityTypeItemType(player, gameEntityType))
                 .setName(buildEntityTypeDisplayName(translation, player, gameEntityType))
                 .setLoreByComponent(buildEntityTypeItemLore(translation, player, LudoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)!!, gameEntityType))
+                .setData("gameEntityType", gameEntityType.name)
                 .build()) { _, item: InteractiveItem, event: InventoryClickEvent ->
 
-                if (LudoGame.instance.gameEntityHandler.hasUnlockedEntityType(player.uniqueId, gameEntityType))
+                val playerWhoClicked: Player = event.whoClicked as Player
+
+                if (LudoGame.instance.gameEntityHandler.hasUnlockedEntityType(player.uniqueId, gameEntityType) && playerWhoClicked.toGamePlayerInstance()!!.selectedEntityType != gameEntityType) {
+                    val gamePlayer: GamePlayer = playerWhoClicked.toGamePlayerInstance() ?: return@of
+
+                    val oldSelectedEntityType: GameEntityType = gamePlayer.selectedEntityType
+                    val oldEntityTypeItem: InteractiveItem = controller.contents.values
+                        .filterNotNull()
+                        .filter { PersistentDataUtils.hasData(it.item.itemMeta, "gameEntityType") }
+                        .first { PersistentDataUtils.getData(it.item.itemMeta, "gameEntityType", String::class.java) == gamePlayer.selectedEntityType.name }
+
+                    gamePlayer.selectedEntityType = gameEntityType
+                    playerWhoClicked.playSound(playerWhoClicked.location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1F)
+                    playerWhoClicked.translateMessage("blocko.entity_shop.selected_entity_type", Placeholder.parsed("entity_type_name", gameEntityType.bukkitEntityType.name))
+                    item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildEntityTypeDisplayName(translation, playerWhoClicked, gameEntityType))
+
+                    oldEntityTypeItem.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildEntityTypeDisplayName(translation, playerWhoClicked, oldSelectedEntityType))
+
                     return@of
+                }
 
                 val achievementPlayer: AchievementPlayer? = LudoGame.instance.achievementHandler.getAchievementPlayer(player.uniqueId)
                 if (gameEntityType.neededAchievementKey != null && achievementPlayer != null && !achievementPlayer.achievementNames.contains(gameEntityType.neededAchievementKey))
@@ -84,11 +108,9 @@ class EntityShopInventory : InventoryProvider {
                 if (statsPlayer.coins < gameEntityType.price)
                     return@of
 
-                val playerWhoClicked: Player = event.whoClicked as Player
-
                 gameEntityType.buyEntityType(playerWhoClicked)
 
-                item.update(controller, InteractiveItem.Modification.TYPE, buildEntityTypeItemType(player,gameEntityType))
+                item.update(controller, InteractiveItem.Modification.TYPE, buildEntityTypeItemType(player, gameEntityType))
                 item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildEntityTypeDisplayName(translation, playerWhoClicked, gameEntityType))
                 item.update(controller, InteractiveItem.Modification.LORE, buildEntityTypeItemLore(translation, player, statsPlayer, gameEntityType))
             })
@@ -98,7 +120,7 @@ class EntityShopInventory : InventoryProvider {
         return items
     }
 
-    private fun buildEntityTypeItemType(player: Player, gameEntityType: GameEntityType): Material{
+    private fun buildEntityTypeItemType(player: Player, gameEntityType: GameEntityType): Material {
         val isUnlocked: Boolean = gameEntityType.isUnlockedByPlayer(player.uniqueId)
         return if (isUnlocked) gameEntityType.getSpawnEggType()!! else Material.BARRIER
     }
@@ -107,8 +129,11 @@ class EntityShopInventory : InventoryProvider {
         val isUnlocked: Boolean = gameEntityType.isUnlockedByPlayer(player.uniqueId)
         val statusColor: NamedTextColor = if (isUnlocked) NamedTextColor.GREEN else NamedTextColor.DARK_GRAY
 
+        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return Component.text("")
+        val isSelected: Boolean = gamePlayer.selectedEntityType == gameEntityType
+
         val displayNameSuffixPlaceholder = if (isUnlocked) Placeholder.parsed("suffix",
-            translation.validateLineAsString("blocko.inventory.entity_shop.entity_type_item.suffix"))
+            translation.validateLineAsString("blocko.inventory.entity_shop.entity_type_item.suffix.${if (isSelected) "selected" else "unlocked"}"))
         else
             Placeholder.parsed("suffix", "")
 

@@ -18,6 +18,7 @@ import java.util.*
 enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val neededAchievementKey: String?) {
 
     VILLAGER(EntityType.VILLAGER, 0, null),
+    SKELETON(EntityType.SKELETON, 10, null),
     WITCH(EntityType.WITCH, 1000, LudoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java)?.translationKey);
 
     fun getSpawnEggType(): Material? {
@@ -35,7 +36,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
         statsPlayer.update(StatsType.COINS, UpdateOperation.DECREASE, this.price)
         statsPlayer.updateDbEntry()
 
-        player.playSound(player.location, Sound.BLOCK_BREWING_STAND_BREW, 10F, 1F)
+        player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1F)
         player.translateMessage("blocko.entity_shop.successfully_bought_entity_type",
             Placeholder.parsed("entity_type_name", this.bukkitEntityType.name),
             Placeholder.parsed("amount", this.price.toString()))

@@ -11,6 +11,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.entity.EntityCombustEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.FoodLevelChangeEvent
@@ -129,6 +130,12 @@ class ProtectionListener(private val plugin: LudoGame) : Listener {
     @EventHandler
     fun onWeatherChangeInArenaWorld(event: WeatherChangeEvent) {
         if (LudoGame.instance.gameArenaHandler.cachedArenas.none { it.gameWorld.name == event.world.name }) return
+        event.isCancelled = true
+    }
+
+    @EventHandler
+    fun onEntityCombust(event: EntityCombustEvent) {
+        if (LudoGame.instance.gameArenaHandler.cachedArenas.none { it.gameWorld.name == event.entity.world.name }) return
         event.isCancelled = true
     }
 
