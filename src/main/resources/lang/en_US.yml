@@ -224,6 +224,16 @@ blocko.achievement.master_eliminator:
   display_name: "Master Eliminator"
   requirement: "<gray>Eliminate <green><amount> <gray>opponents (<yellow><progress>%<gray>)"
 
+# Achievements and Rewards
+# ------------------------------
+# Describes achievement unlock messages and formats for various in-game achievements.
+blocko.achievement.unlocked: |
+  <obfuscated><gradient:blue:green>==============================================</obfuscated>
+  
+  <gold>Nice! <green>You unlocked the achievement "<hover:show_text:'<hover_text>'><yellow><name><green></hover>"!
+  
+  <obfuscated><gradient:green:blue>==============================================</obfuscated>
+
 blocko.stats.show_match_stats: |
   <st><gray>-----</st> <gradient:green:yellow>Ludo Match<dark_gray>-</dark_gray>Stats</gradient> <st><gray>-----</st>
   <dark_gray><bold>»</bold> <gray>Eliminations: <yellow><eliminations>
@@ -236,16 +246,6 @@ blocko.stats.show_match_stats: |
 
 # Sets the title displayed in the game's sidebar, with gradient color styling.
 blocko.sidebar.title: "<gradient:green:yellow><bold>Blocko Game</bold></gradient>"
-
-# Achievements and Rewards
-# ------------------------------
-# Describes achievement unlock messages and formats for various in-game achievements.
-blocko.achievement.unlocked: |
-  <obfuscated><gradient:blue:green>==============================================</obfuscated>
-  
-  <gold>Nice! <green>You unlocked the achievement "<hover:show_text:'<hover_text>'><yellow><name><green></hover>"!
-  
-  <obfuscated><gradient:green:blue>==============================================</obfuscated>
 
 # Sidebar lines section includes various game status indicators.
 blocko.sidebar.line:
