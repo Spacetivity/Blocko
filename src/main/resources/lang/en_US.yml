@@ -143,6 +143,29 @@ blocko.inventory.achievements.achievement_item:
   display_name: "<achievement_color><achievement_name> <suffix>"
   suffix: "✔"
 
+blocko.inventory.entity_shop.title: "Game Entities"
+
+blocko.inventory.entity_shop.no_entity_types_found:
+  display_name: "<red>No entity types found!"
+
+blocko.inventory.entity_shop.entity_type_item:
+  display_name: "<status_color><entity_type_name> <suffix>"
+  suffix: "✔"
+  lore:
+    suffix:
+      buyable: "<green>Click to buy"
+      not_buyable: "<red>Too expensive"
+    not_active: |
+      <gray>Price: <yellow><price>
+      <gray>Required Achievement: <yellow><possible_achievement_name>
+      
+      <lore_suffix>
+    active: |
+      <gray>Click to select and play 
+      <gray>with this entity type
+
+blocko.entity_shop.successfully_bought_entity_type: "<prefix> You have bought the entity type <yellow><entity_type_name> <gray>for <green><amount> <gray>Coins."
+
 # Arena Invitations
 # ------------------------------
 # Defines usage, invitation sent, and invitation received messages for arena invites.

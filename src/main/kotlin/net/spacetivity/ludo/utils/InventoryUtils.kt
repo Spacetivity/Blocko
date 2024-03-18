@@ -9,10 +9,7 @@ import net.spacetivity.ludo.arena.GameArena
 import net.spacetivity.ludo.extensions.getArena
 import net.spacetivity.ludo.inventory.host.HostSettingsInventory
 import net.spacetivity.ludo.inventory.host.InvitationInventory
-import net.spacetivity.ludo.inventory.profile.AchievementsInventory
-import net.spacetivity.ludo.inventory.profile.ProfileInventory
-import net.spacetivity.ludo.inventory.profile.StatsInventory
-import net.spacetivity.ludo.inventory.profile.StatsTeamSelectorInventory
+import net.spacetivity.ludo.inventory.profile.*
 import net.spacetivity.ludo.inventory.team.TeamSelectorInventory
 import net.spacetivity.ludo.player.GamePlayer
 import net.spacetivity.ludo.stats.StatsPlayer
@@ -62,6 +59,11 @@ object InventoryUtils {
     fun openAchievementsInventory(opener: Player) {
         val title: Component = LudoGame.instance.translationHandler.getSelectedTranslation().validateLine("blocko.inventory.achievements.title")
         LudoGame.instance.server.openStaticInventory(opener, title, AchievementsInventory())
+    }
+
+    fun openEntityShopInventory(opener: Player) {
+        val title: Component = LudoGame.instance.translationHandler.getSelectedTranslation().validateLine("blocko.inventory.entity_shop.title")
+        LudoGame.instance.server.openStaticInventory(opener, title, EntityShopInventory())
     }
 
 }

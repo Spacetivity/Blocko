@@ -53,7 +53,14 @@ class GameEntityHandler {
 
     fun loadUnlockedEntityTypes(uuid: UUID) {
         transaction {
-            for (resultRow: ResultRow in GameEntityTypeDAO.select() { GameEntityTypeDAO.uuid eq uuid.toString() }.toMutableList()) {
+            val results: MutableList<ResultRow> = GameEntityTypeDAO.select() { GameEntityTypeDAO.uuid eq uuid.toString() }.toMutableList()
+
+            if (results.isEmpty()) {
+                unlockEntityType(uuid, GameEntityType.VILLAGER)
+                return@transaction
+            }
+
+            for (resultRow: ResultRow in results) {
                 val entityTypeName: String = resultRow[GameEntityTypeDAO.entityTypeName]
                 val gameEntityType: GameEntityType = GameEntityType.entries.find { it.name == entityTypeName } ?: return@transaction
                 unlockedGameEntityTypes.put(uuid, gameEntityType)

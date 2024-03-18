@@ -1,11 +1,11 @@
 package net.spacetivity.ludo.entity
 
-import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.ludo.LudoGame
 import net.spacetivity.ludo.achievement.impl.FirstEliminationAchievement
 import net.spacetivity.ludo.extensions.toGamePlayerInstance
 import net.spacetivity.ludo.extensions.toStatsPlayerInstance
-import net.spacetivity.ludo.player.GamePlayer
+import net.spacetivity.ludo.extensions.translateMessage
 import net.spacetivity.ludo.stats.StatsPlayer
 import net.spacetivity.ludo.stats.StatsType
 import net.spacetivity.ludo.stats.UpdateOperation
@@ -13,6 +13,7 @@ import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import java.util.*
 
 enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val neededAchievementKey: String?) {
 
@@ -20,31 +21,24 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     WITCH(EntityType.WITCH, 1000, LudoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java)?.translationKey);
 
     fun getSpawnEggType(): Material? {
-        return Material.entries.find { it.name == "${bukkitEntityType.name.lowercase()}_spawn_egg" }
+        return Material.entries.find { it.name == "${bukkitEntityType.name.uppercase()}_SPAWN_EGG" }
     }
 
+    fun isUnlockedByPlayer(uuid: UUID): Boolean = LudoGame.instance.gameEntityHandler.hasUnlockedEntityType(uuid, this)
+
     fun buyEntityType(player: Player) {
-        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
-        val statsPlayer: StatsPlayer = gamePlayer.toStatsPlayerInstance() ?: return
+        if (isUnlockedByPlayer(player.uniqueId)) return
 
-        val gameEntityHandler: GameEntityHandler = LudoGame.instance.gameEntityHandler
+        val statsPlayer: StatsPlayer = player.toGamePlayerInstance()?.toStatsPlayerInstance() ?: return
 
-        if (gameEntityHandler.hasUnlockedEntityType(player.uniqueId, this)) {
-            player.sendMessage(Component.text("Already unlocked!"))
-            return
-        }
-
-        if (statsPlayer.coins < this.price) {
-            player.sendMessage(Component.text("Not enough coins!"))
-            return
-        }
-
-        gameEntityHandler.unlockEntityType(player.uniqueId, this)
+        LudoGame.instance.gameEntityHandler.unlockEntityType(player.uniqueId, this)
         statsPlayer.update(StatsType.COINS, UpdateOperation.DECREASE, this.price)
         statsPlayer.updateDbEntry()
 
-        player.sendMessage(Component.text("Entity type ${this.name} successfully bought!"))
         player.playSound(player.location, Sound.BLOCK_BREWING_STAND_BREW, 10F, 1F)
+        player.translateMessage("blocko.entity_shop.successfully_bought_entity_type",
+            Placeholder.parsed("entity_type_name", this.bukkitEntityType.name),
+            Placeholder.parsed("amount", this.price.toString()))
     }
 
 }

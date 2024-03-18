@@ -36,7 +36,7 @@ class ProfileInventory(private val isShopItemActive: Boolean) : InventoryProvide
         controller.setItem(3, 2, InteractiveItem.of(ItemBuilder(if (this.isShopItemActive) Material.SLIME_SPAWN_EGG else Material.BARRIER)
             .setName(translation.validateItemName(entityShopDisplayNameKey))
             .setLoreByComponent(translation.validateItemLore(entityShopLoreKey))
-            .build()))
+            .build()) { _, _, _ -> InventoryUtils.openEntityShopInventory(player) })
 
         controller.setItem(3, 6, InteractiveItem.of(ItemBuilder(Material.NETHER_STAR)
             .setName(translation.validateItemName("blocko.inventory.profile.achievements_item.display_name"))
