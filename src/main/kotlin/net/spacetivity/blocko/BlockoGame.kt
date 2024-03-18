@@ -179,7 +179,7 @@ class BlockoGame : JavaPlugin() {
     }
 
     private fun createOrLoadDatabaseProperties(): DatabaseFile {
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile("-", 3306, "blocko_game", "-", "-"))
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile("-", 3306, "-", "-", "-"))
     }
 
     private fun createOrLoadDiceSidesFile(): DiceSidesFile {
