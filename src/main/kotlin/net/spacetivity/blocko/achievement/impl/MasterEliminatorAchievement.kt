@@ -15,8 +15,9 @@ class MasterEliminatorRequirement(override val translationKey: String, override 
     override fun getPlaceholders(gamePlayer: GamePlayer): List<TagResolver> {
         val statsPlayer: StatsPlayer = gamePlayer.toStatsPlayerInstance() ?: return listOf()
         return listOf(
+            Placeholder.parsed("current_amount", statsPlayer.eliminatedOpponents.toString()),
             Placeholder.parsed("amount", this.neededCount.toString()),
-            Placeholder.parsed("progress", getProgress(statsPlayer.eliminatedOpponents).toString())
+            Placeholder.parsed("progress", getProgress(statsPlayer.eliminatedOpponents).toString().split(".")[0])
         )
     }
 

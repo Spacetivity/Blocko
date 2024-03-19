@@ -225,7 +225,7 @@ blocko.achievement.first_elimination:
 # A high-tier achievement for players who eliminate a significant number of opponents.
 blocko.achievement.master_eliminator:
   display_name: "Master Eliminator"
-  requirement: "<gray>Eliminate <green><amount> <gray>opponents (<yellow><progress>%<gray>)"
+  requirement: "<gray>Eliminate <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>opponents (<yellow><progress>%<gray>)"
 
 # Achievements and Rewards
 # ------------------------------

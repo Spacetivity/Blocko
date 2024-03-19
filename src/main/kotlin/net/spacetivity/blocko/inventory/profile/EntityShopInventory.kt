@@ -4,12 +4,6 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
-import net.spacetivity.inventory.api.annotation.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPosition
-import net.spacetivity.inventory.api.pagination.InventoryPagination
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.AchievementPlayer
 import net.spacetivity.blocko.arena.GameArena
@@ -23,10 +17,17 @@ import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.PersistentDataUtils
+import net.spacetivity.inventory.api.annotation.InventoryProperties
+import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProvider
+import net.spacetivity.inventory.api.item.InteractiveItem
+import net.spacetivity.inventory.api.item.InventoryPosition
+import net.spacetivity.inventory.api.pagination.InventoryPagination
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
+import java.text.MessageFormat
 
 @InventoryProperties(id = "entity_shop_inv", rows = 6, columns = 9)
 class EntityShopInventory : InventoryProvider {
@@ -45,7 +46,9 @@ class EntityShopInventory : InventoryProvider {
             InventoryUtils.openProfileInventory(player, isShopItemActive)
         })
 
-        val pageItems: List<InteractiveItem> = fetchEntityTypeItems(controller, player, translation)
+        val pagination: InventoryPagination = controller.createPagination()
+
+        val pageItems: List<InteractiveItem> = fetchEntityTypeItems(controller, pagination, player, translation)
 
         if (pageItems.isEmpty()) {
             controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(ItemBuilder(Material.BARRIER)
@@ -54,7 +57,6 @@ class EntityShopInventory : InventoryProvider {
             return
         }
 
-        val pagination: InventoryPagination = controller.createPagination()
         pagination.limitItemsPerPage(36)
         pagination.setItemField(1, 0, 4, 8)
         pagination.distributeItems(pageItems)
@@ -68,7 +70,7 @@ class EntityShopInventory : InventoryProvider {
             .build(), pagination))
     }
 
-    private fun fetchEntityTypeItems(controller: InventoryController, player: Player, translation: Translation): List<InteractiveItem> {
+    private fun fetchEntityTypeItems(controller: InventoryController, pagination: InventoryPagination, player: Player, translation: Translation): List<InteractiveItem> {
         val items: MutableList<InteractiveItem> = mutableListOf()
 
         for (gameEntityType: GameEntityType in GameEntityType.entries) {
@@ -84,18 +86,19 @@ class EntityShopInventory : InventoryProvider {
                     val gamePlayer: GamePlayer = playerWhoClicked.toGamePlayerInstance() ?: return@of
 
                     val oldSelectedEntityType: GameEntityType = gamePlayer.selectedEntityType
-                    val oldEntityTypeItem: InteractiveItem = controller.contents.values
-                        .filterNotNull()
+                    val oldEntityTypeItem: InteractiveItem? = pagination.getPaginationItems()
                         .filter { PersistentDataUtils.hasData(it.item.itemMeta, "gameEntityType") }
-                        .first { PersistentDataUtils.getData(it.item.itemMeta, "gameEntityType", String::class.java) == gamePlayer.selectedEntityType.name }
+                        .find { PersistentDataUtils.getData(it.item.itemMeta, "gameEntityType", String::class.java) == gamePlayer.selectedEntityType.name }
 
                     gamePlayer.selectedEntityType = gameEntityType
                     playerWhoClicked.playSound(playerWhoClicked.location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1F)
-                    playerWhoClicked.translateMessage("blocko.entity_shop.selected_entity_type", Placeholder.parsed("entity_type_name", gameEntityType.bukkitEntityType.name))
+
+
+                    playerWhoClicked.translateMessage("blocko.entity_shop.selected_entity_type", Placeholder.parsed("entity_type_name", gameEntityType.getCorrectedTypeName()))
+
                     item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildEntityTypeDisplayName(translation, playerWhoClicked, gameEntityType))
 
-                    oldEntityTypeItem.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildEntityTypeDisplayName(translation, playerWhoClicked, oldSelectedEntityType))
-
+                    oldEntityTypeItem?.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildEntityTypeDisplayName(translation, playerWhoClicked, oldSelectedEntityType))
                     return@of
                 }
 
@@ -122,7 +125,7 @@ class EntityShopInventory : InventoryProvider {
 
     private fun buildEntityTypeItemType(player: Player, gameEntityType: GameEntityType): Material {
         val isUnlocked: Boolean = gameEntityType.isUnlockedByPlayer(player.uniqueId)
-        return if (isUnlocked) gameEntityType.getSpawnEggType()!! else Material.BARRIER
+        return if (isUnlocked) gameEntityType.getSpawnEggType() else Material.BARRIER
     }
 
     private fun buildEntityTypeDisplayName(translation: Translation, player: Player, gameEntityType: GameEntityType): Component {
@@ -139,7 +142,7 @@ class EntityShopInventory : InventoryProvider {
 
         return translation.validateItemName("blocko.inventory.entity_shop.entity_type_item.display_name",
             Placeholder.parsed("status_color", "<${statusColor.asHexString()}>"),
-            Placeholder.parsed("entity_type_name", gameEntityType.bukkitEntityType.name),
+            Placeholder.parsed("entity_type_name", gameEntityType.getCorrectedTypeName()),
             displayNameSuffixPlaceholder)
     }
 
@@ -159,7 +162,7 @@ class EntityShopInventory : InventoryProvider {
             Placeholder.parsed("lore_suffix", translation.validateLineAsString("blocko.inventory.entity_shop.entity_type_item.lore.suffix.buyable"))
 
         return translation.validateItemLore(loreKey,
-            Placeholder.parsed("price", gameEntityType.price.toString()),
+            Placeholder.parsed("price", MessageFormat.format("{0}", gameEntityType.price.toString())),
             possibleAchievementPlaceholder,
             loreSuffixPlaceholder)
     }
