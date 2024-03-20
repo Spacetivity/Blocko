@@ -86,7 +86,6 @@ class EntityShopInventory : InventoryProvider {
                 itemBuilder.addGlow()
 
             items.add(InteractiveItem.of(itemBuilder.build()) { _, item: InteractiveItem, event: InventoryClickEvent ->
-
                 val playerWhoClicked: Player = event.whoClicked as Player
 
                 if (BlockoGame.instance.gameEntityHandler.hasUnlockedEntityType(player.uniqueId, gameEntityType) && playerWhoClicked.toGamePlayerInstance()!!.selectedEntityType != gameEntityType) {

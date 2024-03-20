@@ -14,10 +14,10 @@ import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.MetadataUtils
 import org.bukkit.Location
 import org.bukkit.Sound
-import org.bukkit.entity.EntityType
+import org.bukkit.entity.Animals
 import org.bukkit.entity.LivingEntity
 
-data class GameEntity(val arenaId: String, val teamName: String, val entityType: EntityType, val entityId: Int) {
+data class GameEntity(val arenaId: String, val teamName: String, val gameEntityType: GameEntityType, val entityId: Int) {
 
     var newGoalFieldId: Int? = null
     var currentFieldId: Int? = null
@@ -40,11 +40,16 @@ data class GameEntity(val arenaId: String, val teamName: String, val entityType:
     fun spawn(location: Location) {
         if (this.livingEntity != null) return
 
-        this.livingEntity = location.world.spawnEntity(location, this.entityType) as LivingEntity
+        this.livingEntity = location.world.spawnEntity(location, this.gameEntityType.bukkitEntityType) as LivingEntity
         this.livingEntity!!.isSilent = true;
         this.livingEntity!!.isInvulnerable = true
         this.livingEntity!!.setAI(false)
         this.livingEntity!!.isCustomNameVisible = true
+
+        if (this.gameEntityType.isBaby && this.livingEntity!! is Animals) {
+            val animal: Animals = this.livingEntity as Animals
+            animal.setBaby()
+        }
 
         val gameTeam: GameTeam = BlockoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
         this.livingEntity!!.customName(Component.text(this.teamName.uppercase(), gameTeam.color, TextDecoration.BOLD))

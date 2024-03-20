@@ -3,7 +3,6 @@ package net.spacetivity.blocko.entity
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import net.spacetivity.blocko.team.GameTeamLocation
-import org.bukkit.entity.EntityType
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -26,7 +25,7 @@ class GameEntityHandler {
         this.gameEntities.removeAll(arenaId)
     }
 
-    fun spawnEntity(gameTeamLocation: GameTeamLocation, type: EntityType) {
+    fun spawnEntity(gameTeamLocation: GameTeamLocation, type: GameEntityType) {
         val entityId: Int = this.gameEntities[gameTeamLocation.arenaId].filter { it.teamName == gameTeamLocation.teamName }.size
         GameEntity(gameTeamLocation.arenaId, gameTeamLocation.teamName, type, entityId).spawn(gameTeamLocation.getWorldPosition())
         gameTeamLocation.isTaken = true
