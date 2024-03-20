@@ -64,10 +64,11 @@ class GameField(
         handleStatsReward(oldHolder, false)
     }
 
-    fun getWorldPosition(fieldHeight: Double): Location {
-        val location = Location(this.world, this.x, fieldHeight, this.z, 0.0F, 0.0F)
+    fun getWorldPosition(): Location {
+        val yLevel: Double = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)?.yLevel ?: 0.0
+        val location = Location(this.world, this.x, yLevel, this.z, 0.0F, 0.0F)
         val fixedLocation: Location = location.clone().toCenterLocation()
-        fixedLocation.y = fieldHeight
+        fixedLocation.y = yLevel
         return fixedLocation
     }
 
@@ -89,12 +90,12 @@ class GameField(
         val statsType: StatsType = if (isReward) StatsType.ELIMINATED_OPPONENTS else StatsType.KNOCKED_OUT_BY_OPPONENTS
         statsPlayer.update(statsType, UpdateOperation.INCREASE, 1)
 
-        val coinsPerKill = 20
+        val coinsPerElimination: Int = BlockoGame.instance.globalConfigFile.coinsPerElimination
 
         if (isReward) {
-            gamePlayer.toBukkitInstance()?.addCoins(coinsPerKill, true)
+            gamePlayer.toBukkitInstance()?.addCoins(coinsPerElimination, true)
             gamePlayer.matchStats.eliminations += 1
-            gamePlayer.matchStats.gainedCoins += coinsPerKill
+            gamePlayer.matchStats.gainedCoins += coinsPerElimination
         } else {
             gamePlayer.matchStats.knockedOutByOpponent += 1
         }

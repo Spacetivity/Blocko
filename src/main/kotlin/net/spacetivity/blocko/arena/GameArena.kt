@@ -27,6 +27,7 @@ class GameArena(
     val gameWorld: World,
     var status: GameArenaStatus,
     var phase: GamePhase,
+    val yLevel: Double
 ) {
 
     var locked: Boolean = false
@@ -268,6 +269,10 @@ class GameArena(
         val finishedGamePlayers: List<GamePlayer> = this.currentPlayers.filter { it.getTeam().deactivated }.toList()
         val enoughGamePlayersFinished: Boolean = finishedGamePlayers.size == (this.teamOptions.playerCount - 1)
         return enoughGamePlayersFinished
+    }
+
+    fun isFull(): Boolean {
+        return this.currentPlayers.size >= this.teamOptions.playerCount
     }
 
     private fun findNewHost(): GamePlayer? {

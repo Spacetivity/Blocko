@@ -50,7 +50,7 @@ class GameArenaHandler {
                 gamePhaseHandler.cachedGamePhases.put(arenaId, IngamePhase(arenaId))
                 gamePhaseHandler.cachedGamePhases.put(arenaId, EndingPhase(arenaId))
 
-                cachedArenas.add(GameArena(arenaId, gameWorld, status, idlePhase))
+                cachedArenas.add(GameArena(arenaId, gameWorld, status, idlePhase, playerLocation.y))
             }
         }
     }
@@ -70,7 +70,7 @@ class GameArenaHandler {
         val serializedLocation = "${location.x}:${location.y}:${location.z}:${location.yaw}:${location.pitch}"
         val status: GameArenaStatus = GameArenaStatus.CONFIGURATING
 
-        if (getArena(id) != null || this.cachedArenas.any { it.gameWorld.name.equals(worldName, true) }) return false
+        if (getArena(id) != null || (BlockoGame.instance.gameArenaHandler.cachedArenas.size >= BlockoGame.instance.globalConfigFile.gameArenaMaxParallelAmount)) return false
 
         transaction {
             GameArenaDAO.insert { statement: InsertStatement<Number> ->
@@ -87,7 +87,7 @@ class GameArenaHandler {
         gamePhaseHandler.cachedGamePhases.put(id, IngamePhase(id))
         gamePhaseHandler.cachedGamePhases.put(id, EndingPhase(id))
 
-        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, status, idlePhase))
+        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, status, idlePhase, location.y))
         return true
     }
 

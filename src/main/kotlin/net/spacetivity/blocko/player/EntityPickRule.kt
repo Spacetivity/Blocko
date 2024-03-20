@@ -8,7 +8,7 @@ enum class EntityPickRule(val weight: Int, val probability: Double) {
 
     // Blocko-Bots - Logic by Tobias Heimböck (TGamings)
     // Weight of the rule (Int) and its corresponding probability (Double)
-    // If the weights of two rules are equal, a random number from 1 to 10 is generated. If it's greater than 5, the one with the higher probability wins.
+    // If the weights of two rules are equal, a random number from 1 to 10 is generated. If it's greater than 5, the one with the higher probability wins. (To add a certain randomness to the AI)
     // If the random number is less than or equal to 5, one of the two rules wins randomly.
 
     MOVABLE_OUT_OF_START(5, 1.0),

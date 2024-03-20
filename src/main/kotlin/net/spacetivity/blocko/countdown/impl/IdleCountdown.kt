@@ -40,7 +40,7 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5) {
             val gameTeam: GameTeam? = BlockoGame.instance.gameTeamHandler.getTeam(gameTeamLocation.arenaId, gameTeamLocation.teamName)
             if (gameTeam == null || gameTeam.teamMembers.isEmpty()) continue
             val gamePlayer: GamePlayer = gameArena.currentPlayers.find { it.uuid == gameTeam.teamMembers.first() } ?: continue
-            BlockoGame.instance.gameEntityHandler.spawnEntity(gameTeamLocation, gamePlayer.selectedEntityType.bukkitEntityType)
+            BlockoGame.instance.gameEntityHandler.spawnEntity(gameTeamLocation, gamePlayer.selectedEntityType)
             gameTeamLocation.isTaken = true
         }
 

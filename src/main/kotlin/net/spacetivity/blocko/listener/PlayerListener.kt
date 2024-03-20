@@ -48,6 +48,20 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
         this.plugin.statsPlayerHandler.createOrLoadStatsPlayer(player.uniqueId)
         this.plugin.achievementHandler.createOrLoadAchievementPlayer(player.uniqueId)
         this.plugin.gameEntityHandler.loadUnlockedEntityTypes(player.uniqueId)
+
+        if (this.plugin.globalConfigFile.gameArenaAutoJoin) {
+            val gameArenas: List<GameArena> = this.plugin.gameArenaHandler.cachedArenas
+                .filter { !it.isFull() && it.phase.isIdle() }
+                .sortedBy { it.currentPlayers.size }
+                .reversed()
+
+            if (gameArenas.isEmpty()) {
+                player.kick(Component.text("No free arenas found!", NamedTextColor.RED))
+                return
+            }
+
+            gameArenas.first().join(player.uniqueId, false)
+        }
     }
 
     @EventHandler

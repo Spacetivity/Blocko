@@ -31,9 +31,11 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     var controllingTeamId: Int? = null
     var phaseMode: GamePhaseMode = GamePhaseMode.DICE
 
-    var matchStartTime: Long? = null
+    private var matchStartTime: Long? = null
 
     override fun start() {
+        this.phaseMode = GamePhaseMode.DICE
+
         if (this.matchStartTime == null) this.matchStartTime = System.currentTimeMillis()
 
         for (gamePlayer: GamePlayer in getArena().currentPlayers.filter { !it.isAI }) {
@@ -68,6 +70,8 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
             }
         }
 
+        this.lastControllingTeamId = null
+        this.controllingTeamId = null
         this.matchStartTime = null
     }
 
@@ -146,13 +150,9 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         val currentTimeMillis = System.currentTimeMillis()
         val timeLeftMillis: Long = timeoutTimestamp - currentTimeMillis
 
-        // Ensure time left is not negative
         val positiveTimeLeftMillis = if (timeLeftMillis > 0) timeLeftMillis else 0L
-
-        // Calculate the fraction of time left
         val timeLeftFraction = positiveTimeLeftMillis.toFloat() / totalActionTime.toFloat()
 
-        // Ensure the fraction is within 0.0 to 1.0
         return timeLeftFraction.coerceIn(0.0f, 1.0f)
     }
 
