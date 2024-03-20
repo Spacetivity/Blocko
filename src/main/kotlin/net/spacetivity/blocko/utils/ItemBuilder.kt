@@ -72,6 +72,11 @@ class ItemBuilder(material: Material) {
         return this
     }
 
+    fun addGlow(): ItemBuilder {
+        itemStack.addUnsafeEnchantment(Enchantment.DURABILITY, 1)
+        return this
+    }
+
     fun addEnchantment(enchantment: Enchantment, level: Int): ItemBuilder {
         itemMeta.addEnchant(enchantment, level, true)
         itemStack.itemMeta = itemMeta

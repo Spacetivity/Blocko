@@ -1,11 +1,6 @@
 package net.spacetivity.blocko.inventory.profile
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.inventory.api.annotation.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPosition
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.extensions.getArena
@@ -16,6 +11,12 @@ import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.HeadUtils
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
+import net.spacetivity.blocko.utils.NumberUtils
+import net.spacetivity.inventory.api.annotation.InventoryProperties
+import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProvider
+import net.spacetivity.inventory.api.item.InteractiveItem
+import net.spacetivity.inventory.api.item.InventoryPosition
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
@@ -60,7 +61,7 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
                 Placeholder.parsed("knocked_out_by_opponents_value", this.statsPlayer.knockedOutByOpponents.toString()),
 
                 Placeholder.parsed("coins_key", translation.validateLineAsString("blocko.stats.type.coins")),
-                Placeholder.parsed("coins_value", this.statsPlayer.coins.toString()),
+                Placeholder.parsed("coins_value", NumberUtils.format(this.statsPlayer.coins)),
 
                 Placeholder.parsed("played_games_key", translation.validateLineAsString("blocko.stats.type.played_games")),
                 Placeholder.parsed("played_games_value", this.statsPlayer.playedGames.toString())))
@@ -76,10 +77,12 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
     }
 
     private fun getStatsItem(translation: Translation, statsType: StatsType): InteractiveItem {
+        val statsValue: Int = this.statsPlayer.getStatsValue(statsType)
+
         return InteractiveItem.of(ItemBuilder(Material.PAPER)
             .setName(translation.validateItemName("blocko.inventory.stats.stats_type_item.display_name",
                 Placeholder.parsed("type_name", translation.validateLineAsString(statsType.nameKey)),
-                Placeholder.parsed("value", this.statsPlayer.getStatsValue(statsType).toString())))
+                Placeholder.parsed("value", if (statsType == StatsType.COINS) NumberUtils.format(statsValue) else statsValue.toString())))
             .build())
     }
 

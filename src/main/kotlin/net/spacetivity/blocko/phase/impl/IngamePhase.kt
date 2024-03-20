@@ -31,9 +31,11 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     var controllingTeamId: Int? = null
     var phaseMode: GamePhaseMode = GamePhaseMode.DICE
 
-    var matchStartTime: Long? = null
+    private var matchStartTime: Long? = null
 
     override fun start() {
+        this.phaseMode = GamePhaseMode.DICE
+
         if (this.matchStartTime == null) this.matchStartTime = System.currentTimeMillis()
 
         for (gamePlayer: GamePlayer in getArena().currentPlayers.filter { !it.isAI }) {
@@ -68,6 +70,8 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
             }
         }
 
+        this.lastControllingTeamId = null
+        this.controllingTeamId = null
         this.matchStartTime = null
     }
 

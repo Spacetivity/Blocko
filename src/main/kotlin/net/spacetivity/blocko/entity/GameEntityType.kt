@@ -9,6 +9,7 @@ import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.StatsType
 import net.spacetivity.blocko.stats.UpdateOperation
+import net.spacetivity.blocko.utils.NumberUtils
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.EntityType
@@ -60,7 +61,6 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     VEX(EntityType.VEX, 10, null),
 
     IRON_GOLEM(EntityType.IRON_GOLEM, 10, null),
-    SNOWMAN(EntityType.SNOWMAN, 10, null),
 
     HORSE(EntityType.HORSE, 10, null),
     ZOMBIE_HORSE(EntityType.ZOMBIE_HORSE, 10, null),
@@ -101,7 +101,6 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     fun getSpawnEggType(): Material {
         val typeName: String = when (this) {
             MUSHROOM_COW -> "COW_SPAWN_EGG"
-            SNOWMAN -> "SNOW_GOLEM_SPAWN_EGG"
             else -> "${this.name.uppercase()}_SPAWN_EGG"
         }
 
@@ -126,8 +125,8 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
 
         player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1F)
         player.translateMessage("blocko.entity_shop.successfully_bought_entity_type",
-            Placeholder.parsed("entity_type_name", this.bukkitEntityType.name),
-            Placeholder.parsed("amount", this.price.toString()))
+            Placeholder.parsed("entity_type_name", getCorrectedTypeName()),
+            Placeholder.parsed("amount", NumberUtils.format(this.price)))
     }
 
 }
