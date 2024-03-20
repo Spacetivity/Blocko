@@ -202,7 +202,8 @@ class BlockoGame : JavaPlugin() {
             "BasicLudoBoard",
             true,
             false,
-            10
+            10,
+            20
         ))
     }
 

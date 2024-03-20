@@ -90,12 +90,12 @@ class GameField(
         val statsType: StatsType = if (isReward) StatsType.ELIMINATED_OPPONENTS else StatsType.KNOCKED_OUT_BY_OPPONENTS
         statsPlayer.update(statsType, UpdateOperation.INCREASE, 1)
 
-        val coinsPerKill = 20
+        val coinsPerElimination: Int = BlockoGame.instance.globalConfigFile.coinsPerElimination
 
         if (isReward) {
-            gamePlayer.toBukkitInstance()?.addCoins(coinsPerKill, true)
+            gamePlayer.toBukkitInstance()?.addCoins(coinsPerElimination, true)
             gamePlayer.matchStats.eliminations += 1
-            gamePlayer.matchStats.gainedCoins += coinsPerKill
+            gamePlayer.matchStats.gainedCoins += coinsPerElimination
         } else {
             gamePlayer.matchStats.knockedOutByOpponent += 1
         }

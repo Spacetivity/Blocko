@@ -20,9 +20,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
     var dicedNumber: Int? = null
     var activeEntity: GameEntity? = null
     var lastEntityPickRule: EntityPickRule? = null
-
     var actionTimeoutTimestamp: Long? = null
-
     var selectedEntityType: GameEntityType = GameEntityType.VILLAGER
 
     fun dice(ingamePhase: IngamePhase) {

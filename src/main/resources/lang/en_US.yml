@@ -202,6 +202,8 @@ blocko.coins.receive:
 # Sets the boss bar timeout message and various achievements with their requirements.
 blocko.bossbar.timeout: "<gray>Time left to dice & pick: <time_color><time> <unit><dark_gray>"
 
+# Achievements and Rewards
+# ------------------------------
 # Achievement for playing the first game in Blocko.
 blocko.achievement.first_game:
   display_name: "First Game"
@@ -227,8 +229,6 @@ blocko.achievement.master_eliminator:
   display_name: "Master Eliminator"
   requirement: "<gray>Eliminate <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>opponents (<yellow><progress>%<gray>)"
 
-# Achievements and Rewards
-# ------------------------------
 # Describes achievement unlock messages and formats for various in-game achievements.
 blocko.achievement.unlocked: |
   <obfuscated><gradient:blue:green>==============================================</obfuscated>

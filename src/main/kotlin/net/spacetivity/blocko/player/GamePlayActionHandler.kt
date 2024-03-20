@@ -68,8 +68,8 @@ class GamePlayActionHandler {
                 if (!gameEntity.shouldMove) continue
 
                 val gamePlayer: GamePlayer = gameEntity.controller ?: continue
-                val gameTeam: GameTeam = gamePlayer.getTeam()
 
+                val gameTeam: GameTeam = gamePlayer.getTeam()
                 if (gameTeam.deactivated) continue
 
                 val dicedNumber: Int = gamePlayer.dicedNumber ?: continue
