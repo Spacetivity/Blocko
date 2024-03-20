@@ -64,10 +64,11 @@ class GameField(
         handleStatsReward(oldHolder, false)
     }
 
-    fun getWorldPosition(fieldHeight: Double): Location {
-        val location = Location(this.world, this.x, fieldHeight, this.z, 0.0F, 0.0F)
+    fun getWorldPosition(): Location {
+        val yLevel: Double = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)?.yLevel ?: 0.0
+        val location = Location(this.world, this.x, yLevel, this.z, 0.0F, 0.0F)
         val fixedLocation: Location = location.clone().toCenterLocation()
-        fixedLocation.y = fieldHeight
+        fixedLocation.y = yLevel
         return fixedLocation
     }
 

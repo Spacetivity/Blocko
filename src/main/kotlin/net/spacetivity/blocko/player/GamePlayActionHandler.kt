@@ -75,7 +75,7 @@ class GamePlayActionHandler {
                 val dicedNumber: Int = gamePlayer.dicedNumber ?: continue
 
                 val ignoreDicedNumber: Boolean = gamePlayer.lastEntityPickRule != null && gamePlayer.lastEntityPickRule == EntityPickRule.MOVABLE_OUT_OF_START
-                val hasReachedGoal: Boolean = gameEntity.moveOneFieldForward(if (ignoreDicedNumber) 1 else dicedNumber, 0.0)
+                val hasReachedGoal: Boolean = gameEntity.moveOneFieldForward(if (ignoreDicedNumber) 1 else dicedNumber)
                 if (!hasReachedGoal) continue
 
                 gameEntity.lastStartField = null

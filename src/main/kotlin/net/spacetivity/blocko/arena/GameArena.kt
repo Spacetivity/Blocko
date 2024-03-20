@@ -27,6 +27,7 @@ class GameArena(
     val gameWorld: World,
     var status: GameArenaStatus,
     var phase: GamePhase,
+    val yLevel: Double
 ) {
 
     var locked: Boolean = false

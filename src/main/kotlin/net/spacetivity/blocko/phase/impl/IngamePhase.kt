@@ -150,13 +150,9 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         val currentTimeMillis = System.currentTimeMillis()
         val timeLeftMillis: Long = timeoutTimestamp - currentTimeMillis
 
-        // Ensure time left is not negative
         val positiveTimeLeftMillis = if (timeLeftMillis > 0) timeLeftMillis else 0L
-
-        // Calculate the fraction of time left
         val timeLeftFraction = positiveTimeLeftMillis.toFloat() / totalActionTime.toFloat()
 
-        // Ensure the fraction is within 0.0 to 1.0
         return timeLeftFraction.coerceIn(0.0f, 1.0f)
     }
 

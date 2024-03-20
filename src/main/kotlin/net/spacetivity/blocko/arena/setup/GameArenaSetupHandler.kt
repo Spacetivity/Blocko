@@ -6,11 +6,11 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArenaStatus
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
+import net.spacetivity.blocko.field.PathFace
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.team.GameTeamLocation
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.MetadataUtils
-import net.spacetivity.blocko.field.PathFace
 import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -152,12 +152,14 @@ class GameArenaSetupHandler {
 
         val centeredLocation: Location = LocationUtils.centerLocation(location)
 
+        val yLevel: Double = BlockoGame.instance.gameArenaHandler.getArena(arenaSetupData.arenaId)!!.yLevel
+
         val teamSpawn = GameTeamLocation(
             arenaSetupData.arenaId,
             teamName,
             location.world.name,
             centeredLocation.x,
-            0.0,
+            yLevel,
             centeredLocation.z,
             location.yaw,
             location.pitch,

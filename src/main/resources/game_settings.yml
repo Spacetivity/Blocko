@@ -1,0 +1,11 @@
+game.lobby:
+  world: "BasicLudoBoard"
+  protection: true
+
+# If you use a 'BungeeCord' or 'Velocity' network, you can set this to true, to
+# enable that a player will be automatically put into an arena when he joins the server.
+game.arena.autoJoin: true
+
+# Sets the maximum amount of arenas for this server. The lower your specs are, the lower you should set this value.
+# As default, we recommend 4 arenas.
+game.arena.maxParallelAmount: 4

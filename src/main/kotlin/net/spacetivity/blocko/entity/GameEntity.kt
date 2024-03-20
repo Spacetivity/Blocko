@@ -136,7 +136,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
         return goalField.isTaken && goalField.currentHolder?.teamName != this.teamName
     }
 
-    fun moveOneFieldForward(dicedNumber: Int, fieldHeight: Double): Boolean {
+    fun moveOneFieldForward(dicedNumber: Int): Boolean {
         if (this.livingEntity == null) return false
 
         if (this.lastStartField == null) {
@@ -178,7 +178,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
         if ((newFieldId != goalFieldId) && newField.isTaken)
             return false
 
-        val worldPosition: Location = newField.getWorldPosition(fieldHeight)
+        val worldPosition: Location = newField.getWorldPosition()
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
 
         this.livingEntity!!.teleport(worldPosition)
