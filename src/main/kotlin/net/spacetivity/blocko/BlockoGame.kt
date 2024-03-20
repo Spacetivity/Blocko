@@ -196,7 +196,14 @@ class BlockoGame : JavaPlugin() {
     private fun createOrLoadGlobalConfigFile(): GlobalConfigFile {
         val availableTranslationLanguages: List<String> = this.translationHandler.cachedTranslations.map { it.name }
         val defaultLanguageName: String = if (availableTranslationLanguages.contains("en_US")) "en_US" else availableTranslationLanguages[0]
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(defaultLanguageName, Material.GOLDEN_HOE.name))
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(
+            defaultLanguageName,
+            Material.GOLDEN_HOE.name,
+            "BasicLudoBoard",
+            true,
+            false,
+            10
+        ))
     }
 
     private fun createOrLoadBotNamesFile(): BotNamesFile {

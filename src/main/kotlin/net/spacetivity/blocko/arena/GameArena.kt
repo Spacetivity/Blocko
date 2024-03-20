@@ -271,6 +271,10 @@ class GameArena(
         return enoughGamePlayersFinished
     }
 
+    fun isFull(): Boolean {
+        return this.currentPlayers.size >= this.teamOptions.playerCount
+    }
+
     private fun findNewHost(): GamePlayer? {
         val actualCurrentPlayers: List<GamePlayer> = this.currentPlayers.filter { !it.isAI }
 

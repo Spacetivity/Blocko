@@ -70,7 +70,7 @@ class GameArenaHandler {
         val serializedLocation = "${location.x}:${location.y}:${location.z}:${location.yaw}:${location.pitch}"
         val status: GameArenaStatus = GameArenaStatus.CONFIGURATING
 
-        if (getArena(id) != null || this.cachedArenas.any { it.gameWorld.name.equals(worldName, true) }) return false
+        if (getArena(id) != null || (BlockoGame.instance.gameArenaHandler.cachedArenas.size >= BlockoGame.instance.globalConfigFile.gameArenaMaxParallelAmount)) return false
 
         transaction {
             GameArenaDAO.insert { statement: InsertStatement<Number> ->

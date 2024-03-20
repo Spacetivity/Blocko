@@ -55,7 +55,8 @@ class BlockoCommand : SpaceCommandExecutor {
             val creationStatus = this.gameArenaHandler.createArena(player.world.name, player.location)
 
             if (!creationStatus) {
-                player.sendMessage(Component.text("Arena creation failed!", NamedTextColor.RED))
+                val maxArenaCount = BlockoGame.instance.globalConfigFile.gameArenaMaxParallelAmount
+                player.sendMessage(Component.text("You cannot create more than $maxArenaCount arenas on this server!", NamedTextColor.RED))
                 return
             }
 
