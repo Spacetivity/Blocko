@@ -13,7 +13,6 @@ class EndingPhase(arenaId: String) : GamePhase(arenaId, "ending", 2, EndingCount
 
     override fun start() {
         val gameArena: GameArena = getArena()
-        gameArena.sendArenaMessage(Component.text("The game ends now..."))
 
         for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
             BlockoGame.instance.achievementHandler.getAchievement(PlayFirstGameAchievement::class.java)?.grantIfCompletedBy(gamePlayer)

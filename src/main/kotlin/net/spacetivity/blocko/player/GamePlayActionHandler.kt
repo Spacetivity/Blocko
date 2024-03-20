@@ -3,7 +3,6 @@ package net.spacetivity.blocko.player
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
@@ -87,7 +86,11 @@ class GamePlayActionHandler {
                     val position: Int = ingamePhase.getAmountOfFinishedTeams()
 
                     gamePlayer.matchStats.position = position
-                    gameArena.sendArenaMessage(Component.text("TEAM ${gameTeam.name.uppercase()} HAS FINISHED (#$position)!", NamedTextColor.YELLOW, TextDecoration.BOLD))
+
+                    gameArena.sendArenaMessage("blocko.main_game_loop.player_finished_match",
+                        Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+                        Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }),
+                        Placeholder.parsed("position", position.toString()))
                 }
 
                 if (gameArena.isGameOver()) {
@@ -107,9 +110,13 @@ class GamePlayActionHandler {
                 gamePlayer.dicedNumber = null
 
                 if (ingamePhase.lastControllingTeamId == ingamePhase.controllingTeamId) {
-                    gameArena.sendArenaMessage(Component.text("${newControllingTeam.name} can now dice again!"))
+                    gameArena.sendArenaMessage("blocko.main_game_loop.can_dice_again",
+                        Placeholder.parsed("team_color", "<${newControllingTeam.color.asHexString()}>"),
+                        Placeholder.parsed("team_name", newControllingTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
                 } else {
-                    gameArena.sendArenaMessage(Component.text("${newControllingTeam.name} can now dice!"))
+                    gameArena.sendArenaMessage("blocko.main_game_loop.can_dice",
+                        Placeholder.parsed("team_color", "<${newControllingTeam.color.asHexString()}>"),
+                        Placeholder.parsed("team_name", newControllingTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
                 }
 
                 ingamePhase.phaseMode = GamePhaseMode.DICE
@@ -158,13 +165,15 @@ class GamePlayActionHandler {
                             gamePlayer.lastEntityPickRule = null
                             gamePlayer.dicedNumber = null
                             gamePlayer.actionTimeoutTimestamp = null
-                            
+
                             if (gamePlayer.isDicing()) BlockoGame.instance.diceHandler.dicingPlayers.remove(gamePlayer.uuid)
 
                             ingamePhase.phaseMode = GamePhaseMode.DICE
                             ingamePhase.setNextControllingTeam()
-                            gamePlayer.sendMessage(Component.text("You waited to long. Your turn is over!", NamedTextColor.DARK_RED))
+
+                            gamePlayer.translateMessage("blocko.main_game_loop.turn_expired")
                             gamePlayer.playSound(Sound.BLOCK_SCULK_SHRIEKER_HIT)
+
                             BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
                             continue
                         }
@@ -191,7 +200,7 @@ class GamePlayActionHandler {
                                     ingamePhase.phaseMode = GamePhaseMode.DICE
                                     ingamePhase.setNextControllingTeam()
                                 } else {
-                                    gamePlayer.sendActionBar(Component.text("Please select a entity now.", NamedTextColor.LIGHT_PURPLE))
+                                    gamePlayer.translateActionBar("blocko.main_game_loop.select_entity_notify")
                                 }
                             }
                         }

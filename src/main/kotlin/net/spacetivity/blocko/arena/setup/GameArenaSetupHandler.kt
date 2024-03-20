@@ -1,9 +1,10 @@
 package net.spacetivity.blocko.arena.setup
 
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArenaStatus
+import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
 import net.spacetivity.blocko.field.PathFace
@@ -40,9 +41,8 @@ class GameArenaSetupHandler {
 
                 if (toolMode == GameArenaSetupTool.ToolMode.SET_TURN || toolMode == GameArenaSetupTool.ToolMode.SET_TEAM_ENTRANCE) {
                     val facing: BlockFace = player.facing
-                    if (facing == BlockFace.NORTH || facing == BlockFace.SOUTH || facing == BlockFace.EAST || facing == BlockFace.WEST) {
-                        player.sendActionBar(Component.text("Current facing direction: ${facing.name}", NamedTextColor.GRAY))
-                    }
+                    if (facing == BlockFace.NORTH || facing == BlockFace.SOUTH || facing == BlockFace.EAST || facing == BlockFace.WEST)
+                        player.translateMessage("blocko.setup.turn_direction", Placeholder.parsed("face", facing.name))
                 }
 
                 if (System.currentTimeMillis() < arenaSetupData.timeoutTimestamp) continue
@@ -63,19 +63,19 @@ class GameArenaSetupHandler {
 
     fun startSetup(player: Player, arenaId: String) {
         if (hasOpenSetup(player.uniqueId)) {
-            player.sendMessage(Component.text("You are already in setup mode!"))
+            player.translateMessage("blocko.setup.already_in_setup_mode")
             return
         }
 
         if (this.arenaSetupCache.entries.any { it.value.arenaId.equals(arenaId, true) }) {
-            player.sendMessage(Component.text("This arena is already being configured.", NamedTextColor.RED))
+            player.translateMessage("blocko.setup.arena_already_configurated_by_player")
             return
         }
 
         val setupTool = GameArenaSetupTool(player)
         setupTool.setToPlayer()
 
-        player.sendMessage(Component.text("You are now in setup mode!"))
+        player.translateMessage("blocko.setup.setup_mode_activated")
 
         val arenaSetupData = GameArenaSetupData(arenaId, setupTool)
         arenaSetupData.gameTeams.addAll(
@@ -92,7 +92,7 @@ class GameArenaSetupHandler {
 
     fun handleSetupEnd(player: Player, success: Boolean) {
         if (!hasOpenSetup(player.uniqueId)) {
-            player.sendMessage(Component.text("You are not in setup mode!"))
+            player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
@@ -100,17 +100,17 @@ class GameArenaSetupHandler {
 
         if (success) {
             if (!hasConfiguredFieldsAlready(player.uniqueId)) {
-                player.sendMessage(Component.text("You have to add game-fields first before you finish the setup!"))
+                player.translateMessage("blocko.setup.no_fields_configured")
                 return
             }
 
             if (!hasConfiguredAllGarageFields(player.uniqueId)) {
-                player.sendMessage(Component.text("You have to add all garage fields for all teams before you finish the setup!"))
+                player.translateMessage("blocko.setup.no_garage_fields_configured")
                 return
             }
 
             if (!hasConfiguredAllTeamSpawns(player.uniqueId)) {
-                player.sendMessage(Component.text("You have to set all team spawn locations before you finish the setup!"))
+                player.translateMessage("blocko.setup.not_enough_team_spawns_configured")
                 return
             }
 
@@ -133,20 +133,20 @@ class GameArenaSetupHandler {
         }
 
         player.inventory.remove(arenaSetupData.setupTool.itemStack)
-        player.sendMessage(Component.text("You are no longer in setup mode!"))
+        player.translateMessage("blocko.setup.setup_mode_deactivated")
         this.arenaSetupCache.remove(player.uniqueId)
     }
 
     fun addTeamSpawn(player: Player, teamName: String, location: Location) {
         if (!hasOpenSetup(player.uniqueId)) {
-            player.sendMessage(Component.text("You are not in setup mode!"))
+            player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
         val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
 
         if (arenaSetupData.gameTeamLocations.any { it.x == location.x && it.y == location.y && it.z == location.z }) {
-            player.sendMessage(Component.text("There is already a team spawn on this location!"))
+            player.translateMessage("blocko.setup.team_spawn_already_set")
             return
         }
 
@@ -168,12 +168,12 @@ class GameArenaSetupHandler {
 
         arenaSetupData.gameTeamLocations.add(teamSpawn)
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.sendMessage(Component.text("Team Spawn added."))
+        player.translateMessage("blocko.setup.team_spawn_added")
     }
 
     fun addField(player: Player, location: Location) {
         if (!hasOpenSetup(player.uniqueId)) {
-            player.sendMessage(Component.text("You are not in setup mode!"))
+            player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
@@ -182,7 +182,7 @@ class GameArenaSetupHandler {
         val z: Double = location.z
 
         if (arenaSetupData.gameFields.any { it.x == x && it.z == z }) {
-            player.sendMessage(Component.text("There is already a game field at this location!", NamedTextColor.RED))
+            player.translateMessage("blocko.setup.game_field_already_set")
             return
         }
 
@@ -211,17 +211,20 @@ class GameArenaSetupHandler {
         MetadataUtils.apply(displayEntity, "displayEntity", arenaSetupData.arenaId)
 
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.sendActionBar(Component.text("Game field #${arenaSetupData.gameFields.size - 1} at (${x} | ${z}) added."))
+        player.translateMessage("blocko.setup.game_field_set",
+            Placeholder.parsed("field_id", (arenaSetupData.gameFields.size - 1).toString()),
+            Placeholder.parsed("x", x.toString()),
+            Placeholder.parsed("z", z.toString()))
     }
 
     fun setTurn(player: Player, gameField: GameField, blockLocation: Location, face: PathFace) {
         if (!hasOpenSetup(player.uniqueId)) {
-            player.sendMessage(Component.text("You are not in setup mode!"))
+            player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
         if (gameField.isGarageField) {
-            player.sendMessage(Component.text("You cannot set a turn to a garage field!"))
+            player.translateMessage("blocko.setup.turn_not_creatable_at_garage_field")
             return
         }
 
@@ -233,17 +236,15 @@ class GameArenaSetupHandler {
         if (displayEntity != null) {
             this.fieldScoreboardTeam.removeEntity(displayEntity)
             this.turnScoreboardTeam.addEntity(displayEntity)
-        } else {
-            player.sendMessage(Component.text("Cannot update entity display!", NamedTextColor.DARK_RED))
         }
 
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.sendMessage(Component.text("You created a turning point for your field. (Direction: ${face.name})"))
+        player.translateMessage("blocko.setup.turning_point_created", Placeholder.parsed("face", face.name))
     }
 
     fun addGarageField(player: Player, teamName: String, location: Location) {
         if (!hasOpenSetup(player.uniqueId)) {
-            player.sendMessage(Component.text("You are not in setup mode!"))
+            player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
@@ -255,17 +256,17 @@ class GameArenaSetupHandler {
         val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z }
 
         if (possibleField == null) {
-            player.sendMessage(Component.text("There is no field on this location!"))
+            player.translateMessage("blocko.setup.no_field_found_at_location")
             return
         }
 
         if (possibleField.isGarageField) {
-            player.sendMessage(Component.text("This field is already a garage field!"))
+            player.translateMessage("blocko.setup.field_already_a_garage_field")
             return
         }
 
         if (possibleField.properties.rotation != null) {
-            player.sendMessage(Component.text("This field cannot be a garage field!"))
+            player.translateMessage("blocko.setup.field_not_able_for_garage_field")
             return
         }
 
@@ -279,16 +280,20 @@ class GameArenaSetupHandler {
             this.fieldScoreboardTeam.removeEntity(displayEntity)
             this.garageFieldScoreboardTeam.addEntity(displayEntity)
         } else {
-            player.sendMessage(Component.text("Cannot update entity display!", NamedTextColor.DARK_RED))
+            player.translateMessage("blocko.setup.cannot_update_entity_display")
         }
 
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.sendMessage(Component.text("Set field at (${x} | ${z}) to garage field of team ${teamName}."))
+        player.translateMessage("blocko.setup.game_field_set_to_garage_field",
+            Placeholder.parsed("x", x.toString()),
+            Placeholder.parsed("z", z.toString()),
+            Placeholder.parsed("team_color", "<${arenaSetupData.gameTeams.find { it.name == teamName }!!.color.asHexString()}>"),
+            Placeholder.parsed("team_name", teamName))
     }
 
     fun setFieldId(player: Player, teamName: String, location: Location) {
         if (!hasOpenSetup(player.uniqueId)) {
-            player.sendMessage(Component.text("You are not in setup mode!"))
+            player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
@@ -300,12 +305,12 @@ class GameArenaSetupHandler {
         val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z }
 
         if (possibleField == null) {
-            player.sendMessage(Component.text("There is no field on this location!"))
+            player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
         if (possibleField.properties.getFieldId(teamName) != null) {
-            player.sendMessage(Component.text("This field already has an id!"))
+            player.translateMessage("blocko.setup.field_already_has_id")
             return
         }
 
@@ -314,7 +319,10 @@ class GameArenaSetupHandler {
         arenaSetupData.setupTool.fieldIndex += 1
 
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.sendMessage(Component.text("Set field id to $currentFieldIndex for team $teamName", NamedTextColor.YELLOW))
+        player.translateMessage("blocko.setup.set_field_id_for_team",
+            Placeholder.parsed("field_id", currentFieldIndex.toString()),
+            Placeholder.parsed("team_color", "<${arenaSetupData.gameTeams.find { it.name == teamName }!!.color.asHexString()}>"),
+            Placeholder.parsed("team_name", teamName))
     }
 
     private fun hasOpenSetup(uuid: UUID): Boolean {

@@ -1,11 +1,10 @@
 package net.spacetivity.blocko.phase.impl
 
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.countdown.impl.IdleCountdown
 import net.spacetivity.blocko.extensions.getArena
+import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
@@ -55,7 +54,7 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
                 val gameArena: GameArena = player.getArena() ?: return@onInteract
 
                 if (gameArena.arenaHost!!.uuid != player.uniqueId) {
-                    player.sendMessage(Component.text("You have to be the host to edit the arena settings!", NamedTextColor.RED))
+                    player.translateMessage("blocko.phase.host_item_blocked")
                     return@onInteract
                 }
 

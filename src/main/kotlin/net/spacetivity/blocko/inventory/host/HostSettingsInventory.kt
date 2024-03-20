@@ -4,17 +4,17 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
-import net.spacetivity.inventory.api.annotation.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPosition
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.team.GameTeamOptions
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
+import net.spacetivity.inventory.api.annotation.InventoryProperties
+import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProvider
+import net.spacetivity.inventory.api.item.InteractiveItem
+import net.spacetivity.inventory.api.item.InventoryPosition
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -72,7 +72,6 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
             item.update(controller, InteractiveItem.Modification.TYPE, getIndicatorMaterialType(indicatorType))
             item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, getIndicatorDisplayName(indicatorType, translation))
 
-            player.sendMessage(getIndicatorDisplayName(indicatorType, translation))
             player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.0F)
         })
     }

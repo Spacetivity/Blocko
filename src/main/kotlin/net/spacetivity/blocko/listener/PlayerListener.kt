@@ -3,7 +3,6 @@ package net.spacetivity.blocko.listener
 import io.papermc.paper.event.player.AsyncChatEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.container.Achievement
@@ -15,6 +14,7 @@ import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.extensions.getArena
 import net.spacetivity.blocko.extensions.getTeam
 import net.spacetivity.blocko.extensions.toGamePlayerInstance
+import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
@@ -56,7 +56,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                 .reversed()
 
             if (gameArenas.isEmpty()) {
-                player.kick(Component.text("No free arenas found!", NamedTextColor.RED))
+                player.kick(this.plugin.translationHandler.getSelectedTranslation().validateLine("no_free_arena_found"))
                 return
             }
 
@@ -101,14 +101,14 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
 
             Material.DIAMOND_HOE -> {
                 if (!block.type.name.contains("WALL_SIGN", true)) {
-                    player.sendMessage(Component.text("You only can create a arena sign on a wall sign block!"))
+                    player.translateMessage("blocko.sign.cannot_create_at_invalid_block")
                     return
                 }
 
                 event.isCancelled = true
 
                 if (!this.gameArenaSignHandler.existsLocation(block.location)) {
-                    player.sendMessage(Component.text("At this location is no arena sign!"))
+                    player.translateMessage("blocko.sign.not_found")
                     return
                 }
 
@@ -121,7 +121,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                 sign.getSide(Side.FRONT).line(3, Component.text(""))
                 sign.update()
 
-                player.sendMessage(Component.text("Deleted arena sign!"))
+                player.translateMessage("blocko.sign.deleted")
             }
 
             else -> {}
@@ -148,7 +148,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                 val gameArena: GameArena? = if (arenaSign.arenaId == null) null else BlockoGame.instance.gameArenaHandler.getArena(arenaSign.arenaId!!)
 
                 if (gameArena == null) {
-                    player.sendMessage(Component.text("This sign has no arena assigned!", NamedTextColor.DARK_RED))
+                    player.translateMessage("blocko.sign.no_arena_assigned")
                     return
                 }
 
@@ -156,8 +156,6 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                     gameArena.quit(player)
                 } else if (player.getArena() == null) {
                     gameArena.join(player.uniqueId, false)
-                } else {
-                    player.sendMessage(Component.text("Error : No sign action found...", NamedTextColor.DARK_RED))
                 }
             }
 
@@ -170,19 +168,19 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                 val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
 
                 if (gamePlayer.getTeam().deactivated) {
-                    player.sendMessage(Component.text("You have already saved all your entities!", NamedTextColor.GOLD))
+                    player.translateMessage("blocko.main_game_loop.already_saved_all_entities")
                     return
                 }
 
                 val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
 
                 if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) {
-                    player.sendMessage(Component.text("Please wait your turn!", NamedTextColor.RED))
+                    player.translateMessage("blocko.main_game_loop.wrong_turn")
                     return
                 }
 
                 if (ingamePhase.phaseMode != GamePhaseMode.DICE) {
-                    player.sendMessage(Component.text("You cannot dice now (${ingamePhase.phaseMode.name})!", NamedTextColor.RED))
+                    player.translateMessage("blocko.main_game_loop.can_not_dice")
                     return
                 }
 
@@ -199,12 +197,17 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                 val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
 
                 if (gamePlayer.getTeam().deactivated) {
-                    player.sendMessage(Component.text("You have already saved all your entities!", NamedTextColor.GOLD))
+                    player.translateMessage("blocko.main_game_loop.already_saved_all_entities")
                     return
                 }
 
-                if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) {
-                    player.sendMessage(Component.text("You cannot pick an entity now!", NamedTextColor.RED))
+                if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) {
+                    player.translateMessage("blocko.main_game_loop.wrong_turn")
+                    return
+                }
+
+                if (ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) {
+                    player.translateMessage("blocko.main_game_loop.cannot_pick_entity_now")
                     return
                 }
 
@@ -215,12 +218,12 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                     ?: return
 
                 if (gamePlayer.dicedNumber!! != 6 && gameEntity.currentFieldId == null) {
-                    player.sendMessage(Component.text("You cannot move this entity into the field without dicing 6 first!", NamedTextColor.RED))
+                    player.translateMessage("blocko.main_game_loop.needs_a_six")
                     return
                 }
 
                 if (!gameEntity.isMovableTo(gamePlayer.dicedNumber!!)) {
-                    player.sendMessage(Component.text("You cannot move this entity!"))
+                    player.translateMessage("blocko.main_game_loop.entity_not_movable")
                     return
                 }
 
@@ -228,8 +231,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
 
                 getOtherHighlightedEntities(gamePlayer, gameArena, gameEntity).forEach { it.toggleHighlighting(false) }
 
-                val dicedNumber: Int = gamePlayer.dicedNumber ?: return
-                player.sendMessage(Component.text("Game entity selected to move $dicedNumber fields."))
+                player.translateMessage("blocko.main_game_loop.entity_selected")
             }
 
             Material.DIAMOND_HOE -> {
@@ -237,19 +239,19 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                 if (!event.action.isRightClick && event.action != Action.RIGHT_CLICK_BLOCK) return
 
                 if (!block.type.name.contains("WALL_SIGN", true)) {
-                    player.sendMessage(Component.text("You only can create a arena sign on a wall sign block!"))
+                    player.translateMessage("blocko.sign.cannot_create_at_invalid_block")
                     return
                 }
 
                 if (this.gameArenaSignHandler.existsLocation(block.location)) {
-                    player.sendMessage(Component.text("At this location is already a arena sign!"))
+                    player.translateMessage("blocko.sign.already_exists")
                     return
                 }
 
                 this.gameArenaSignHandler.createSignLocation(block.location)
                 this.gameArenaSignHandler.loadArenaSigns()
 
-                player.sendMessage(Component.text("Added arena join sign!", NamedTextColor.GREEN))
+                player.translateMessage("blocko.sign.created")
             }
 
             else -> {}

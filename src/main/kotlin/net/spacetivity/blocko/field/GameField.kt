@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.field
 
-import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.achievement.impl.FirstEliminationAchievement
@@ -53,7 +53,13 @@ class GameField(
         teamSpawnLocation.isTaken = true
 
         val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolderEntity) ?: return
-        gameArena.sendArenaMessage(Component.text("${newHolderGameTeam.name} has thrown out a entity from ${oldHolderGameTeam.name}."))
+
+        gameArena.sendArenaMessage("blocko.main_game_loop.entity_thrown_out_by_opponent",
+            Placeholder.parsed("successor_team_color", "<${newHolderGameTeam.color.asHexString()}>"),
+            Placeholder.parsed("successor_team_name", newHolderGameTeam.name.lowercase().replaceFirstChar { it.uppercase() }),
+            Placeholder.parsed("victim_team_color", "<${oldHolderGameTeam.color.asHexString()}>"),
+            Placeholder.parsed("victim_team_name", oldHolderGameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
+
         gameArena.sendArenaSound(Sound.ENTITY_WITHER_DEATH, 0.05F)
 
         handleStatsReward(newHolder, true)

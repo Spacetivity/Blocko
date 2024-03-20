@@ -1,13 +1,13 @@
 package net.spacetivity.blocko.countdown.impl
 
-import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.countdown.GameCountdown
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
-import net.spacetivity.blocko.stats.UpdateOperation
 import net.spacetivity.blocko.stats.StatsType
+import net.spacetivity.blocko.stats.UpdateOperation
 import org.bukkit.Sound
 import org.bukkit.scheduler.BukkitTask
 
@@ -17,7 +17,10 @@ class EndingCountdown(arenaId: String) : GameCountdown(arenaId, 5) {
         val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
         val isOne = remainingSeconds == 1
 
-        gameArena.sendArenaMessage(Component.text("Game stops in ${if (isOne) "one" else remainingSeconds} ${if (isOne) "second" else "seconds"}."))
+        gameArena.sendArenaMessage("blocko.countdown.ending.running",
+            Placeholder.parsed("time", (if (isOne) "one" else remainingSeconds).toString()),
+            Placeholder.parsed("time_string", if (isOne) "second" else "seconds"))
+
         gameArena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP,0.2F)
     }
 
@@ -29,7 +32,7 @@ class EndingCountdown(arenaId: String) : GameCountdown(arenaId, 5) {
             statsPlayer.update(StatsType.PLAYED_GAMES, UpdateOperation.INCREASE, 1)
         }
 
-        gameArena.sendArenaMessage(Component.text("Game arena resets now... You are teleported to spawn!"))
+        gameArena.sendArenaMessage("blocko.countdown.ending.end")
         gameArena.reset(false)
     }
 

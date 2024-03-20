@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.title.Title
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.translation.Translation
 import org.bukkit.entity.Player
 
@@ -19,6 +20,16 @@ fun Player.translateTitle(key: String, vararg toReplace: TagResolver) {
     val titleParts: MutableList<Component> = validateComponents(key, *toReplace)
     if (titleParts.size > 2) throw UnsupportedOperationException("Title $key can only have two lines!")
     showTitle(Title.title(titleParts[0], titleParts[1]))
+}
+
+fun GamePlayer.translateMessage(key: String, vararg toReplace: TagResolver) {
+    val player: Player = toBukkitInstance() ?: return
+    validateComponents(key, *toReplace).forEach { player.sendMessage(it) }
+}
+
+fun GamePlayer.translateActionBar(key: String, vararg toReplace: TagResolver) {
+    val player: Player = toBukkitInstance() ?: return
+    validateComponents(key, *toReplace).forEach { player.sendActionBar(it) }
 }
 
 private fun validateComponents(key: String, vararg toReplace: TagResolver): MutableList<Component> {

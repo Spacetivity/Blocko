@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.countdown.impl
 
-import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.countdown.GameCountdown
@@ -18,11 +18,11 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5) {
         val isOne = remainingSeconds == 1
 
         if (remainingSeconds % 10 == 0 || remainingSeconds < 6) {
-            gameArena.sendArenaMessage(Component.text("Game starts in ${if (isOne) "one" else remainingSeconds} ${if (isOne) "second" else "seconds"}."))
+            gameArena.sendArenaMessage("blocko.countdown.idle.running",
+                Placeholder.parsed("time", (if (isOne) "one" else remainingSeconds).toString()),
+                Placeholder.parsed("time_string", if (isOne) "second" else "seconds"))
             gameArena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP, 0.2F)
         }
-
-        // if (remainingSeconds == 2) addMissingPlayers(gameArena)
     }
 
     override fun handleCountdownEnd() {

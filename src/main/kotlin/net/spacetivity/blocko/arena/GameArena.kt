@@ -1,12 +1,13 @@
 package net.spacetivity.blocko.arena
 
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.dice.DiceHandler
-import net.spacetivity.blocko.extensions.*
+import net.spacetivity.blocko.extensions.clearPhaseItems
+import net.spacetivity.blocko.extensions.getTeam
+import net.spacetivity.blocko.extensions.toGamePlayerInstance
+import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.player.GamePlayer
@@ -14,7 +15,6 @@ import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.team.GameTeamOptions
-import net.spacetivity.blocko.translation.Translation
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.World
@@ -43,19 +43,8 @@ class GameArena(
         if (this.status == GameArenaStatus.READY) this.phase.start()
     }
 
-    @Deprecated(level = DeprecationLevel.WARNING, message = "Will be replaced")
-    fun sendArenaMessage(message: Component) {
-        for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
-            if (player == null) continue
-            player.sendMessage(message)
-        }
-    }
-
     fun sendArenaMessage(key: String, vararg toReplace: TagResolver) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-        for (gamePlayer: GamePlayer in this.currentPlayers.filter { !it.isAI }) {
-            gamePlayer.sendMessage(translation.validateLine(key, *toReplace))
-        }
+        this.currentPlayers.filter { !it.isAI }.forEach { it.translateMessage(key, *toReplace) }
     }
 
     fun sendArenaSound(sound: Sound, volume: Float) {
@@ -69,7 +58,7 @@ class GameArena(
         val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(sender.arenaId) ?: return
 
         if (!gameArena.phase.isIdle()) {
-            sender.sendMessage(Component.text("Your game has already started!", NamedTextColor.RED))
+            sender.translateMessage("blocko.arena.game_already_started")
             return
         }
 
@@ -77,28 +66,28 @@ class GameArena(
         val receiverBukkitPlayer: Player? = Bukkit.getPlayer(receiverName)
 
         if (receiverBukkitPlayer == null) {
-            sender.sendMessage(Component.text("This player does not exist!", NamedTextColor.RED))
+            sender.translateMessage("blocko.utils.player_not_found")
             return
         }
 
         val receiverGamePlayer: GamePlayer? = receiverBukkitPlayer.toGamePlayerInstance()
         if (receiverGamePlayer != null && receiverGamePlayer.arenaId == sender.arenaId) {
-            sender.sendMessage(Component.text("This player is already in your arena!", NamedTextColor.RED))
+            sender.translateMessage("blocko.arena.player_already_in_arena")
             return
         }
 
         if (senderBukkitPlayer.name.equals(receiverName, true)) {
-            sender.sendMessage(Component.text("You cannot invite yourself!", NamedTextColor.RED))
+            sender.translateMessage("blocko.arena.invite_yourself")
             return
         }
 
         if (this.invitedPlayers.contains(receiverBukkitPlayer.uniqueId)) {
-            sender.sendMessage(Component.text("This player was already invited!", NamedTextColor.RED))
+            sender.translateMessage("blocko.arena.player_already_invited")
             return
         }
 
         if (gameArena.currentPlayers.size >= gameArena.teamOptions.playerCount) {
-            sender.sendMessage(Component.text("Arena is already full!", NamedTextColor.RED))
+            sender.translateMessage("blocko.arena.already_full")
             return
         }
 
@@ -117,30 +106,30 @@ class GameArena(
         val gamePlayer = GamePlayer(uuid, name, this.id, null, isAI)
 
         if (this.currentPlayers.any { it.uuid == gamePlayer.uuid }) {
-            gamePlayer.sendMessage(Component.text("Already in arena!"))
+            gamePlayer.translateMessage("blocko.arena.yourself_already_in_arena")
             return false
         }
 
         if (!this.phase.isIdle()) {
-            gamePlayer.sendMessage(Component.text("The game is already running!", NamedTextColor.DARK_RED))
+            gamePlayer.translateMessage("blocko.arena.game_already_started")
             return false
         }
 
         if (this.currentPlayers.size >= this.teamOptions.playerCount) {
-            gamePlayer.sendMessage(Component.text("Arena is full!", NamedTextColor.DARK_RED))
+            gamePlayer.translateMessage("blocko.arena.already_full")
             return false
         }
 
         if (!isAI && this.locked && !this.invitedPlayers.contains(uuid)) {
-            gamePlayer.sendMessage(Component.text("This arena can only be entered by invitation of the host."))
+            gamePlayer.translateMessage("blocko.arena.not_invited_by_host")
             return false
         }
 
-        gamePlayer.sendMessage(Component.text("You joined the arena!", NamedTextColor.GREEN))
+        sendArenaMessage("blocko.arena.join", Placeholder.parsed("name", gamePlayer.name))
 
         if (!gamePlayer.isAI && (this.currentPlayers.isEmpty() || this.arenaHost == null)) {
             this.arenaHost = gamePlayer
-            gamePlayer.sendMessage(Component.text("You are now the arena host!", NamedTextColor.GREEN))
+            gamePlayer.translateMessage("blocko.arena.host_join")
         }
 
         this.currentPlayers.add(gamePlayer)
@@ -153,7 +142,7 @@ class GameArena(
 
             GameScoreboardUtils.setGameSidebar(gamePlayer)
         } else {
-            val aiStatsPlayer = StatsPlayer(uuid, 0,0,0,0)
+            val aiStatsPlayer = StatsPlayer(uuid, 0, 0, 0, 0)
             BlockoGame.instance.statsPlayerHandler.cachedStatsPlayers.add(aiStatsPlayer)
         }
 
@@ -162,12 +151,9 @@ class GameArena(
     }
 
     fun quit(player: Player) {
-        if (this.currentPlayers.none { it.uuid == player.uniqueId }) {
-            player.sendMessage(Component.text("Not in arena!"))
-            return
-        }
+        if (this.currentPlayers.none { it.uuid == player.uniqueId }) return
 
-        player.sendMessage(Component.text("You left the arena!", NamedTextColor.YELLOW))
+        sendArenaMessage("blocko.arena.quit", Placeholder.parsed("name", player.name))
         player.clearPhaseItems()
 
         BlockoGame.instance.bossbarHandler.clearBossbars(player)
@@ -197,7 +183,7 @@ class GameArena(
 
         if (this.phase.isIdle() && this.phase.countdown != null && this.phase.countdown!!.isRunning) {
             this.phase.countdown!!.cancel()
-            sendArenaMessage(Component.text("Countdown stopped! To less players...", NamedTextColor.YELLOW))
+            sendArenaMessage("blocko.countdown.idle.stopped_to_less_players")
         }
 
         if (this.arenaHost != null && this.arenaHost!!.uuid == player.uniqueId) {
@@ -207,7 +193,7 @@ class GameArena(
             if (this.arenaHost == null) {
                 reset(false)
             } else {
-                this.arenaHost?.sendMessage(Component.text("You are now the new Game-Host!", NamedTextColor.YELLOW))
+                this.arenaHost?.translateMessage("blocko.arena.host_join")
             }
         }
 

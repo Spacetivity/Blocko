@@ -1,6 +1,5 @@
 package net.spacetivity.blocko.phase.impl
 
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
@@ -82,7 +81,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
         for ((entityIndex, i) in (2..5).withIndex()) {
             hotbarItems[i] = ItemBuilder(Material.ARMOR_STAND)
-                .setName(Component.text("Move Entity #${entityIndex + 1}"))
+                .setName(translation.validateItemName("blocko.main_game_loop.entity_selector_display_name", Placeholder.parsed("count", (entityIndex + 1).toString())))
                 .setData("entitySelector", entityIndex)
                 .build()
         }
@@ -144,7 +143,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun getControllingGamePlayerTimeLeftFraction(): Float {
-        val totalActionTime = 60_000L // Total action time in milliseconds (60 seconds)
+        val totalActionTime = 60_000L
         val controllingGamePlayer: GamePlayer = getControllingGamePlayer() ?: return 0f
         val timeoutTimestamp: Long = controllingGamePlayer.actionTimeoutTimestamp ?: return 0f
         val currentTimeMillis = System.currentTimeMillis()
