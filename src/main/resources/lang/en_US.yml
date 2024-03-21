@@ -268,6 +268,7 @@ blocko.inventory.stats.overview_item:
     <gray><knocked_out_by_opponents_key>: <yellow><knocked_out_by_opponents_value>
     <gray><coins_key>: <yellow><coins_value>
     <gray><played_games_key>: <yellow><played_games_value>
+    <gray><won_games_key>: <yellow><won_games_value>
 
 blocko.inventory.stats.search_player_item:
   display_name: "<yellow>Select Team"
@@ -331,6 +332,7 @@ blocko.stats.type:
   knocked_out_by_opponents: "Knocked out by opponents"
   coins: "Coins"
   played_games: "Played games"
+  won_games: "Won games"
 
 # Configures messages for receiving coins, both normally and upon player elimination.
 blocko.coins.receive:
@@ -368,6 +370,18 @@ blocko.achievement.first_elimination:
 blocko.achievement.master_eliminator:
   display_name: "Master Eliminator"
   requirement: "<gray>Eliminate <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>opponents (<yellow><progress>%<gray>)"
+
+blocko.achievement.rush_expert:
+  display_name: "Rush Expert"
+  requirement: "<gray>Win a Blocko game in under 15 minutes"
+
+blocko.achievement.win_monster:
+  display_name: "Win Monster"
+  requirement: "<gray>Win a Blocko match <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>times. (<yellow><progress>%<gray>)"
+
+blocko.achievement.entity_collector:
+  display_name: "Entity Collector"
+  requirement: "<gray>Buy all <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>entity types. (<yellow><progress>%<gray>)"
 
 # Describes achievement unlock messages and formats for various in-game achievements.
 blocko.achievement.unlocked: |

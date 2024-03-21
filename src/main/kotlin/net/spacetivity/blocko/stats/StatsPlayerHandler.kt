@@ -32,12 +32,13 @@ class StatsPlayerHandler {
                 val statsPlayer: StatsPlayer
 
                 if (resultRow == null) {
-                    statsPlayer = StatsPlayer(uuid, 0, 0, 0, 0)
+                    statsPlayer = StatsPlayer(uuid, 0, 0, 0, 0, 0)
                     StatsPlayerDAO.insert { statement: InsertStatement<Number> ->
                         statement[StatsPlayerDAO.uuid] = uuid.toString()
                         statement[eliminatedOpponents] = 0
                         statement[knockedOutByOpponents] = 0
                         statement[playedGames] = 0
+                        statement[wonGames] = 0
                         statement[coins] = 0
                     }
 
@@ -47,6 +48,7 @@ class StatsPlayerHandler {
                         resultRow[StatsPlayerDAO.eliminatedOpponents],
                         resultRow[StatsPlayerDAO.knockedOutByOpponents],
                         resultRow[StatsPlayerDAO.playedGames],
+                        resultRow[StatsPlayerDAO.wonGames],
                         resultRow[StatsPlayerDAO.coins]
                     )
                 }
@@ -70,6 +72,7 @@ class StatsPlayerHandler {
                 it[eliminatedOpponents] = statsPlayer.eliminatedOpponents
                 it[knockedOutByOpponents] = statsPlayer.knockedOutByOpponents
                 it[playedGames] = statsPlayer.playedGames
+                it[wonGames] = statsPlayer.wonGames
                 it[coins] = statsPlayer.coins
             }
         }
@@ -90,6 +93,7 @@ class StatsPlayerHandler {
                     resultRow[StatsPlayerDAO.eliminatedOpponents],
                     resultRow[StatsPlayerDAO.knockedOutByOpponents],
                     resultRow[StatsPlayerDAO.playedGames],
+                    resultRow[StatsPlayerDAO.wonGames],
                     resultRow[StatsPlayerDAO.coins]
                 )
             }

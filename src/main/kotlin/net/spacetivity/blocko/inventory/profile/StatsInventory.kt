@@ -64,7 +64,10 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
                 Placeholder.parsed("coins_value", NumberUtils.format(this.statsPlayer.coins)),
 
                 Placeholder.parsed("played_games_key", translation.validateLineAsString("blocko.stats.type.played_games")),
-                Placeholder.parsed("played_games_value", this.statsPlayer.playedGames.toString())))
+                Placeholder.parsed("played_games_value", this.statsPlayer.playedGames.toString()),
+
+                Placeholder.parsed("won_games_key", translation.validateLineAsString("blocko.stats.type.won_games")),
+                Placeholder.parsed("won_games_value", this.statsPlayer.wonGames.toString())))
             .setOwner(if (gamePlayer.isAI) HeadUtils.BOT else player.playerProfile.properties.first().value)
             .build()))
 

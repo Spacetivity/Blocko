@@ -31,6 +31,10 @@ class GameEntityHandler {
         gameTeamLocation.isTaken = true
     }
 
+    fun hasUnlockedAllEntityTypes(uuid: UUID): Boolean {
+        return this.unlockedGameEntityTypes.get(uuid).size == GameEntityType.entries.size
+    }
+
     fun hasUnlockedEntityType(uuid: UUID, entityType: GameEntityType): Boolean {
         return this.unlockedGameEntityTypes.containsEntry(uuid, entityType)
     }
@@ -41,12 +45,12 @@ class GameEntityHandler {
 
     fun unlockEntityType(uuid: UUID, entityType: GameEntityType) {
         if (hasUnlockedEntityType(uuid, entityType)) return
+        unlockedGameEntityTypes.put(uuid, entityType)
         transaction {
             GameEntityTypeDAO.insert { statement: InsertStatement<Number> ->
                 statement[GameEntityTypeDAO.uuid] = uuid.toString()
                 statement[entityTypeName] = entityType.name
             }
-            unlockedGameEntityTypes.put(uuid, entityType)
         }
     }
 

@@ -2,15 +2,16 @@ package net.spacetivity.blocko.achievement.impl
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
+import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.achievement.container.ProgressRequirement
 import net.spacetivity.blocko.extensions.toStatsPlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 
-class MasterEliminatorAchievement(translationKey: String) : Achievement(translationKey, 550, listOf(MasterEliminatorRequirement(translationKey, 50)))
+class EntityCollectorAchievement(translationKey: String) : Achievement(translationKey, 10000, listOf(EntityCollectorRequirement(translationKey, 54)))
 
-class MasterEliminatorRequirement(override val translationKey: String, override val neededCount: Int) : ProgressRequirement<Int> {
+class EntityCollectorRequirement(override val translationKey: String, override val neededCount: Int) : ProgressRequirement<Int> {
 
     override fun getPlaceholders(gamePlayer: GamePlayer): List<TagResolver> {
         val statsPlayer: StatsPlayer = gamePlayer.toStatsPlayerInstance() ?: return listOf()
@@ -22,8 +23,7 @@ class MasterEliminatorRequirement(override val translationKey: String, override 
     }
 
     override fun isCompletedBy(gamePlayer: GamePlayer): Boolean {
-        val statsPlayer: StatsPlayer = gamePlayer.toStatsPlayerInstance() ?: return false
-        return statsPlayer.eliminatedOpponents == neededCount
+        return BlockoGame.instance.gameEntityHandler.hasUnlockedAllEntityTypes(gamePlayer.uuid)
     }
 
 }

@@ -2,14 +2,19 @@ package net.spacetivity.blocko.phase.impl
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.achievement.AchievementHandler
+import net.spacetivity.blocko.achievement.impl.RushExpertAchievement
+import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.extensions.playSound
+import net.spacetivity.blocko.extensions.toStatsPlayerInstance
 import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
+import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
@@ -29,8 +34,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     var lastControllingTeamId: Int? = null
     var controllingTeamId: Int? = null
     var phaseMode: GamePhaseMode = GamePhaseMode.DICE
-
-    private var matchStartTime: Long? = null
+    var matchStartTime: Long? = null
 
     override fun start() {
         this.phaseMode = GamePhaseMode.DICE
@@ -46,7 +50,15 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     override fun stop() {
         for (gamePlayer: GamePlayer in getArena().currentPlayers) {
             val player: Player = gamePlayer.toBukkitInstance() ?: return
+
+            val statsPlayer: StatsPlayer? = gamePlayer.toStatsPlayerInstance()
+            if (statsPlayer != null) statsPlayer.wonGames += 1
+
             BlockoGame.instance.bossbarHandler.unregisterBossbar(player, "timeoutBar")
+
+            val achievementHandler: AchievementHandler = BlockoGame.instance.achievementHandler
+            achievementHandler.getAchievement(RushExpertAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+            achievementHandler.getAchievement(WinMonsterAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
 
             val matchDuration: kotlin.time.Duration = (System.currentTimeMillis() - this.matchStartTime!!).toDuration(DurationUnit.MILLISECONDS)
 

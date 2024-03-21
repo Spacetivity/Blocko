@@ -142,7 +142,7 @@ class GameArena(
 
             GameScoreboardUtils.setGameSidebar(gamePlayer)
         } else {
-            val aiStatsPlayer = StatsPlayer(uuid, 0, 0, 0, 0)
+            val aiStatsPlayer = StatsPlayer(uuid, 0, 0, 0, 0, 0)
             BlockoGame.instance.statsPlayerHandler.cachedStatsPlayers.add(aiStatsPlayer)
         }
 

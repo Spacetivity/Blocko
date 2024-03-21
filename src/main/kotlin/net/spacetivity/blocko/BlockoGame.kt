@@ -135,6 +135,9 @@ class BlockoGame : JavaPlugin() {
         this.achievementHandler.registerAchievement(FirstKnockoutAchievement("first_knockout"))
         this.achievementHandler.registerAchievement(FirstEliminationAchievement("first_elimination"))
         this.achievementHandler.registerAchievement(MasterEliminatorAchievement("master_eliminator"))
+        this.achievementHandler.registerAchievement(RushExpertAchievement("rush_expert"))
+        this.achievementHandler.registerAchievement(WinMonsterAchievement("win_monster"))
+        this.achievementHandler.registerAchievement(EntityCollectorAchievement("entity_collector"))
 
         this.gamePlayActionHandler = GamePlayActionHandler()
         this.gamePlayActionHandler.startMainTask()

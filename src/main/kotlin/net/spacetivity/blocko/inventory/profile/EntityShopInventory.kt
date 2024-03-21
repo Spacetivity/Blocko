@@ -170,7 +170,7 @@ class EntityShopInventory : InventoryProvider {
 
         val possibleAchievementPlaceholder: TagResolver.Single = if (gameEntityType.neededAchievementKey == null) Placeholder.parsed("possible_achievement_name", "-/-")
         else Placeholder.parsed("possible_achievement_name", BlockoGame.instance.achievementHandler.getAchievementByKey(gameEntityType.neededAchievementKey)?.name
-            ?: "-/-")
+            ?: ":=)")
 
         val loreSuffixPlaceholder: TagResolver.Single = if (isUnlocked)
             Placeholder.parsed("lore_suffix", "")

@@ -2,10 +2,11 @@ package net.spacetivity.blocko.entity
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.achievement.impl.MasterEliminatorAchievement
+import net.spacetivity.blocko.achievement.impl.*
 import net.spacetivity.blocko.extensions.toGamePlayerInstance
 import net.spacetivity.blocko.extensions.toStatsPlayerInstance
 import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.StatsType
 import net.spacetivity.blocko.stats.UpdateOperation
@@ -29,19 +30,19 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     CHICKEN(EntityType.CHICKEN, 40, false, null),
     COW(EntityType.COW, 50, false, null),
     CREEPER(EntityType.CREEPER, 80, false, null),
-    DROWNED(EntityType.DROWNED, 70, false, null),
+    DROWNED(EntityType.DROWNED, 70, false, BlockoGame.instance.achievementHandler.getAchievement(PlayFirstGameAchievement::class.java)?.translationKey),
     ENDERMAN(EntityType.ENDERMAN, 80, false, null),
     EVOKER(EntityType.EVOKER, 120, false, null),
     FOX(EntityType.FOX, 60, false, null),
     FROG(EntityType.FROG, 40, false, null),
     HUSK(EntityType.HUSK, 70, false, null),
-    MUSHROOM_COW(EntityType.MUSHROOM_COW, 50, false, null),
+    MUSHROOM_COW(EntityType.MUSHROOM_COW, 3500, false, BlockoGame.instance.achievementHandler.getAchievement(EntityCollectorAchievement::class.java)?.translationKey),
     OCELOT(EntityType.OCELOT, 50, false, null),
     PIG(EntityType.PIG, 40, false, null),
     PIGLIN(EntityType.PIGLIN, 70, false, null),
     PIGLIN_BRUTE(EntityType.PIGLIN_BRUTE, 120, false, null),
     PILLAGER(EntityType.PILLAGER, 90, false, null),
-    RABBIT(EntityType.RABBIT, 40, false, null),
+    RABBIT(EntityType.RABBIT, 40, false, BlockoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java)?.translationKey),
     SHEEP(EntityType.SHEEP, 40, false, null),
     SHULKER(EntityType.SHULKER, 150, false, null),
     SKELETON(EntityType.SKELETON, 90, false, null),
@@ -60,7 +61,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     PARROT(EntityType.PARROT, 50, false, null),
     VEX(EntityType.VEX, 75, false, null),
 
-    IRON_GOLEM(EntityType.IRON_GOLEM, 150, false, null),
+    IRON_GOLEM(EntityType.IRON_GOLEM, 150, false, BlockoGame.instance.achievementHandler.getAchievement(WinMonsterAchievement::class.java)?.translationKey),
 
     HORSE(EntityType.HORSE, 100, true, null),
     ZOMBIE_HORSE(EntityType.ZOMBIE_HORSE, 100, true, null),
@@ -127,11 +128,14 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     fun buyEntityType(player: Player) {
         if (isUnlockedByPlayer(player.uniqueId)) return
 
+        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
         val statsPlayer: StatsPlayer = player.toGamePlayerInstance()?.toStatsPlayerInstance() ?: return
 
         BlockoGame.instance.gameEntityHandler.unlockEntityType(player.uniqueId, this)
         statsPlayer.update(StatsType.COINS, UpdateOperation.DECREASE, this.price)
         statsPlayer.updateDbEntry()
+
+        BlockoGame.instance.achievementHandler.getAchievement(EntityCollectorAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
 
         player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1F)
         player.translateMessage("blocko.entity_shop.successfully_bought_entity_type",

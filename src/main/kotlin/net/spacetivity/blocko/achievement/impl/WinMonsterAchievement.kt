@@ -8,9 +8,9 @@ import net.spacetivity.blocko.extensions.toStatsPlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 
-class MasterEliminatorAchievement(translationKey: String) : Achievement(translationKey, 550, listOf(MasterEliminatorRequirement(translationKey, 50)))
+class WinMonsterAchievement(translationKey: String) : Achievement(translationKey, 165, listOf(WinMonsterRequirement(translationKey, 20)))
 
-class MasterEliminatorRequirement(override val translationKey: String, override val neededCount: Int) : ProgressRequirement<Int> {
+class WinMonsterRequirement(override val translationKey: String, override val neededCount: Int) : ProgressRequirement<Int> {
 
     override fun getPlaceholders(gamePlayer: GamePlayer): List<TagResolver> {
         val statsPlayer: StatsPlayer = gamePlayer.toStatsPlayerInstance() ?: return listOf()
@@ -23,7 +23,7 @@ class MasterEliminatorRequirement(override val translationKey: String, override 
 
     override fun isCompletedBy(gamePlayer: GamePlayer): Boolean {
         val statsPlayer: StatsPlayer = gamePlayer.toStatsPlayerInstance() ?: return false
-        return statsPlayer.eliminatedOpponents == neededCount
+        return statsPlayer.wonGames == 20
     }
 
 }
