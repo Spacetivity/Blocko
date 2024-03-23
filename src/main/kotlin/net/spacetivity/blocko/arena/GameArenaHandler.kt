@@ -13,6 +13,7 @@ import net.spacetivity.blocko.player.GamePlayer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
+import org.bukkit.WorldCreator
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
 import org.bukkit.block.sign.Side
@@ -33,7 +34,17 @@ class GameArenaHandler {
         transaction {
             for (resultRow: ResultRow in GameArenaDAO.selectAll().toMutableList()) {
                 val arenaId: String = resultRow[GameArenaDAO.id]
-                val gameWorld: World = Bukkit.getWorld(resultRow[GameArenaDAO.worldName]) ?: continue
+
+                val worldName = resultRow[GameArenaDAO.worldName]
+                var gameWorld: World? = null
+
+                if (Bukkit.getWorld(worldName) == null)
+                    gameWorld = WorldCreator(worldName).createWorld()
+
+                if (gameWorld == null) {
+                    println("Cannot load game world $worldName!")
+                    continue
+                }
 
                 val serializedLocation = resultRow[GameArenaDAO.playerLocation].split(":")
                 val x: Double = serializedLocation[0].toDouble()
@@ -50,7 +61,7 @@ class GameArenaHandler {
                 gamePhaseHandler.cachedGamePhases.put(arenaId, IngamePhase(arenaId))
                 gamePhaseHandler.cachedGamePhases.put(arenaId, EndingPhase(arenaId))
 
-                cachedArenas.add(GameArena(arenaId, gameWorld, status, idlePhase, playerLocation.y))
+                cachedArenas.add(GameArena(arenaId, gameWorld, status, idlePhase, playerLocation.y, playerLocation))
             }
         }
     }
@@ -87,7 +98,7 @@ class GameArenaHandler {
         gamePhaseHandler.cachedGamePhases.put(id, IngamePhase(id))
         gamePhaseHandler.cachedGamePhases.put(id, EndingPhase(id))
 
-        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, status, idlePhase, location.y))
+        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, status, idlePhase, location.y, location))
         return true
     }
 

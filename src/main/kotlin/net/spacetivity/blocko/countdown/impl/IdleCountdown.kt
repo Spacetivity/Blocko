@@ -28,6 +28,10 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5) {
     override fun handleCountdownEnd() {
         val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
 
+        for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+            gamePlayer.toBukkitInstance()?.teleport(gameArena.location)
+        }
+
         addMissingPlayers(gameArena)
 
         for (gamePlayer: GamePlayer in gameArena.currentPlayers) {

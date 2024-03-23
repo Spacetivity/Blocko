@@ -89,18 +89,6 @@ class DiceHandler {
             return
         }
 
-        if (this.dicingPlayers.isNotEmpty()) {
-            val stillDicing: MutableList<GamePlayer> = mutableListOf()
-
-            for (uuid in this.dicingPlayers.keys) {
-                val currentGp = BlockoGame.instance.gameArenaHandler.getArena(gamePlayer.arenaId)!!.currentPlayers.find { it.uuid == uuid }
-                    ?: continue
-                stillDicing.add(currentGp)
-            }
-
-            return
-        }
-
         this.dicingPlayers[gamePlayer.uuid] = DiceSession(1, System.currentTimeMillis() + (1000 * 2))
     }
 

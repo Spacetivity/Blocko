@@ -97,7 +97,7 @@ blocko.main_game_loop:
   needs_a_six: "<prefix> <gray>You can't move this entity into the field without dicing 6 first!"
   entity_not_movable: "<prefix> <gray>You can't move this entity!"
   entity_selected: "<prefix> <gray>Game entity will now move!"
-  entity_thrown_out_by_opponent: "<prefix> <successor_team_color><successor_team_name> <gray>has thrown out a entity from <victim_team_color><victim_team_name><gray>."
+  entity_thrown_out_by_opponent: "<prefix> <successor_team_color><successor_team_name> <gray>has thrown out an entity from <victim_team_color><victim_team_name><gray>."
 
 blocko.countdown:
   idle:
@@ -109,6 +109,7 @@ blocko.countdown:
 
 blocko.command:
   blocko:
+    lobby_spawn_set: "<prefix> <gray>Lobby spawn was set!"
     no_arenas_found: "<prefix> <gray>No arenas found!"
     arena_not_exists: "<prefix> <gray>Arena with id <yellow><id> <gray>doesn't exist!"
     arena_list:
@@ -126,6 +127,8 @@ blocko.command:
     world_teleported: "<prefix> <gray>Teleported to world <yellow><world_name><gray>."
     usage: |
       <prefix> <gray>Command usage:
+      <dark_gray>» <gray>/blocko setLobbySpawn
+      
       <dark_gray>» <gray>/blocko arena list
       <dark_gray>» <gray>/blocko arena init
       <dark_gray>» <gray>/blocko arena delete <arenaId>
@@ -342,7 +345,7 @@ blocko.coins.receive:
 # In-game
 # ------------------------------
 # Sets the boss bar timeout message and various achievements with their requirements.
-blocko.bossbar.timeout: "<gray>Time left to dice & pick: <time_color><time> <unit><dark_gray>"
+blocko.bossbar.timeout: "<gray>Time left for <team_color><team_name><gray>: <time_color><time> <unit><dark_gray>"
 
 # Achievements and Rewards
 # ------------------------------

@@ -15,6 +15,7 @@ import net.spacetivity.blocko.extensions.getArena
 import net.spacetivity.blocko.extensions.getTeam
 import net.spacetivity.blocko.extensions.toGamePlayerInstance
 import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
@@ -45,6 +46,10 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     fun onJoin(event: PlayerJoinEvent) {
         val player: Player = event.player
+
+        val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
+        if (lobbySpawn != null) player.teleport(lobbySpawn.toBukkitInstance())
+
         this.plugin.statsPlayerHandler.createOrLoadStatsPlayer(player.uniqueId)
         this.plugin.achievementHandler.createOrLoadAchievementPlayer(player.uniqueId)
         this.plugin.gameEntityHandler.loadUnlockedEntityTypes(player.uniqueId)

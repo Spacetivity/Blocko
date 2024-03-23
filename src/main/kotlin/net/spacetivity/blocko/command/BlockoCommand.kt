@@ -28,6 +28,12 @@ class BlockoCommand : SpaceCommandExecutor {
         if (!sender.isPlayer) return
         val player: Player = sender.castTo(Player::class.java)
 
+        if (args.size == 1 && args[0].equals("setLobbySpawn", true)) {
+            BlockoGame.instance.lobbySpawnHandler.setLobbySpawn(player.location)
+            player.translateMessage("blocko.command.blocko.lobby_spawn_set")
+            return
+        }
+
         if (args.size == 2 && args[0].equals("arena", true) && args[1].equals("list", true)) {
             val cachedArenas: MutableList<GameArena> = this.gameArenaHandler.cachedArenas
 
@@ -177,7 +183,7 @@ class BlockoCommand : SpaceCommandExecutor {
         val player: Player = sender.castTo(Player::class.java)
 
         if (args.size == 1)
-            result.addAll(listOf("arena", "worldTp"))
+            result.addAll(listOf("setLobbySpawn", "arena", "worldTp"))
 
         if (args.size == 2 && args[0].equals("arena", true))
             result.addAll(listOf("list", "init", "setup", "delete"))

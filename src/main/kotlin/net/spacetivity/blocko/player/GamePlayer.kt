@@ -33,7 +33,10 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
         this.activeEntity = gameEntity
         this.activeEntity!!.entityStatus = GameEntityStatus.MOVING
         this.actionTimeoutTimestamp = null
-        BlockoGame.instance.bossbarHandler.unregisterBossbar(toBukkitInstance()!!, "timeoutBar")
+
+        for (gamePlayer: GamePlayer in BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
+            BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
+        }
 
         GameScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
@@ -43,6 +46,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
         if (this.dicedNumber == null) return
 
         val situation: Pair<EntityPickRule, GameEntity?> = EntityPickRule.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
+        this.actionTimeoutTimestamp = null
 
         if (situation.first == EntityPickRule.NOT_MOVABLE && situation.second == null) {
             this.activeEntity = null
@@ -57,6 +61,10 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
         this.activeEntity!!.entityStatus = GameEntityStatus.MOVING
         this.activeEntity!!.toggleHighlighting(true)
         this.lastEntityPickRule = situation.first
+
+        for (gamePlayer: GamePlayer in BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
+            BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
+        }
 
         GameScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY

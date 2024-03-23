@@ -54,13 +54,13 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
 
     @EventHandler
     fun onInteractWithGameEntity(event: PlayerInteractAtEntityEvent) {
-        if (BlockoGame.instance.gameEntityHandler.gameEntities.values().none { it.livingEntity!!.uniqueId == event.rightClicked.uniqueId }) return
+        if (BlockoGame.instance.gameEntityHandler.gameEntities.values().filter { it.livingEntity != null }.none { it.livingEntity!!.uniqueId == event.rightClicked.uniqueId }) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onDamageGameEntity(event: EntityDamageByEntityEvent) {
-        if (BlockoGame.instance.gameEntityHandler.gameEntities.values().none { it.livingEntity!!.uniqueId == event.entity.uniqueId }) return
+        if (BlockoGame.instance.gameEntityHandler.gameEntities.values().filter { it.livingEntity != null }.none { it.livingEntity!!.uniqueId == event.entity.uniqueId }) return
         event.isCancelled = true
     }
 

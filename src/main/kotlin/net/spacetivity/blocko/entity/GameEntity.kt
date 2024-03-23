@@ -48,6 +48,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
 
         if (this.gameEntityType.isBaby && this.livingEntity!! is Animals) {
             val animal: Animals = this.livingEntity as Animals
+            animal.ageLock = true
             animal.setBaby()
         }
 

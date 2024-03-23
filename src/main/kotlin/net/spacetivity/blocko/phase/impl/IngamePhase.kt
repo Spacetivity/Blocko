@@ -7,6 +7,7 @@ import net.spacetivity.blocko.achievement.impl.RushExpertAchievement
 import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.entity.GameEntity
+import net.spacetivity.blocko.extensions.getArena
 import net.spacetivity.blocko.extensions.playSound
 import net.spacetivity.blocko.extensions.toStatsPlayerInstance
 import net.spacetivity.blocko.extensions.translateMessage
@@ -91,14 +92,14 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
         hotbarItems[0] = BlockoGame.instance.diceHandler.getDiceItem()
 
-        for ((entityIndex, i) in (2..5).withIndex()) {
+        for ((entityIndex, i) in (1..4).withIndex()) {
             hotbarItems[i] = ItemBuilder(Material.ARMOR_STAND)
                 .setName(translation.validateItemName("blocko.main_game_loop.entity_selector_display_name", Placeholder.parsed("count", (entityIndex + 1).toString())))
                 .setData("entitySelector", entityIndex)
                 .build()
         }
 
-        hotbarItems[8] = ItemBuilder(Material.CLOCK)
+        hotbarItems[7] = ItemBuilder(Material.CLOCK)
             .setName(translation.validateItemName("blocko.items.profile.display_name"))
             .setLoreByComponent(translation.validateItemLore("blocko.items.profile.lore"))
             .onInteract { event: PlayerInteractEvent ->
@@ -106,6 +107,16 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
                 InventoryUtils.openProfileInventory(player, false)
             }
             .build()
+
+        hotbarItems[8] = ItemBuilder(Material.SLIME_BALL)
+            .setName(translation.validateItemName("blocko.items.leave.display_name"))
+            .onInteract { event: PlayerInteractEvent ->
+                val player: Player = event.player
+                val gameArena: GameArena = player.getArena() ?: return@onInteract
+                gameArena.quit(player)
+            }
+            .build()
+
     }
 
     fun isInControllingTeam(uuid: UUID): Boolean {
@@ -113,6 +124,10 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun setNextControllingTeam(): GameTeam? {
+        getArena().currentPlayers.filter { !it.isAI }.forEach { gamePlayer: GamePlayer ->
+            BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
+        }
+
         GameScoreboardUtils.updateDicedNumberLine(this.arenaId, null)
 
         val oldControllingGamePlayer: GamePlayer? = getControllingGamePlayer()
@@ -151,7 +166,11 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
     fun getControllingGamePlayer(): GamePlayer? {
         val controllingTeam: GameTeam = getControllingTeam() ?: return null
-        return getArena().currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
+        val currentPlayers: MutableSet<GamePlayer> = getArena().currentPlayers
+        if (currentPlayers.isEmpty()) return null
+
+        val uuid: UUID = controllingTeam.teamMembers.firstOrNull() ?: return null
+        return currentPlayers.find { it.uuid == uuid }
     }
 
     fun getControllingGamePlayerTimeLeftFraction(): Float {

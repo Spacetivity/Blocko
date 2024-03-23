@@ -19,6 +19,10 @@ class GameEntityHandler {
         return this.gameEntities.get(arenaId).filter { it.teamName.equals(teamName, true) }
     }
 
+    fun clearEntitiesForTeam(arenaId: String, teamName: String) {
+        getEntitiesFromTeam(arenaId, teamName).forEach { it.despawn() }
+    }
+
     fun clearEntitiesFromArena(arenaId: String) {
         val entities: MutableCollection<GameEntity> = this.gameEntities.get(arenaId).toMutableList()
         entities.forEach { it.despawn() }
@@ -27,7 +31,12 @@ class GameEntityHandler {
 
     fun spawnEntity(gameTeamLocation: GameTeamLocation, type: GameEntityType) {
         val entityId: Int = this.gameEntities[gameTeamLocation.arenaId].filter { it.teamName == gameTeamLocation.teamName }.size
-        GameEntity(gameTeamLocation.arenaId, gameTeamLocation.teamName, type, entityId).spawn(gameTeamLocation.getWorldPosition())
+
+        val entityLocation = gameTeamLocation.getWorldPosition().clone()
+        entityLocation.pitch = 0.0F
+
+        GameEntity(gameTeamLocation.arenaId, gameTeamLocation.teamName, type, entityId).spawn(entityLocation)
+
         gameTeamLocation.isTaken = true
     }
 

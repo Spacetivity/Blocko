@@ -9,7 +9,7 @@ import net.spacetivity.blocko.extensions.toStatsPlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 
-class EntityCollectorAchievement(translationKey: String) : Achievement(translationKey, 10000, listOf(EntityCollectorRequirement(translationKey, 54)))
+class EntityCollectorAchievement(translationKey: String) : Achievement(translationKey, 10000, listOf(EntityCollectorRequirement(translationKey, 55)))
 
 class EntityCollectorRequirement(override val translationKey: String, override val neededCount: Int) : ProgressRequirement<Int> {
 

@@ -4,6 +4,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArenaStatus
+import net.spacetivity.blocko.extensions.translateActionBar
 import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
@@ -42,7 +43,7 @@ class GameArenaSetupHandler {
                 if (toolMode == GameArenaSetupTool.ToolMode.SET_TURN || toolMode == GameArenaSetupTool.ToolMode.SET_TEAM_ENTRANCE) {
                     val facing: BlockFace = player.facing
                     if (facing == BlockFace.NORTH || facing == BlockFace.SOUTH || facing == BlockFace.EAST || facing == BlockFace.WEST)
-                        player.translateMessage("blocko.setup.turn_direction", Placeholder.parsed("face", facing.name))
+                        player.translateActionBar("blocko.setup.turn_direction", Placeholder.parsed("face", facing.name))
                 }
 
                 if (System.currentTimeMillis() < arenaSetupData.timeoutTimestamp) continue

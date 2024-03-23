@@ -31,6 +31,8 @@ import net.spacetivity.blocko.files.GlobalConfigFile
 import net.spacetivity.blocko.listener.PlayerListener
 import net.spacetivity.blocko.listener.PlayerSetupListener
 import net.spacetivity.blocko.listener.ProtectionListener
+import net.spacetivity.blocko.lobby.LobbySpawnDAO
+import net.spacetivity.blocko.lobby.LobbySpawnHandler
 import net.spacetivity.blocko.phase.GamePhaseHandler
 import net.spacetivity.blocko.player.GamePlayActionHandler
 import net.spacetivity.blocko.scoreboard.SidebarHandler
@@ -77,6 +79,8 @@ class BlockoGame : JavaPlugin() {
     lateinit var statsPlayerHandler: StatsPlayerHandler
     lateinit var achievementHandler: AchievementHandler
 
+    lateinit var lobbySpawnHandler: LobbySpawnHandler
+
     private lateinit var gamePlayActionHandler: GamePlayActionHandler
 
     override fun onEnable() {
@@ -100,7 +104,8 @@ class BlockoGame : JavaPlugin() {
                 GameArenaSignDAO,
                 AchievementPlayerDAO,
                 StatsPlayerDAO,
-                GameEntityTypeDAO
+                GameEntityTypeDAO,
+                LobbySpawnDAO
             )
         }
 
@@ -138,6 +143,8 @@ class BlockoGame : JavaPlugin() {
         this.achievementHandler.registerAchievement(RushExpertAchievement("rush_expert"))
         this.achievementHandler.registerAchievement(WinMonsterAchievement("win_monster"))
         this.achievementHandler.registerAchievement(EntityCollectorAchievement("entity_collector"))
+
+        this.lobbySpawnHandler = LobbySpawnHandler()
 
         this.gamePlayActionHandler = GamePlayActionHandler()
         this.gamePlayActionHandler.startMainTask()
@@ -202,8 +209,6 @@ class BlockoGame : JavaPlugin() {
         return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(
             defaultLanguageName,
             Material.GOLDEN_HOE.name,
-            "BasicLudoBoard",
-            true,
             false,
             10,
             20

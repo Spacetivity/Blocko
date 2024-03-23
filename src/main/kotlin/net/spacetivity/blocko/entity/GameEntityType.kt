@@ -29,6 +29,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     SPIDER(EntityType.SPIDER, 70, false, null),
     CHICKEN(EntityType.CHICKEN, 40, false, null),
     COW(EntityType.COW, 50, false, null),
+    GOAT(EntityType.GOAT, 10, false, BlockoGame.instance.achievementHandler.getAchievement(WinMonsterAchievement::class.java)?.translationKey),
     CREEPER(EntityType.CREEPER, 80, false, null),
     DROWNED(EntityType.DROWNED, 70, false, BlockoGame.instance.achievementHandler.getAchievement(PlayFirstGameAchievement::class.java)?.translationKey),
     ENDERMAN(EntityType.ENDERMAN, 80, false, null),

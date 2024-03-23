@@ -9,13 +9,17 @@ import net.spacetivity.blocko.extensions.getTeam
 import net.spacetivity.blocko.extensions.toGamePlayerInstance
 import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.field.GameField
+import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.phase.GamePhase
+import net.spacetivity.blocko.phase.GamePhaseMode
+import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.team.GameTeamOptions
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.entity.Player
@@ -27,7 +31,8 @@ class GameArena(
     val gameWorld: World,
     var status: GameArenaStatus,
     var phase: GamePhase,
-    val yLevel: Double
+    val yLevel: Double,
+    val location: Location,
 ) {
 
     var locked: Boolean = false
@@ -156,6 +161,10 @@ class GameArena(
         sendArenaMessage("blocko.arena.quit", Placeholder.parsed("name", player.name))
         player.clearPhaseItems()
 
+        val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
+        if (lobbySpawn != null && player.world.name != lobbySpawn.worldName)
+            player.teleport(lobbySpawn.toBukkitInstance())
+
         BlockoGame.instance.bossbarHandler.clearBossbars(player)
 
         val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == player.uniqueId } ?: return
@@ -166,6 +175,19 @@ class GameArena(
         if (!gamePlayer.isAI) {
             BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)?.updateDbEntry()
             GameScoreboardUtils.removeGameSidebar(player)
+        }
+
+        if (phase.isIngame()) {
+            val ingamePhase: IngamePhase = phase as IngamePhase
+            BlockoGame.instance.gameEntityHandler.clearEntitiesForTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
+            gamePlayer.actionTimeoutTimestamp = null
+
+            for (currentGamePlayer: GamePlayer in this.currentPlayers.filter { !it.isAI }) {
+                BlockoGame.instance.bossbarHandler.unregisterBossbar(currentGamePlayer.toBukkitInstance()!!, "timeoutBar")
+            }
+
+            ingamePhase.phaseMode = GamePhaseMode.DICE
+            ingamePhase.setNextControllingTeam()
         }
 
         if (gamePlayer.teamName != null)
@@ -206,6 +228,10 @@ class GameArena(
         for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
             if (player == null) continue
 
+            val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
+            if (lobbySpawn != null && player.world.name != lobbySpawn.worldName)
+                player.teleport(lobbySpawn.toBukkitInstance())
+
             GameScoreboardUtils.removeGameSidebar(player)
             BlockoGame.instance.bossbarHandler.clearBossbars(player)
 
@@ -213,6 +239,10 @@ class GameArena(
         }
 
         for (gamePlayer: GamePlayer in this.currentPlayers) {
+            gamePlayer.actionTimeoutTimestamp = null
+            gamePlayer.activeEntity = null
+            gamePlayer.lastEntityPickRule = null
+
             val statsPlayer: StatsPlayer? = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)
 
             if (gamePlayer.isAI)
@@ -223,6 +253,10 @@ class GameArena(
             for (gameTeam: GameTeam in BlockoGame.instance.gameTeamHandler.gameTeams[this.id]) {
                 gameTeam.quit(gamePlayer)
             }
+        }
+
+        for (gameTeam: GameTeam in BlockoGame.instance.gameTeamHandler.gameTeams[this.id]) {
+            gameTeam.deactivated = false
         }
 
         val diceHandler: DiceHandler = BlockoGame.instance.diceHandler
