@@ -7,16 +7,14 @@ import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.World
+import org.bukkit.entity.Chicken
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.entity.EntityCombustEvent
-import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.EntityDamageEvent
-import org.bukkit.event.entity.FoodLevelChangeEvent
+import org.bukkit.event.entity.*
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.PlayerDropItemEvent
@@ -71,6 +69,13 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
         if (event.entity !is Player) return
         val player: Player = event.entity as Player
         if (!shouldBeProtected(player.world, player)) return
+        event.isCancelled = true
+    }
+
+    @EventHandler
+    fun onChickenAggDropInArenaWorld(event: EntityDropItemEvent) {
+        if (!shouldBeProtected(event.entity.world)) return
+        if (event.entity !is Chicken) return
         event.isCancelled = true
     }
 

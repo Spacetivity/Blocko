@@ -30,8 +30,14 @@ class GamePlayActionHandler {
         this.mainTask = Bukkit.getScheduler().runTaskTimerAsynchronously(BlockoGame.instance, Runnable {
             for (gameArena: GameArena in BlockoGame.instance.gameArenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
                 for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
-                    if (gamePlayer.getTeam().deactivated) continue
                     val player: Player = gamePlayer.toBukkitInstance() ?: continue
+
+                    if (player.location.y <= (gameArena.yLevel - 10)) {
+                        val yLevelDifference = gameArena.yLevel - player.location.y
+                        player.teleportAsync(player.location.clone().add(0.0, yLevelDifference + 2.0, 1.0))
+                    }
+
+                    if (gamePlayer.getTeam().deactivated) continue
 
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
                     if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) continue
