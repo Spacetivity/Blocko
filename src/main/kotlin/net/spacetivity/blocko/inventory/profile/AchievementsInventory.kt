@@ -3,12 +3,6 @@ package net.spacetivity.blocko.inventory.profile
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
-import net.spacetivity.inventory.api.annotation.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPosition
-import net.spacetivity.inventory.api.pagination.InventoryPagination
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.AchievementHandler
 import net.spacetivity.blocko.achievement.AchievementPlayer
@@ -20,6 +14,12 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
+import net.spacetivity.inventory.api.annotation.InventoryProperties
+import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProvider
+import net.spacetivity.inventory.api.item.InteractiveItem
+import net.spacetivity.inventory.api.item.InventoryPosition
+import net.spacetivity.inventory.api.pagination.InventoryPagination
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
@@ -80,13 +80,14 @@ class AchievementsInventory : InventoryProvider {
             else
                 Placeholder.parsed("suffix", "")
 
-            items.add(InteractiveItem.of(ItemBuilder(if (hasCompleted) Material.LIME_DYE else Material.GRAY_DYE)
+            val itemBuilder = ItemBuilder(if (hasCompleted) Material.LIME_DYE else Material.GRAY_DYE)
                 .setName(translation.validateItemName("blocko.inventory.achievements.achievement_item.display_name",
                     Placeholder.parsed("achievement_color", "<${if (hasCompleted) NamedTextColor.GREEN.asHexString() else NamedTextColor.DARK_GRAY.asHexString()}>"),
                     Placeholder.parsed("achievement_name", achievement.name),
                     suffixPlaceholder))
-                .setLoreByComponent(achievement.getDescription(gamePlayer))
-                .build()))
+
+            if (!hasCompleted) itemBuilder.setLoreByComponent(achievement.getDescription(gamePlayer))
+            items.add(InteractiveItem.of(itemBuilder.build()))
         }
 
         return items

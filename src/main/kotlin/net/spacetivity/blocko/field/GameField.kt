@@ -79,22 +79,22 @@ class GameField(
     }
 
     private fun handleStatsReward(gamePlayer: GamePlayer, isReward: Boolean) {
-        if (!gamePlayer.isAI) {
-            val possibleAchievements: MutableSet<Achievement?> = mutableSetOf()
+        val possibleAchievements: MutableSet<Achievement?> = mutableSetOf()
 
+        if (!gamePlayer.isAI) {
             if (isReward) {
                 possibleAchievements.add(BlockoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java))
                 possibleAchievements.add(BlockoGame.instance.achievementHandler.getAchievement(MasterEliminatorAchievement::class.java))
             } else {
                 possibleAchievements.add(BlockoGame.instance.achievementHandler.getAchievement(FirstKnockoutAchievement::class.java))
             }
-
-            possibleAchievements.forEach { it?.grantIfCompletedBy(gamePlayer) }
         }
 
         val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
         val statsType: StatsType = if (isReward) StatsType.ELIMINATED_OPPONENTS else StatsType.KNOCKED_OUT_BY_OPPONENTS
         statsPlayer.update(statsType, UpdateOperation.INCREASE, 1)
+
+        possibleAchievements.forEach { it?.grantIfCompletedBy(gamePlayer) }
 
         val coinsPerElimination: Int = BlockoGame.instance.globalConfigFile.coinsPerElimination
 
