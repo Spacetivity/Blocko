@@ -34,7 +34,8 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
             .build()) { _, _, _ ->
 
             if (this.statsPlayer.uuid != player.uniqueId) {
-                val selfStatsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId) ?: return@of
+                val selfStatsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)
+                    ?: return@of
                 InventoryUtils.openStatsInventory(player, selfStatsPlayer)
                 return@of
             }
@@ -44,12 +45,12 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
             InventoryUtils.openProfileInventory(player, isShopItemActive)
         })
 
+        val gamePlayer: GamePlayer = this.gameArena.currentPlayers.find { it.uuid == this.statsPlayer.uuid } ?: return
+
         for (column in 0..<4) {
             val statsType: StatsType = StatsType.entries[column]
-            controller.setItem(2, column * 2 + 1, getStatsItem(translation, statsType))
+            controller.setItem(2, column * 2 + 1, getStatsItem(translation, gamePlayer.isAI, statsType))
         }
-
-        val gamePlayer: GamePlayer = this.gameArena.currentPlayers.find { it.uuid == this.statsPlayer.uuid } ?: return
 
         controller.setItem(InventoryPosition.of(4, if (this.showSearchPlayerItem) 2 else 4), InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
             .setName(translation.validateItemName("blocko.inventory.stats.overview_item.display_name"))
@@ -79,11 +80,14 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
         }
     }
 
-    private fun getStatsItem(translation: Translation, statsType: StatsType): InteractiveItem {
+    private fun getStatsItem(translation: Translation, isAI: Boolean, statsType: StatsType): InteractiveItem {
         val statsValue: Int = this.statsPlayer.getStatsValue(statsType)
 
-        return InteractiveItem.of(ItemBuilder(Material.PAPER)
-            .setName(translation.validateItemName("blocko.inventory.stats.stats_type_item.display_name",
+        val displayAsAI: Boolean = isAI && (statsType == StatsType.COINS || statsType == StatsType.PLAYED_GAMES)
+        val displayNameKey = "blocko.inventory.stats.stats_type_item.display_name.${if (displayAsAI) "not_active" else "active"}"
+
+        return InteractiveItem.of(ItemBuilder(if (displayAsAI) Material.BARRIER else Material.PAPER)
+            .setName(translation.validateItemName(displayNameKey,
                 Placeholder.parsed("type_name", translation.validateLineAsString(statsType.nameKey)),
                 Placeholder.parsed("value", if (statsType == StatsType.COINS) NumberUtils.format(statsValue) else statsValue.toString())))
             .build())

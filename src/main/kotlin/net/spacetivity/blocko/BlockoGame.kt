@@ -137,6 +137,7 @@ class BlockoGame : JavaPlugin() {
         this.achievementHandler = AchievementHandler()
         this.achievementHandler.registerAchievement(PlayFirstGameAchievement("first_game"))
         this.achievementHandler.registerAchievement(FairPlayAchievement("fair_play"))
+        this.achievementHandler.registerAchievement(BadMannersAchievement("bad_manners"))
         this.achievementHandler.registerAchievement(FirstKnockoutAchievement("first_knockout"))
         this.achievementHandler.registerAchievement(FirstEliminationAchievement("first_elimination"))
         this.achievementHandler.registerAchievement(MasterEliminatorAchievement("master_eliminator"))
@@ -211,7 +212,9 @@ class BlockoGame : JavaPlugin() {
             Material.GOLDEN_HOE.name,
             false,
             10,
-            20
+            20,
+            30,
+            10
         ))
     }
 

@@ -5,7 +5,7 @@ import io.papermc.paper.event.player.PlayerOpenSignEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.achievement.container.Achievement
+import net.spacetivity.blocko.achievement.impl.BadMannersAchievement
 import net.spacetivity.blocko.achievement.impl.FairPlayAchievement
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.sign.GameArenaSign
@@ -46,6 +46,8 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     fun onJoin(event: PlayerJoinEvent) {
         val player: Player = event.player
+        player.allowFlight = true
+        player.isFlying = true
 
         val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
         if (lobbySpawn != null) player.teleport(lobbySpawn.toBukkitInstance())
@@ -80,13 +82,14 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
 
     @EventHandler
     fun onChat(event: AsyncChatEvent) {
+        val rawMessage: String = PlainTextComponentSerializer.plainText().serialize(event.message())
         val gamePlayer: GamePlayer = event.player.toGamePlayerInstance() ?: return
 
-        val rawMessage: String = PlainTextComponentSerializer.plainText().serialize(event.message())
-        if (!rawMessage.contains("gg", true)) return
+        if (rawMessage.contains("gg", true))
+            this.plugin.achievementHandler.getAchievement(FairPlayAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
 
-        val achievement: Achievement = this.plugin.achievementHandler.getAchievement(FairPlayAchievement::class.java) ?: return
-        achievement.grantIfCompletedBy(gamePlayer)
+        if (rawMessage.contains("bg", true))
+            this.plugin.achievementHandler.getAchievement(BadMannersAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
     }
 
     @EventHandler
@@ -149,7 +152,8 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
 
                 event.isCancelled = true
 
-                val arenaSign: GameArenaSign = BlockoGame.instance.gameArenaSignHandler.getSign(block.location) ?: return
+                val arenaSign: GameArenaSign = BlockoGame.instance.gameArenaSignHandler.getSign(block.location)
+                    ?: return
                 val gameArena: GameArena? = if (arenaSign.arenaId == null) null else BlockoGame.instance.gameArenaHandler.getArena(arenaSign.arenaId!!)
 
                 if (gameArena == null) {

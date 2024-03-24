@@ -11,17 +11,17 @@ import org.bukkit.Sound
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
 
-class IdleCountdown(arenaId: String) : GameCountdown(arenaId, 5) {
+class IdleCountdown(arenaId: String) : GameCountdown(arenaId, BlockoGame.instance.globalConfigFile.idleCountdownSeconds) {
 
     override fun handleCountdownIdle(countdownTask: BukkitTask, remainingSeconds: Int) {
         val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
         val isOne = remainingSeconds == 1
 
         if (remainingSeconds % 10 == 0 || remainingSeconds < 6) {
+            gameArena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP, 0.2F)
             gameArena.sendArenaMessage("blocko.countdown.idle.running",
                 Placeholder.parsed("time", (if (isOne) "one" else remainingSeconds).toString()),
                 Placeholder.parsed("time_string", if (isOne) "second" else "seconds"))
-            gameArena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP, 0.2F)
         }
     }
 

@@ -293,7 +293,9 @@ blocko.inventory.stats_team_selector.team_item:
       <red>You cannot select this team, it has no members
 
 blocko.inventory.stats.stats_type_item:
-  display_name: "<gray><type_name>: <yellow><value>"
+  display_name:
+    active: "<gray><type_name>: <yellow><value>"
+    not_active: "<red>AI has no <type_name>"
 
 blocko.inventory.achievements.title: "Achievements"
 
@@ -305,6 +307,11 @@ blocko.inventory.achievements.achievement_item:
   suffix: "✔"
 
 blocko.inventory.entity_shop.title: "Game Entities"
+
+blocko.inventory.leave.title: "Leave game?"
+
+blocko.inventory.leave.display_item:
+  display_name: "<gray>Leave game"
 
 blocko.inventory.entity_shop.no_entity_types_found:
   display_name: "<red>No entity types found!"
@@ -358,6 +365,10 @@ blocko.achievement.first_game:
 blocko.achievement.fair_play:
   display_name: "Fair Play"
   requirement: "<gray>Write gg in the chat, after a Blocko round"
+
+blocko.achievement.bad_manners:
+  display_name: "Bad Manners"
+  requirement: "<gray>Write bg in the chat, after a Blocko round. (If you are not well behaved!!)"
 
 # Awarded upon experiencing a knockout by an opponent for the first time.
 blocko.achievement.first_knockout:

@@ -2,9 +2,11 @@ package net.spacetivity.blocko.listener
 
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.extensions.getArena
+import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.PersistentDataUtils
+import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -47,8 +49,8 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
         if (!PersistentDataUtils.hasData(item.itemMeta, "clickableItem")) return
 
         val clickableItemId: UUID = PersistentDataUtils.getData(item.itemMeta, "clickableItem", UUID::class.java)
-
         val itemBuilder: ItemBuilder = this.plugin.clickableItems[clickableItemId] ?: return
+
         itemBuilder.action.invoke(event)
     }
 
@@ -68,35 +70,35 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     fun onDamageInArenaWorld(event: EntityDamageEvent) {
         if (event.entity !is Player) return
         val player: Player = event.entity as Player
-        if (player.getArena() == null || player.getArena()!!.gameWorld.name != player.world.name) return
+        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onFoodLevelChangeInArenaWorld(event: FoodLevelChangeEvent) {
         val player: Player = event.entity as Player
-        if (player.getArena() == null || player.getArena()!!.gameWorld.name != player.world.name) return
+        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onSwapItemInArenaWorld(event: PlayerSwapHandItemsEvent) {
         val player: Player = event.player
-        if (player.getArena() == null || player.getArena()!!.gameWorld.name != player.world.name) return
+        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onBlockBreakInArenaWorld(event: BlockBreakEvent) {
         val player: Player = event.player
-        if (player.getArena() == null || player.getArena()!!.gameWorld.name != player.world.name) return
+        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onBlockPlaceInArenaWorld(event: BlockPlaceEvent) {
         val player: Player = event.player
-        if (player.getArena() == null || player.getArena()!!.gameWorld.name != player.world.name) return
+        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
         event.setBuild(false)
     }
@@ -104,14 +106,14 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     @EventHandler
     fun onItemDragInArenaWorld(event: InventoryDragEvent) {
         val player: Player = event.whoClicked as Player
-        if (player.getArena() == null || player.getArena()!!.gameWorld.name != player.world.name) return
+        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onItemClickInArenaWorld(event: InventoryClickEvent) {
         val player: Player = event.whoClicked as Player
-        if (player.getArena() == null || player.getArena()!!.gameWorld.name != player.world.name) return
+        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
@@ -123,20 +125,25 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     fun onInteract(event: PlayerInteractEvent) {
         val player: Player = event.player
-        if (player.getArena() == null || player.getArena()!!.gameWorld.name != player.world.name) return
+        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onWeatherChangeInArenaWorld(event: WeatherChangeEvent) {
-        if (BlockoGame.instance.gameArenaHandler.cachedArenas.none { it.gameWorld.name == event.world.name }) return
+        if (!shouldBeProtected(event.world)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onEntityCombust(event: EntityCombustEvent) {
-        if (BlockoGame.instance.gameArenaHandler.cachedArenas.none { it.gameWorld.name == event.entity.world.name }) return
+        if (!shouldBeProtected(event.entity.world)) return
         event.isCancelled = true
+    }
+
+    private fun shouldBeProtected(world: World, vararg player: Player): Boolean {
+        val lobbySpawn: LobbySpawn? = this.plugin.lobbySpawnHandler.lobbySpawn
+        return (lobbySpawn != null && lobbySpawn.worldName == world.name) || (player.size == 1 && (player[0].getArena() != null && player[0].getArena()!!.gameWorld.name == player[0].world.name))
     }
 
 }

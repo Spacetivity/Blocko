@@ -66,7 +66,7 @@ object InventoryUtils {
         val gameArena: GameArena = opener.getArena() ?: return
         val gamePlayer: GamePlayer = gameArena.currentPlayers.find { it.uuid == statsPlayer.uuid } ?: return
 
-        val suffixPlaceholder: TagResolver = if (gamePlayer.isAI) Placeholder.parsed("suffix", "(AI)") else TagResolver.empty()
+        val suffixPlaceholder: TagResolver = if (gamePlayer.isAI) Placeholder.parsed("suffix", "(AI)") else Placeholder.parsed("suffix", "")
 
         val titleKey = "blocko.inventory.stats.title.${if (opener.uniqueId == statsPlayer.uuid) "matching_name" else "other_name"}"
         val title: Component = BlockoGame.instance.translationHandler.getSelectedTranslation().validateLine(titleKey, Placeholder.parsed("player_name", gamePlayer.name), suffixPlaceholder)

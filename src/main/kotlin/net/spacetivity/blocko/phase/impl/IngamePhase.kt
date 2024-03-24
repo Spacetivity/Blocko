@@ -20,6 +20,7 @@ import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
+import net.spacetivity.inventory.api.SpaceInventoryProvider
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -64,9 +65,9 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
             val matchDuration: kotlin.time.Duration = (System.currentTimeMillis() - this.matchStartTime!!).toDuration(DurationUnit.MILLISECONDS)
 
             matchDuration.toComponents { hours, minutes, seconds, _ ->
-                val hoursString: String = if (hours != 0L && hours != 1L) hours.toString() else "0$hours"
-                val minutesString: String = if (minutes != 0 && minutes != 1) minutes.toString() else "0$minutes"
-                val secondsString: String = if (seconds != 0 && seconds != 1) seconds.toString() else "0$seconds"
+                val hoursString: String = if (hours in 0..9) "0$hours" else hours.toString()
+                val minutesString: String = if (minutes in 0..9) "0$minutes" else minutes.toString()
+                val secondsString: String = if (seconds in 0..9) "0$seconds" else seconds.toString()
 
                 val timeString = "$hoursString:$minutesString:$secondsString"
 
@@ -113,7 +114,18 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
                 val gameArena: GameArena = player.getArena() ?: return@onInteract
-                gameArena.quit(player)
+
+                SpaceInventoryProvider.api.openConfirmationInventory(
+                    player,
+                    translation.validateItemName("blocko.inventory.leave.title"),
+                    ItemBuilder(Material.OAK_DOOR).setName(translation.validateItemName("blocko.inventory.leave.display_item.display_name")).build(),
+                    {
+                        gameArena.quit(player)
+                    },
+                    {
+                        player.closeInventory()
+                    }
+                )
             }
             .build()
 
@@ -131,13 +143,16 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         GameScoreboardUtils.updateDicedNumberLine(this.arenaId, null)
 
         val oldControllingGamePlayer: GamePlayer? = getControllingGamePlayer()
+        val oldControllingGamePlayerDicedNumber: Int? = oldControllingGamePlayer?.dicedNumber
+
+        oldControllingGamePlayer?.dicedNumber = null
 
         if (this.controllingTeamId != null && oldControllingGamePlayer != null)
             getHighlightedEntities(oldControllingGamePlayer, getArena()).forEach { it.toggleHighlighting(false) }
 
         val availableTeams: List<GameTeam> = BlockoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
 
-        val newControllingTeam: GameTeam? = if (hasControllingTeamMemberDicedSix()) this.getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
+        val newControllingTeam: GameTeam? = if (hasControllingTeamMemberDicedSix(oldControllingGamePlayerDicedNumber)) getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
         val newControllingTeamId: Int = newControllingTeam?.teamId ?: availableTeams.minOf { it.teamId }
 
         this.lastControllingTeamId = if (this.controllingTeamId == null) null else this.controllingTeamId
@@ -197,16 +212,14 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         return getArena().currentPlayers.filter { it.hasSavedAllEntities() }.size
     }
 
-    private fun hasControllingTeamMemberDicedSix(): Boolean {
+    private fun hasControllingTeamMemberDicedSix(dicedNumber: Int?): Boolean {
         val controllingTeam: GameTeam = getControllingTeam() ?: return false
         if (controllingTeam.deactivated) return false
-        val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return false
 
         var hasDicedSix = false
 
         for (teamMemberUniqueId: UUID in controllingTeam.teamMembers) {
-            val gamePlayer: GamePlayer = gameArena.currentPlayers.find { it.uuid == teamMemberUniqueId } ?: continue
-            if (gamePlayer.dicedNumber == null || gamePlayer.dicedNumber != 6) continue
+            if (dicedNumber == null || dicedNumber != 6) continue
             hasDicedSix = true
         }
 

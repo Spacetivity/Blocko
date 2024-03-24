@@ -7,5 +7,8 @@ data class GlobalConfigFile(
     val gameArenaAutoJoin: Boolean,
     val gameArenaMaxParallelAmount: Int,
 
-    val coinsPerElimination: Int
+    val coinsPerElimination: Int,
+
+    val idleCountdownSeconds: Int,
+    val endingCountdownSeconds: Int
 ) : SpaceFile

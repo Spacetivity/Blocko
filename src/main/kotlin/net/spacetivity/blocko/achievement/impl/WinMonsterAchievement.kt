@@ -15,9 +15,9 @@ class WinMonsterRequirement(override val translationKey: String, override val ne
     override fun getPlaceholders(gamePlayer: GamePlayer): List<TagResolver> {
         val statsPlayer: StatsPlayer = gamePlayer.toStatsPlayerInstance() ?: return listOf()
         return listOf(
-            Placeholder.parsed("current_amount", statsPlayer.eliminatedOpponents.toString()),
+            Placeholder.parsed("current_amount", statsPlayer.wonGames.toString()),
             Placeholder.parsed("amount", this.neededCount.toString()),
-            Placeholder.parsed("progress", getProgress(statsPlayer.eliminatedOpponents).toString().split(".")[0])
+            Placeholder.parsed("progress", getProgress(statsPlayer.wonGames).toString().split(".")[0])
         )
     }
 
