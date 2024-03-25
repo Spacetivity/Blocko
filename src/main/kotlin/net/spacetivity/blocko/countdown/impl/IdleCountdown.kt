@@ -8,6 +8,7 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.team.GameTeam
 import org.bukkit.Sound
+import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
 
@@ -28,8 +29,11 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, BlockoGame.instanc
     override fun handleCountdownEnd() {
         val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
 
-        for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
-            gamePlayer.toBukkitInstance()?.teleport(gameArena.location)
+        for (gamePlayer: GamePlayer in gameArena.currentPlayers.filter { !it.isAI }) {
+            val player: Player = gamePlayer.toBukkitInstance() ?: continue
+            player.teleport(gameArena.location)
+            player.allowFlight = true
+            player.isFlying = true
         }
 
         addMissingPlayers(gameArena)
