@@ -60,6 +60,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
         this.plugin.statsPlayerHandler.createOrLoadStatsPlayer(player.uniqueId)
         this.plugin.achievementHandler.createOrLoadAchievementPlayer(player.uniqueId)
         this.plugin.gameEntityHandler.loadUnlockedEntityTypes(player.uniqueId)
+        this.plugin.gameEntityHandler.loadGameEntityHistory(player.uniqueId)
 
         if (this.plugin.globalConfigFile.gameArenaAutoJoin) {
             val gameArenas: List<GameArena> = this.plugin.gameArenaHandler.cachedArenas
@@ -85,6 +86,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
         this.plugin.statsPlayerHandler.unloadStatsPlayer(player.uniqueId)
         this.plugin.achievementHandler.unloadAchievementPlayer(player.uniqueId)
         this.plugin.gameEntityHandler.unloadUnlockedEntityTypes(player.uniqueId)
+        this.plugin.gameEntityHandler.unloadGameEntityHistory(player.uniqueId)
 
         for (team: Team in player.scoreboard.teams) {
             if (!team.hasEntry(player.name)) continue

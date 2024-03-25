@@ -8,12 +8,14 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class GameEntityHandler {
 
     val gameEntities: Multimap<String, GameEntity> = ArrayListMultimap.create()
     val unlockedGameEntityTypes: Multimap<UUID, GameEntityType> = ArrayListMultimap.create()
+    val gameEntityHistories: MutableMap<UUID, GameEntityHistory> = mutableMapOf()
 
     fun getEntitiesFromTeam(arenaId: String, teamName: String): List<GameEntity> {
         return this.gameEntities.get(arenaId).filter { it.teamName.equals(teamName, true) }
@@ -38,6 +40,46 @@ class GameEntityHandler {
         GameEntity(gameTeamLocation.arenaId, gameTeamLocation.teamName, type, entityId).spawn(entityLocation)
 
         gameTeamLocation.isTaken = true
+    }
+
+    fun getSelectedEntityType(uuid: UUID): GameEntityType {
+        return this.gameEntityHistories[uuid]?.selectedEntityType ?: GameEntityType.VILLAGER
+    }
+
+    fun setSelectedEntityType(uuid: UUID, gameEntityType: GameEntityType) {
+        if (getSelectedEntityType(uuid) == gameEntityType) return
+
+        this.gameEntityHistories[uuid]?.selectedEntityType = gameEntityType
+
+        transaction {
+            val resultRow: ResultRow? = GameEntityHistoryDAO.select { GameEntityHistoryDAO.uuid eq uuid.toString() }.firstOrNull()
+
+            if (resultRow == null) {
+                GameEntityHistoryDAO.insert {
+                    it[this.uuid] = uuid.toString()
+                    it[this.selectedEntityType] = gameEntityType
+                }
+            } else {
+                GameEntityHistoryDAO.update({ GameEntityHistoryDAO.uuid eq uuid.toString() }) {
+                    it[this.selectedEntityType] = gameEntityType
+                }
+            }
+        }
+    }
+
+    fun loadGameEntityHistory(uuid: UUID) {
+        if (this.gameEntityHistories.containsKey(uuid)) return
+
+        transaction {
+            for (resultRow: ResultRow in GameEntityHistoryDAO.select() { GameEntityHistoryDAO.uuid eq uuid.toString() }.toMutableList()) {
+                val gameEntityHistory = GameEntityHistory(UUID.fromString(resultRow[GameEntityHistoryDAO.uuid]), resultRow[GameEntityHistoryDAO.selectedEntityType])
+                gameEntityHistories[uuid] = gameEntityHistory
+            }
+        }
+    }
+
+    fun unloadGameEntityHistory(uuid: UUID) {
+        this.gameEntityHistories.remove(uuid)
     }
 
     fun hasUnlockedAllEntityTypes(uuid: UUID): Boolean {
@@ -74,7 +116,8 @@ class GameEntityHandler {
 
             for (resultRow: ResultRow in results) {
                 val entityTypeName: String = resultRow[GameEntityTypeDAO.entityTypeName]
-                val gameEntityType: GameEntityType = GameEntityType.entries.find { it.name == entityTypeName } ?: return@transaction
+                val gameEntityType: GameEntityType = GameEntityType.entries.find { it.name == entityTypeName }
+                    ?: return@transaction
                 unlockedGameEntityTypes.put(uuid, gameEntityType)
             }
         }

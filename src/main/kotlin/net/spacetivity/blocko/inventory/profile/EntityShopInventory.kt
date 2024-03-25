@@ -99,7 +99,6 @@ class EntityShopInventory : InventoryProvider {
                     gamePlayerWoClicked.selectedEntityType = gameEntityType
                     playerWhoClicked.playSound(playerWhoClicked.location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1F)
 
-
                     playerWhoClicked.translateMessage("blocko.entity_shop.selected_entity_type", Placeholder.parsed("entity_type_name", gameEntityType.getCorrectedTypeName()))
 
                     item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildEntityTypeDisplayName(translation, playerWhoClicked, gameEntityType))
@@ -137,6 +136,8 @@ class EntityShopInventory : InventoryProvider {
     private fun setEntityTypeItemGlow(player: Player, controller: InventoryController, interactiveItem: InteractiveItem, gameEntityType: GameEntityType) {
         val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
         val isSelected: Boolean = gamePlayer.selectedEntityType == gameEntityType
+
+        if (isSelected) BlockoGame.instance.gameEntityHandler.setSelectedEntityType(player.uniqueId, gameEntityType)
 
         interactiveItem.update(controller, InteractiveItem.Modification.GLOWING, isSelected)
     }

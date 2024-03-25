@@ -20,6 +20,7 @@ import net.spacetivity.blocko.command.api.impl.BukkitCommandExecutor
 import net.spacetivity.blocko.dice.DiceHandler
 import net.spacetivity.blocko.dice.DiceSidesFile
 import net.spacetivity.blocko.entity.GameEntityHandler
+import net.spacetivity.blocko.entity.GameEntityHistoryDAO
 import net.spacetivity.blocko.entity.GameEntityTypeDAO
 import net.spacetivity.blocko.field.GameFieldDAO
 import net.spacetivity.blocko.field.GameFieldHandler
@@ -57,6 +58,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.lang.reflect.Constructor
 import java.util.*
 
 class BlockoGame : JavaPlugin() {
@@ -94,10 +96,10 @@ class BlockoGame : JavaPlugin() {
         val dbProperties: DatabaseFile = createOrLoadDatabaseProperties()
 
         Database.connect(
-            url = "jdbc:mariadb://${dbProperties.hostname}:${dbProperties.port}/${dbProperties.database}",
-            driver = "org.mariadb.jdbc.Driver",
-            user = dbProperties.user,
-            password = dbProperties.password,
+            "jdbc:mariadb://${dbProperties.hostname}:${dbProperties.port}/${dbProperties.database}",
+            "org.mariadb.jdbc.Driver",
+            dbProperties.user,
+            dbProperties.password,
         )
 
         transaction {
@@ -110,6 +112,7 @@ class BlockoGame : JavaPlugin() {
                 AchievementPlayerDAO,
                 StatsPlayerDAO,
                 GameEntityTypeDAO,
+                GameEntityHistoryDAO,
                 LobbySpawnDAO
             )
         }
@@ -183,8 +186,8 @@ class BlockoGame : JavaPlugin() {
     }
 
     private fun registerCommand(commandExecutor: SpaceCommandExecutor) {
-        BukkitCommandExecutor::class.java.getDeclaredConstructor(CommandProperties::class.java, this::class.java)
-            .newInstance(this.commandHandler.registerCommand(commandExecutor), this)
+        val constructor: Constructor<BukkitCommandExecutor> = BukkitCommandExecutor::class.java.getDeclaredConstructor(CommandProperties::class.java, this::class.java)
+        constructor.newInstance(this.commandHandler.registerCommand(commandExecutor), this)
     }
 
     companion object {

@@ -21,7 +21,8 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
     var activeEntity: GameEntity? = null
     var lastEntityPickRule: EntityPickRule? = null
     var actionTimeoutTimestamp: Long? = null
-    var selectedEntityType: GameEntityType = GameEntityType.VILLAGER
+
+    var selectedEntityType: GameEntityType = BlockoGame.instance.gameEntityHandler.getSelectedEntityType(this.uuid)
 
     fun dice(ingamePhase: IngamePhase) {
         if (isDicing()) return
