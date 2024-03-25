@@ -2,6 +2,7 @@ package net.spacetivity.blocko.team
 
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.player.GamePlayer
 import java.util.*
@@ -30,6 +31,8 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
         gamePlayer.translateMessage("blocko.team.join",
             Placeholder.parsed("team_color", "<${this.color.asHexString()}>"),
             Placeholder.parsed("team_name", this.name.lowercase().replaceFirstChar { it.uppercase() }))
+
+        BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
     }
 
     fun quit(gamePlayer: GamePlayer) {
@@ -41,6 +44,8 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
         this.teamMembers.remove(gamePlayer.uuid)
         gamePlayer.teamName = null
         gamePlayer.translateMessage("blocko.team.quit")
+
+        BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
     }
 
     fun getFreeSpawnLocation(): GameTeamLocation? {

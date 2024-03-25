@@ -73,6 +73,8 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
 
             gameArenas.first().join(player.uniqueId, false)
         }
+
+        this.plugin.playerFormatHandler.setTablistFormatForAll()
     }
 
     @EventHandler

@@ -35,6 +35,7 @@ import net.spacetivity.blocko.lobby.LobbySpawnDAO
 import net.spacetivity.blocko.lobby.LobbySpawnHandler
 import net.spacetivity.blocko.phase.GamePhaseHandler
 import net.spacetivity.blocko.player.GamePlayActionHandler
+import net.spacetivity.blocko.scoreboard.PlayerFormatHandler
 import net.spacetivity.blocko.scoreboard.SidebarHandler
 import net.spacetivity.blocko.stats.StatsPlayerDAO
 import net.spacetivity.blocko.stats.StatsPlayerHandler
@@ -65,6 +66,7 @@ class BlockoGame : JavaPlugin() {
 
     lateinit var translationHandler: TranslationHandler
     lateinit var sidebarHandler: SidebarHandler
+    lateinit var playerFormatHandler: PlayerFormatHandler
     lateinit var commandHandler: SpaceCommandHandler
     lateinit var bossbarHandler: BossbarHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
@@ -118,6 +120,7 @@ class BlockoGame : JavaPlugin() {
         this.botNamesFile = createOrLoadBotNamesFile()
 
         this.sidebarHandler = SidebarHandler()
+        this.playerFormatHandler = PlayerFormatHandler()
 
         this.commandHandler = SpaceCommandHandler()
         this.bossbarHandler = BossbarHandler()

@@ -13,7 +13,7 @@ blocko.utils:
 
 blocko.format:
   chat: "<gray><yellow>@<gray><location> <dark_gray>| <color><player_name><dark_gray>: <white><message>"
-  tablist: "<color><player_name><dark_gray>"
+  tablist: "<color>"
 
 # Sets the message of the day (MOTD) for the server, incorporating gradients and strikethrough text.
 blocko.motd: "        <gray><st>------</st> <gradient:green:yellow>Blocko Game<dark_gray>-</dark_gray>testserver</gradient> <gray><st>-----</st>\n          <gradient:gold:blue>-= https://discord.spacetivity.net =-</gradient>"

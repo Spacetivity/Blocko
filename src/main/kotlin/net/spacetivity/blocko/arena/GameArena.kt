@@ -146,6 +146,7 @@ class GameArena(
             this.phase.countdown?.tryStartup(Predicate { playerCount -> playerCount == neededPlayerCount })
 
             GameScoreboardUtils.setGameSidebar(gamePlayer)
+            BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
         } else {
             val aiStatsPlayer = StatsPlayer(uuid, 0, 0, 0, 0, 0)
             BlockoGame.instance.statsPlayerHandler.cachedStatsPlayers.add(aiStatsPlayer)
