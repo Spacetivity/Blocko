@@ -45,10 +45,13 @@ import net.spacetivity.blocko.translation.TranslationHandler
 import net.spacetivity.blocko.utils.FileUtils
 import net.spacetivity.blocko.utils.HeadUtils
 import net.spacetivity.blocko.utils.ItemBuilder
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scoreboard.Team
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -165,6 +168,13 @@ class BlockoGame : JavaPlugin() {
     }
 
     override fun onDisable() {
+        for (player: Player in Bukkit.getOnlinePlayers()) {
+            for (team: Team in player.scoreboard.teams) {
+                if (!team.hasEntry(player.name)) continue
+                team.removeEntry(player.name)
+            }
+        }
+
         this.diceHandler.stopDiceAnimation()
         this.gamePlayActionHandler.stopTasks()
         this.gameArenaSetupHandler.stopTask()

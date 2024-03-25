@@ -129,6 +129,11 @@ class GameArenaSetupHandler {
                 val arenaId: String = MetadataUtils.get(entity, "displayEntity")!!
                 if (!arenaSetupData.arenaId.equals(arenaId, true)) continue
 
+                for (team: Team in Bukkit.getScoreboardManager().mainScoreboard.teams) {
+                    if (!team.hasEntity(entity)) continue
+                    team.removeEntity(entity)
+                }
+
                 entity.remove()
             }
         }

@@ -34,7 +34,9 @@ class GamePlayActionHandler {
 
                     if (player.location.y <= (gameArena.yLevel - 10)) {
                         val yLevelDifference = gameArena.yLevel - player.location.y
-                        player.teleportAsync(player.location.clone().add(0.0, yLevelDifference + 2.0, 1.0))
+                        player.teleportAsync(player.location.clone().add(0.0, yLevelDifference + 2.0, 1.0)).thenAccept {
+                            player.isFlying = true
+                        }
                     }
 
                     if (gamePlayer.getTeam().deactivated) continue

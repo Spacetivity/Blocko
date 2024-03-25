@@ -38,6 +38,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.scoreboard.Team
 
 class PlayerListener(private val plugin: BlockoGame) : Listener {
 
@@ -84,6 +85,11 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
         this.plugin.statsPlayerHandler.unloadStatsPlayer(player.uniqueId)
         this.plugin.achievementHandler.unloadAchievementPlayer(player.uniqueId)
         this.plugin.gameEntityHandler.unloadUnlockedEntityTypes(player.uniqueId)
+
+        for (team: Team in player.scoreboard.teams) {
+            if (!team.hasEntry(player.name)) continue
+            team.removeEntry(player.name)
+        }
     }
 
     @EventHandler
