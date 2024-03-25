@@ -3,6 +3,9 @@ package net.spacetivity.blocko.listener
 import io.papermc.paper.event.player.AsyncChatEvent
 import io.papermc.paper.event.player.PlayerOpenSignEvent
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.impl.BadMannersAchievement
@@ -19,6 +22,7 @@ import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
+import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -82,14 +86,36 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
 
     @EventHandler
     fun onChat(event: AsyncChatEvent) {
+        val player: Player = event.player
+
         val rawMessage: String = PlainTextComponentSerializer.plainText().serialize(event.message())
-        val gamePlayer: GamePlayer = event.player.toGamePlayerInstance() ?: return
+        val gamePlayer: GamePlayer? = player.toGamePlayerInstance()
 
-        if (rawMessage.contains("gg", true))
-            this.plugin.achievementHandler.getAchievement(FairPlayAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+        if (gamePlayer != null) {
+            if (rawMessage.contains("gg", true))
+                this.plugin.achievementHandler.getAchievement(FairPlayAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
 
-        if (rawMessage.contains("bg", true))
-            this.plugin.achievementHandler.getAchievement(BadMannersAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+            if (rawMessage.contains("bg", true))
+                this.plugin.achievementHandler.getAchievement(BadMannersAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+        }
+
+        val translation: Translation = this.plugin.translationHandler.getSelectedTranslation()
+        val gameArena: GameArena? = player.getArena()
+
+        val isPlaying: Boolean = player.getArena() != null
+
+        val locationPlaceholder: TagResolver.Single = Placeholder.parsed("location", if (isPlaying && gameArena!!.phase.isIdle()) "LOBBY" else if (isPlaying && (gameArena!!.phase.isIngame() || gameArena.phase.isEnding())) "ARENA" else "SERVER")
+
+        val color: NamedTextColor = if (isPlaying) this.plugin.gameTeamHandler.getTeamOfPlayer(gamePlayer!!.arenaId, gamePlayer.uuid)?.color ?: NamedTextColor.GRAY else NamedTextColor.GRAY
+        val colorPlaceholder: TagResolver.Single = Placeholder.parsed("color", "<${color.asHexString()}>")
+
+        val namePlaceholder: TagResolver.Single = Placeholder.parsed("player_name", player.name)
+
+        event.viewers().removeIf { isPlaying == (player.getArena() == null) }
+
+        event.renderer { _, _, message, _ ->
+            translation.validateLine("blocko.format.chat", locationPlaceholder, colorPlaceholder, namePlaceholder, Placeholder.component("message", message))
+        }
     }
 
     @EventHandler

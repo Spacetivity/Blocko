@@ -144,6 +144,7 @@ class BlockoGame : JavaPlugin() {
         this.achievementHandler.registerAchievement(RushExpertAchievement("rush_expert"))
         this.achievementHandler.registerAchievement(WinMonsterAchievement("win_monster"))
         this.achievementHandler.registerAchievement(EntityCollectorAchievement("entity_collector"))
+        this.achievementHandler.registerAchievement(BadLuckAchievement("bad_luck"))
 
         this.lobbySpawnHandler = LobbySpawnHandler()
 

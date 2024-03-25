@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.phase.impl
 
-import net.kyori.adventure.text.Component
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.achievement.impl.BadLuckAchievement
 import net.spacetivity.blocko.achievement.impl.PlayFirstGameAchievement
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.countdown.impl.EndingCountdown
@@ -16,6 +16,7 @@ class EndingPhase(arenaId: String) : GamePhase(arenaId, "ending", 2, EndingCount
 
         for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
             BlockoGame.instance.achievementHandler.getAchievement(PlayFirstGameAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+            BlockoGame.instance.achievementHandler.getAchievement(BadLuckAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
         }
 
         countdown?.tryStartup()

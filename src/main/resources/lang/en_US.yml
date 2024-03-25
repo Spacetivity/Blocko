@@ -11,6 +11,10 @@ blocko.utils:
   no_permission: "<prefix> <gray>No permission... :o"
   player_not_found: "<prefix> <gray>This player doesn't exist!"
 
+blocko.format:
+  chat: "<gray><yellow>@<gray><location> <dark_gray>| <color><player_name><dark_gray>: <white><message>"
+  tablist: "<color><player_name><dark_gray>"
+
 # Sets the message of the day (MOTD) for the server, incorporating gradients and strikethrough text.
 blocko.motd: "        <gray><st>------</st> <gradient:green:yellow>Blocko Game<dark_gray>-</dark_gray>testserver</gradient> <gray><st>-----</st>\n          <gradient:gold:blue>-= https://discord.spacetivity.net =-</gradient>"
 
@@ -396,6 +400,10 @@ blocko.achievement.win_monster:
 blocko.achievement.entity_collector:
   display_name: "Entity Collector"
   requirement: "<gray>Buy all <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>entity types. (<yellow><progress>%<gray>)"
+
+blocko.achievement.bad_luck:
+  display_name: "Bad Luck"
+  requirement: "<gray>Complete a Blocko match without saving any entities."
 
 # Describes achievement unlock messages and formats for various in-game achievements.
 blocko.achievement.unlocked: |
