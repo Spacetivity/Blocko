@@ -317,6 +317,9 @@ blocko.inventory.leave.title: "Leave game?"
 blocko.inventory.leave.display_item:
   display_name: "<gray>Leave game"
 
+blocko.inventory.entity_shop.balance_item:
+  display_name: "<gray>Your coins: <gold><amount>"
+
 blocko.inventory.entity_shop.no_entity_types_found:
   display_name: "<red>No entity types found!"
 

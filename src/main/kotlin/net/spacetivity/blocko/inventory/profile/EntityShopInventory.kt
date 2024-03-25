@@ -62,6 +62,11 @@ class EntityShopInventory : InventoryProvider {
         pagination.setItemField(1, 0, 4, 8)
         pagination.distributeItems(pageItems)
 
+        controller.setItem(5, 0, InteractiveItem.Companion.of(ItemBuilder(Material.RAW_GOLD)
+            .setName(buildBalanceDisplayName(translation, player))
+            .setData("balanceItem", true)
+            .build()))
+
         controller.setItem(5, 7, InteractiveItem.previousPage(ItemBuilder(Material.ARROW)
             .setName(translation.validateItemName("blocko.inventory_utils.previous_page_item_display_name"))
             .build(), pagination))
@@ -122,6 +127,9 @@ class EntityShopInventory : InventoryProvider {
 
                 gameEntityType.buyEntityType(playerWhoClicked)
 
+                val balanceItem: InteractiveItem? = controller.contents.values.firstOrNull { it != null && PersistentDataUtils.hasData(it.item.itemMeta, "balanceItem") }
+                balanceItem?.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildBalanceDisplayName(translation, player))
+
                 setEntityTypeItemGlow(playerWhoClicked, controller, item, gameEntityType)
                 item.update(controller, InteractiveItem.Modification.TYPE, buildEntityTypeItemType(player, gameEntityType))
                 item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildEntityTypeDisplayName(translation, playerWhoClicked, gameEntityType))
@@ -131,6 +139,11 @@ class EntityShopInventory : InventoryProvider {
         }
 
         return items
+    }
+
+    private fun buildBalanceDisplayName(translation: Translation, player: Player): Component {
+        val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)!!
+        return translation.validateItemName("blocko.inventory.entity_shop.balance_item.display_name", Placeholder.parsed("amount", NumberUtils.format(statsPlayer.coins)))
     }
 
     private fun setEntityTypeItemGlow(player: Player, controller: InventoryController, interactiveItem: InteractiveItem, gameEntityType: GameEntityType) {
