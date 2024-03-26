@@ -102,8 +102,8 @@ class EntityShopInventory : InventoryProvider {
                         .find { PersistentDataUtils.getData(it.item.itemMeta, "gameEntityType", String::class.java) == gamePlayerWoClicked.selectedEntityType.name }
 
                     gamePlayerWoClicked.selectedEntityType = gameEntityType
-                    playerWhoClicked.playSound(playerWhoClicked.location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1F)
 
+                    playerWhoClicked.playSound(playerWhoClicked.location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1F)
                     playerWhoClicked.translateMessage("blocko.entity_shop.selected_entity_type", Placeholder.parsed("entity_type_name", gameEntityType.getCorrectedTypeName()))
 
                     item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildEntityTypeDisplayName(translation, playerWhoClicked, gameEntityType))

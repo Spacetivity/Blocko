@@ -20,12 +20,12 @@ class PlayerFormatHandler {
     }
 
     private fun setTablistFormatForPlayer(newPlayer: Player) {
-        Bukkit.getOnlinePlayers().forEach { setTablistFormat(it, it.scoreboard) }
+        Bukkit.getOnlinePlayers().forEach { setTablistFormat(it, newPlayer.scoreboard) }
     }
 
     private fun setTablistFormat(player: Player, scoreboard: Scoreboard) {
         val gamePlayer: GamePlayer? = player.toGamePlayerInstance()
-        val teamName: String = "0_${if (gamePlayer == null) "lobby" else if (gamePlayer.teamName == null) "lobby" else gamePlayer.teamName}_0_${UUID.randomUUID().toString().split("-")[0]}"
+        val teamName = "0_${if (gamePlayer == null) "lobby" else if (gamePlayer.teamName == null) "lobby" else gamePlayer.teamName}_0_${UUID.randomUUID().toString().split("-")[0]}"
 
         var color: NamedTextColor = NamedTextColor.GRAY
 

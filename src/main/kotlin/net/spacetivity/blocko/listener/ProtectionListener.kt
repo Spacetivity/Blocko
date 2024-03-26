@@ -68,13 +68,11 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     fun onDamageInArenaWorld(event: EntityDamageEvent) {
         if (event.entity !is Player) return
         val player: Player = event.entity as Player
-        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onChickenAggDropInArenaWorld(event: EntityDropItemEvent) {
-        if (!shouldBeProtected(event.entity.world)) return
         if (event.entity !is Chicken) return
         event.isCancelled = true
     }
@@ -82,28 +80,24 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     @EventHandler
     fun onFoodLevelChangeInArenaWorld(event: FoodLevelChangeEvent) {
         val player: Player = event.entity as Player
-        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onSwapItemInArenaWorld(event: PlayerSwapHandItemsEvent) {
         val player: Player = event.player
-        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onBlockBreakInArenaWorld(event: BlockBreakEvent) {
         val player: Player = event.player
-        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onBlockPlaceInArenaWorld(event: BlockPlaceEvent) {
         val player: Player = event.player
-        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
         event.setBuild(false)
     }
@@ -111,14 +105,12 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     @EventHandler
     fun onItemDragInArenaWorld(event: InventoryDragEvent) {
         val player: Player = event.whoClicked as Player
-        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onItemClickInArenaWorld(event: InventoryClickEvent) {
         val player: Player = event.whoClicked as Player
-        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
@@ -130,19 +122,16 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     fun onInteract(event: PlayerInteractEvent) {
         val player: Player = event.player
-        if (!shouldBeProtected(player.world, player)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onWeatherChangeInArenaWorld(event: WeatherChangeEvent) {
-        if (!shouldBeProtected(event.world)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onEntityCombust(event: EntityCombustEvent) {
-        if (!shouldBeProtected(event.entity.world)) return
         event.isCancelled = true
     }
 
