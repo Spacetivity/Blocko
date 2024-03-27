@@ -10,5 +10,7 @@ data class GlobalConfigFile(
     val coinsPerElimination: Int,
 
     val idleCountdownSeconds: Int,
-    val endingCountdownSeconds: Int
+    val endingCountdownSeconds: Int,
+
+    val motdEnabled: Boolean
 ) : SpaceFile

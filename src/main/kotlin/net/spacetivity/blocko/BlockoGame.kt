@@ -231,7 +231,8 @@ class BlockoGame : JavaPlugin() {
             10,
             20,
             30,
-            10
+            10,
+            true
         ))
     }
 

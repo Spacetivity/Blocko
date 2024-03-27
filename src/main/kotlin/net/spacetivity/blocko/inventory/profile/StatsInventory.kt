@@ -52,6 +52,12 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
             controller.setItem(2, column * 2 + 1, getStatsItem(translation, gamePlayer.isAI, statsType))
         }
 
+        val skinValue: String =
+            if (this.statsPlayer.uuid == player.uniqueId)
+                player.playerProfile.properties.first().value
+            else
+                gamePlayer.toBukkitInstance()?.playerProfile?.properties?.first()?.value ?: HeadUtils.BOT
+
         controller.setItem(InventoryPosition.of(4, if (this.showSearchPlayerItem) 2 else 4), InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
             .setName(translation.validateItemName("blocko.inventory.stats.overview_item.display_name"))
             .setLoreByComponent(translation.validateItemLore("blocko.inventory.stats.overview_item.lore",
@@ -69,7 +75,7 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
 
                 Placeholder.parsed("won_games_key", translation.validateLineAsString("blocko.stats.type.won_games")),
                 Placeholder.parsed("won_games_value", this.statsPlayer.wonGames.toString())))
-            .setOwner(if (gamePlayer.isAI) HeadUtils.BOT else player.playerProfile.properties.first().value)
+            .setOwner(if (gamePlayer.isAI) HeadUtils.BOT else skinValue)
             .build()))
 
         if (this.showSearchPlayerItem) {

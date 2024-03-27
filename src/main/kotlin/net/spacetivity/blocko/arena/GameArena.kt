@@ -4,10 +4,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.dice.DiceHandler
-import net.spacetivity.blocko.extensions.clearPhaseItems
-import net.spacetivity.blocko.extensions.getTeam
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.extensions.*
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.phase.GamePhase
@@ -145,6 +142,8 @@ class GameArena(
             val neededPlayerCount: Int = if (this.waitForActualPlayers) this.teamOptions.playerCount else 1
             this.phase.countdown?.tryStartup(Predicate { playerCount -> playerCount == neededPlayerCount })
 
+            togglePlayerVisibility(bukkitPlayer!!, false)
+
             GameScoreboardUtils.setGameSidebar(gamePlayer)
             BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
         } else {
@@ -196,6 +195,8 @@ class GameArena(
 
         this.invitedPlayers.removeIf { it == player.uniqueId }
         this.currentPlayers.removeIf { it.uuid == player.uniqueId }
+
+        togglePlayerVisibility(player, true)
 
         if (this.currentPlayers.isEmpty()) this.phase.countdown?.cancel()
 
@@ -284,6 +285,20 @@ class GameArena(
 
         if (!this.phase.isIdle()) BlockoGame.instance.gamePhaseHandler.initIndexPhase(this)
         BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
+    }
+
+    fun togglePlayerVisibility(bukkitPlayer: Player, show: Boolean) {
+        for (currentPlayer: Player in Bukkit.getOnlinePlayers()) {
+            if (show) {
+                if (currentPlayer.getArena() != null) continue
+                bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
+                currentPlayer.showPlayer(BlockoGame.instance, bukkitPlayer)
+            } else {
+                if (currentPlayer.getArena() != null && currentPlayer.getArena()!!.id == this.id) continue
+                bukkitPlayer.hidePlayer(BlockoGame.instance, currentPlayer)
+                currentPlayer.hidePlayer(BlockoGame.instance, bukkitPlayer)
+            }
+        }
     }
 
     fun isGameOver(): Boolean {

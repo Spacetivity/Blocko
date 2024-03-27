@@ -211,9 +211,10 @@ class GamePlayActionHandler {
                                 if (entitiesFromTeam.all { (dicedNumber != 6 && it.currentFieldId == null) || !it.isMovableTo(gamePlayer.dicedNumber!!) }) {
                                     gamePlayer.activeEntity = null
                                     gamePlayer.lastEntityPickRule = null
-                                    // gamePlayer.dicedNumber = null
                                     gamePlayer.actionTimeoutTimestamp = null
+
                                     BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
+
                                     ingamePhase.phaseMode = GamePhaseMode.DICE
                                     ingamePhase.setNextControllingTeam()
                                 } else {
