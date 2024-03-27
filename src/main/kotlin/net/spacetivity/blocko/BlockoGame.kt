@@ -93,13 +93,13 @@ class BlockoGame : JavaPlugin() {
     override fun onEnable() {
         instance = this
 
-        val dbProperties: DatabaseFile = createOrLoadDatabaseProperties()
+        val databaseFile: DatabaseFile = createOrLoadDatabaseFile()
 
         Database.connect(
-            "jdbc:mariadb://${dbProperties.hostname}:${dbProperties.port}/${dbProperties.database}",
+            "jdbc:mariadb://${databaseFile.hostname}:${databaseFile.port}/${databaseFile.database}",
             "org.mariadb.jdbc.Driver",
-            dbProperties.user,
-            dbProperties.password,
+            databaseFile.user,
+            databaseFile.password,
         )
 
         transaction {
@@ -206,7 +206,7 @@ class BlockoGame : JavaPlugin() {
         return "blocko.achievement.$title.${if (isName) "display_name" else "requirement"}"
     }
 
-    private fun createOrLoadDatabaseProperties(): DatabaseFile {
+    private fun createOrLoadDatabaseFile(): DatabaseFile {
         return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile("-", 3306, "-", "-", "-"))
     }
 

@@ -303,7 +303,7 @@ class GameArena(
 
     fun isGameOver(): Boolean {
         val finishedGamePlayers: List<GamePlayer> = this.currentPlayers.filter { it.getTeam().deactivated }.toList()
-        val enoughGamePlayersFinished: Boolean = finishedGamePlayers.size == (this.teamOptions.playerCount - 1)
+        val enoughGamePlayersFinished: Boolean = finishedGamePlayers.size == (this.currentPlayers.size - 1)
         return enoughGamePlayersFinished
     }
 
