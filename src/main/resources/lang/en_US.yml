@@ -165,6 +165,10 @@ blocko.items:
     display_name: "<green>Team Selector <gray>(Right-click)"
     lore: |
       <gray>Choose a team for yourself
+  instant_starter:
+    display_name: "<green>Start Game <gray>(Right-click)"
+    lore: |
+      <gray>Ends the idling countdown immediately
   host_settings:
     display_name: "<green>Host Settings <gray>(Right-click)"
     lore: |

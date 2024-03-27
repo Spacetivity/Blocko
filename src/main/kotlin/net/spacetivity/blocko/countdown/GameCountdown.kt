@@ -10,8 +10,8 @@ import java.util.function.Predicate
 
 abstract class GameCountdown(protected val arenaId: String, private val duration: Int) {
 
+    var modifiableDuration: Int = this.duration
     private var fallbackDuration: Int = this.duration
-    private var modifiableDuration: Int = this.duration
 
     private var countdownTask: BukkitTask? = null
     var isRunning: Boolean = false
@@ -32,7 +32,6 @@ abstract class GameCountdown(protected val arenaId: String, private val duration
 
             handleCountdownIdle(this.countdownTask!!, remainingSeconds)
             this.modifiableDuration = remainingSeconds.dec()
-
         }, 0L, 20L)
     }
 

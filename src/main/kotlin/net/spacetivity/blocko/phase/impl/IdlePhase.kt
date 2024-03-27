@@ -7,9 +7,11 @@ import net.spacetivity.blocko.extensions.getArena
 import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.translation.Translation
+import net.spacetivity.blocko.utils.HeadUtils
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
@@ -43,6 +45,31 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
                 val player: Player = event.player
                 val gameArena: GameArena = player.getArena() ?: return@onInteract
                 InventoryUtils.openTeamSelectorInventory(player, gameArena)
+            }
+            .build()
+
+        hotbarItems[4] = ItemBuilder(Material.PLAYER_HEAD)
+            .setName(translation.validateItemName("blocko.items.instant_starter.display_name"))
+            .setLoreByComponent(translation.validateItemLore("blocko.items.instant_starter.lore"))
+            .setOwner(HeadUtils.PLAY)
+            .onInteract { event: PlayerInteractEvent ->
+                val player: Player = event.player
+                val gameArena: GameArena = player.getArena() ?: return@onInteract
+
+                if (gameArena.arenaHost!!.uuid != player.uniqueId) {
+                    player.translateMessage("blocko.phase.host_item_blocked")
+                    return@onInteract
+                }
+
+                if (this.countdown == null) return@onInteract
+                if (this.countdown!!.modifiableDuration <= 5) return@onInteract
+
+                gameArena.waitForActualPlayers = false
+
+                if (!this.countdown!!.isRunning) this.countdown!!.tryStartup()
+                this.countdown!!.modifiableDuration = 5
+
+                player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 0.1F)
             }
             .build()
 

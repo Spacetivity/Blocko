@@ -142,7 +142,7 @@ class GameArena(
             val neededPlayerCount: Int = if (this.waitForActualPlayers) this.teamOptions.playerCount else 1
             this.phase.countdown?.tryStartup(Predicate { playerCount -> playerCount == neededPlayerCount })
 
-            togglePlayerVisibility(bukkitPlayer!!, false)
+            togglePlayerVisibility(bukkitPlayer!!, true)
 
             GameScoreboardUtils.setGameSidebar(gamePlayer)
             BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
@@ -162,8 +162,9 @@ class GameArena(
         player.clearPhaseItems()
 
         val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
-        if (lobbySpawn != null && player.world.name != lobbySpawn.worldName)
-            player.teleport(lobbySpawn.toBukkitInstance())
+        if (lobbySpawn != null && player.world.name != lobbySpawn.worldName) player.teleportAsync(lobbySpawn.toBukkitInstance()).thenAccept {
+            togglePlayerVisibility(player, false)
+        }
 
         BlockoGame.instance.bossbarHandler.clearBossbars(player)
 
@@ -196,7 +197,7 @@ class GameArena(
         this.invitedPlayers.removeIf { it == player.uniqueId }
         this.currentPlayers.removeIf { it.uuid == player.uniqueId }
 
-        togglePlayerVisibility(player, true)
+        togglePlayerVisibility(player, false)
 
         if (this.currentPlayers.isEmpty()) this.phase.countdown?.cancel()
 
@@ -287,20 +288,6 @@ class GameArena(
         BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
     }
 
-    fun togglePlayerVisibility(bukkitPlayer: Player, show: Boolean) {
-        for (currentPlayer: Player in Bukkit.getOnlinePlayers()) {
-            if (show) {
-                if (currentPlayer.getArena() != null) continue
-                bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
-                currentPlayer.showPlayer(BlockoGame.instance, bukkitPlayer)
-            } else {
-                if (currentPlayer.getArena() != null && currentPlayer.getArena()!!.id == this.id) continue
-                bukkitPlayer.hidePlayer(BlockoGame.instance, currentPlayer)
-                currentPlayer.hidePlayer(BlockoGame.instance, bukkitPlayer)
-            }
-        }
-    }
-
     fun isGameOver(): Boolean {
         val finishedGamePlayers: List<GamePlayer> = this.currentPlayers.filter { it.getTeam().deactivated }.toList()
         val enoughGamePlayersFinished: Boolean = finishedGamePlayers.size == (this.currentPlayers.size - 1)
@@ -322,6 +309,30 @@ class GameArena(
             actualCurrentPlayers.filter { it.uuid != this.arenaHost?.uuid }.random()
 
         return newHostPlayer
+    }
+
+    private fun togglePlayerVisibility(bukkitPlayer: Player, isJoin: Boolean) {
+        for (currentPlayer: Player in Bukkit.getOnlinePlayers()) {
+            if (isJoin) {
+                val playersInSameArena: Boolean = (bukkitPlayer.getArena() != null && currentPlayer.getArena() != null) && (bukkitPlayer.getArena()!!.id == currentPlayer.getArena()!!.id)
+
+                if (playersInSameArena) {
+                    bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
+                    currentPlayer.showPlayer(BlockoGame.instance, bukkitPlayer)
+                } else {
+                    bukkitPlayer.hidePlayer(BlockoGame.instance, currentPlayer)
+                    currentPlayer.hidePlayer(BlockoGame.instance, bukkitPlayer)
+                }
+            } else {
+                if (currentPlayer.getArena() != null) {
+                    bukkitPlayer.hidePlayer(BlockoGame.instance, currentPlayer)
+                    currentPlayer.hidePlayer(BlockoGame.instance, bukkitPlayer)
+                } else {
+                    bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
+                    currentPlayer.showPlayer(BlockoGame.instance, bukkitPlayer)
+                }
+            }
+        }
     }
 
 }

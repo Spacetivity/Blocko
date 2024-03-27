@@ -24,6 +24,7 @@ import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.PersistentDataUtils
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
@@ -61,6 +62,13 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
         this.plugin.achievementHandler.createOrLoadAchievementPlayer(player.uniqueId)
         this.plugin.gameEntityHandler.loadUnlockedEntityTypes(player.uniqueId)
         this.plugin.gameEntityHandler.loadGameEntityHistory(player.uniqueId)
+
+        for (currentPlayer: Player in Bukkit.getOnlinePlayers()) {
+            if (currentPlayer.getArena() != null) {
+                currentPlayer.hidePlayer(this.plugin, player)
+                player.hidePlayer(this.plugin, currentPlayer)
+            }
+        }
 
         if (this.plugin.globalConfigFile.gameArenaAutoJoin) {
             val gameArenas: List<GameArena> = this.plugin.gameArenaHandler.cachedArenas
