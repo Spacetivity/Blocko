@@ -8,4 +8,5 @@ author:
   - TGamings
   - realFallenBreak
 depend:
+  - SpaceDependencies
   - SpaceInventories
