@@ -347,7 +347,8 @@ class GameArenaSetupHandler {
 
     private fun hasConfiguredAllTeamSpawns(uuid: UUID): Boolean {
         val arenaSetupData: GameArenaSetupData = getSetupData(uuid) ?: return false
-        return arenaSetupData.gameTeamLocations.size == 16
+        val maxGameLocSpawns: Int = arenaSetupData.gameTeams.size * 4
+        return maxGameLocSpawns == 16
     }
 
 }
