@@ -66,7 +66,7 @@ class ArenaInviteCommand : SpaceCommandExecutor {
     }
 
     override fun sendUsage(sender: SpaceCommandSender) {
-        sender.castTo(Player::class.java).translateMessage("blocko.arena.arena_invite.usage")
+        sender.castTo(Player::class.java).translateMessage("blocko.command.arena.arena_invite.usage")
     }
 
     override fun onTabComplete(sender: SpaceCommandSender, args: List<String>): MutableList<String> {
