@@ -90,11 +90,11 @@ class GameField(
             }
         }
 
+        possibleAchievements.forEach { it?.grantIfCompletedBy(gamePlayer) }
+
         val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
         val statsType: StatsType = if (isReward) StatsType.ELIMINATED_OPPONENTS else StatsType.KNOCKED_OUT_BY_OPPONENTS
         statsPlayer.update(statsType, UpdateOperation.INCREASE, 1)
-
-        possibleAchievements.forEach { it?.grantIfCompletedBy(gamePlayer) }
 
         val coinsPerElimination: Int = BlockoGame.instance.globalConfigFile.coinsPerElimination
 
