@@ -30,4 +30,8 @@ class EndingPhase(arenaId: String) : GamePhase(arenaId, "ending", 2, EndingCount
 
     }
 
+    override fun initSpectatorHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
+
+    }
+
 }

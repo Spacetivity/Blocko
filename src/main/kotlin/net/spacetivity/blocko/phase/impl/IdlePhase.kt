@@ -99,4 +99,8 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
             .build()
     }
 
+    override fun initSpectatorHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
+
+    }
+
 }

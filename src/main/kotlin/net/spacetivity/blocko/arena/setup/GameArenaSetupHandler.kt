@@ -3,6 +3,7 @@ package net.spacetivity.blocko.arena.setup
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.GameArenaStatus
 import net.spacetivity.blocko.extensions.translateActionBar
 import net.spacetivity.blocko.extensions.translateMessage
@@ -119,6 +120,9 @@ class GameArenaSetupHandler {
             BlockoGame.instance.gameFieldHandler.initFields(arenaSetupData.gameFields)
             BlockoGame.instance.gameTeamHandler.initTeamSpawns(arenaSetupData.gameTeamLocations)
             BlockoGame.instance.gameArenaSignHandler.loadArenaSigns()
+
+            val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(arenaSetupData.arenaId) ?: return
+            BlockoGame.instance.gameArenaSignHandler.updateArenaSign(gameArena)
         }
 
         for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {

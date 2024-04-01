@@ -39,6 +39,8 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     var matchStartTime: Long? = null
 
     override fun start() {
+        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(getArena())
+
         this.phaseMode = GamePhaseMode.DICE
 
         if (this.matchStartTime == null) this.matchStartTime = System.currentTimeMillis()
@@ -129,6 +131,19 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
             }
             .build()
 
+    }
+
+    override fun initSpectatorHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
+        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+
+        hotbarItems[8] = ItemBuilder(Material.SLIME_BALL)
+            .setName(translation.validateItemName("blocko.items.leave.display_name"))
+            .onInteract { event: PlayerInteractEvent ->
+                val player: Player = event.player
+                val gameArena: GameArena = player.getArena() ?: return@onInteract
+                gameArena.quitAsSpectator(player)
+            }
+            .build()
     }
 
     fun isInControllingTeam(uuid: UUID): Boolean {

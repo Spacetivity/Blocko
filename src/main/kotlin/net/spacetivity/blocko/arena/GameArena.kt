@@ -37,6 +37,8 @@ class GameArena(
     var teamOptions: GameTeamOptions = GameTeamOptions.TWO_BY_ONE
 
     val currentPlayers: MutableSet<GamePlayer> = mutableSetOf()
+    val spectatorPlayers: MutableSet<UUID> = mutableSetOf()
+
     var arenaHost: GamePlayer? = null
 
     val invitedPlayers: MutableSet<UUID> = mutableSetOf()
@@ -46,14 +48,248 @@ class GameArena(
     }
 
     fun sendArenaMessage(key: String, vararg toReplace: TagResolver) {
-        this.currentPlayers.filter { !it.isAI }.forEach { it.translateMessage(key, *toReplace) }
+        for (player: Player in getAllPlayers()) player.translateMessage(key, *toReplace)
     }
 
     fun sendArenaSound(sound: Sound, volume: Float) {
-        for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
-            if (player == null) continue
-            player.playSound(player.location, sound, volume, 1F)
+        for (player: Player in getAllPlayers()) player.playSound(player.location, sound, volume, 1F)
+    }
+
+    fun joinAsSpectator(player: Player) {
+        if (this.spectatorPlayers.contains(player.uniqueId)) {
+            player.translateMessage("blocko.arena.yourself_already_spectating_arena")
+            return
         }
+
+        if (!this.phase.isIngame()) {
+            player.translateMessage("blocko.arena.not_spectatable")
+            return
+        }
+
+        player.teleport(this.location)
+        player.allowFlight = true
+        player.isFlying = true
+
+        this.spectatorPlayers.add(player.uniqueId)
+        this.phase.setupPlayerInventory(player)
+
+        player.translateMessage("blocko.arena.spectate_join")
+        GameScoreboardUtils.setGameSidebar(player)
+
+        val ingamePhase: IngamePhase = this.phase as IngamePhase
+        val controllingTeam: GameTeam = ingamePhase.getControllingTeam() ?: return
+        GameScoreboardUtils.updateControllingTeamLine(this, controllingTeam)
+        BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
+
+        togglePlayerVisibility(player, PlayerVisibility.SPECTATING)
+    }
+
+    fun quitAsSpectator(player: Player) {
+        if (!this.spectatorPlayers.contains(player.uniqueId)) return
+
+        player.translateMessage("blocko.arena.spectate_quit")
+        player.clearPhaseItems()
+
+        val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
+        if (lobbySpawn != null && player.world.name != lobbySpawn.worldName) player.teleportAsync(lobbySpawn.toBukkitInstance()).thenAccept {
+            togglePlayerVisibility(player, PlayerVisibility.IN_LOBBY)
+            player.allowFlight = true
+            player.isFlying = true
+        }
+
+        BlockoGame.instance.bossbarHandler.clearBossbars(player)
+        GameScoreboardUtils.removeGameSidebar(player)
+        BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
+
+        this.spectatorPlayers.remove(player.uniqueId)
+    }
+
+    fun join(uuid: UUID, isAI: Boolean): Boolean {
+        val bukkitPlayer: Player? = Bukkit.getPlayer(uuid)
+        val name: String = bukkitPlayer?.name ?: BlockoGame.instance.botNamesFile.botNames.random()
+
+        val gamePlayer = GamePlayer(uuid, name, this.id, null, isAI)
+
+        if (this.currentPlayers.any { it.uuid == gamePlayer.uuid }) {
+            gamePlayer.translateMessage("blocko.arena.yourself_already_in_arena")
+            return false
+        }
+
+        if (!this.phase.isIdle()) {
+            gamePlayer.translateMessage("blocko.arena.game_already_started")
+            return false
+        }
+
+        if (this.currentPlayers.size >= this.teamOptions.playerCount) {
+            gamePlayer.translateMessage("blocko.arena.already_full")
+            return false
+        }
+
+        if (!isAI && this.locked && !this.invitedPlayers.contains(uuid)) {
+            gamePlayer.translateMessage("blocko.arena.not_invited_by_host")
+            return false
+        }
+
+        sendArenaMessage("blocko.arena.join", Placeholder.parsed("name", gamePlayer.name))
+
+        if (!gamePlayer.isAI && (this.currentPlayers.isEmpty() || this.arenaHost == null)) {
+            this.arenaHost = gamePlayer
+            gamePlayer.translateMessage("blocko.arena.host_join")
+        }
+
+        this.currentPlayers.add(gamePlayer)
+
+        if (!isAI) {
+            this.phase.setupPlayerInventory(gamePlayer.toBukkitInstance()!!)
+
+            val neededPlayerCount: Int = if (this.waitForActualPlayers) this.teamOptions.playerCount else 1
+            this.phase.countdown?.tryStartup(Predicate { playerCount -> playerCount == neededPlayerCount })
+
+            togglePlayerVisibility(bukkitPlayer!!, PlayerVisibility.IN_ARENA)
+
+            GameScoreboardUtils.setGameSidebar(bukkitPlayer)
+            BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
+        } else {
+            val aiStatsPlayer = StatsPlayer(uuid, 0, 0, 0, 0, 0)
+            BlockoGame.instance.statsPlayerHandler.cachedStatsPlayers.add(aiStatsPlayer)
+        }
+
+        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
+        return true
+    }
+
+    fun quit(player: Player) {
+        if (this.currentPlayers.none { it.uuid == player.uniqueId }) return
+
+        sendArenaMessage("blocko.arena.quit", Placeholder.parsed("name", player.name))
+        player.clearPhaseItems()
+
+        val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
+        if (lobbySpawn != null && player.world.name != lobbySpawn.worldName) player.teleportAsync(lobbySpawn.toBukkitInstance()).thenAccept {
+            togglePlayerVisibility(player, PlayerVisibility.IN_LOBBY)
+            player.allowFlight = true
+            player.isFlying = true
+        }
+
+        BlockoGame.instance.bossbarHandler.clearBossbars(player)
+
+        val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == player.uniqueId } ?: return
+
+        if (BlockoGame.instance.diceHandler.dicingPlayers.containsKey(gamePlayer.uuid))
+            BlockoGame.instance.diceHandler.dicingPlayers.remove(gamePlayer.uuid)
+
+        if (!gamePlayer.isAI) {
+            BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)?.updateDbEntry()
+            GameScoreboardUtils.removeGameSidebar(player)
+        }
+
+        if (phase.isIngame()) {
+            val ingamePhase: IngamePhase = phase as IngamePhase
+            BlockoGame.instance.gameEntityHandler.clearEntitiesForTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
+            gamePlayer.actionTimeoutTimestamp = null
+
+            for (currentGamePlayer: GamePlayer in this.currentPlayers.filter { !it.isAI }) {
+                BlockoGame.instance.bossbarHandler.unregisterBossbar(currentGamePlayer.toBukkitInstance()!!, "timeoutBar")
+            }
+
+            ingamePhase.phaseMode = GamePhaseMode.DICE
+            ingamePhase.setNextControllingTeam()
+        }
+
+        if (gamePlayer.teamName != null)
+            BlockoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(gamePlayer)
+
+        this.invitedPlayers.removeIf { it == player.uniqueId }
+        this.currentPlayers.removeIf { it.uuid == player.uniqueId }
+
+        togglePlayerVisibility(player, PlayerVisibility.IN_LOBBY)
+
+        if (this.currentPlayers.isEmpty()) this.phase.countdown?.cancel()
+
+        if (this.phase.isIngame() && (this.currentPlayers.isEmpty() || this.currentPlayers.size == 1)) {
+            reset(false)
+            return
+        }
+
+        if (this.phase.isIdle() && this.phase.countdown != null && this.phase.countdown!!.isRunning) {
+            this.phase.countdown!!.cancel()
+            sendArenaMessage("blocko.countdown.idle.stopped_to_less_players")
+        }
+
+        if (this.arenaHost != null && this.arenaHost!!.uuid == player.uniqueId) {
+            this.arenaHost = null
+            this.arenaHost = findNewHost()
+
+            if (this.arenaHost == null) {
+                reset(false)
+            } else {
+                this.arenaHost?.translateMessage("blocko.arena.host_join")
+            }
+        }
+
+        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
+    }
+
+    fun reset(shutdown: Boolean) {
+        this.phase.countdown?.cancel()
+
+        for (player: Player in getAllPlayers()) {
+            val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
+            if (lobbySpawn != null && player.world.name != lobbySpawn.worldName)
+                player.teleport(lobbySpawn.toBukkitInstance())
+
+            GameScoreboardUtils.removeGameSidebar(player)
+            BlockoGame.instance.bossbarHandler.clearBossbars(player)
+
+            this.phase.clearPlayerInventory(player)
+        }
+
+        for (gamePlayer: GamePlayer in this.currentPlayers) {
+            gamePlayer.actionTimeoutTimestamp = null
+            gamePlayer.activeEntity = null
+            gamePlayer.lastEntityPickRule = null
+
+            val statsPlayer: StatsPlayer? = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)
+
+            if (gamePlayer.isAI)
+                BlockoGame.instance.statsPlayerHandler.cachedStatsPlayers.removeIf { it.uuid == gamePlayer.uuid }
+
+            if (!gamePlayer.isAI && statsPlayer != null && !shutdown) statsPlayer.updateDbEntry()
+
+            for (gameTeam: GameTeam in BlockoGame.instance.gameTeamHandler.gameTeams[this.id]) {
+                gameTeam.quit(gamePlayer)
+            }
+        }
+
+        for (gameTeam: GameTeam in BlockoGame.instance.gameTeamHandler.gameTeams[this.id]) {
+            gameTeam.deactivated = false
+        }
+
+        val diceHandler: DiceHandler = BlockoGame.instance.diceHandler
+
+        for (currentPlayer: GamePlayer in this.currentPlayers) {
+            if (!diceHandler.dicingPlayers.containsKey(currentPlayer.uuid)) continue
+            diceHandler.dicingPlayers.remove(currentPlayer.uuid)
+        }
+
+        this.invitedPlayers.clear()
+        this.currentPlayers.clear()
+        this.spectatorPlayers.clear()
+
+        this.locked = false
+        this.waitForActualPlayers = true
+        this.teamOptions = GameTeamOptions.TWO_BY_ONE
+        this.arenaHost = null
+
+        BlockoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
+
+        for (gameField: GameField in BlockoGame.instance.gameFieldHandler.cachedGameFields[this.id]) {
+            gameField.isTaken = false
+            gameField.currentHolder = null
+        }
+
+        if (!this.phase.isIdle()) BlockoGame.instance.gamePhaseHandler.initIndexPhase(this)
+        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
     }
 
     fun sendArenaInvite(sender: GamePlayer, receiverName: String) {
@@ -101,191 +337,10 @@ class GameArena(
         BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
     }
 
-    fun join(uuid: UUID, isAI: Boolean): Boolean {
-        val bukkitPlayer: Player? = Bukkit.getPlayer(uuid)
-        val name: String = bukkitPlayer?.name ?: BlockoGame.instance.botNamesFile.botNames.random()
-
-        val gamePlayer = GamePlayer(uuid, name, this.id, null, isAI)
-
-        if (this.currentPlayers.any { it.uuid == gamePlayer.uuid }) {
-            gamePlayer.translateMessage("blocko.arena.yourself_already_in_arena")
-            return false
-        }
-
-        if (!this.phase.isIdle()) {
-            gamePlayer.translateMessage("blocko.arena.game_already_started")
-            return false
-        }
-
-        if (this.currentPlayers.size >= this.teamOptions.playerCount) {
-            gamePlayer.translateMessage("blocko.arena.already_full")
-            return false
-        }
-
-        if (!isAI && this.locked && !this.invitedPlayers.contains(uuid)) {
-            gamePlayer.translateMessage("blocko.arena.not_invited_by_host")
-            return false
-        }
-
-        sendArenaMessage("blocko.arena.join", Placeholder.parsed("name", gamePlayer.name))
-
-        if (!gamePlayer.isAI && (this.currentPlayers.isEmpty() || this.arenaHost == null)) {
-            this.arenaHost = gamePlayer
-            gamePlayer.translateMessage("blocko.arena.host_join")
-        }
-
-        this.currentPlayers.add(gamePlayer)
-
-        if (!isAI) {
-            this.phase.setupPlayerInventory(gamePlayer.toBukkitInstance()!!)
-
-            val neededPlayerCount: Int = if (this.waitForActualPlayers) this.teamOptions.playerCount else 1
-            this.phase.countdown?.tryStartup(Predicate { playerCount -> playerCount == neededPlayerCount })
-
-            togglePlayerVisibility(bukkitPlayer!!, true)
-
-            GameScoreboardUtils.setGameSidebar(gamePlayer)
-            BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
-        } else {
-            val aiStatsPlayer = StatsPlayer(uuid, 0, 0, 0, 0, 0)
-            BlockoGame.instance.statsPlayerHandler.cachedStatsPlayers.add(aiStatsPlayer)
-        }
-
-        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
-        return true
-    }
-
-    fun quit(player: Player) {
-        if (this.currentPlayers.none { it.uuid == player.uniqueId }) return
-
-        sendArenaMessage("blocko.arena.quit", Placeholder.parsed("name", player.name))
-        player.clearPhaseItems()
-
-        val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
-        if (lobbySpawn != null && player.world.name != lobbySpawn.worldName) player.teleportAsync(lobbySpawn.toBukkitInstance()).thenAccept {
-            togglePlayerVisibility(player, false)
-        }
-
-        BlockoGame.instance.bossbarHandler.clearBossbars(player)
-
-        val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == player.uniqueId } ?: return
-
-        if (BlockoGame.instance.diceHandler.dicingPlayers.containsKey(gamePlayer.uuid))
-            BlockoGame.instance.diceHandler.dicingPlayers.remove(gamePlayer.uuid)
-
-        if (!gamePlayer.isAI) {
-            BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)?.updateDbEntry()
-            GameScoreboardUtils.removeGameSidebar(player)
-        }
-
-        if (phase.isIngame()) {
-            val ingamePhase: IngamePhase = phase as IngamePhase
-            BlockoGame.instance.gameEntityHandler.clearEntitiesForTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
-            gamePlayer.actionTimeoutTimestamp = null
-
-            for (currentGamePlayer: GamePlayer in this.currentPlayers.filter { !it.isAI }) {
-                BlockoGame.instance.bossbarHandler.unregisterBossbar(currentGamePlayer.toBukkitInstance()!!, "timeoutBar")
-            }
-
-            ingamePhase.phaseMode = GamePhaseMode.DICE
-            ingamePhase.setNextControllingTeam()
-        }
-
-        if (gamePlayer.teamName != null)
-            BlockoGame.instance.gameTeamHandler.getTeamOfPlayer(this.id, player.uniqueId)?.quit(gamePlayer)
-
-        this.invitedPlayers.removeIf { it == player.uniqueId }
-        this.currentPlayers.removeIf { it.uuid == player.uniqueId }
-
-        togglePlayerVisibility(player, false)
-
-        if (this.currentPlayers.isEmpty()) this.phase.countdown?.cancel()
-
-        if (this.phase.isIngame() && (this.currentPlayers.isEmpty() || this.currentPlayers.size == 1)) {
-            reset(false)
-            return
-        }
-
-        if (this.phase.isIdle() && this.phase.countdown != null && this.phase.countdown!!.isRunning) {
-            this.phase.countdown!!.cancel()
-            sendArenaMessage("blocko.countdown.idle.stopped_to_less_players")
-        }
-
-        if (this.arenaHost != null && this.arenaHost!!.uuid == player.uniqueId) {
-            this.arenaHost = null
-            this.arenaHost = findNewHost()
-
-            if (this.arenaHost == null) {
-                reset(false)
-            } else {
-                this.arenaHost?.translateMessage("blocko.arena.host_join")
-            }
-        }
-
-        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
-    }
-
-    fun reset(shutdown: Boolean) {
-        this.phase.countdown?.cancel()
-
-        for (player: Player? in this.currentPlayers.filter { !it.isAI }.map { it.toBukkitInstance() }) {
-            if (player == null) continue
-
-            val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
-            if (lobbySpawn != null && player.world.name != lobbySpawn.worldName)
-                player.teleport(lobbySpawn.toBukkitInstance())
-
-            GameScoreboardUtils.removeGameSidebar(player)
-            BlockoGame.instance.bossbarHandler.clearBossbars(player)
-
-            this.phase.clearPlayerInventory(player)
-        }
-
-        for (gamePlayer: GamePlayer in this.currentPlayers) {
-            gamePlayer.actionTimeoutTimestamp = null
-            gamePlayer.activeEntity = null
-            gamePlayer.lastEntityPickRule = null
-
-            val statsPlayer: StatsPlayer? = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)
-
-            if (gamePlayer.isAI)
-                BlockoGame.instance.statsPlayerHandler.cachedStatsPlayers.removeIf { it.uuid == gamePlayer.uuid }
-
-            if (!gamePlayer.isAI && statsPlayer != null && !shutdown) statsPlayer.updateDbEntry()
-
-            for (gameTeam: GameTeam in BlockoGame.instance.gameTeamHandler.gameTeams[this.id]) {
-                gameTeam.quit(gamePlayer)
-            }
-        }
-
-        for (gameTeam: GameTeam in BlockoGame.instance.gameTeamHandler.gameTeams[this.id]) {
-            gameTeam.deactivated = false
-        }
-
-        val diceHandler: DiceHandler = BlockoGame.instance.diceHandler
-
-        for (currentPlayer: GamePlayer in this.currentPlayers) {
-            if (!diceHandler.dicingPlayers.containsKey(currentPlayer.uuid)) continue
-            diceHandler.dicingPlayers.remove(currentPlayer.uuid)
-        }
-
-        this.invitedPlayers.clear()
-        this.currentPlayers.clear()
-
-        this.locked = false
-        this.waitForActualPlayers = true
-        this.teamOptions = GameTeamOptions.TWO_BY_ONE
-        this.arenaHost = null
-
-        BlockoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
-
-        for (gameField: GameField in BlockoGame.instance.gameFieldHandler.cachedGameFields[this.id]) {
-            gameField.isTaken = false
-            gameField.currentHolder = null
-        }
-
-        if (!this.phase.isIdle()) BlockoGame.instance.gamePhaseHandler.initIndexPhase(this)
-        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
+    fun getAllPlayers(): List<Player> {
+        val players: MutableList<Player> = this.spectatorPlayers.mapNotNull { Bukkit.getPlayer(it) }.toMutableList()
+        players.addAll(this.currentPlayers.filter { !it.isAI }.mapNotNull { it.toBukkitInstance() })
+        return players
     }
 
     fun isGameOver(): Boolean {
@@ -311,28 +366,50 @@ class GameArena(
         return newHostPlayer
     }
 
-    private fun togglePlayerVisibility(bukkitPlayer: Player, isJoin: Boolean) {
+    private fun togglePlayerVisibility(bukkitPlayer: Player, visibility: PlayerVisibility) {
         for (currentPlayer: Player in Bukkit.getOnlinePlayers()) {
-            if (isJoin) {
-                val playersInSameArena: Boolean = (bukkitPlayer.getArena() != null && currentPlayer.getArena() != null) && (bukkitPlayer.getArena()!!.id == currentPlayer.getArena()!!.id)
+            when (visibility) {
+                PlayerVisibility.IN_ARENA -> {
+                    val playersInSameArena: Boolean = (bukkitPlayer.getArena() != null && currentPlayer.getArena() != null) && (bukkitPlayer.getArena()!!.id == currentPlayer.getArena()!!.id)
 
-                if (playersInSameArena) {
-                    bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
-                    currentPlayer.showPlayer(BlockoGame.instance, bukkitPlayer)
-                } else {
-                    bukkitPlayer.hidePlayer(BlockoGame.instance, currentPlayer)
-                    currentPlayer.hidePlayer(BlockoGame.instance, bukkitPlayer)
+                    if (playersInSameArena) {
+                        bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
+                        currentPlayer.showPlayer(BlockoGame.instance, bukkitPlayer)
+                    } else {
+                        bukkitPlayer.hidePlayer(BlockoGame.instance, currentPlayer)
+                        currentPlayer.hidePlayer(BlockoGame.instance, bukkitPlayer)
+                    }
                 }
-            } else {
-                if (currentPlayer.getArena() != null) {
-                    bukkitPlayer.hidePlayer(BlockoGame.instance, currentPlayer)
-                    currentPlayer.hidePlayer(BlockoGame.instance, bukkitPlayer)
-                } else {
-                    bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
-                    currentPlayer.showPlayer(BlockoGame.instance, bukkitPlayer)
+
+                PlayerVisibility.IN_LOBBY -> {
+                    if (currentPlayer.getArena() != null) {
+                        bukkitPlayer.hidePlayer(BlockoGame.instance, currentPlayer)
+                        currentPlayer.hidePlayer(BlockoGame.instance, bukkitPlayer)
+                    } else {
+                        bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
+                        currentPlayer.showPlayer(BlockoGame.instance, bukkitPlayer)
+                    }
+                }
+
+                PlayerVisibility.SPECTATING -> {
+                    val isCurrentPlayerAlsoSpectator: Boolean = this.spectatorPlayers.contains(currentPlayer.uniqueId)
+
+                    if (isCurrentPlayerAlsoSpectator) {
+                        bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
+                        currentPlayer.showPlayer(BlockoGame.instance, bukkitPlayer)
+                    } else {
+                        bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
+                        currentPlayer.hidePlayer(BlockoGame.instance, bukkitPlayer)
+                    }
                 }
             }
         }
+    }
+
+    enum class PlayerVisibility {
+        IN_ARENA,
+        IN_LOBBY,
+        SPECTATING
     }
 
 }

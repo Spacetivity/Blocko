@@ -53,6 +53,12 @@ blocko.sign:
 blocko.arena:
   no_free_arena_found: "<prefix> <gray>No free arena was found..."
   game_already_started: "<prefix> <gray>The game has already started!"
+
+  yourself_already_spectating_arena: "<prefix> <gray>You are already spectating this arena!"
+  not_spectatable: "<prefix> <gray>You cannot spectate this arena right now!"
+  spectate_join: "<prefix> <gray>You are now a spectator."
+  spectate_quit: "<prefix> <gray>You are no longer spectating."
+
   yourself_already_in_arena: "<prefix> <gray>You are already in this arena!"
   player_already_in_arena: "<prefix> <gray>This player plays already in this arena!"
   player_already_invited: "<prefix> <gray>This player was already invited!"

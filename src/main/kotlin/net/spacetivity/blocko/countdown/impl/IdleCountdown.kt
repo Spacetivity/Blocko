@@ -41,8 +41,9 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, BlockoGame.instanc
         for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
             if (gamePlayer.teamName != null) continue
             BlockoGame.instance.gameTeamHandler.gameTeams[gameArena.id].first { it.teamMembers.isEmpty() }.join(gamePlayer)
-            GameScoreboardUtils.updateTeamLine(gamePlayer)
         }
+
+        for (player: Player in gameArena.getAllPlayers()) GameScoreboardUtils.updateTeamLine(player)
 
         for (gameTeamLocation in BlockoGame.instance.gameTeamHandler.getLocationsOfAllTeams(this.arenaId)) {
             val gameTeam: GameTeam? = BlockoGame.instance.gameTeamHandler.getTeam(gameTeamLocation.arenaId, gameTeamLocation.teamName)

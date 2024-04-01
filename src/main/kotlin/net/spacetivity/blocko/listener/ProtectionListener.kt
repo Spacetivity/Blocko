@@ -1,10 +1,10 @@
 package net.spacetivity.blocko.listener
 
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.extensions.getArena
 import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.PersistentDataUtils
+import org.bukkit.GameMode
 import org.bukkit.World
 import org.bukkit.entity.Chicken
 import org.bukkit.entity.Player
@@ -91,26 +91,26 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     @EventHandler
     fun onBlockBreakInArenaWorld(event: BlockBreakEvent) {
         if (!shouldBeProtected(event.player.world)) return
-        event.isCancelled = true
+        event.isCancelled = (event.player.gameMode != GameMode.CREATIVE)
     }
 
     @EventHandler
     fun onBlockPlaceInArenaWorld(event: BlockPlaceEvent) {
         if (!shouldBeProtected(event.player.world)) return
-        event.isCancelled = true
-        event.setBuild(false)
+        event.isCancelled = (event.player.gameMode != GameMode.CREATIVE)
+        event.setBuild(event.player.gameMode == GameMode.CREATIVE)
     }
 
     @EventHandler
     fun onItemDragInArenaWorld(event: InventoryDragEvent) {
         if (!shouldBeProtected(event.whoClicked.world)) return
-        event.isCancelled = true
+        event.isCancelled = (event.whoClicked.gameMode != GameMode.CREATIVE)
     }
 
     @EventHandler
     fun onItemClickInArenaWorld(event: InventoryClickEvent) {
         if (!shouldBeProtected(event.whoClicked.world)) return
-        event.isCancelled = true
+        event.isCancelled = (event.whoClicked.gameMode != GameMode.CREATIVE)
     }
 
     @EventHandler
@@ -122,7 +122,7 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     fun onInteract(event: PlayerInteractEvent) {
         if (!shouldBeProtected(event.player.world)) return
-        event.isCancelled = true
+        event.isCancelled = (event.player.gameMode != GameMode.CREATIVE)
     }
 
     @EventHandler
@@ -148,11 +148,6 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     private fun isLobbyWorld(world: World): Boolean {
         val lobbySpawn: LobbySpawn = this.plugin.lobbySpawnHandler.lobbySpawn ?: return false
         return lobbySpawn.worldName == world.name
-    }
-
-    private fun shouldBeProtected(world: World, vararg player: Player): Boolean {
-        val lobbySpawn: LobbySpawn? = this.plugin.lobbySpawnHandler.lobbySpawn
-        return (lobbySpawn != null && lobbySpawn.worldName == world.name) || (player.size == 1 && (player[0].getArena() != null && player[0].getArena()!!.gameWorld.name == player[0].world.name))
     }
 
 }

@@ -135,12 +135,11 @@ class GamePlayActionHandler {
     fun startPlayerTask() {
         this.playerTask = Bukkit.getScheduler().runTaskTimerAsynchronously(BlockoGame.instance, Runnable {
             for (gameArena: GameArena in BlockoGame.instance.gameArenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
-                for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+                val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+                val controllingGamePlayer: GamePlayer = ingamePhase.getControllingGamePlayer() ?: continue
 
-                    val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
-                    val controllingGamePlayer: GamePlayer = ingamePhase.getControllingGamePlayer() ?: continue
-
-                    if (!gamePlayer.isAI && controllingGamePlayer.actionTimeoutTimestamp != null) {
+                for (player: Player in gameArena.getAllPlayers()) {
+                    if (controllingGamePlayer.actionTimeoutTimestamp != null) {
                         val bossbarHandler: BossbarHandler = BlockoGame.instance.bossbarHandler
 
                         val controllingGamePlayerTeam: GameTeam = BlockoGame.instance.gameTeamHandler.getTeamOfPlayer(controllingGamePlayer.arenaId, controllingGamePlayer.uuid)
@@ -161,20 +160,20 @@ class GamePlayActionHandler {
                             timePlaceholder,
                             unitPlaceholder)
 
-                        val bukkitPlayer: Player = gamePlayer.toBukkitInstance() ?: continue
-
-                        if (bossbarHandler.getBossbars(bukkitPlayer.uniqueId).none { it.first == "timeoutBar" }) {
-                            bossbarHandler.registerBossbar(bukkitPlayer, "timeoutBar", bossbarText, 1.0F, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
+                        if (bossbarHandler.getBossbars(player.uniqueId).none { it.first == "timeoutBar" }) {
+                            bossbarHandler.registerBossbar(player, "timeoutBar", bossbarText, 1.0F, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
                         } else {
                             val progress: Float = ingamePhase.getControllingGamePlayerTimeLeftFraction()
-                            bossbarHandler.updateBossbar(bukkitPlayer.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.PROGRESS, progress)
-                            bossbarHandler.updateBossbar(bukkitPlayer.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.NAME, bossbarText)
+                            bossbarHandler.updateBossbar(player.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.PROGRESS, progress)
+                            bossbarHandler.updateBossbar(player.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.NAME, bossbarText)
 
                             val barColor: BossBar.Color = if (timeLeft >= 30) BossBar.Color.GREEN else if (timeLeft >= 10) BossBar.Color.YELLOW else BossBar.Color.RED
-                            bossbarHandler.updateBossbar(bukkitPlayer.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.COLOR, barColor)
+                            bossbarHandler.updateBossbar(player.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.COLOR, barColor)
                         }
                     }
+                }
 
+                for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
                     if (gamePlayer.getTeam().deactivated) continue
                     if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
 

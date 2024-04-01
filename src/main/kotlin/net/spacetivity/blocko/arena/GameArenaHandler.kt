@@ -126,7 +126,11 @@ class GameArenaHandler {
     }
 
     fun getArenaOfPlayer(uuid: UUID): GameArena? {
-        return this.cachedArenas.find { it.currentPlayers.any { gamePlayer: GamePlayer -> gamePlayer.uuid == uuid } }
+        return this.cachedArenas.find { it.currentPlayers.any { gamePlayer: GamePlayer -> gamePlayer.uuid == uuid } } ?: getArenaOfSpectator(uuid)
+    }
+
+    fun getArenaOfSpectator(uuid: UUID): GameArena? {
+        return this.cachedArenas.find { it.spectatorPlayers.contains(uuid) }
     }
 
     fun loadJoinSign(location: Location, gameArena: GameArena?) {
@@ -162,6 +166,8 @@ class GameArenaHandler {
 
             if (arenaStatus == GameArenaStatus.READY && arenaPhase.isIdle()) {
                 signSide.line(3, Component.text("[JOIN]", NamedTextColor.GREEN))
+            } else if (arenaStatus == GameArenaStatus.READY && arenaPhase.isIngame()) {
+                signSide.line(3, Component.text("[SPECTATE]", NamedTextColor.GOLD))
             } else {
                 signSide.line(3, Component.text(" "))
             }

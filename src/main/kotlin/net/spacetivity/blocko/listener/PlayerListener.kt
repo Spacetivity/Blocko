@@ -25,6 +25,7 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
@@ -52,6 +53,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     fun onJoin(event: PlayerJoinEvent) {
         val player: Player = event.player
+        player.gameMode = GameMode.ADVENTURE
         player.allowFlight = true
         player.isFlying = true
 
@@ -144,7 +146,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
             event.isCancelled = true
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     fun onBreak(event: BlockBreakEvent) {
         val player: Player = event.player
         val block: Block = event.block
@@ -158,6 +160,8 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                 }
 
                 event.isCancelled = true
+
+                println(0)
 
                 if (!this.gameArenaSignHandler.existsLocation(block.location)) {
                     player.translateMessage("blocko.sign.not_found")
@@ -208,7 +212,11 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                 if (player.getArena() != null && player.getArena()!!.id == gameArena.id) {
                     gameArena.quit(player)
                 } else if (player.getArena() == null) {
-                    gameArena.join(player.uniqueId, false)
+                    if (gameArena.phase.isIngame()) {
+                        gameArena.joinAsSpectator(player)
+                    } else {
+                        gameArena.join(player.uniqueId, false)
+                    }
                 }
             }
 
