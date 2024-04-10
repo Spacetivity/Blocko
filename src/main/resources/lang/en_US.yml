@@ -32,7 +32,7 @@ blocko.setup:
   no_garage_fields_configured: "<prefix> <gray>You have to add all garage fields for all teams before you finish the setup!"
   not_enough_team_spawns_configured: "<prefix> <gray>You have to set all team spawn locations before you finish the setup!"
   team_spawn_already_set: "<prefix> <gray>There is already a team spawn on this location!"
-  team_spawn_added: "<prefix> <gray>Team spawn added."
+  team_spawn_added: "<prefix> <gray>Spawn location added for team <team_color><team_name><gray>."
   game_field_already_set: "<prefix> <gray>There is already a game field at this location!"
   game_field_set: "<gray>Game field <dark_gray>#<yellow><field_id> <gray>at <dark_gray>(<yellow><x> <dark_gray>| <yellow><z><dark_gray>) <gray>added."
   game_field_set_to_garage_field: "<gray>Game field at <dark_gray>(<yellow><x> <dark_gray>| <yellow><z><dark_gray>) <gray>set to garage field of team <team_color><team_name><gray>."

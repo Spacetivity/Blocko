@@ -161,8 +161,6 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
 
                 event.isCancelled = true
 
-                println(0)
-
                 if (!this.gameArenaSignHandler.existsLocation(block.location)) {
                     player.translateMessage("blocko.sign.not_found")
                     return

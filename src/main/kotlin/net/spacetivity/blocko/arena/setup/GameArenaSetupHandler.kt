@@ -178,7 +178,12 @@ class GameArenaSetupHandler {
 
         arenaSetupData.gameTeamLocations.add(teamSpawn)
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.translateMessage("blocko.setup.team_spawn_added")
+
+        val gameTeam: GameTeam = arenaSetupData.gameTeams.find { it.name == teamName } ?: return
+
+        player.translateMessage("blocko.setup.team_spawn_added",
+            Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+            Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
     }
 
     fun addField(player: Player, location: Location) {

@@ -1,7 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.9.23"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "net.spacetivity.blocko"
@@ -41,4 +43,28 @@ kotlin {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "17"
+}
+
+tasks {
+    named<ShadowJar>("shadowJar") {
+        archiveFileName.set("${project.name}-${project.version}.jar")
+        mergeServiceFiles()
+        relocate("org.mariadb.jdbc", "net.spacetivity.mariadb.jdbc")
+        relocate("org.jetbrains.exposed", "net.spacetivity.jetbrains.exposed")
+
+        exclude("org/**")
+        exclude("kotlin/**")
+        exclude("kotlinx/**")
+
+        exclude("META-INF/**kotlin**")
+        exclude("META-INF/**/*kotlin*")
+
+        exclude("**/META-INF/**/*kotlin*")
+
+        dependencies {
+            exclude(dependency("org.jetbrains.exposed:exposed-core:$exposedVersion"))
+            exclude(dependency("org.jetbrains.exposed:exposed-dao:$exposedVersion"))
+            exclude(dependency("org.jetbrains.exposed:exposed-jdbc:$exposedVersion"))
+        }
+    }
 }
