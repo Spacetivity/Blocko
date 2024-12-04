@@ -28,7 +28,7 @@ class StatsPlayerHandler {
     fun createOrLoadStatsPlayer(uuid: UUID) {
         GlobalScope.launch {
             transaction {
-                val resultRow: ResultRow? = StatsPlayerDAO.select { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
+                val resultRow: ResultRow? = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
                 val statsPlayer: StatsPlayer
 
                 if (resultRow == null) {
@@ -86,7 +86,7 @@ class StatsPlayerHandler {
         var statsPlayer: StatsPlayer? = null
 
         transaction {
-            val resultRow: ResultRow? = StatsPlayerDAO.select { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
+            val resultRow: ResultRow? = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
             if (resultRow != null) {
                 statsPlayer = StatsPlayer(
                     uuid,

@@ -7,11 +7,11 @@ import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.PathFace
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.ItemBuilder
-import net.spacetivity.inventory.api.annotation.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
 import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPosition
+import net.spacetivity.inventory.api.item.InventoryPos
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -23,10 +23,10 @@ class GameFieldTurnSetupInventory(private val blockLocation: Location) : Invento
         val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
         val availablePositions = listOf(
-            InventoryPosition.of(0, 2),
-            InventoryPosition.of(0, 3),
-            InventoryPosition.of(0, 5),
-            InventoryPosition.of(0, 6)
+            InventoryPos.of(0, 2),
+            InventoryPos.of(0, 3),
+            InventoryPos.of(0, 5),
+            InventoryPos.of(0, 6)
         )
 
         val items: List<InteractiveItem> = initItems(translation, player)

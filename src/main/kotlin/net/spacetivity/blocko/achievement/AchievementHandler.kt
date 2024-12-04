@@ -12,7 +12,7 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
@@ -39,7 +39,7 @@ class AchievementHandler {
             val achievementPlayer = AchievementPlayer(uuid, mutableListOf())
             cachedAchievementPlayers.add(achievementPlayer)
 
-            for (resultRow: ResultRow in AchievementPlayerDAO.select() { AchievementPlayerDAO.uuid eq uuid.toString() }.toMutableList()) {
+            for (resultRow: ResultRow in AchievementPlayerDAO.selectAll().where { AchievementPlayerDAO.uuid eq uuid.toString() }.toMutableList()) {
                 val achievementName: String = resultRow[AchievementPlayerDAO.achievementId]
                 if (cachedAchievements.none { it.translationKey == achievementName }) return@transaction
                 achievementPlayer.achievementNames.add(achievementName)
@@ -74,7 +74,7 @@ class AchievementHandler {
         var achievementPlayer: AchievementPlayer? = getAchievementPlayer(uuid)
 
         if (achievementPlayer == null) {
-           achievementPlayer = AchievementPlayer(uuid, mutableListOf(achievement.translationKey))
+            achievementPlayer = AchievementPlayer(uuid, mutableListOf(achievement.translationKey))
             this.cachedAchievementPlayers.add(achievementPlayer)
         } else {
             achievementPlayer.achievementNames.add(achievement.translationKey)

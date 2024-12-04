@@ -5,11 +5,12 @@ import com.google.common.collect.Multimap
 import net.spacetivity.blocko.team.GameTeamLocation
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import java.util.*
+import kotlin.collections.set
 
 class GameEntityHandler {
 
@@ -52,7 +53,7 @@ class GameEntityHandler {
         this.gameEntityHistories[uuid]?.selectedEntityType = gameEntityType
 
         transaction {
-            val resultRow: ResultRow? = GameEntityHistoryDAO.select { GameEntityHistoryDAO.uuid eq uuid.toString() }.firstOrNull()
+            val resultRow: ResultRow? = GameEntityHistoryDAO.selectAll().where { GameEntityHistoryDAO.uuid eq uuid.toString() }.firstOrNull()
 
             if (resultRow == null) {
                 GameEntityHistoryDAO.insert {
@@ -71,7 +72,7 @@ class GameEntityHandler {
         if (this.gameEntityHistories.containsKey(uuid)) return
 
         transaction {
-            for (resultRow: ResultRow in GameEntityHistoryDAO.select() { GameEntityHistoryDAO.uuid eq uuid.toString() }.toMutableList()) {
+            for (resultRow: ResultRow in GameEntityHistoryDAO.selectAll().where { GameEntityHistoryDAO.uuid eq uuid.toString() }.toMutableList()) {
                 val gameEntityHistory = GameEntityHistory(UUID.fromString(resultRow[GameEntityHistoryDAO.uuid]), resultRow[GameEntityHistoryDAO.selectedEntityType])
                 gameEntityHistories[uuid] = gameEntityHistory
             }
@@ -107,7 +108,7 @@ class GameEntityHandler {
 
     fun loadUnlockedEntityTypes(uuid: UUID) {
         transaction {
-            val results: MutableList<ResultRow> = GameEntityTypeDAO.select() { GameEntityTypeDAO.uuid eq uuid.toString() }.toMutableList()
+            val results: MutableList<ResultRow> = GameEntityTypeDAO.selectAll().where { GameEntityTypeDAO.uuid eq uuid.toString() }.toMutableList()
 
             if (results.isEmpty()) {
                 unlockEntityType(uuid, GameEntityType.VILLAGER)

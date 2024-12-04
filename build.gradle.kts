@@ -2,7 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.23"
+    kotlin("jvm") version "1.9.24"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -11,7 +11,8 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     maven {
-        url = uri("https://nexus.spacetivity.net/repository/maven-public/")
+        isAllowInsecureProtocol = true
+        url = uri("http://37.114.42.133:8081/repository/maven-public/")
         credentials {
             username = property("nexusUsername") as String
             password = property("nexusPassword") as String
@@ -20,51 +21,55 @@ repositories {
     mavenCentral()
 }
 
-val exposedVersion: String by project
-
 dependencies {
-    compileOnly("com.google.code.gson:gson:2.10.1")
-    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
-    compileOnly("net.spacetivity.inventory:inventory-api:1.0-SNAPSHOT")
+    compileOnly(libs.gson)
+    compileOnly(libs.api.inventory)
+    compileOnly(libs.bundles.database)
+    compileOnly(libs.bundles.paper)
+}
 
-    compileOnly(group = "org.mariadb.jdbc", name = "mariadb-java-client", version = "3.0.7")
-
-    api("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    api("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    api("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-
-    compileOnly(group = "org.slf4j", name = "slf4j-api", version = "1.7.25")
-    compileOnly(group = "org.slf4j", name = "slf4j-simple", version = "1.7.25")
+tasks.shadowJar {
+    manifest {
+        attributes["paperweight-mappings-namespace"] = "mojang"
+    }
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(libs.versions.java.get().toInt())
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
+    kotlinOptions.jvmTarget = libs.versions.java.get()
 }
 
 tasks {
     named<ShadowJar>("shadowJar") {
         archiveFileName.set("${project.name}-${project.version}.jar")
         mergeServiceFiles()
-        relocate("org.mariadb.jdbc", "net.spacetivity.mariadb.jdbc")
-        relocate("org.jetbrains.exposed", "net.spacetivity.jetbrains.exposed")
-
-        exclude("org/**")
-        exclude("kotlin/**")
-        exclude("kotlinx/**")
-
-        exclude("META-INF/**kotlin**")
-        exclude("META-INF/**/*kotlin*")
-
-        exclude("**/META-INF/**/*kotlin*")
-
-        dependencies {
-            exclude(dependency("org.jetbrains.exposed:exposed-core:$exposedVersion"))
-            exclude(dependency("org.jetbrains.exposed:exposed-dao:$exposedVersion"))
-            exclude(dependency("org.jetbrains.exposed:exposed-jdbc:$exposedVersion"))
-        }
+        archiveClassifier.set("")
     }
 }
+
+//tasks {
+//    named<ShadowJar>("shadowJar") {
+//        archiveFileName.set("${project.name}-${project.version}.jar")
+//        mergeServiceFiles()
+//        relocate("org.mariadb.jdbc", "net.spacetivity.mariadb.jdbc")
+//        relocate("org.jetbrains.exposed", "net.spacetivity.jetbrains.exposed")
+//
+//        exclude("org/**")
+//        exclude("kotlin/**")
+//        exclude("kotlinx/**")
+//
+//        exclude("META-INF/**kotlin**")
+//        exclude("META-INF/**/*kotlin*")
+//
+//        exclude("**/META-INF/**/*kotlin*")
+//
+//        dependencies {
+//            exclude(dependency("org.jetbrains.exposed:exposed-core:${libs.versions.sql.core}"))
+//            exclude(dependency("org.jetbrains.exposed:exposed-dao:${libs.versions.sql.dao}"))
+//            exclude(dependency("org.jetbrains.exposed:exposed-jdbc:${libs.versions.sql.jdbc}"))
+//        }
+//    }
+//}

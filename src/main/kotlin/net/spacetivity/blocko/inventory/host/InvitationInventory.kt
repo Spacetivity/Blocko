@@ -2,12 +2,6 @@ package net.spacetivity.blocko.inventory.host
 
 import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.inventory.api.annotation.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPosition
-import net.spacetivity.inventory.api.pagination.InventoryPagination
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.extensions.getArena
@@ -16,6 +10,12 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
+import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProperties
+import net.spacetivity.inventory.api.inventory.InventoryProvider
+import net.spacetivity.inventory.api.item.InteractiveItem
+import net.spacetivity.inventory.api.item.InventoryPos
+import net.spacetivity.inventory.api.pagination.InventoryPagination
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -40,7 +40,7 @@ class InvitationInventory(private val gameArena: GameArena) : InventoryProvider 
             controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(ItemBuilder(Material.BARRIER)
                 .setName(translation.validateItemName("blocko.inventory.invitation.no_players_to_invite_found.display_name"))
                 .setLoreByComponent(translation.validateItemLore("blocko.inventory.invitation.no_players_to_invite_found.lore"))
-                .build()), InventoryPosition.of(2, 3), InventoryPosition.of(3, 5))
+                .build()), InventoryPos.of(2, 3), InventoryPos.of(3, 5))
             return
         }
 

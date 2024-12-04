@@ -12,11 +12,11 @@ import net.spacetivity.blocko.utils.HeadUtils
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.NumberUtils
-import net.spacetivity.inventory.api.annotation.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
 import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPosition
+import net.spacetivity.inventory.api.item.InventoryPos
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
@@ -58,7 +58,7 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
             else
                 gamePlayer.toBukkitInstance()?.playerProfile?.properties?.first()?.value ?: HeadUtils.BOT
 
-        controller.setItem(InventoryPosition.of(4, if (this.showSearchPlayerItem) 2 else 4), InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
+        controller.setItem(InventoryPos.of(4, if (this.showSearchPlayerItem) 2 else 4), InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
             .setName(translation.validateItemName("blocko.inventory.stats.overview_item.display_name"))
             .setLoreByComponent(translation.validateItemLore("blocko.inventory.stats.overview_item.lore",
                 Placeholder.parsed("eliminations_key", translation.validateLineAsString("blocko.stats.type.eliminations")),

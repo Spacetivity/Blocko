@@ -61,7 +61,7 @@ class GameArenaSetupTool(private val holder: Player) {
             ToolMode.SET_GARAGE_FIELD -> InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.GARAGE, block)
             ToolMode.SET_TEAM_ENTRANCE -> InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.ENTRANCE, block)
             ToolMode.SET_TEAM_PATH -> {
-                if (this.currentTeamName == null || (this.holder.isSneaking && this.currentTeamName != null)) Bukkit.getServer().openStaticInventory(this.holder, Component.text("Set team path"), GameTeamSetupInventory(InvType.IDS, block.location))
+                if (this.currentTeamName == null || (this.holder.isSneaking && this.currentTeamName != null)) openStaticInventory(this.holder, Component.text("Set team path"), GameTeamSetupInventory(InvType.IDS, block.location))
                 else BlockoGame.instance.gameArenaSetupHandler.setFieldId(this.holder, this.currentTeamName!!, block.location)
             }
         }

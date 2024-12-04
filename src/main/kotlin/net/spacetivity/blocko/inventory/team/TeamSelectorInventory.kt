@@ -12,8 +12,8 @@ import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.PersistentDataUtils
-import net.spacetivity.inventory.api.annotation.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
 import net.spacetivity.inventory.api.item.InteractiveItem
 import org.bukkit.Bukkit

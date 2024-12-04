@@ -10,11 +10,11 @@ import net.spacetivity.blocko.team.GameTeamOptions
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
-import net.spacetivity.inventory.api.annotation.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
 import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPosition
+import net.spacetivity.inventory.api.item.InventoryPos
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -29,13 +29,13 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
 
         controller.setItem(0, 1, InteractiveItem.of(ItemBuilder(Material.WRITABLE_BOOK)
             .setName(translation.validateItemName("blocko.inventory.host.invite_players.display_name"))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS)
+            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
             .build()) { _, _, _ -> InventoryUtils.openInvitationInventory(player, this.gameArena) })
 
         controller.setItem(0, 2, InteractiveItem.of(ItemBuilder(Material.END_CRYSTAL)
             .setName(buildTeamModeSelectorDisplayName(translation))
             .setLoreByComponent(buildTeamModeSelectorLore(translation))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS)
+            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
             .build()) { _, item: InteractiveItem, event: InventoryClickEvent ->
 
             val nextMode: GameTeamOptions = GameTeamOptions.entries.find { it.id == if (event.isLeftClick) this.gameArena.teamOptions.id.inc() else this.gameArena.teamOptions.id.dec() }
@@ -51,14 +51,14 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
             player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)
         })
 
-        setIndicatorItem(controller, InventoryPosition.of(0, 6), IndicatorType.PRIVACY, translation, player)
-        setIndicatorItem(controller, InventoryPosition.of(0, 7), IndicatorType.WAITING_PREDICATE, translation, player)
+        setIndicatorItem(controller, InventoryPos.of(0, 6), IndicatorType.PRIVACY, translation, player)
+        setIndicatorItem(controller, InventoryPos.of(0, 7), IndicatorType.WAITING_PREDICATE, translation, player)
     }
 
-    private fun setIndicatorItem(controller: InventoryController, position: InventoryPosition, indicatorType: IndicatorType, translation: Translation, player: Player) {
+    private fun setIndicatorItem(controller: InventoryController, position: InventoryPos, indicatorType: IndicatorType, translation: Translation, player: Player) {
         controller.setItem(position, InteractiveItem.of(ItemBuilder(getIndicatorMaterialType(indicatorType))
             .setName(getIndicatorDisplayName(indicatorType, translation))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS)
+            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
             .build()) { _, item: InteractiveItem, _ ->
 
             if (indicatorType == IndicatorType.PRIVACY) this.gameArena.locked = !this.gameArena.locked

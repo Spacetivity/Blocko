@@ -37,7 +37,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     FOX(EntityType.FOX, 60, false, null),
     FROG(EntityType.FROG, 40, false, null),
     HUSK(EntityType.HUSK, 70, false, null),
-    MUSHROOM_COW(EntityType.MUSHROOM_COW, 3500, false, BlockoGame.instance.achievementHandler.getAchievement(EntityCollectorAchievement::class.java)?.translationKey),
+    //TODO: MUSHROOM_COW(EntityType.COW, 3500, false, BlockoGame.instance.achievementHandler.getAchievement(EntityCollectorAchievement::class.java)?.translationKey),
     OCELOT(EntityType.OCELOT, 50, false, null),
     PIG(EntityType.PIG, 40, false, null),
     PIGLIN(EntityType.PIGLIN, 70, false, null),
@@ -112,7 +112,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
 
     fun getSpawnEggType(): Material {
         val typeName: String = when (this) {
-            MUSHROOM_COW -> "COW_SPAWN_EGG"
+            //MUSHROOM_COW -> "COW_SPAWN_EGG"
             else -> "${this.name.uppercase()}_SPAWN_EGG"
         }
 

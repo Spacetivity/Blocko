@@ -1,0 +1,32 @@
+[versions]
+java = "21"
+
+gson = "2.11.0"
+#guava = "33.2.0-jre"
+
+mariadb = "3.5.1"
+exposed = "0.56.0"
+
+api-paper = "1.21.3-R0.1-SNAPSHOT"
+api-paper-async = "2.20.0"
+
+api-inventory = "1.0-SNAPSHOT"
+
+[libraries]
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+#guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+
+mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-dao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
+
+paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "api-paper" }
+async-paper-api = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-api", version.ref = "api-paper-async" }
+async-paper-core = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-core", version.ref = "api-paper-async" }
+
+api-inventory = { group = "net.spacetivity.inventory", name = "inventory-api", version.ref = "api-inventory" }
+
+[bundles]
+database = ["mariadb", "exposed-core", "exposed-dao", "exposed-jdbc"]
+paper = ["paper-api", "async-paper-api", "async-paper-core"]

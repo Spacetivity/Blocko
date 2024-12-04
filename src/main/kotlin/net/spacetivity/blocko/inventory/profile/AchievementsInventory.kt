@@ -14,11 +14,11 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
-import net.spacetivity.inventory.api.annotation.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
 import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPosition
+import net.spacetivity.inventory.api.item.InventoryPos
 import net.spacetivity.inventory.api.pagination.InventoryPagination
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -45,7 +45,7 @@ class AchievementsInventory : InventoryProvider {
         if (pageItems.isEmpty()) {
             controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(ItemBuilder(Material.BARRIER)
                 .setName(translation.validateItemName("blocko.inventory.achievements.no_achievements_found.display_name"))
-                .build()), InventoryPosition.of(2, 3), InventoryPosition.of(3, 5))
+                .build()), InventoryPos.of(2, 3), InventoryPos.of(3, 5))
             return
         }
 
