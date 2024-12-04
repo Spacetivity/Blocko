@@ -6,7 +6,6 @@ description: Blocko is a inspiration of the classic board game 'Mensch Ärgere d
 website: https://builtbybit.com/creators/spacetivity.301580/
 author:
   - TGamings
-  - realFallenBreak
 depend:
   - SpaceDependencies
   - SpaceInventories
