@@ -15,8 +15,9 @@ import kotlin.collections.set
 class GameEntityHandler {
 
     val gameEntities: Multimap<String, GameEntity> = ArrayListMultimap.create()
-    val unlockedGameEntityTypes: Multimap<UUID, GameEntityType> = ArrayListMultimap.create()
-    val gameEntityHistories: MutableMap<UUID, GameEntityHistory> = mutableMapOf()
+
+    private val unlockedGameEntityTypes: Multimap<UUID, GameEntityType> = ArrayListMultimap.create()
+    private val gameEntityHistories: MutableMap<UUID, GameEntityHistory> = mutableMapOf()
 
     fun getEntitiesFromTeam(arenaId: String, teamName: String): List<GameEntity> {
         return this.gameEntities.get(arenaId).filter { it.teamName.equals(teamName, true) }

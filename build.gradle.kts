@@ -46,30 +46,20 @@ tasks {
     named<ShadowJar>("shadowJar") {
         archiveFileName.set("${project.name}-${project.version}.jar")
         mergeServiceFiles()
-        archiveClassifier.set("")
+
+        exclude("org/**")
+        exclude("kotlin/**")
+        exclude("kotlinx/**")
+
+        exclude("META-INF/**kotlin**")
+        exclude("META-INF/**/*kotlin*")
+
+        exclude("**/META-INF/**/*kotlin*")
+
+        dependencies {
+            exclude(dependency("org.jetbrains.exposed:exposed-core:${libs.versions.exposed}"))
+            exclude(dependency("org.jetbrains.exposed:exposed-dao:${libs.versions.exposed}"))
+            exclude(dependency("org.jetbrains.exposed:exposed-jdbc:${libs.versions.exposed}"))
+        }
     }
 }
-
-//tasks {
-//    named<ShadowJar>("shadowJar") {
-//        archiveFileName.set("${project.name}-${project.version}.jar")
-//        mergeServiceFiles()
-//        relocate("org.mariadb.jdbc", "net.spacetivity.mariadb.jdbc")
-//        relocate("org.jetbrains.exposed", "net.spacetivity.jetbrains.exposed")
-//
-//        exclude("org/**")
-//        exclude("kotlin/**")
-//        exclude("kotlinx/**")
-//
-//        exclude("META-INF/**kotlin**")
-//        exclude("META-INF/**/*kotlin*")
-//
-//        exclude("**/META-INF/**/*kotlin*")
-//
-//        dependencies {
-//            exclude(dependency("org.jetbrains.exposed:exposed-core:${libs.versions.sql.core}"))
-//            exclude(dependency("org.jetbrains.exposed:exposed-dao:${libs.versions.sql.dao}"))
-//            exclude(dependency("org.jetbrains.exposed:exposed-jdbc:${libs.versions.sql.jdbc}"))
-//        }
-//    }
-//}

@@ -18,6 +18,7 @@ object GameScoreboardUtils {
 
     fun setGameSidebar(player: Player) {
         val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val initialEntityStatus = GameEntityStatus.AT_SPAWN
 
         BlockoGame.instance.sidebarHandler.registerSidebar(SidebarBuilder(player)
             .setTitle(translation.validateLine("blocko.sidebar.title"))
@@ -27,10 +28,10 @@ object GameScoreboardUtils {
             .addLine(getControllingTeamComponent(translation, null))
             .addLine(getDicedNumberComponent(translation, null))
             .addBlankLine()
-            .addLine(getStatusComponent(translation, 1, GameEntityStatus.AT_SPAWN))
-            .addLine(getStatusComponent(translation, 2, GameEntityStatus.AT_SPAWN))
-            .addLine(getStatusComponent(translation, 3, GameEntityStatus.AT_SPAWN))
-            .addLine(getStatusComponent(translation, 4, GameEntityStatus.AT_SPAWN))
+            .addLine(getStatusComponent(translation, 1, initialEntityStatus))
+            .addLine(getStatusComponent(translation, 2, initialEntityStatus))
+            .addLine(getStatusComponent(translation, 3, initialEntityStatus))
+            .addLine(getStatusComponent(translation, 4, initialEntityStatus))
             .build())
     }
 

@@ -3,7 +3,6 @@ package net.spacetivity.blocko.achievement.container
 import net.kyori.adventure.text.Component
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.player.GamePlayer
-import org.bukkit.Material
 
 open class Achievement(val translationKey: String, val rewardedCoins: Int, private val requirements: List<Requirement>) {
 
@@ -18,11 +17,6 @@ open class Achievement(val translationKey: String, val rewardedCoins: Int, priva
         }
 
         return description
-    }
-
-    fun getIconType(gamePlayer: GamePlayer): Material {
-        val hasAchievementUnlocked: Boolean = BlockoGame.instance.achievementHandler.hasAchievementUnlocked(gamePlayer.uuid, this.translationKey)
-        return if (hasAchievementUnlocked) Material.LIME_DYE else Material.GRAY_DYE
     }
 
     fun grantIfCompletedBy(gamePlayer: GamePlayer) {
