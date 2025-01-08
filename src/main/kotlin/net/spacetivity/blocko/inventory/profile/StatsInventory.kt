@@ -12,11 +12,11 @@ import net.spacetivity.blocko.utils.HeadUtils
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.NumberUtils
-import net.spacetivity.inventory.api.annotation.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
 import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPosition
+import net.spacetivity.inventory.api.item.InventoryPos
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
@@ -34,7 +34,8 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
             .build()) { _, _, _ ->
 
             if (this.statsPlayer.uuid != player.uniqueId) {
-                val selfStatsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId) ?: return@of
+                val selfStatsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)
+                    ?: return@of
                 InventoryUtils.openStatsInventory(player, selfStatsPlayer)
                 return@of
             }
@@ -44,14 +45,20 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
             InventoryUtils.openProfileInventory(player, isShopItemActive)
         })
 
-        for (column in 0..<4) {
-            val statsType: StatsType = StatsType.entries[column]
-            controller.setItem(2, column * 2 + 1, getStatsItem(translation, statsType))
-        }
-
         val gamePlayer: GamePlayer = this.gameArena.currentPlayers.find { it.uuid == this.statsPlayer.uuid } ?: return
 
-        controller.setItem(InventoryPosition.of(4, if (this.showSearchPlayerItem) 2 else 4), InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
+        for (column in 0..<4) {
+            val statsType: StatsType = StatsType.entries[column]
+            controller.setItem(2, column * 2 + 1, getStatsItem(translation, gamePlayer.isAI, statsType))
+        }
+
+        val skinValue: String =
+            if (this.statsPlayer.uuid == player.uniqueId)
+                player.playerProfile.properties.first().value
+            else
+                gamePlayer.toBukkitInstance()?.playerProfile?.properties?.first()?.value ?: HeadUtils.BOT
+
+        controller.setItem(InventoryPos.of(4, if (this.showSearchPlayerItem) 2 else 4), InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
             .setName(translation.validateItemName("blocko.inventory.stats.overview_item.display_name"))
             .setLoreByComponent(translation.validateItemLore("blocko.inventory.stats.overview_item.lore",
                 Placeholder.parsed("eliminations_key", translation.validateLineAsString("blocko.stats.type.eliminations")),
@@ -64,8 +71,11 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
                 Placeholder.parsed("coins_value", NumberUtils.format(this.statsPlayer.coins)),
 
                 Placeholder.parsed("played_games_key", translation.validateLineAsString("blocko.stats.type.played_games")),
-                Placeholder.parsed("played_games_value", this.statsPlayer.playedGames.toString())))
-            .setOwner(if (gamePlayer.isAI) HeadUtils.BOT else player.playerProfile.properties.first().value)
+                Placeholder.parsed("played_games_value", this.statsPlayer.playedGames.toString()),
+
+                Placeholder.parsed("won_games_key", translation.validateLineAsString("blocko.stats.type.won_games")),
+                Placeholder.parsed("won_games_value", this.statsPlayer.wonGames.toString())))
+            .setOwner(if (gamePlayer.isAI) HeadUtils.BOT else skinValue)
             .build()))
 
         if (this.showSearchPlayerItem) {
@@ -76,11 +86,14 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
         }
     }
 
-    private fun getStatsItem(translation: Translation, statsType: StatsType): InteractiveItem {
+    private fun getStatsItem(translation: Translation, isAI: Boolean, statsType: StatsType): InteractiveItem {
         val statsValue: Int = this.statsPlayer.getStatsValue(statsType)
 
-        return InteractiveItem.of(ItemBuilder(Material.PAPER)
-            .setName(translation.validateItemName("blocko.inventory.stats.stats_type_item.display_name",
+        val displayAsAI: Boolean = isAI && (statsType == StatsType.COINS || statsType == StatsType.PLAYED_GAMES)
+        val displayNameKey = "blocko.inventory.stats.stats_type_item.display_name.${if (displayAsAI) "not_active" else "active"}"
+
+        return InteractiveItem.of(ItemBuilder(if (displayAsAI) Material.BARRIER else Material.PAPER)
+            .setName(translation.validateItemName(displayNameKey,
                 Placeholder.parsed("type_name", translation.validateLineAsString(statsType.nameKey)),
                 Placeholder.parsed("value", if (statsType == StatsType.COINS) NumberUtils.format(statsValue) else statsValue.toString())))
             .build())

@@ -73,7 +73,7 @@ class ItemBuilder(material: Material) {
     }
 
     fun addGlow(): ItemBuilder {
-        itemStack.addUnsafeEnchantment(Enchantment.DURABILITY, 1)
+        itemStack.addUnsafeEnchantment(Enchantment.UNBREAKING, 1)
         return this
     }
 

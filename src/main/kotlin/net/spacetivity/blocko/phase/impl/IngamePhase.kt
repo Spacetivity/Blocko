@@ -1,20 +1,26 @@
 package net.spacetivity.blocko.phase.impl
 
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.achievement.AchievementHandler
+import net.spacetivity.blocko.achievement.impl.RushExpertAchievement
+import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.entity.GameEntity
+import net.spacetivity.blocko.extensions.getArena
 import net.spacetivity.blocko.extensions.playSound
+import net.spacetivity.blocko.extensions.toStatsPlayerInstance
 import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
+import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
+import net.spacetivity.inventory.api.SpaceInventoryProvider
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -30,10 +36,11 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     var lastControllingTeamId: Int? = null
     var controllingTeamId: Int? = null
     var phaseMode: GamePhaseMode = GamePhaseMode.DICE
-
-    private var matchStartTime: Long? = null
+    var matchStartTime: Long? = null
 
     override fun start() {
+        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(getArena())
+
         this.phaseMode = GamePhaseMode.DICE
 
         if (this.matchStartTime == null) this.matchStartTime = System.currentTimeMillis()
@@ -47,14 +54,22 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     override fun stop() {
         for (gamePlayer: GamePlayer in getArena().currentPlayers) {
             val player: Player = gamePlayer.toBukkitInstance() ?: return
+
+            val statsPlayer: StatsPlayer? = gamePlayer.toStatsPlayerInstance()
+            if (statsPlayer != null) statsPlayer.wonGames += 1
+
             BlockoGame.instance.bossbarHandler.unregisterBossbar(player, "timeoutBar")
+
+            val achievementHandler: AchievementHandler = BlockoGame.instance.achievementHandler
+            achievementHandler.getAchievement(RushExpertAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+            achievementHandler.getAchievement(WinMonsterAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
 
             val matchDuration: kotlin.time.Duration = (System.currentTimeMillis() - this.matchStartTime!!).toDuration(DurationUnit.MILLISECONDS)
 
             matchDuration.toComponents { hours, minutes, seconds, _ ->
-                val hoursString: String = if (hours != 0L && hours != 1L) hours.toString() else "0$hours"
-                val minutesString: String = if (minutes != 0 && minutes != 1) minutes.toString() else "0$minutes"
-                val secondsString: String = if (seconds != 0 && seconds != 1) seconds.toString() else "0$seconds"
+                val hoursString: String = if (hours in 0..9) "0$hours" else hours.toString()
+                val minutesString: String = if (minutes in 0..9) "0$minutes" else minutes.toString()
+                val secondsString: String = if (seconds in 0..9) "0$seconds" else seconds.toString()
 
                 val timeString = "$hoursString:$minutesString:$secondsString"
 
@@ -80,19 +95,53 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
         hotbarItems[0] = BlockoGame.instance.diceHandler.getDiceItem()
 
-        for ((entityIndex, i) in (2..5).withIndex()) {
+        for ((entityIndex, i) in (1..4).withIndex()) {
             hotbarItems[i] = ItemBuilder(Material.ARMOR_STAND)
-                .setName(Component.text("Move Entity #${entityIndex + 1}"))
+                .setName(translation.validateItemName("blocko.main_game_loop.entity_selector_display_name", Placeholder.parsed("count", (entityIndex + 1).toString())))
                 .setData("entitySelector", entityIndex)
                 .build()
         }
 
-        hotbarItems[8] = ItemBuilder(Material.CLOCK)
+        hotbarItems[7] = ItemBuilder(Material.CLOCK)
             .setName(translation.validateItemName("blocko.items.profile.display_name"))
             .setLoreByComponent(translation.validateItemLore("blocko.items.profile.lore"))
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
                 InventoryUtils.openProfileInventory(player, false)
+            }
+            .build()
+
+        hotbarItems[8] = ItemBuilder(Material.SLIME_BALL)
+            .setName(translation.validateItemName("blocko.items.leave.display_name"))
+            .onInteract { event: PlayerInteractEvent ->
+                val player: Player = event.player
+                val gameArena: GameArena = player.getArena() ?: return@onInteract
+
+                SpaceInventoryProvider.api.openConfirmationInventory(
+                    player,
+                    translation.validateItemName("blocko.inventory.leave.title"),
+                    ItemBuilder(Material.OAK_DOOR).setName(translation.validateItemName("blocko.inventory.leave.display_item.display_name")).build(),
+                    {
+                        gameArena.quit(player)
+                    },
+                    {
+                        player.closeInventory()
+                    }
+                )
+            }
+            .build()
+
+    }
+
+    override fun initSpectatorHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
+        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+
+        hotbarItems[8] = ItemBuilder(Material.SLIME_BALL)
+            .setName(translation.validateItemName("blocko.items.leave.display_name"))
+            .onInteract { event: PlayerInteractEvent ->
+                val player: Player = event.player
+                val gameArena: GameArena = player.getArena() ?: return@onInteract
+                gameArena.quitAsSpectator(player)
             }
             .build()
     }
@@ -102,16 +151,23 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun setNextControllingTeam(): GameTeam? {
+        getArena().currentPlayers.filter { !it.isAI }.forEach { gamePlayer: GamePlayer ->
+            BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
+        }
+
         GameScoreboardUtils.updateDicedNumberLine(this.arenaId, null)
 
         val oldControllingGamePlayer: GamePlayer? = getControllingGamePlayer()
+        val oldControllingGamePlayerDicedNumber: Int? = oldControllingGamePlayer?.dicedNumber
+
+        oldControllingGamePlayer?.dicedNumber = null
 
         if (this.controllingTeamId != null && oldControllingGamePlayer != null)
             getHighlightedEntities(oldControllingGamePlayer, getArena()).forEach { it.toggleHighlighting(false) }
 
         val availableTeams: List<GameTeam> = BlockoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
 
-        val newControllingTeam: GameTeam? = if (hasControllingTeamMemberDicedSix()) this.getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
+        val newControllingTeam: GameTeam? = if (hasControllingTeamMemberDicedSix(oldControllingGamePlayerDicedNumber)) getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
         val newControllingTeamId: Int = newControllingTeam?.teamId ?: availableTeams.minOf { it.teamId }
 
         this.lastControllingTeamId = if (this.controllingTeamId == null) null else this.controllingTeamId
@@ -140,11 +196,15 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
     fun getControllingGamePlayer(): GamePlayer? {
         val controllingTeam: GameTeam = getControllingTeam() ?: return null
-        return getArena().currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
+        val currentPlayers: MutableSet<GamePlayer> = getArena().currentPlayers
+        if (currentPlayers.isEmpty()) return null
+
+        val uuid: UUID = controllingTeam.teamMembers.firstOrNull() ?: return null
+        return currentPlayers.find { it.uuid == uuid }
     }
 
     fun getControllingGamePlayerTimeLeftFraction(): Float {
-        val totalActionTime = 60_000L // Total action time in milliseconds (60 seconds)
+        val totalActionTime = 60_000L
         val controllingGamePlayer: GamePlayer = getControllingGamePlayer() ?: return 0f
         val timeoutTimestamp: Long = controllingGamePlayer.actionTimeoutTimestamp ?: return 0f
         val currentTimeMillis = System.currentTimeMillis()
@@ -167,16 +227,14 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         return getArena().currentPlayers.filter { it.hasSavedAllEntities() }.size
     }
 
-    private fun hasControllingTeamMemberDicedSix(): Boolean {
+    private fun hasControllingTeamMemberDicedSix(dicedNumber: Int?): Boolean {
         val controllingTeam: GameTeam = getControllingTeam() ?: return false
         if (controllingTeam.deactivated) return false
-        val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return false
 
         var hasDicedSix = false
 
         for (teamMemberUniqueId: UUID in controllingTeam.teamMembers) {
-            val gamePlayer: GamePlayer = gameArena.currentPlayers.find { it.uuid == teamMemberUniqueId } ?: continue
-            if (gamePlayer.dicedNumber == null || gamePlayer.dicedNumber != 6) continue
+            if (dicedNumber == null || dicedNumber != 6) continue
             hasDicedSix = true
         }
 

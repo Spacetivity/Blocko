@@ -7,8 +7,159 @@
 # Defines a global prefix for all in-game messages, styled with gradients and bold text.
 blocko.prefix.global: "<gradient:green:yellow><bold>Blocko</gradient> <dark_gray><bold>»</bold>"
 
+blocko.utils:
+  no_permission: "<prefix> <gray>No permission... :o"
+  player_not_found: "<prefix> <gray>This player doesn't exist!"
+
+blocko.format:
+  chat: "<gray><yellow>@<gray><location> <dark_gray>| <color><player_name><dark_gray>: <white><message>"
+  tablist: "<color>"
+
 # Sets the message of the day (MOTD) for the server, incorporating gradients and strikethrough text.
 blocko.motd: "        <gray><st>------</st> <gradient:green:yellow>Blocko Game<dark_gray>-</dark_gray>testserver</gradient> <gray><st>-----</st>\n          <gradient:gold:blue>-= https://discord.spacetivity.net =-</gradient>"
+
+blocko.setup:
+  not_in_setup_mode: "<prefix> <gray>You are not in setup mode!"
+  already_in_setup_mode: "<prefix> <gray>You are already in setup mode!"
+  arena_already_configurated_by_player: "<prefix> <gray>This arena is already being configured."
+  setup_mode_activated: "<prefix> <gray>You are now in setup mode!"
+  setup_mode_deactivated: "<prefix> <gray>You are no longer in setup mode!"
+  field_already_has_id: "<prefix> <gray>This field already has an id!"
+  field_already_a_garage_field: "<prefix> <gray>This field is already a garage field!"
+  field_not_able_for_garage_field: "<prefix> <gray>This field cannot be a garage field!"
+  no_field_found_at_location: "<prefix> <gray>There is no field at this location!"
+  no_fields_configured: "<prefix> <gray>You have to add game-fields first before you finish the setup!"
+  no_garage_fields_configured: "<prefix> <gray>You have to add all garage fields for all teams before you finish the setup!"
+  not_enough_team_spawns_configured: "<prefix> <gray>You have to set all team spawn locations before you finish the setup!"
+  team_spawn_already_set: "<prefix> <gray>There is already a team spawn on this location!"
+  team_spawn_added: "<prefix> <gray>Spawn location added for team <team_color><team_name><gray>."
+  game_field_already_set: "<prefix> <gray>There is already a game field at this location!"
+  game_field_set: "<gray>Game field <dark_gray>#<yellow><field_id> <gray>at <dark_gray>(<yellow><x> <dark_gray>| <yellow><z><dark_gray>) <gray>added."
+  game_field_set_to_garage_field: "<gray>Game field at <dark_gray>(<yellow><x> <dark_gray>| <yellow><z><dark_gray>) <gray>set to garage field of team <team_color><team_name><gray>."
+  turn_not_creatable_at_garage_field: "<prefix> <gray>You cannot set a turn to a garage field!"
+  turn_direction: "<gray>Current face direction: <yellow><face>"
+  turning_point_created: "<prefix> <gray>You created a turning point for your field. <dark_gray>(<gray>Direction: <yellow><face><dark_gray>)"
+  set_field_id_for_team: "<prefix> <gray>Set field id to <yellow><field_id> <gray>for team <team_color><team_name><gray>."
+  cannot_update_entity_display: "<prefix> <dark_red>Cannot update entity display!"
+
+blocko.sign:
+  cannot_create_at_invalid_block: "<prefix> <gray>You can only create a arena sign on a wall sign block!"
+  not_found: "<prefix> <gray>There is no arena sign at this location!"
+  already_exists: "<prefix> <gray>There is already a arena sign at this location!"
+  deleted: "<prefix> <gray>Deleted arena sign!"
+  created: "<prefix> <gray>Created arena sign!"
+  no_arena_assigned: "<prefix> <gray>This sign has no arena assigned!"
+
+blocko.arena:
+  no_free_arena_found: "<prefix> <gray>No free arena was found..."
+  game_already_started: "<prefix> <gray>The game has already started!"
+
+  yourself_already_spectating_arena: "<prefix> <gray>You are already spectating this arena!"
+  not_spectatable: "<prefix> <gray>You cannot spectate this arena right now!"
+  spectate_join: "<prefix> <gray>You are now a spectator."
+  spectate_quit: "<prefix> <gray>You are no longer spectating."
+
+  yourself_already_in_arena: "<prefix> <gray>You are already in this arena!"
+  player_already_in_arena: "<prefix> <gray>This player plays already in this arena!"
+  player_already_invited: "<prefix> <gray>This player was already invited!"
+  invite_yourself: "<prefix> <gray>You cannot invite yourself!"
+  already_full: "<prefix> <gray>This arena is full!"
+  invite_sent: "<prefix> <gray>You invited <yellow><name> <gray>to join your arena."
+  invite_received: |
+    <obfuscated><gradient:blue:green>==============================================</obfuscated>
+
+    <dark_gray><bold>»</bold> <gray>Arena invite from <yellow><name><dark_gray>.
+    <dark_gray><bold>»</bold> <click:run_command:'/arenainvite accept <id>'><hover:show_text:'<gray>Accept invitation'><green>[ACCEPT]</hover></click> <click:run_command:'/arenainvite deny <id>'><hover:show_text:'<gray>Deny invitation'><red>[DENY]</hover></click>
+
+    <obfuscated><gradient:blue:green>==============================================</obfuscated>
+  not_invited_by_host: "<prefix> <gray>This arena can only be entered by invitation of the host."
+  join: "<prefix> <yellow><name> <gray>joined the Blocko match."
+  quit: "<prefix> <yellow><name> <gray>left the Blocko match."
+  host_join: "<prefix> <gray>You are now the arena host!"
+
+blocko.team:
+  already_full: "<prefix> <gray>This team is already full!"
+  yourself_already_in_team: "<prefix> <gray>You are already in this team!"
+  not_in_team: "<prefix> <gray>You are not in this team!"
+  join: "<prefix> <gray>You are now in team <team_color><team_name><gray>."
+  quit: "<prefix> <gray>You left your team."
+
+blocko.phase:
+  not_found: "<dark_red>ERROR: Phase <priority> not found for arena <id>!"
+  host_item_blocked: "<prefix> <gray>You have to be the host to edit the arena settings!"
+
+blocko.main_game_loop:
+  already_dicing: "<prefix> <gray>You are already dicing!"
+  current_dice_number: "<gray>Current number: <yellow><dice_number>"
+  diced_number: "<prefix> <gray>You diced: <yellow><diced_number>"
+  can_dice_again: "<prefix> <gray>Team <team_color><team_name> <gray>can now dice again!"
+  can_dice: "<prefix> <gray>Team <team_color><team_name> <gray>can now dice!"
+  can_not_dice: "<prefix> <gray>You can not dice now!"
+  dice_display_name: "<green><dice_number> <gray>(Right-click)"
+  dice_error: "<dark_red>ERROR (Check dice_sides.json file!) No dice side for number <number> found..."
+  player_finished_match: "<prefix> <gray>Team <team_color><team_name> <gray>has saved all entities! <dark_gray>(<gray>#<yellow><position><dark_gray>)"
+  turn_expired: "<prefix> <gray>You waited too long. Your turn is over!"
+  entity_selector_display_name: "<green>Move Entity <dark_gray>#<yellow><count> <gray>(Right-click)"
+  select_entity_notify: "<gray>Please select a <yellow>entity <gray>now."
+  already_saved_all_entities: "<prefix> <gray>You have already saved all your entities!"
+  wrong_turn: "<prefix> <gray>Please await your turn!"
+  cannot_pick_entity_now: "<prefix> <gray>You cannot pick a entity now!"
+  needs_a_six: "<prefix> <gray>You can't move this entity into the field without dicing 6 first!"
+  entity_not_movable: "<prefix> <gray>You can't move this entity!"
+  entity_selected: "<prefix> <gray>Game entity will now move!"
+  entity_thrown_out_by_opponent: "<prefix> <successor_team_color><successor_team_name> <gray>has thrown out an entity from <victim_team_color><victim_team_name><gray>."
+
+blocko.countdown:
+  idle:
+    running: "<prefix> <gray>Match starts in <yellow><time> <gray><time_string>."
+    stopped_to_less_players: "<prefix> <gray>Countdown stopped! To less players..."
+  ending:
+    running: "<prefix> <gray>Arena resets in <yellow><time> <gray><time_string>."
+    end: "<prefix> <gray>Arena resets now. You are teleported to spawn!"
+
+blocko.command:
+  blocko:
+    lobby_spawn_set: "<prefix> <gray>Lobby spawn was set!"
+    no_arenas_found: "<prefix> <gray>No arenas found!"
+    arena_not_exists: "<prefix> <gray>Arena with id <yellow><id> <gray>doesn't exist!"
+    arena_list:
+      title: "<prefix> <gray>All arenas: "
+      line: "<dark_gray>» <gray>Id: <yellow><id> <click:run_command:'/blocko arena delete <id>'><hover:show_text:'<gray>Click here to delete the arena!'><dark_red>[DELETE]</hover></click> <dark_gray>(<green><current_player_amount><dark_gray>/<yellow><max_player_amount><dark_gray>)"
+    arena_limit_reached: "<prefix> <gray>You cannot create more than <yellow><arena_limit> <gray>arenas on this server!"
+    arena_created: "<prefix> <gray>Arena created."
+    arena_deleted: "<prefix> <gray>Arena deleted."
+    arena_fully_configured: "<prefix> <gray>This arena is already fully configured!"
+    arena_lacks_certain_team: "<prefix> <gray>Arena <yellow><id> <gray>has no team called <team_color><team_name><gray>."
+    world_does_not_exist: "<prefix> <gray>This world doesn't exist!"
+    world_loaded: |
+      <prefix> <gray>World <yellow><world_name> <gray>loaded.
+      <prefix> <gray>Please retype this command!
+    world_teleported: "<prefix> <gray>Teleported to world <yellow><world_name><gray>."
+    usage: |
+      <prefix> <gray>Command usage:
+      <dark_gray>» <gray>/blocko setLobbySpawn
+      
+      <dark_gray>» <gray>/blocko arena list
+      <dark_gray>» <gray>/blocko arena init
+      <dark_gray>» <gray>/blocko arena delete <arenaId>
+      
+      <dark_gray>» <gray>/blocko setup start <arenaId>
+      <dark_gray>» <gray>/blocko setup cancel
+      <dark_gray>» <gray>/blocko setup finish  
+      <dark_gray>» <gray>/blocko setup addTeamSpawn <teamName>
+      
+      <dark_gray>» <gray>/blocko worldTp <worldName>
+  arena_invite:
+    not_in_a_game: "<prefix> <gray>You must be in a game arena to invite other players!"
+    not_the_host_player: "<prefix> <gray>Only the arena host can invite players to the game!"
+    invitation_denied: "<prefix> <gray>You denied the invitation."
+    no_open_invitation: "<prefix> <gray>You have no open invitation to join this arena!"
+    invitation_expired: "<prefix> <gray>Your invitation has already expired!"
+    usage: |
+      <prefix> <gray>Command usage:
+      <dark_gray>» <gray>/arenainvite send <name>
+      <dark_gray>» <gray>/arenainvite accept <id>
+      <dark_gray>» <gray>/arenainvite deny <id>
 
 blocko.items:
   profile:
@@ -20,6 +171,10 @@ blocko.items:
     display_name: "<green>Team Selector <gray>(Right-click)"
     lore: |
       <gray>Choose a team for yourself
+  instant_starter:
+    display_name: "<green>Start Game <gray>(Right-click)"
+    lore: |
+      <gray>Ends the idling countdown immediately
   host_settings:
     display_name: "<green>Host Settings <gray>(Right-click)"
     lore: |
@@ -54,11 +209,30 @@ blocko.inventory.host.wait_for_players:
   active: "On"
   not_active: "Off"
 
+blocko.inventory.game_team_setup.title:
+  garage: "Add garage field"
+  entrance: "Set team entrance"
+
+blocko.inventory.game_team_setup.team_item:
+  display_name: "<team_color><team_name>"
+  lore:
+    garage: "<gray>Click to set a garage field"
+    entrance: "<gray>Click to set a team entrance"
+  click:
+    set_field_ids: "<prefix> <gray>Now, please set the field ids for team <team_color><team_name><gray>."
+    cannot_set_team_entrance: "<prefix> <gray>Cannot set team entrance, field is not there!"
+
+blocko.inventory.game_field_set_turn.title: "Set a turn"
+
+blocko.inventory.game_field_set_turn.turn_item:
+  display_name: "<yellow><face>"
+  lore: "<gray>Click to set the field turn"
+
 blocko.inventory.invitation.title: "Invite a player"
 
 blocko.inventory.invitation.no_players_to_invite_found:
   display_name: "<red>No players found!"
-  lore: | 
+  lore: |
     <gray>Wait until more players join the server
     <gray>to invite someone to your arena!
 
@@ -111,6 +285,7 @@ blocko.inventory.stats.overview_item:
     <gray><knocked_out_by_opponents_key>: <yellow><knocked_out_by_opponents_value>
     <gray><coins_key>: <yellow><coins_value>
     <gray><played_games_key>: <yellow><played_games_value>
+    <gray><won_games_key>: <yellow><won_games_value>
 
 blocko.inventory.stats.search_player_item:
   display_name: "<yellow>Select Team"
@@ -132,7 +307,9 @@ blocko.inventory.stats_team_selector.team_item:
       <red>You cannot select this team, it has no members
 
 blocko.inventory.stats.stats_type_item:
-  display_name: "<gray><type_name>: <yellow><value>"
+  display_name:
+    active: "<gray><type_name>: <yellow><value>"
+    not_active: "<red>AI has no <type_name>"
 
 blocko.inventory.achievements.title: "Achievements"
 
@@ -144,6 +321,14 @@ blocko.inventory.achievements.achievement_item:
   suffix: "✔"
 
 blocko.inventory.entity_shop.title: "Game Entities"
+
+blocko.inventory.leave.title: "Leave game?"
+
+blocko.inventory.leave.display_item:
+  display_name: "<gray>Leave game"
+
+blocko.inventory.entity_shop.balance_item:
+  display_name: "<gray>Your coins: <gold><amount>"
 
 blocko.inventory.entity_shop.no_entity_types_found:
   display_name: "<red>No entity types found!"
@@ -169,28 +354,12 @@ blocko.inventory.entity_shop.entity_type_item:
 blocko.entity_shop.successfully_bought_entity_type: "<prefix> <gray>You have bought the entity type <yellow><entity_type_name> <gray>for <green><amount> <gray>Coins."
 blocko.entity_shop.selected_entity_type: "<prefix> <gray>Entity type <yellow><entity_type_name> <gray>selected."
 
-# Arena Invitations
-# ------------------------------
-# Defines usage, invitation sent, and invitation received messages for arena invites.
-blocko.arena.arena_invite_command.usage: |
-  <prefix> <gray>Invitation usage:
-  <dark_gray>- <gray>/arenainvite send <name>
-  <dark_gray>- <gray>/arenainvite accept <id>
-  <dark_gray>- <gray>/arenainvite deny <id>
-blocko.arena.invite_sent: "<prefix> <gray>You invited <yellow><name> <gray>to join your arena."
-blocko.arena.invite_received: |
-  <obfuscated><gradient:blue:green>==============================================</obfuscated>
-  
-  <dark_gray><bold>»</bold> <gray>Arena invite from <yellow><name><dark_gray>.
-  <dark_gray><bold>»</bold> <click:run_command:'/arenainvite accept <id>'><hover:show_text:'<gray>Accept invitation'><green>[ACCEPT]</hover></click> <click:run_command:'/arenainvite deny <id>'><hover:show_text:'<gray>Deny invitation'><red>[DENY]</hover></click>
-  
-  <obfuscated><gradient:blue:green>==============================================</obfuscated>
-
 blocko.stats.type:
   eliminations: "Eliminations"
   knocked_out_by_opponents: "Knocked out by opponents"
   coins: "Coins"
   played_games: "Played games"
+  won_games: "Won games"
 
 # Configures messages for receiving coins, both normally and upon player elimination.
 blocko.coins.receive:
@@ -200,7 +369,7 @@ blocko.coins.receive:
 # In-game
 # ------------------------------
 # Sets the boss bar timeout message and various achievements with their requirements.
-blocko.bossbar.timeout: "<gray>Time left to dice & pick: <time_color><time> <unit><dark_gray>"
+blocko.bossbar.timeout: "<gray>Time left for <team_color><team_name><gray>: <time_color><time> <unit><dark_gray>"
 
 # Achievements and Rewards
 # ------------------------------
@@ -209,27 +378,42 @@ blocko.achievement.first_game:
   display_name: "First Game"
   requirement: "<gray>Play your first Blocko game"
 
-# Encourages sportsmanship by rewarding players for positive in-game behavior.
 blocko.achievement.fair_play:
   display_name: "Fair Play"
   requirement: "<gray>Write gg in the chat, after a Blocko round"
 
-# Awarded upon experiencing a knockout by an opponent for the first time.
+blocko.achievement.bad_manners:
+  display_name: "Bad Manners"
+  requirement: "<gray>Write bg in the chat, after a Blocko round. (If you are not well behaved!!)"
+
 blocko.achievement.first_knockout:
   display_name: "First Knockout"
   requirement: "<gray>Get knocked out by an opponent the first time"
 
-# Recognizes the player's first elimination of another player in the game.
 blocko.achievement.first_elimination:
   display_name: "First Elimination"
   requirement: "<gray>Make you first elimination"
 
-# A high-tier achievement for players who eliminate a significant number of opponents.
 blocko.achievement.master_eliminator:
   display_name: "Master Eliminator"
   requirement: "<gray>Eliminate <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>opponents (<yellow><progress>%<gray>)"
 
-# Describes achievement unlock messages and formats for various in-game achievements.
+blocko.achievement.rush_expert:
+  display_name: "Rush Expert"
+  requirement: "<gray>Win a Blocko game in under 15 minutes"
+
+blocko.achievement.win_monster:
+  display_name: "Win Monster"
+  requirement: "<gray>Win a Blocko match <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>times. (<yellow><progress>%<gray>)"
+
+blocko.achievement.entity_collector:
+  display_name: "Entity Collector"
+  requirement: "<gray>Buy all <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>entity types. (<yellow><progress>%<gray>)"
+
+blocko.achievement.bad_luck:
+  display_name: "Bad Luck"
+  requirement: "<gray>Complete a Blocko match without saving any entities."
+
 blocko.achievement.unlocked: |
   <obfuscated><gradient:blue:green>==============================================</obfuscated>
   

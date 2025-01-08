@@ -9,6 +9,10 @@ fun Player.getArena(): GameArena? {
     return BlockoGame.instance.gameArenaHandler.getArenaOfPlayer(uniqueId)
 }
 
+fun Player.isSpectating(): Boolean {
+    return BlockoGame.instance.gameArenaHandler.cachedArenas.any { it.spectatorPlayers.contains(this.uniqueId) }
+}
+
 fun Player.clearPhaseItems() {
     val gameArena: GameArena = getArena() ?: return
     gameArena.phase.clearPlayerInventory(this)

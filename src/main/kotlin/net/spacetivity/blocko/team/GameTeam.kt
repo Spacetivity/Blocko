@@ -1,8 +1,9 @@
 package net.spacetivity.blocko.team
 
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.spacetivity.blocko.extensions.sendMessage
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.player.GamePlayer
 import java.util.*
 
@@ -15,29 +16,36 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
 
     fun join(gamePlayer: GamePlayer) {
         if (isFull()) {
-            gamePlayer.sendMessage(Component.text("This team is already full!"))
+            gamePlayer.translateMessage("blocko.team.already_full")
             return
         }
 
         if (containsTeam(gamePlayer.uuid)) {
-            gamePlayer.sendMessage(Component.text("You are already in this team!"))
+            gamePlayer.translateMessage("blocko.team.yourself_already_in_team")
             return
         }
 
         this.teamMembers.add(gamePlayer.uuid)
         gamePlayer.teamName = this.name
-        gamePlayer.sendMessage(Component.text("You are now in team: ${this.name}", NamedTextColor.GREEN))
+
+        gamePlayer.translateMessage("blocko.team.join",
+            Placeholder.parsed("team_color", "<${this.color.asHexString()}>"),
+            Placeholder.parsed("team_name", this.name.lowercase().replaceFirstChar { it.uppercase() }))
+
+        BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
     }
 
     fun quit(gamePlayer: GamePlayer) {
         if (!containsTeam(gamePlayer.uuid)) {
-            gamePlayer.sendMessage(Component.text("You are not in this team!"))
+            gamePlayer.translateMessage("blocko.team.not_in_team")
             return
         }
 
         this.teamMembers.remove(gamePlayer.uuid)
         gamePlayer.teamName = null
-        gamePlayer.sendMessage(Component.text("You are left your team.", NamedTextColor.YELLOW))
+        gamePlayer.translateMessage("blocko.team.quit")
+
+        BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
     }
 
     fun getFreeSpawnLocation(): GameTeamLocation? {

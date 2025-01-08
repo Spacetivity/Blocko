@@ -20,6 +20,7 @@ import net.spacetivity.blocko.command.api.impl.BukkitCommandExecutor
 import net.spacetivity.blocko.dice.DiceHandler
 import net.spacetivity.blocko.dice.DiceSidesFile
 import net.spacetivity.blocko.entity.GameEntityHandler
+import net.spacetivity.blocko.entity.GameEntityHistoryDAO
 import net.spacetivity.blocko.entity.GameEntityTypeDAO
 import net.spacetivity.blocko.field.GameFieldDAO
 import net.spacetivity.blocko.field.GameFieldHandler
@@ -31,8 +32,11 @@ import net.spacetivity.blocko.files.GlobalConfigFile
 import net.spacetivity.blocko.listener.PlayerListener
 import net.spacetivity.blocko.listener.PlayerSetupListener
 import net.spacetivity.blocko.listener.ProtectionListener
+import net.spacetivity.blocko.lobby.LobbySpawnDAO
+import net.spacetivity.blocko.lobby.LobbySpawnHandler
 import net.spacetivity.blocko.phase.GamePhaseHandler
 import net.spacetivity.blocko.player.GamePlayActionHandler
+import net.spacetivity.blocko.scoreboard.PlayerFormatHandler
 import net.spacetivity.blocko.scoreboard.SidebarHandler
 import net.spacetivity.blocko.stats.StatsPlayerDAO
 import net.spacetivity.blocko.stats.StatsPlayerHandler
@@ -42,15 +46,19 @@ import net.spacetivity.blocko.translation.TranslationHandler
 import net.spacetivity.blocko.utils.FileUtils
 import net.spacetivity.blocko.utils.HeadUtils
 import net.spacetivity.blocko.utils.ItemBuilder
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scoreboard.Team
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.lang.reflect.Constructor
 import java.util.*
 
 class BlockoGame : JavaPlugin() {
@@ -63,6 +71,7 @@ class BlockoGame : JavaPlugin() {
 
     lateinit var translationHandler: TranslationHandler
     lateinit var sidebarHandler: SidebarHandler
+    lateinit var playerFormatHandler: PlayerFormatHandler
     lateinit var commandHandler: SpaceCommandHandler
     lateinit var bossbarHandler: BossbarHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
@@ -77,18 +86,20 @@ class BlockoGame : JavaPlugin() {
     lateinit var statsPlayerHandler: StatsPlayerHandler
     lateinit var achievementHandler: AchievementHandler
 
+    lateinit var lobbySpawnHandler: LobbySpawnHandler
+
     private lateinit var gamePlayActionHandler: GamePlayActionHandler
 
     override fun onEnable() {
         instance = this
 
-        val dbProperties: DatabaseFile = createOrLoadDatabaseProperties()
+        val databaseFile: DatabaseFile = createOrLoadDatabaseFile()
 
         Database.connect(
-            url = "jdbc:mariadb://${dbProperties.hostname}:${dbProperties.port}/${dbProperties.database}",
-            driver = "org.mariadb.jdbc.Driver",
-            user = dbProperties.user,
-            password = dbProperties.password,
+            "jdbc:mariadb://${databaseFile.hostname}:${databaseFile.port}/${databaseFile.database}",
+            "org.mariadb.jdbc.Driver",
+            databaseFile.user,
+            databaseFile.password,
         )
 
         transaction {
@@ -100,7 +111,9 @@ class BlockoGame : JavaPlugin() {
                 GameArenaSignDAO,
                 AchievementPlayerDAO,
                 StatsPlayerDAO,
-                GameEntityTypeDAO
+                GameEntityTypeDAO,
+                GameEntityHistoryDAO,
+                LobbySpawnDAO
             )
         }
 
@@ -113,6 +126,7 @@ class BlockoGame : JavaPlugin() {
         this.botNamesFile = createOrLoadBotNamesFile()
 
         this.sidebarHandler = SidebarHandler()
+        this.playerFormatHandler = PlayerFormatHandler()
 
         this.commandHandler = SpaceCommandHandler()
         this.bossbarHandler = BossbarHandler()
@@ -132,9 +146,16 @@ class BlockoGame : JavaPlugin() {
         this.achievementHandler = AchievementHandler()
         this.achievementHandler.registerAchievement(PlayFirstGameAchievement("first_game"))
         this.achievementHandler.registerAchievement(FairPlayAchievement("fair_play"))
+        this.achievementHandler.registerAchievement(BadMannersAchievement("bad_manners"))
         this.achievementHandler.registerAchievement(FirstKnockoutAchievement("first_knockout"))
         this.achievementHandler.registerAchievement(FirstEliminationAchievement("first_elimination"))
         this.achievementHandler.registerAchievement(MasterEliminatorAchievement("master_eliminator"))
+        this.achievementHandler.registerAchievement(RushExpertAchievement("rush_expert"))
+        this.achievementHandler.registerAchievement(WinMonsterAchievement("win_monster"))
+        this.achievementHandler.registerAchievement(EntityCollectorAchievement("entity_collector"))
+        this.achievementHandler.registerAchievement(BadLuckAchievement("bad_luck"))
+
+        this.lobbySpawnHandler = LobbySpawnHandler()
 
         this.gamePlayActionHandler = GamePlayActionHandler()
         this.gamePlayActionHandler.startMainTask()
@@ -150,6 +171,13 @@ class BlockoGame : JavaPlugin() {
     }
 
     override fun onDisable() {
+        for (player: Player in Bukkit.getOnlinePlayers()) {
+            for (team: Team in player.scoreboard.teams) {
+                if (!team.hasEntry(player.name)) continue
+                team.removeEntry(player.name)
+            }
+        }
+
         this.diceHandler.stopDiceAnimation()
         this.gamePlayActionHandler.stopTasks()
         this.gameArenaSetupHandler.stopTask()
@@ -158,8 +186,8 @@ class BlockoGame : JavaPlugin() {
     }
 
     private fun registerCommand(commandExecutor: SpaceCommandExecutor) {
-        BukkitCommandExecutor::class.java.getDeclaredConstructor(CommandProperties::class.java, this::class.java)
-            .newInstance(this.commandHandler.registerCommand(commandExecutor), this)
+        val constructor: Constructor<BukkitCommandExecutor> = BukkitCommandExecutor::class.java.getDeclaredConstructor(CommandProperties::class.java, this::class.java)
+        constructor.newInstance(this.commandHandler.registerCommand(commandExecutor), this)
     }
 
     companion object {
@@ -178,7 +206,7 @@ class BlockoGame : JavaPlugin() {
         return "blocko.achievement.$title.${if (isName) "display_name" else "requirement"}"
     }
 
-    private fun createOrLoadDatabaseProperties(): DatabaseFile {
+    private fun createOrLoadDatabaseFile(): DatabaseFile {
         return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile("-", 3306, "-", "-", "-"))
     }
 
@@ -199,11 +227,12 @@ class BlockoGame : JavaPlugin() {
         return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(
             defaultLanguageName,
             Material.GOLDEN_HOE.name,
-            "BasicLudoBoard",
-            true,
             false,
             10,
-            20
+            20,
+            30,
+            10,
+            true
         ))
     }
 

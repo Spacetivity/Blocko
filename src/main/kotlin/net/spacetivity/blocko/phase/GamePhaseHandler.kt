@@ -2,8 +2,7 @@ package net.spacetivity.blocko.phase
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.extensions.playSound
@@ -11,6 +10,7 @@ import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.team.GameTeam
+import net.spacetivity.blocko.translation.Translation
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -37,7 +37,10 @@ class GamePhaseHandler {
 
         if (newGamePhase == null) {
             gameArena.reset(false)
-            Bukkit.getConsoleSender().sendMessage(Component.text("ERROR: Phase $newPhasePriority not found for arena ${gameArena.id}!", NamedTextColor.DARK_RED))
+            val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+            Bukkit.getConsoleSender().sendMessage(translation.validateLine("blocko.phase.not_found",
+                Placeholder.parsed("priority", newPhasePriority.toString()),
+                Placeholder.parsed("id", gameArena.id)))
             return
         }
 

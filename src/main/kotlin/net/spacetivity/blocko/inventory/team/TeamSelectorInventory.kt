@@ -3,10 +3,6 @@ package net.spacetivity.blocko.inventory.team
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.inventory.api.annotation.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.extensions.toGamePlayerInstance
@@ -16,6 +12,10 @@ import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.PersistentDataUtils
+import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.inventory.InventoryProperties
+import net.spacetivity.inventory.api.inventory.InventoryProvider
+import net.spacetivity.inventory.api.item.InteractiveItem
 import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
@@ -81,7 +81,7 @@ class TeamSelectorInventory(private val gameArena: GameArena) : InventoryProvide
 
             player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.0F)
 
-            GameScoreboardUtils.updateTeamLine(gamePlayer)
+            GameScoreboardUtils.updateTeamLine(player)
         }
     }
 

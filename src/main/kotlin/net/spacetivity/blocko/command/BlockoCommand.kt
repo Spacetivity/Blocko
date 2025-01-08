@@ -1,7 +1,6 @@
 package net.spacetivity.blocko.command
 
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.GameArenaHandler
@@ -11,6 +10,7 @@ import net.spacetivity.blocko.arena.setup.GameArenaSetupHandler
 import net.spacetivity.blocko.command.api.CommandProperties
 import net.spacetivity.blocko.command.api.SpaceCommandExecutor
 import net.spacetivity.blocko.command.api.SpaceCommandSender
+import net.spacetivity.blocko.extensions.translateMessage
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.WorldCreator
@@ -25,27 +25,33 @@ class BlockoCommand : SpaceCommandExecutor {
     private val gameArenaHandler: GameArenaHandler = BlockoGame.instance.gameArenaHandler
 
     override fun execute(sender: SpaceCommandSender, args: List<String>) {
-        if (!sender.isPlayer) {
-            println("You must be a player to use this command!")
+        if (!sender.isPlayer) return
+        val player: Player = sender.castTo(Player::class.java)
+
+        if (args.size == 1 && args[0].equals("setLobbySpawn", true)) {
+            BlockoGame.instance.lobbySpawnHandler.setLobbySpawn(player.location)
+            player.translateMessage("blocko.command.blocko.lobby_spawn_set")
             return
         }
-
-        val player: Player = sender.castTo(Player::class.java)
 
         if (args.size == 2 && args[0].equals("arena", true) && args[1].equals("list", true)) {
             val cachedArenas: MutableList<GameArena> = this.gameArenaHandler.cachedArenas
 
             if (cachedArenas.isEmpty()) {
-                player.sendMessage(Component.text("No arenas found!", NamedTextColor.RED))
+                player.translateMessage("blocko.command.blocko.no_arenas_found")
                 return
             }
 
-            player.sendMessage(Component.text("All arenas: "))
+            player.translateMessage("blocko.command.blocko.arena_list.title")
 
             cachedArenas.forEach { gameArena: GameArena ->
                 val currentPlayerAmount: Int = gameArena.currentPlayers.size
                 val maxPlayerAmount: Int = gameArena.teamOptions.playerCount
-                player.sendMessage(Component.text("> ArenaId: ${gameArena.id} [DELETE] [RESET] ($currentPlayerAmount/$maxPlayerAmount)"))
+
+                player.translateMessage("blocko.command.blocko.arena_list.line",
+                    Placeholder.parsed("id", gameArena.id),
+                    Placeholder.parsed("current_player_amount", currentPlayerAmount.toString()),
+                    Placeholder.parsed("max_player_amount", maxPlayerAmount.toString()))
             }
 
             return
@@ -56,11 +62,11 @@ class BlockoCommand : SpaceCommandExecutor {
 
             if (!creationStatus) {
                 val maxArenaCount = BlockoGame.instance.globalConfigFile.gameArenaMaxParallelAmount
-                player.sendMessage(Component.text("You cannot create more than $maxArenaCount arenas on this server!", NamedTextColor.RED))
+                player.translateMessage("blocko.command.blocko.arena_limit_reached", Placeholder.parsed("arena_limit", maxArenaCount.toString()))
                 return
             }
 
-            player.sendMessage(Component.text("Arena created!", NamedTextColor.GREEN))
+            player.translateMessage("blocko.command.blocko.arena_created")
             return
         }
 
@@ -69,12 +75,12 @@ class BlockoCommand : SpaceCommandExecutor {
             val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
 
             if (gameArena == null) {
-                player.sendMessage(Component.text("Arena does not exist!"))
+                player.translateMessage("blocko.command.blocko.arena_not_exists", Placeholder.parsed("id", arenaId))
                 return
             }
 
             if (gameArena.status != GameArenaStatus.CONFIGURATING) {
-                player.sendMessage(Component.text("This arena is already fully configured!"))
+                player.translateMessage("blocko.command.blocko.arena_fully_configured")
                 return
             }
 
@@ -85,7 +91,7 @@ class BlockoCommand : SpaceCommandExecutor {
         if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("cancel", true)) {
             checkSetupMode(player) { arenaSetupData: GameArenaSetupData ->
                 if (this.gameArenaHandler.cachedArenas.none { it.id == arenaSetupData.arenaId }) {
-                    player.sendMessage(Component.text("Arena does not exist!"))
+                    player.translateMessage("blocko.command.blocko.arena_not_exists")
                     return@checkSetupMode
                 }
 
@@ -97,7 +103,7 @@ class BlockoCommand : SpaceCommandExecutor {
         if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("finish", true)) {
             checkSetupMode(player) { arenaSetupData: GameArenaSetupData ->
                 if (this.gameArenaHandler.cachedArenas.none { it.id == arenaSetupData.arenaId }) {
-                    player.sendMessage(Component.text("Arena does not exist!"))
+                    player.translateMessage("blocko.command.blocko.arena_not_exists")
                     return@checkSetupMode
                 }
 
@@ -111,7 +117,11 @@ class BlockoCommand : SpaceCommandExecutor {
                 val teamName: String = args[3]
 
                 if (arenaSetupData.gameTeams.none { it.name.equals(teamName, true) }) {
-                    player.sendMessage(Component.text("Arena ${arenaSetupData.arenaId} has no team called $teamName"))
+                    player.translateMessage("blocko.command.blocko.arena_lacks_certain_team",
+                        Placeholder.parsed("id", arenaSetupData.arenaId),
+                        Placeholder.parsed("team_color", "<${arenaSetupData.gameTeams.find { it.name == teamName }!!.color.asHexString()}>"),
+                        Placeholder.parsed("team_name", teamName))
+
                     return@checkSetupMode
                 }
 
@@ -124,12 +134,12 @@ class BlockoCommand : SpaceCommandExecutor {
             val arenaId: String = args[2]
 
             if (this.gameArenaHandler.cachedArenas.none { it.id == arenaId }) {
-                player.sendMessage(Component.text("Arena does not exist!"))
+                player.translateMessage("blocko.command.blocko.arena_not_exists")
                 return
             }
 
             this.gameArenaHandler.deleteArena(arenaId)
-            player.sendMessage(Component.text("Arena deleted!", NamedTextColor.YELLOW))
+            player.translateMessage("blocko.command.blocko.arena_deleted")
             return
         }
 
@@ -142,23 +152,17 @@ class BlockoCommand : SpaceCommandExecutor {
                 val worldFile: File? = listFiles.find { it.name.equals(worldName, true) }
 
                 if (worldFile == null) {
-                    player.sendMessage(Component.text("This world does not exist!"))
+                    player.translateMessage("blocko.command.blocko.world_does_not_exist")
                     return
                 }
 
                 WorldCreator(worldName).createWorld()
-                player.sendMessage(Component.text("World $worldName loaded!"))
-                player.sendMessage(Component.text("Please retype this command."))
-                return
-            }
-
-            if (this.gameArenaHandler.cachedArenas.any { it.gameWorld.name == worldName }) {
-                player.sendMessage(Component.text("This world has already a game arena!"))
+                player.translateMessage("blocko.command.blocko.world_loaded", Placeholder.parsed("world_name", worldName))
                 return
             }
 
             player.teleportAsync(world.spawnLocation)
-            player.sendMessage(Component.text("Teleported to world $worldName."))
+            player.translateMessage("blocko.command.blocko.world_teleported", Placeholder.parsed("world_name", worldName))
             return
         }
 
@@ -167,22 +171,9 @@ class BlockoCommand : SpaceCommandExecutor {
     }
 
     override fun sendUsage(sender: SpaceCommandSender) {
-        sender.sendMessages(
-            arrayOf(
-                "/blocko arena list",
-
-                "/blocko arena init",
-
-                "/blocko arena setup start <arenaId>",
-                "/blocko arena setup cancel",
-                "/blocko arena setup finish",
-
-                "/blocko arena setup addTeamSpawn <teamName>",
-
-                "/blocko arena delete <arenaId>",
-                "/blocko worldTp <worldName>",
-            )
-        )
+        if (!sender.isPlayer) return
+        val player: Player = sender.castTo(Player::class.java)
+        player.translateMessage("blocko.command.blocko.usage")
     }
 
     override fun onTabComplete(sender: SpaceCommandSender, args: List<String>): MutableList<String> {
@@ -192,7 +183,7 @@ class BlockoCommand : SpaceCommandExecutor {
         val player: Player = sender.castTo(Player::class.java)
 
         if (args.size == 1)
-            result.addAll(listOf("arena", "worldTp"))
+            result.addAll(listOf("setLobbySpawn", "arena", "worldTp"))
 
         if (args.size == 2 && args[0].equals("arena", true))
             result.addAll(listOf("list", "init", "setup", "delete"))
@@ -221,7 +212,7 @@ class BlockoCommand : SpaceCommandExecutor {
         val arenaSetupData: GameArenaSetupData? = this.arenaSetupHandler.getSetupData(player.uniqueId)
 
         if (arenaSetupData == null) {
-            player.sendMessage(Component.text("You are not in setup-mode!"))
+            player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 

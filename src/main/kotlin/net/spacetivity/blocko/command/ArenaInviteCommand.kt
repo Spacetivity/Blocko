@@ -1,7 +1,5 @@
 package net.spacetivity.blocko.command
 
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.command.api.CommandProperties
@@ -27,12 +25,12 @@ class ArenaInviteCommand : SpaceCommandExecutor {
             val gameArena: GameArena? = player.getArena()
 
             if (gameArena == null) {
-                player.sendMessage(Component.text("You must be in a game arena to invite other players!", NamedTextColor.RED))
+                player.translateMessage("blocko.command.arena_invite.not_in_a_game")
                 return
             }
 
             if (gameArena.arenaHost != null && gameArena.arenaHost!!.uuid != player.uniqueId) {
-                player.sendMessage(Component.text("Only the arena host can invite players to the game!", NamedTextColor.RED))
+                player.translateMessage("blocko.command.arena_invite.not_the_host_player")
                 return
             }
 
@@ -58,7 +56,7 @@ class ArenaInviteCommand : SpaceCommandExecutor {
 
             validateInvitation(arenaId, player) { gameArena: GameArena ->
                 gameArena.invitedPlayers.remove(player.uniqueId)
-                player.sendMessage(Component.text("Invitation denied!", NamedTextColor.YELLOW))
+                player.translateMessage("blocko.command.arena_invite.invitation_denied")
             }
 
             return
@@ -68,7 +66,7 @@ class ArenaInviteCommand : SpaceCommandExecutor {
     }
 
     override fun sendUsage(sender: SpaceCommandSender) {
-        sender.castTo(Player::class.java).translateMessage("blocko.arena.arena_invite_command.usage")
+        sender.castTo(Player::class.java).translateMessage("blocko.command.arena_invite.usage")
     }
 
     override fun onTabComplete(sender: SpaceCommandSender, args: List<String>): MutableList<String> {
@@ -96,17 +94,17 @@ class ArenaInviteCommand : SpaceCommandExecutor {
         val gameArena: GameArena? = BlockoGame.instance.gameArenaHandler.getArena(arenaId)
 
         if (gameArena == null) {
-            player.sendMessage(Component.text("This arena does not exist!", NamedTextColor.RED))
+            player.translateMessage("blocko.command.blocko.arena_not_exists")
             return
         }
 
         if (!gameArena.invitedPlayers.contains(player.uniqueId)) {
-            player.sendMessage(Component.text("You have no open invitation to join this arena!", NamedTextColor.RED))
+            player.translateMessage("blocko.command.arena_invite.no_open_invitation")
             return
         }
 
         if (!gameArena.phase.isIdle()) {
-            player.sendMessage(Component.text("Your invitation has already expired!", NamedTextColor.RED))
+            player.translateMessage("blocko.command.arena_invite.invitation_expired")
             return
         }
 

@@ -7,7 +7,7 @@ import net.spacetivity.blocko.extensions.toStatsPlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 
-class FirstEliminationAchievement(translationKey: String) : Achievement(translationKey, 30, listOf(FirstEliminationRequirement(translationKey)))
+class FirstEliminationAchievement(translationKey: String) : Achievement(translationKey, 15, listOf(FirstEliminationRequirement(translationKey)))
 
 class FirstEliminationRequirement(override val translationKey: String) : Requirement {
     override fun getPlaceholders(gamePlayer: GamePlayer): List<TagResolver> = emptyList()

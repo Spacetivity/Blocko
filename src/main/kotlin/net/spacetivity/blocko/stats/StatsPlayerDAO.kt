@@ -8,6 +8,7 @@ object StatsPlayerDAO : Table("stats_players") {
     val eliminatedOpponents: Column<Int> = integer("eliminatedOpponents")
     val knockedOutByOpponents: Column<Int> = integer("knockedOutByOpponents")
     val playedGames: Column<Int> = integer("playedGames")
+    val wonGames: Column<Int> = integer("wonGames")
     val coins: Column<Int> = integer("coins")
 
     override val primaryKey: PrimaryKey = PrimaryKey(uuid)

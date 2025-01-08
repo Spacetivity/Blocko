@@ -3,8 +3,7 @@ package net.spacetivity.blocko.dice
 import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.extensions.*
@@ -12,6 +11,7 @@ import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
+import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.HeadUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import org.bukkit.Bukkit
@@ -51,7 +51,7 @@ class DiceHandler {
 
                         gamePlayer.dicedNumber = dicedNumber
                         gamePlayer.playSound(Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM)
-                        gamePlayer.sendActionBar(Component.text("You diced: $dicedNumber", NamedTextColor.GREEN, TextDecoration.BOLD))
+                        gamePlayer.translateActionBar("blocko.main_game_loop.diced_number", Placeholder.parsed("diced_number", dicedNumber.toString()))
 
                         this.dicingPlayers.remove(gamePlayer.uuid)
 
@@ -85,20 +85,7 @@ class DiceHandler {
         if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) return
 
         if (gamePlayer.isDicing()) {
-            gamePlayer.sendMessage(Component.text("You are already dicing!"))
-            return
-        }
-
-        if (this.dicingPlayers.isNotEmpty()) {
-            val stillDicing: MutableList<GamePlayer> = mutableListOf()
-
-            for (uuid in this.dicingPlayers.keys) {
-                val currentGp = BlockoGame.instance.gameArenaHandler.getArena(gamePlayer.arenaId)!!.currentPlayers.find { it.uuid == uuid }
-                    ?: continue
-                stillDicing.add(currentGp)
-            }
-
-            Bukkit.broadcast(Component.text("ERROR!!!! THERE IS ALREADY A DICING PLAYER >> ${this.dicingPlayers.keys} ${stillDicing.map { it.teamName }}"))
+            gamePlayer.translateMessage("blocko.main_game_loop.already_dicing")
             return
         }
 
@@ -126,13 +113,14 @@ class DiceHandler {
         BlockoGame.instance.gameArenaHandler.getArena(gamePlayer.arenaId)?.sendArenaSound(Sound.BLOCK_BAMBOO_BREAK, 0.2F)
         diceSession.currentDiceNumber = diceSide.first
 
-        gamePlayer.sendActionBar(Component.text("Current number: ${diceSide.first}", NamedTextColor.AQUA, TextDecoration.BOLD))
+        gamePlayer.translateActionBar("blocko.main_game_loop.current_dice_number", Placeholder.parsed("dice_number", diceSide.first.toString()))
 
         GameScoreboardUtils.updateDicedNumberLine(gamePlayer.arenaId, diceSession.currentDiceNumber)
     }
 
     private fun getDiceDisplayName(diceNumber: Int): Component {
-        return Component.text("$diceNumber", NamedTextColor.YELLOW, TextDecoration.BOLD)
+        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        return translation.validateLine("blocko.main_game_loop.dice_display_name", Placeholder.parsed("dice_number", diceNumber.toString()))
     }
 
     private fun getDiceSide(blockedDiceNumber: Number): Pair<Int, String> {
@@ -140,7 +128,8 @@ class DiceHandler {
         val diceSide: Pair<Int, String>? = this.diceSides.entries.find { it.key == randomNumber }?.toPair()
 
         if (diceSide == null) {
-            Bukkit.getConsoleSender().sendMessage(Component.text("ERROR (Check dice_sides.json! No dice side for number $randomNumber found...", NamedTextColor.DARK_RED))
+            val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+            Bukkit.getConsoleSender().sendMessage(translation.validateLine("blocko.main_game_loop.dice_error", Placeholder.parsed("number", randomNumber.toString())))
             return Pair(1, HeadUtils.DICE_ONE)
         }
 

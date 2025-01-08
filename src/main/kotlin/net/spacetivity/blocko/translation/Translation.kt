@@ -20,13 +20,13 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
     )
 
     fun validateLineAsString(key: String, vararg toReplace: Any): String {
-        val content = cachedMessages[key] ?: return "$key not found..."
+        val content: String = cachedMessages[key] ?: return "$key not found..."
         return MessageFormat.format(content, *toReplace)
     }
 
     fun validateLine(key: String, vararg toReplace: TagResolver): Component {
-        val message = cachedMessages[key]
-        val builder = MiniMessage.builder()
+        val message: String? = cachedMessages[key]
+        val builder: MiniMessage.Builder = MiniMessage.builder()
 
         if (message == null) return builder.tags(TagResolver.builder().resolver(StandardTags.color()).build()).build()
             .deserialize("<red>$key not found...")
@@ -40,18 +40,16 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
     }
 
     fun validateLines(key: String, vararg toReplace: TagResolver): List<Component> {
-        val message = cachedMessages[key]
-        val builder = MiniMessage.builder()
+        val message: String? = cachedMessages[key]
 
-        val build = builder.tags(TagResolver.builder().resolver(StandardTags.color()).build()).build()
+        val builder: MiniMessage.Builder = MiniMessage.builder()
+        val build: MiniMessage = builder.tags(TagResolver.builder().resolver(StandardTags.color()).build()).build()
 
-        if (message == null) {
+        if (message == null)
             return listOf(build.deserialize("<red>$key <red>not found..."))
-        }
 
-        if (!hasMultipleLines(key)) {
+        if (!hasMultipleLines(key))
             return listOf(build.deserialize("<red>$key <red>is not a multiline message!"))
-        }
 
         val lines = message.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         val components: MutableList<Component> = ArrayList()
@@ -98,7 +96,7 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
             if (message.contains("<prefix")) tagBuilder.resolver(extractPrefix(message))
             components.add(builder.tags(tagBuilder.build()).build().deserialize("<!i>$message"))
         } else {
-            for (line in message.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
+            for (line: String in message.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
                 if (line.contains("<prefix")) tagBuilder.resolver(extractPrefix(line))
                 components.add(builder.tags(tagBuilder.build()).build().deserialize("<!i>$line"))
             }

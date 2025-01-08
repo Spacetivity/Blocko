@@ -41,13 +41,14 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
         if (this.livingEntity != null) return
 
         this.livingEntity = location.world.spawnEntity(location, this.gameEntityType.bukkitEntityType) as LivingEntity
-        this.livingEntity!!.isSilent = true;
+        this.livingEntity!!.isSilent = true
         this.livingEntity!!.isInvulnerable = true
         this.livingEntity!!.setAI(false)
         this.livingEntity!!.isCustomNameVisible = true
 
         if (this.gameEntityType.isBaby && this.livingEntity!! is Animals) {
             val animal: Animals = this.livingEntity as Animals
+            animal.ageLock = true
             animal.setBaby()
         }
 
@@ -58,8 +59,9 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
 
     fun toggleHighlighting(active: Boolean) {
         if (this.isHighlighted == active) return
+        if (this.livingEntity == null) return
 
-        this.livingEntity!!.isGlowing = active
+        this.livingEntity?.isGlowing = active
         this.isHighlighted = active
     }
 

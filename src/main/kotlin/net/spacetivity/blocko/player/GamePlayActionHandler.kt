@@ -3,7 +3,6 @@ package net.spacetivity.blocko.player
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
@@ -31,8 +30,16 @@ class GamePlayActionHandler {
         this.mainTask = Bukkit.getScheduler().runTaskTimerAsynchronously(BlockoGame.instance, Runnable {
             for (gameArena: GameArena in BlockoGame.instance.gameArenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
                 for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
-                    if (gamePlayer.getTeam().deactivated) continue
                     val player: Player = gamePlayer.toBukkitInstance() ?: continue
+
+                    if (player.location.y <= (gameArena.yLevel - 10)) {
+                        val yLevelDifference = gameArena.yLevel - player.location.y
+                        player.teleportAsync(player.location.clone().add(0.0, yLevelDifference + 2.0, 1.0)).thenAccept {
+                            player.isFlying = true
+                        }
+                    }
+
+                    if (gamePlayer.getTeam().deactivated) continue
 
                     val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
                     if (!ingamePhase.isInControllingTeam(gamePlayer.uuid) || ingamePhase.phaseMode != GamePhaseMode.PICK_ENTITY) continue
@@ -87,7 +94,11 @@ class GamePlayActionHandler {
                     val position: Int = ingamePhase.getAmountOfFinishedTeams()
 
                     gamePlayer.matchStats.position = position
-                    gameArena.sendArenaMessage(Component.text("TEAM ${gameTeam.name.uppercase()} HAS FINISHED (#$position)!", NamedTextColor.YELLOW, TextDecoration.BOLD))
+
+                    gameArena.sendArenaMessage("blocko.main_game_loop.player_finished_match",
+                        Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+                        Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }),
+                        Placeholder.parsed("position", position.toString()))
                 }
 
                 if (gameArena.isGameOver()) {
@@ -107,9 +118,13 @@ class GamePlayActionHandler {
                 gamePlayer.dicedNumber = null
 
                 if (ingamePhase.lastControllingTeamId == ingamePhase.controllingTeamId) {
-                    gameArena.sendArenaMessage(Component.text("${newControllingTeam.name} can now dice again!"))
+                    gameArena.sendArenaMessage("blocko.main_game_loop.can_dice_again",
+                        Placeholder.parsed("team_color", "<${newControllingTeam.color.asHexString()}>"),
+                        Placeholder.parsed("team_name", newControllingTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
                 } else {
-                    gameArena.sendArenaMessage(Component.text("${newControllingTeam.name} can now dice!"))
+                    gameArena.sendArenaMessage("blocko.main_game_loop.can_dice",
+                        Placeholder.parsed("team_color", "<${newControllingTeam.color.asHexString()}>"),
+                        Placeholder.parsed("team_name", newControllingTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
                 }
 
                 ingamePhase.phaseMode = GamePhaseMode.DICE
@@ -120,15 +135,15 @@ class GamePlayActionHandler {
     fun startPlayerTask() {
         this.playerTask = Bukkit.getScheduler().runTaskTimerAsynchronously(BlockoGame.instance, Runnable {
             for (gameArena: GameArena in BlockoGame.instance.gameArenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
-                for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+                val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+                val controllingGamePlayer: GamePlayer = ingamePhase.getControllingGamePlayer() ?: continue
 
-                    val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
-
-                    if (gamePlayer.getTeam().deactivated) continue
-                    if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
-
-                    if (!gamePlayer.isAI && ingamePhase.isInControllingTeam(gamePlayer.uuid) && gamePlayer.actionTimeoutTimestamp != null) {
+                for (player: Player in gameArena.getAllPlayers()) {
+                    if (controllingGamePlayer.actionTimeoutTimestamp != null) {
                         val bossbarHandler: BossbarHandler = BlockoGame.instance.bossbarHandler
+
+                        val controllingGamePlayerTeam: GameTeam = BlockoGame.instance.gameTeamHandler.getTeamOfPlayer(controllingGamePlayer.arenaId, controllingGamePlayer.uuid)
+                            ?: continue
 
                         val timeLeft: Long = ingamePhase.getControllingGamePlayerTimeLeft()
 
@@ -138,19 +153,29 @@ class GamePlayActionHandler {
                         val timeColor: String = if (timeLeft >= 30) NamedTextColor.GREEN.asHexString() else if (timeLeft >= 10) NamedTextColor.YELLOW.asHexString() else NamedTextColor.DARK_RED.asHexString()
                         val timeColorPlaceholder = Placeholder.parsed("time_color", "<$timeColor>")
 
-                        val bossbarText: Component = BlockoGame.instance.translationHandler.getSelectedTranslation().validateLine("blocko.bossbar.timeout", timeColorPlaceholder, timePlaceholder, unitPlaceholder)
+                        val bossbarText: Component = BlockoGame.instance.translationHandler.getSelectedTranslation().validateLine("blocko.bossbar.timeout",
+                            Placeholder.parsed("team_color", "<${controllingGamePlayerTeam.color.asHexString()}>"),
+                            Placeholder.parsed("team_name", controllingGamePlayerTeam.name.lowercase().replaceFirstChar { it.uppercase() }),
+                            timeColorPlaceholder,
+                            timePlaceholder,
+                            unitPlaceholder)
 
-                        if (bossbarHandler.getBossbars(gamePlayer.uuid).none { it.first == "timeoutBar" }) {
-                            bossbarHandler.registerBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar", bossbarText, 1.0F, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
+                        if (bossbarHandler.getBossbars(player.uniqueId).none { it.first == "timeoutBar" }) {
+                            bossbarHandler.registerBossbar(player, "timeoutBar", bossbarText, 1.0F, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
                         } else {
                             val progress: Float = ingamePhase.getControllingGamePlayerTimeLeftFraction()
-                            bossbarHandler.updateBossbar(gamePlayer.uuid, "timeoutBar", BossbarHandler.BossBarUpdate.PROGRESS, progress)
-                            bossbarHandler.updateBossbar(gamePlayer.uuid, "timeoutBar", BossbarHandler.BossBarUpdate.NAME, bossbarText)
+                            bossbarHandler.updateBossbar(player.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.PROGRESS, progress)
+                            bossbarHandler.updateBossbar(player.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.NAME, bossbarText)
 
                             val barColor: BossBar.Color = if (timeLeft >= 30) BossBar.Color.GREEN else if (timeLeft >= 10) BossBar.Color.YELLOW else BossBar.Color.RED
-                            bossbarHandler.updateBossbar(gamePlayer.uuid, "timeoutBar", BossbarHandler.BossBarUpdate.COLOR, barColor)
+                            bossbarHandler.updateBossbar(player.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.COLOR, barColor)
                         }
                     }
+                }
+
+                for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+                    if (gamePlayer.getTeam().deactivated) continue
+                    if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
 
                     if (!gamePlayer.isAI && gamePlayer.actionTimeoutTimestamp != null && (ingamePhase.phaseMode == GamePhaseMode.DICE || ingamePhase.phaseMode == GamePhaseMode.PICK_ENTITY)) {
                         if (System.currentTimeMillis() >= gamePlayer.actionTimeoutTimestamp!!) {
@@ -158,14 +183,14 @@ class GamePlayActionHandler {
                             gamePlayer.lastEntityPickRule = null
                             gamePlayer.dicedNumber = null
                             gamePlayer.actionTimeoutTimestamp = null
-                            
+
                             if (gamePlayer.isDicing()) BlockoGame.instance.diceHandler.dicingPlayers.remove(gamePlayer.uuid)
 
                             ingamePhase.phaseMode = GamePhaseMode.DICE
                             ingamePhase.setNextControllingTeam()
-                            gamePlayer.sendMessage(Component.text("You waited to long. Your turn is over!", NamedTextColor.DARK_RED))
+
+                            gamePlayer.translateMessage("blocko.main_game_loop.turn_expired")
                             gamePlayer.playSound(Sound.BLOCK_SCULK_SHRIEKER_HIT)
-                            BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
                             continue
                         }
                     }
@@ -185,13 +210,14 @@ class GamePlayActionHandler {
                                 if (entitiesFromTeam.all { (dicedNumber != 6 && it.currentFieldId == null) || !it.isMovableTo(gamePlayer.dicedNumber!!) }) {
                                     gamePlayer.activeEntity = null
                                     gamePlayer.lastEntityPickRule = null
-                                    gamePlayer.dicedNumber = null
                                     gamePlayer.actionTimeoutTimestamp = null
+
                                     BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
+
                                     ingamePhase.phaseMode = GamePhaseMode.DICE
                                     ingamePhase.setNextControllingTeam()
                                 } else {
-                                    gamePlayer.sendActionBar(Component.text("Please select a entity now.", NamedTextColor.LIGHT_PURPLE))
+                                    gamePlayer.translateActionBar("blocko.main_game_loop.select_entity_notify")
                                 }
                             }
                         }
@@ -203,7 +229,7 @@ class GamePlayActionHandler {
 
                 }
             }
-        }, 0L, 20L)
+        }, 0L, 10L)
     }
 
     fun stopTasks() {

@@ -8,7 +8,7 @@ import net.spacetivity.blocko.extensions.toStatsPlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 
-class MasterEliminatorAchievement(translationKey: String) : Achievement(translationKey, 300, listOf(MasterEliminatorRequirement(translationKey, 50)))
+class MasterEliminatorAchievement(translationKey: String) : Achievement(translationKey, 550, listOf(MasterEliminatorRequirement(translationKey, 50)))
 
 class MasterEliminatorRequirement(override val translationKey: String, override val neededCount: Int) : ProgressRequirement<Int> {
 

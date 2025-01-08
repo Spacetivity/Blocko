@@ -8,6 +8,7 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
+import net.spacetivity.blocko.extensions.toGamePlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
@@ -15,22 +16,22 @@ import org.bukkit.entity.Player
 
 object GameScoreboardUtils {
 
-    fun setGameSidebar(gamePlayer: GamePlayer) {
-        val player: Player = gamePlayer.toBukkitInstance() ?: return
+    fun setGameSidebar(player: Player) {
         val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val initialEntityStatus = GameEntityStatus.AT_SPAWN
 
         BlockoGame.instance.sidebarHandler.registerSidebar(SidebarBuilder(player)
             .setTitle(translation.validateLine("blocko.sidebar.title"))
             .addBlankLine()
-            .addLine(getTeamComponent(translation, gamePlayer))
+            .addLine(getTeamComponent(translation, player.toGamePlayerInstance()))
             .addBlankLine()
             .addLine(getControllingTeamComponent(translation, null))
             .addLine(getDicedNumberComponent(translation, null))
             .addBlankLine()
-            .addLine(getStatusComponent(translation, 1, GameEntityStatus.AT_SPAWN))
-            .addLine(getStatusComponent(translation, 2, GameEntityStatus.AT_SPAWN))
-            .addLine(getStatusComponent(translation, 3, GameEntityStatus.AT_SPAWN))
-            .addLine(getStatusComponent(translation, 4, GameEntityStatus.AT_SPAWN))
+            .addLine(getStatusComponent(translation, 1, initialEntityStatus))
+            .addLine(getStatusComponent(translation, 2, initialEntityStatus))
+            .addLine(getStatusComponent(translation, 3, initialEntityStatus))
+            .addLine(getStatusComponent(translation, 4, initialEntityStatus))
             .build())
     }
 
@@ -38,18 +39,15 @@ object GameScoreboardUtils {
         BlockoGame.instance.sidebarHandler.unregisterSidebar(player.uniqueId)
     }
 
-    fun updateTeamLine(gamePlayer: GamePlayer) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-        val sidebar: Sidebar = BlockoGame.instance.sidebarHandler.getSidebar(gamePlayer.uuid) ?: return
-        sidebar.updateLine(8, getTeamComponent(translation, gamePlayer))
+    fun updateTeamLine(player: Player) {
+        val sidebar: Sidebar = BlockoGame.instance.sidebarHandler.getSidebar(player.uniqueId) ?: return
+        sidebar.updateLine(8, getTeamComponent(BlockoGame.instance.translationHandler.getSelectedTranslation(), player.toGamePlayerInstance()))
     }
 
     fun updateControllingTeamLine(gameArena: GameArena, controllingTeam: GameTeam) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-
-        for (gamePlayer: GamePlayer in gameArena.currentPlayers.filter { !it.isAI }) {
-            val sidebar: Sidebar = BlockoGame.instance.sidebarHandler.getSidebar(gamePlayer.uuid) ?: continue
-            sidebar.updateLine(6, getControllingTeamComponent(translation, controllingTeam))
+        for (player: Player in gameArena.getAllPlayers()) {
+            val sidebar: Sidebar = BlockoGame.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
+            sidebar.updateLine(6, getControllingTeamComponent(BlockoGame.instance.translationHandler.getSelectedTranslation(), controllingTeam))
         }
     }
 
@@ -60,33 +58,30 @@ object GameScoreboardUtils {
     }
 
     fun updateEntityStatusLine(gameEntity: GameEntity) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
         val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(gameEntity.arenaId) ?: return
 
-        for (gamePlayer: GamePlayer in gameArena.currentPlayers.filter { !it.isAI }) {
-            val sidebar: Sidebar = BlockoGame.instance.sidebarHandler.getSidebar(gamePlayer.uuid) ?: continue
+        for (player: Player in gameArena.getAllPlayers()) {
+            val sidebar: Sidebar = BlockoGame.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
             val lineId: Int = getSidebarLineForEntity(gameEntity.entityId) ?: continue
-            sidebar.updateLine(lineId, getStatusComponent(translation, gameEntity.entityId.inc(), gameEntity.entityStatus))
+            sidebar.updateLine(lineId, getStatusComponent(BlockoGame.instance.translationHandler.getSelectedTranslation(), gameEntity.entityId.inc(), gameEntity.entityStatus))
         }
     }
 
     fun updateDicedNumberLine(arenaId: String, currentDicedNumber: Int?) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
         val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(arenaId) ?: return
-
         if (!gameArena.phase.isIngame()) return
 
-        for (gamePlayer: GamePlayer in gameArena.currentPlayers.filter { !it.isAI }) {
-            val sidebar: Sidebar = BlockoGame.instance.sidebarHandler.getSidebar(gamePlayer.uuid) ?: continue
-            sidebar.updateLine(5, getDicedNumberComponent(translation, currentDicedNumber))
+        for (player: Player in gameArena.getAllPlayers()) {
+            val sidebar: Sidebar = BlockoGame.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
+            sidebar.updateLine(5, getDicedNumberComponent(BlockoGame.instance.translationHandler.getSelectedTranslation(), currentDicedNumber))
         }
     }
 
-    private fun getTeamComponent(translation: Translation, gamePlayer: GamePlayer): Component {
+    private fun getTeamComponent(translation: Translation, gamePlayer: GamePlayer?): Component {
         val teamColorHex: String
         val teamName: String
 
-        if (gamePlayer.teamName == null) {
+        if (gamePlayer?.teamName == null) {
             teamColorHex = NamedTextColor.GRAY.asHexString()
             teamName = "-/-"
         } else {

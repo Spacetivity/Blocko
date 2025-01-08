@@ -28,16 +28,17 @@ class StatsPlayerHandler {
     fun createOrLoadStatsPlayer(uuid: UUID) {
         GlobalScope.launch {
             transaction {
-                val resultRow: ResultRow? = StatsPlayerDAO.select { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
+                val resultRow: ResultRow? = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
                 val statsPlayer: StatsPlayer
 
                 if (resultRow == null) {
-                    statsPlayer = StatsPlayer(uuid, 0, 0, 0, 0)
+                    statsPlayer = StatsPlayer(uuid, 0, 0, 0, 0, 0)
                     StatsPlayerDAO.insert { statement: InsertStatement<Number> ->
                         statement[StatsPlayerDAO.uuid] = uuid.toString()
                         statement[eliminatedOpponents] = 0
                         statement[knockedOutByOpponents] = 0
                         statement[playedGames] = 0
+                        statement[wonGames] = 0
                         statement[coins] = 0
                     }
 
@@ -47,6 +48,7 @@ class StatsPlayerHandler {
                         resultRow[StatsPlayerDAO.eliminatedOpponents],
                         resultRow[StatsPlayerDAO.knockedOutByOpponents],
                         resultRow[StatsPlayerDAO.playedGames],
+                        resultRow[StatsPlayerDAO.wonGames],
                         resultRow[StatsPlayerDAO.coins]
                     )
                 }
@@ -70,6 +72,7 @@ class StatsPlayerHandler {
                 it[eliminatedOpponents] = statsPlayer.eliminatedOpponents
                 it[knockedOutByOpponents] = statsPlayer.knockedOutByOpponents
                 it[playedGames] = statsPlayer.playedGames
+                it[wonGames] = statsPlayer.wonGames
                 it[coins] = statsPlayer.coins
             }
         }
@@ -83,13 +86,14 @@ class StatsPlayerHandler {
         var statsPlayer: StatsPlayer? = null
 
         transaction {
-            val resultRow: ResultRow? = StatsPlayerDAO.select { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
+            val resultRow: ResultRow? = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
             if (resultRow != null) {
                 statsPlayer = StatsPlayer(
                     uuid,
                     resultRow[StatsPlayerDAO.eliminatedOpponents],
                     resultRow[StatsPlayerDAO.knockedOutByOpponents],
                     resultRow[StatsPlayerDAO.playedGames],
+                    resultRow[StatsPlayerDAO.wonGames],
                     resultRow[StatsPlayerDAO.coins]
                 )
             }

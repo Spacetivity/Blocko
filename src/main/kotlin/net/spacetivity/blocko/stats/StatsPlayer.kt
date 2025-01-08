@@ -3,7 +3,7 @@ package net.spacetivity.blocko.stats
 import net.spacetivity.blocko.BlockoGame
 import java.util.*
 
-data class StatsPlayer(val uuid: UUID, var eliminatedOpponents: Int, var knockedOutByOpponents: Int, var playedGames: Int, var coins: Int) {
+data class StatsPlayer(val uuid: UUID, var eliminatedOpponents: Int, var knockedOutByOpponents: Int, var playedGames: Int, var wonGames: Int, var coins: Int) {
 
     fun updateDbEntry() {
         BlockoGame.instance.statsPlayerHandler.updateStatsPlayer(this)
@@ -15,6 +15,7 @@ data class StatsPlayer(val uuid: UUID, var eliminatedOpponents: Int, var knocked
             StatsType.KNOCKED_OUT_BY_OPPONENTS -> if (operation == UpdateOperation.INCREASE) this.knockedOutByOpponents += newValue else this.knockedOutByOpponents -= newValue
             StatsType.COINS -> if (operation == UpdateOperation.INCREASE) this.coins += newValue else this.coins -= newValue
             StatsType.PLAYED_GAMES -> if (operation == UpdateOperation.INCREASE) this.playedGames += newValue else this.playedGames -= newValue
+            StatsType.WON_GAMES -> if (operation == UpdateOperation.INCREASE) this.wonGames += newValue else this.wonGames -= newValue
         }
     }
 
@@ -23,6 +24,7 @@ data class StatsPlayer(val uuid: UUID, var eliminatedOpponents: Int, var knocked
         StatsType.KNOCKED_OUT_BY_OPPONENTS -> this.knockedOutByOpponents
         StatsType.COINS -> this.coins
         StatsType.PLAYED_GAMES -> this.playedGames
+        StatsType.WON_GAMES -> this.wonGames
     }
 
 }
@@ -31,7 +33,8 @@ enum class StatsType(val nameKey: String) {
     ELIMINATED_OPPONENTS("blocko.stats.type.eliminations"),
     KNOCKED_OUT_BY_OPPONENTS("blocko.stats.type.knocked_out_by_opponents"),
     COINS("blocko.stats.type.coins"),
-    PLAYED_GAMES("blocko.stats.type.played_games");
+    PLAYED_GAMES("blocko.stats.type.played_games"),
+    WON_GAMES("blocko.stats.type.won_games");
 }
 
 enum class UpdateOperation {
