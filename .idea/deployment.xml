@@ -6,7 +6,7 @@
       <paths name="spacetivity-server">
         <serverdata>
           <mappings>
-            <mapping deploy="/plugins" local="$PROJECT_DIR$/build/libs" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

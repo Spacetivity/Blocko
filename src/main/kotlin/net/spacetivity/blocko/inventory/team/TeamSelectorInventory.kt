@@ -44,7 +44,7 @@ class TeamSelectorInventory(private val gameArena: GameArena) : InventoryProvide
         return InteractiveItem.of(ItemBuilder(Material.LEATHER_CHESTPLATE)
             .setName(buildTeamItemDisplayName(gameTeam, translation))
             .setArmorColor(Color.fromRGB(teamColor.red(), teamColor.green(), teamColor.blue()))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS, ItemFlag.HIDE_DYE)
+            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_DYE)
             .setLoreByComponent(buildTeamItemLore(gameTeam, translation))
             .setData("teamName", gameTeam.name)
             .build()) { _, item: InteractiveItem, event: InventoryClickEvent ->

@@ -28,6 +28,7 @@ import net.spacetivity.blocko.field.GameFieldProperties
 import net.spacetivity.blocko.field.GameFieldPropertiesTypeAdapter
 import net.spacetivity.blocko.files.BotNamesFile
 import net.spacetivity.blocko.files.DatabaseFile
+import net.spacetivity.blocko.files.DatabaseType
 import net.spacetivity.blocko.files.GlobalConfigFile
 import net.spacetivity.blocko.listener.PlayerListener
 import net.spacetivity.blocko.listener.PlayerSetupListener
@@ -95,12 +96,16 @@ class BlockoGame : JavaPlugin() {
 
         val databaseFile: DatabaseFile = createOrLoadDatabaseFile()
 
-        Database.connect(
-            "jdbc:mariadb://${databaseFile.hostname}:${databaseFile.port}/${databaseFile.database}",
-            "org.mariadb.jdbc.Driver",
-            databaseFile.user,
-            databaseFile.password,
-        )
+        if (databaseFile.databaseType == DatabaseType.SQLITE) {
+            Database.connect("jdbc:sqlite:${databaseFile.database}", driver = "org.sqlite.JDBC")
+        } else {
+            Database.connect(
+                "jdbc:mariadb://${databaseFile.hostname}:${databaseFile.port}/${databaseFile.database}",
+                "org.mariadb.jdbc.Driver",
+                databaseFile.user,
+                databaseFile.password,
+            )
+        }
 
         transaction {
             addLogger(StdOutSqlLogger)
@@ -207,7 +212,7 @@ class BlockoGame : JavaPlugin() {
     }
 
     private fun createOrLoadDatabaseFile(): DatabaseFile {
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile("-", 3306, "-", "-", "-"))
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile(DatabaseType.SQLITE, "-", 3306, "-", "-", "-"))
     }
 
     private fun createOrLoadDiceSidesFile(): DiceSidesFile {
