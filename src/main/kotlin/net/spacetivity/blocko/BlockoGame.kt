@@ -1,5 +1,6 @@
 package net.spacetivity.blocko
 
+import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import net.spacetivity.blocko.achievement.AchievementHandler
@@ -26,16 +27,14 @@ import net.spacetivity.blocko.field.GameFieldDAO
 import net.spacetivity.blocko.field.GameFieldHandler
 import net.spacetivity.blocko.field.GameFieldProperties
 import net.spacetivity.blocko.field.GameFieldPropertiesTypeAdapter
-import net.spacetivity.blocko.files.BotNamesFile
-import net.spacetivity.blocko.files.DatabaseFile
-import net.spacetivity.blocko.files.DatabaseType
-import net.spacetivity.blocko.files.GlobalConfigFile
+import net.spacetivity.blocko.files.*
 import net.spacetivity.blocko.listener.PlayerListener
 import net.spacetivity.blocko.listener.PlayerSetupListener
 import net.spacetivity.blocko.listener.ProtectionListener
 import net.spacetivity.blocko.lobby.LobbySpawnDAO
 import net.spacetivity.blocko.lobby.LobbySpawnHandler
 import net.spacetivity.blocko.phase.GamePhaseHandler
+import net.spacetivity.blocko.player.EntityAiHandler
 import net.spacetivity.blocko.player.GamePlayActionHandler
 import net.spacetivity.blocko.scoreboard.PlayerFormatHandler
 import net.spacetivity.blocko.scoreboard.SidebarHandler
@@ -44,7 +43,7 @@ import net.spacetivity.blocko.stats.StatsPlayerHandler
 import net.spacetivity.blocko.team.GameTeamHandler
 import net.spacetivity.blocko.team.GameTeamLocationDAO
 import net.spacetivity.blocko.translation.TranslationHandler
-import net.spacetivity.blocko.utils.FileUtils
+import net.spacetivity.blocko.utils.FileUtil
 import net.spacetivity.blocko.utils.HeadUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import org.bukkit.Bukkit
@@ -52,7 +51,6 @@ import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scoreboard.Team
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -62,11 +60,12 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.lang.reflect.Constructor
 import java.util.*
 
-class BlockoGame : JavaPlugin() {
+class BlockoGame : SuspendingJavaPlugin() {
 
     val clickableItems: MutableMap<UUID, ItemBuilder> = mutableMapOf()
 
     lateinit var diceSidesFile: DiceSidesFile
+    lateinit var setupConfigFile: SetupConfigFile
     lateinit var globalConfigFile: GlobalConfigFile
     lateinit var botNamesFile: BotNamesFile
 
@@ -89,15 +88,18 @@ class BlockoGame : JavaPlugin() {
 
     lateinit var lobbySpawnHandler: LobbySpawnHandler
 
+    lateinit var entityAiHandler: EntityAiHandler
+
     private lateinit var gamePlayActionHandler: GamePlayActionHandler
 
-    override fun onEnable() {
+    override suspend fun onEnableAsync() {
         instance = this
 
         val databaseFile: DatabaseFile = createOrLoadDatabaseFile()
 
         if (databaseFile.databaseType == DatabaseType.SQLITE) {
-            Database.connect("jdbc:sqlite:${databaseFile.database}", driver = "org.sqlite.JDBC")
+            val sqlitePath = dataFolder.toPath().resolve("blocko.db").toAbsolutePath().toString()
+            Database.connect("jdbc:sqlite:$sqlitePath", driver = "org.sqlite.JDBC")
         } else {
             Database.connect(
                 "jdbc:mariadb://${databaseFile.hostname}:${databaseFile.port}/${databaseFile.database}",
@@ -127,6 +129,7 @@ class BlockoGame : JavaPlugin() {
         this.translationHandler = TranslationHandler()
         this.translationHandler.generateTranslations(this::class.java)
 
+        this.setupConfigFile = createOrLoadSetupConfigFile()
         this.globalConfigFile = createOrLoadGlobalConfigFile()
         this.botNamesFile = createOrLoadBotNamesFile()
 
@@ -161,6 +164,8 @@ class BlockoGame : JavaPlugin() {
         this.achievementHandler.registerAchievement(BadLuckAchievement("bad_luck"))
 
         this.lobbySpawnHandler = LobbySpawnHandler()
+
+        this.entityAiHandler = EntityAiHandler()
 
         this.gamePlayActionHandler = GamePlayActionHandler()
         this.gamePlayActionHandler.startMainTask()
@@ -212,11 +217,18 @@ class BlockoGame : JavaPlugin() {
     }
 
     private fun createOrLoadDatabaseFile(): DatabaseFile {
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile(DatabaseType.SQLITE, "-", 3306, "-", "-", "-"))
+        return FileUtil.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile(
+            DatabaseType.SQLITE,
+            "-",
+            3306,
+            "-",
+            "-",
+            "-"
+        ))
     }
 
     private fun createOrLoadDiceSidesFile(): DiceSidesFile {
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "dice", "dice_sides", DiceSidesFile::class, DiceSidesFile(mutableMapOf(
+        return FileUtil.createOrLoadFile(dataFolder.toPath(), "dice", "dice_sides", DiceSidesFile::class, DiceSidesFile(mutableMapOf(
             Pair(1, HeadUtils.DICE_ONE),
             Pair(2, HeadUtils.DICE_TWO),
             Pair(3, HeadUtils.DICE_THREE),
@@ -226,10 +238,18 @@ class BlockoGame : JavaPlugin() {
         )))
     }
 
+    private fun createOrLoadSetupConfigFile(): SetupConfigFile {
+        return FileUtil.createOrLoadFile(dataFolder.toPath(), "global", "setup", SetupConfigFile::class, SetupConfigFile(
+            setupStepsResettable = false,
+            setupSessionEndless = false,
+            setupSessionTimeoutMinutes = 15,
+        ))
+    }
+
     private fun createOrLoadGlobalConfigFile(): GlobalConfigFile {
         val availableTranslationLanguages: List<String> = this.translationHandler.cachedTranslations.map { it.name }
         val defaultLanguageName: String = if (availableTranslationLanguages.contains("en_US")) "en_US" else availableTranslationLanguages[0]
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(
+        return FileUtil.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(
             defaultLanguageName,
             Material.GOLDEN_HOE.name,
             false,
@@ -242,7 +262,7 @@ class BlockoGame : JavaPlugin() {
     }
 
     private fun createOrLoadBotNamesFile(): BotNamesFile {
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "bot_names", BotNamesFile::class, BotNamesFile())
+        return FileUtil.createOrLoadFile(dataFolder.toPath(), "global", "bot_names", BotNamesFile::class, BotNamesFile())
     }
 
 }

@@ -5,7 +5,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
-import net.spacetivity.blocko.extensions.getArena
+import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.inventory.host.HostSettingsInventory
 import net.spacetivity.blocko.inventory.host.InvitationInventory
 import net.spacetivity.blocko.inventory.profile.*

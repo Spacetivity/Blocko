@@ -5,8 +5,8 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.GameArenaStatus
-import net.spacetivity.blocko.extensions.translateActionBar
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.translation.translateActionBar
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
 import net.spacetivity.blocko.field.PathFace
@@ -34,6 +34,8 @@ class GameArenaSetupHandler {
 
     private var setupTask: BukkitTask? = null
 
+    private val isSetupEndless = BlockoGame.instance.setupConfigFile.setupSessionEndless
+
     init {
         this.setupTask = Bukkit.getScheduler().runTaskTimer(BlockoGame.instance, Runnable {
             for (entry: MutableMap.MutableEntry<UUID, GameArenaSetupData> in this.arenaSetupCache.entries) {
@@ -47,7 +49,7 @@ class GameArenaSetupHandler {
                         player.translateActionBar("blocko.setup.turn_direction", Placeholder.parsed("face", facing.name))
                 }
 
-                if (System.currentTimeMillis() < arenaSetupData.timeoutTimestamp) continue
+                if (isSetupEndless || (System.currentTimeMillis() < arenaSetupData.timeoutTimestamp)) continue
                 handleSetupEnd(player, false)
             }
         }, 0L, 20L)

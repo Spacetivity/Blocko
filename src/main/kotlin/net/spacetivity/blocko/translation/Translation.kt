@@ -8,10 +8,9 @@ import net.kyori.adventure.text.minimessage.tag.standard.StandardTags
 import java.text.MessageFormat
 import java.util.*
 
-
 class Translation(val name: String, val cachedMessages: MutableMap<String, String>) {
 
-    private val defaultResolvers: MutableSet<TagResolver> = mutableSetOf(
+    private val defaultResolvers: Set<TagResolver> = setOf(
         StandardTags.gradient(),
         StandardTags.color(),
         StandardTags.decorations(),
@@ -19,121 +18,75 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
         StandardTags.hoverEvent()
     )
 
-    fun validateLineAsString(key: String, vararg toReplace: Any): String {
-        val content: String = cachedMessages[key] ?: return "$key not found..."
-        return MessageFormat.format(content, *toReplace)
+    private val miniMessage: MiniMessage = MiniMessage.builder()
+        .tags(TagResolver.builder().resolver(StandardTags.color()).build())
+        .build()
+
+    fun validateLineAsString(key: String, vararg args: Any): String {
+        val content = cachedMessages[key] ?: return "$key not found..."
+        return MessageFormat.format(content, *args)
     }
 
-    fun validateLine(key: String, vararg toReplace: TagResolver): Component {
-        val message: String? = cachedMessages[key]
-        val builder: MiniMessage.Builder = MiniMessage.builder()
-
-        if (message == null) return builder.tags(TagResolver.builder().resolver(StandardTags.color()).build()).build()
-            .deserialize("<red>$key not found...")
-
-        val tagBuilder: TagResolver.Builder = TagResolver.builder()
-            .resolvers(this.defaultResolvers)
-            .resolvers(*toReplace)
-
-        if (message.contains("<prefix")) tagBuilder.resolver(extractPrefix(message))
-        return builder.tags(tagBuilder.build()).build().deserialize(message)
+    fun validateLine(key: String, vararg additionalResolvers: TagResolver): Component {
+        val message = cachedMessages[key] ?: return errorComponent("$key not found...")
+        return deserializeWithResolvers(message, *additionalResolvers)
     }
 
-    fun validateLines(key: String, vararg toReplace: TagResolver): List<Component> {
-        val message: String? = cachedMessages[key]
-
-        val builder: MiniMessage.Builder = MiniMessage.builder()
-        val build: MiniMessage = builder.tags(TagResolver.builder().resolver(StandardTags.color()).build()).build()
-
-        if (message == null)
-            return listOf(build.deserialize("<red>$key <red>not found..."))
-
-        if (!hasMultipleLines(key))
-            return listOf(build.deserialize("<red>$key <red>is not a multiline message!"))
-
-        val lines = message.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        val components: MutableList<Component> = ArrayList()
-
-        for (line in lines) {
-            val tagBuilder: TagResolver.Builder = TagResolver.builder()
-                .resolvers(this.defaultResolvers)
-                .resolvers(*toReplace)
-
-            if (line.contains("<prefix")) tagBuilder.resolver(extractPrefix(line))
-            components.add(builder.tags(tagBuilder.build()).build().deserialize(line))
-        }
-
-        return components
+    fun validateLines(key: String, vararg additionalResolvers: TagResolver): List<Component> {
+        val message = cachedMessages[key] ?: return listOf(errorComponent("$key not found..."))
+        val lines = message.lines()
+        if (lines.size <= 1) return listOf(errorComponent("$key is not a multiline message!"))
+        return lines.map { line -> deserializeWithResolvers(line, *additionalResolvers) }
     }
 
-    fun validateItemName(key: String, vararg toReplace: TagResolver): Component {
-        val message = cachedMessages[key]
-        val builder = MiniMessage.builder()
-
-        if (message == null) return builder.tags(TagResolver.builder().resolver(StandardTags.color()).build()).build().deserialize("<red>$key not found...")
-
-        val tagBuilder: TagResolver.Builder = TagResolver.builder()
-            .resolvers(this.defaultResolvers)
-            .resolvers(*toReplace)
-
-        if (message.contains("<prefix")) tagBuilder.resolver(extractPrefix(message))
-        return builder.tags(tagBuilder.build()).build().deserialize("<!i>$message")
+    fun validateItemName(key: String, vararg additionalResolvers: TagResolver): Component {
+        val message = cachedMessages[key] ?: return errorComponent("$key not found...")
+        return deserializeWithResolvers("<!i>$message", *additionalResolvers)
     }
 
-    fun validateItemLore(key: String, vararg toReplace: TagResolver): List<Component> {
-        val message = cachedMessages[key]
-        val builder = MiniMessage.builder()
-        val build = builder.tags(TagResolver.builder().resolver(StandardTags.color()).build()).build()
-
-        if (message == null) return listOf(build.deserialize("<red>$key not found..."))
-
-        val components: MutableList<Component> = ArrayList()
-        val tagBuilder: TagResolver.Builder = TagResolver.builder()
-            .resolvers(this.defaultResolvers)
-            .resolvers(*toReplace)
-
-        if (!hasMultipleLines(key)) {
-            if (message.contains("<prefix")) tagBuilder.resolver(extractPrefix(message))
-            components.add(builder.tags(tagBuilder.build()).build().deserialize("<!i>$message"))
+    fun validateItemLore(key: String, vararg additionalResolvers: TagResolver): List<Component> {
+        val message = cachedMessages[key] ?: return listOf(errorComponent("$key not found..."))
+        val lines = message.lines()
+        return if (lines.size == 1) {
+            listOf(deserializeWithResolvers("<!i>${lines[0]}", *additionalResolvers))
         } else {
-            for (line: String in message.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
-                if (line.contains("<prefix")) tagBuilder.resolver(extractPrefix(line))
-                components.add(builder.tags(tagBuilder.build()).build().deserialize("<!i>$line"))
-            }
+            lines.map { line -> deserializeWithResolvers("<!i>$line", *additionalResolvers) }
         }
+    }
 
-        return components
+    private fun deserializeWithResolvers(message: String, vararg additionalResolvers: TagResolver): Component {
+        // Build a combined resolver that includes defaults, additional ones, and extracted prefixes if needed.
+        val combinedResolvers = mutableListOf<TagResolver>().apply {
+            addAll(defaultResolvers)
+            addAll(additionalResolvers)
+            if (message.contains("<prefix")) add(extractPrefix(message))
+        }
+        val resolver = TagResolver.builder().resolvers(combinedResolvers).build()
+        return MiniMessage.builder().tags(resolver).build().deserialize(message)
+    }
+
+    private fun errorComponent(text: String): Component {
+        return miniMessage.deserialize("<red>$text")
     }
 
     private fun extractPrefix(content: String): TagResolver.Single {
-        var placeholder: TagResolver.Single = Placeholder.parsed("", "")
-
-        if (content.contains("<prefix_")) {
-            val unformattedPrefixName = content.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0].split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
-            val prefixName = unformattedPrefixName.substring(0, unformattedPrefixName.length - 1)
-            val validPrefixName = prefixName.substring(0, 1).uppercase(Locale.getDefault()) + prefixName.substring(1)
-            val prefix = cachedMessages["blocko.prefix"]!!.replace("<prefix_text>", validPrefixName)
-
-            placeholder = Placeholder.component("prefix_$prefixName", MiniMessage.builder()
-                .tags(TagResolver.builder()
-                    .resolvers(this.defaultResolvers)
-                    .build())
-                .build()
-                .deserialize(prefix))
+        // Use regex to capture prefix from patterns like <prefix_myPrefix>
+        val regex = Regex("<prefix_([^>]+)>")
+        val matchResult = regex.find(content)
+        return if (matchResult != null) {
+            val rawPrefix = matchResult.groupValues[1].trimEnd { !it.isLetterOrDigit() }
+            val validPrefix = rawPrefix.replaceFirstChar { it.uppercase(Locale.getDefault()) }
+            val prefixTemplate = cachedMessages["blocko.prefix"] ?: "<prefix_text>"
+            val prefixMessage = prefixTemplate.replace("<prefix_text>", validPrefix)
+            Placeholder.component("prefix_$rawPrefix", miniMessage.deserialize(prefixMessage))
         } else if (content.contains("<prefix>")) {
-            placeholder = Placeholder.component(
-                "prefix",
-                MiniMessage.builder().tags(TagResolver.builder().resolvers(this.defaultResolvers).build())
-                    .build().deserialize(cachedMessages["blocko.prefix.global"]!!)
-            )
+            Placeholder.component("prefix", miniMessage.deserialize(cachedMessages["blocko.prefix.global"] ?: ""))
+        } else {
+            Placeholder.parsed("", "")
         }
-
-        return placeholder
     }
 
-    fun hasMultipleLines(key: String?): Boolean {
-        val message: String = cachedMessages[key] ?: return false
-        return message.contains("\n")
+    fun hasMultipleLines(key: String): Boolean {
+        return cachedMessages[key]?.contains("\n") == true
     }
-
 }

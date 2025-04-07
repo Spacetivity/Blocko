@@ -4,7 +4,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.countdown.GameCountdown
-import net.spacetivity.blocko.extensions.addCoins
+import net.spacetivity.blocko.stats.addCoins
 import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer

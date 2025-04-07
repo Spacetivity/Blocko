@@ -1,7 +1,6 @@
-package net.spacetivity.blocko.extensions
+package net.spacetivity.blocko.player
 
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.team.GameTeam
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -12,17 +11,13 @@ fun GamePlayer.getTeam(): GameTeam {
 }
 
 fun GamePlayer.playSound(sound: Sound) {
-    if (!isAI) {
-        val player: Player = toBukkitInstance() ?: return
-        player.playSound(player.location, sound, 0.2F, 1.0F)
-    }
+    if (isAI) return
+    val player: Player = toBukkitInstance() ?: return
+    player.playSound(player.location, sound, 0.2F, 1.0F)
 }
 
 fun GamePlayer.accessStorageContents(): Array<ItemStack?>? {
-    if (!isAI) {
-        val player: Player = toBukkitInstance() ?: return null
-        return player.inventory.storageContents
-    }
-
-    return null
+    if (isAI) return null
+    val player: Player = toBukkitInstance() ?: return null
+    return player.inventory.storageContents
 }

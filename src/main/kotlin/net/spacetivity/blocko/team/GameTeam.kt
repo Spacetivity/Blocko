@@ -3,8 +3,8 @@ package net.spacetivity.blocko.team
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.extensions.translateMessage
 import net.spacetivity.blocko.player.GamePlayer
+import net.spacetivity.blocko.translation.translateMessage
 import java.util.*
 
 class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {

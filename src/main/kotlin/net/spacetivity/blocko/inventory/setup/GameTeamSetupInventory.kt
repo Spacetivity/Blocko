@@ -3,7 +3,7 @@ package net.spacetivity.blocko.inventory.setup
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.setup.GameArenaSetupData
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation

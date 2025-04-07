@@ -4,7 +4,6 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
 import net.spacetivity.blocko.entity.GameEntityType
-import net.spacetivity.blocko.extensions.isDicing
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
@@ -15,7 +14,7 @@ import java.util.*
 
 class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var teamName: String?, val isAI: Boolean) {
 
-    val matchStats: GamePlayerMatchStats = GamePlayerMatchStats()
+    val matchStats = GamePlayerMatchStats()
 
     var dicedNumber: Int? = null
     var activeEntity: GameEntity? = null
@@ -46,7 +45,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
     fun autoPickEntity(ingamePhase: IngamePhase) {
         if (this.dicedNumber == null) return
 
-        val situation: Pair<EntityPickRule, GameEntity?> = EntityPickRule.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
+        val situation: Pair<EntityPickRule, GameEntity?> = BlockoGame.instance.entityAiHandler.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
         this.actionTimeoutTimestamp = null
 
         if (situation.first == EntityPickRule.NOT_MOVABLE && situation.second == null) {
@@ -80,7 +79,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
 
         this.activeEntity?.newGoalFieldId = if (currentFieldId == null) teamStartPoint + this.dicedNumber!! else currentFieldId + this.dicedNumber!!
 
-        val activeEntity1: GameEntity = this.activeEntity ?: throw NullPointerException("ACTIVE ENTITY IS NULL")
+        val activeEntity1: GameEntity = this.activeEntity ?: throw NullPointerException("Active entity is null")
 
         if (!activeEntity1.shouldMove)
             this.activeEntity!!.shouldMove = true

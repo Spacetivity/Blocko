@@ -1,11 +1,9 @@
-package net.spacetivity.blocko.extensions
+package net.spacetivity.blocko.stats
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.stats.StatsPlayer
-import net.spacetivity.blocko.stats.StatsType
-import net.spacetivity.blocko.stats.UpdateOperation
+import net.spacetivity.blocko.translation.translateMessage
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 

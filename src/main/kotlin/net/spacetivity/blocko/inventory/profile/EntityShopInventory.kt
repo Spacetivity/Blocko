@@ -8,9 +8,9 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.AchievementPlayer
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.entity.GameEntityType
-import net.spacetivity.blocko.extensions.getArena
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.arena.toGamePlayerInstance
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.translation.Translation

@@ -3,7 +3,7 @@ package net.spacetivity.blocko.achievement.impl
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.achievement.container.Requirement
-import net.spacetivity.blocko.extensions.toStatsPlayerInstance
+import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 

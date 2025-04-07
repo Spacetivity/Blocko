@@ -3,7 +3,7 @@ package net.spacetivity.blocko.phase
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.countdown.GameCountdown
-import net.spacetivity.blocko.extensions.isSpectating
+import net.spacetivity.blocko.arena.isSpectating
 import net.spacetivity.blocko.phase.impl.EndingPhase
 import net.spacetivity.blocko.phase.impl.IdlePhase
 import net.spacetivity.blocko.phase.impl.IngamePhase

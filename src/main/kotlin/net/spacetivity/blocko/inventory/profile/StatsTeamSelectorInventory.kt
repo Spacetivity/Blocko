@@ -4,9 +4,9 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
-import net.spacetivity.blocko.extensions.toStatsPlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
+import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
@@ -58,7 +58,7 @@ class StatsTeamSelectorInventory(private val gameArena: GameArena) : InventoryPr
                 Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
                 Placeholder.parsed("team_name", gameTeam.name)))
             .setLoreByComponent(translation.validateItemLore(teamLoreKey))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ITEM_SPECIFICS, ItemFlag.HIDE_DYE)
+            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_DYE)
             .setData("teamName", gameTeam.name)
 
         if (isNotEmptyTeam)

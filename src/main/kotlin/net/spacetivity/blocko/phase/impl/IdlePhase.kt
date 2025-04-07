@@ -3,8 +3,8 @@ package net.spacetivity.blocko.phase.impl
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.countdown.impl.IdleCountdown
-import net.spacetivity.blocko.extensions.getArena
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.HeadUtils

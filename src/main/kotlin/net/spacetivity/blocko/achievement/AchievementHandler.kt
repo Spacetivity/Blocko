@@ -3,9 +3,9 @@ package net.spacetivity.blocko.achievement
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.achievement.container.Achievement
-import net.spacetivity.blocko.extensions.addCoins
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.stats.addCoins
+import net.spacetivity.blocko.arena.toGamePlayerInstance
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.player.GamePlayer
 import org.bukkit.Bukkit
 import org.bukkit.Sound

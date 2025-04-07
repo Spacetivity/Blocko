@@ -8,7 +8,7 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
+import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation

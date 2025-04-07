@@ -5,10 +5,10 @@ import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.command.api.CommandProperties
 import net.spacetivity.blocko.command.api.SpaceCommandExecutor
 import net.spacetivity.blocko.command.api.SpaceCommandSender
-import net.spacetivity.blocko.extensions.getArena
-import net.spacetivity.blocko.extensions.getPossibleInvitationDestination
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.arena.getPossibleInvitationDestination
+import net.spacetivity.blocko.arena.toGamePlayerInstance
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.player.GamePlayer
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player

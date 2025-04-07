@@ -8,8 +8,8 @@ import net.spacetivity.blocko.achievement.AchievementHandler
 import net.spacetivity.blocko.achievement.AchievementPlayer
 import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.arena.GameArena
-import net.spacetivity.blocko.extensions.getArena
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
+import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils

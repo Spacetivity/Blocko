@@ -8,3 +8,8 @@ data class DatabaseFile(
     val user: String,
     val password: String,
 ) : SpaceFile
+
+enum class DatabaseType {
+    SQLITE,
+    MARIADB;
+}

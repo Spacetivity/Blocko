@@ -1,11 +1,10 @@
-package net.spacetivity.blocko.extensions
+package net.spacetivity.blocko.translation
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.title.Title
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.translation.Translation
 import org.bukkit.entity.Player
 
 fun Player.translateMessage(key: String, vararg toReplace: TagResolver) {

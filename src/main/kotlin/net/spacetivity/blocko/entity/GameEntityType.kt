@@ -3,9 +3,9 @@ package net.spacetivity.blocko.entity
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.impl.*
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
-import net.spacetivity.blocko.extensions.toStatsPlayerInstance
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.arena.toGamePlayerInstance
+import net.spacetivity.blocko.stats.toStatsPlayerInstance
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.StatsType
@@ -35,25 +35,31 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     ENDERMAN(EntityType.ENDERMAN, 80, false, null),
     EVOKER(EntityType.EVOKER, 120, false, null),
     FOX(EntityType.FOX, 60, false, null),
+    ARMADILLO(EntityType.ARMADILLO, 60, false, null),
     FROG(EntityType.FROG, 40, false, null),
+    TURTLE(EntityType.TURTLE, 45, false, null),
     HUSK(EntityType.HUSK, 70, false, null),
     //TODO: MUSHROOM_COW(EntityType.COW, 3500, false, BlockoGame.instance.achievementHandler.getAchievement(EntityCollectorAchievement::class.java)?.translationKey),
     OCELOT(EntityType.OCELOT, 50, false, null),
     PIG(EntityType.PIG, 40, false, null),
     PIGLIN(EntityType.PIGLIN, 70, false, null),
     PIGLIN_BRUTE(EntityType.PIGLIN_BRUTE, 120, false, null),
+    ZOGLIN(EntityType.ZOGLIN, 120, true, null),
+    HOGLIN(EntityType.HOGLIN, 120, true, null),
     PILLAGER(EntityType.PILLAGER, 90, false, null),
+    ILLUSIONER(EntityType.ILLUSIONER, 90, false, null),
     RABBIT(EntityType.RABBIT, 40, false, BlockoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java)?.translationKey),
     SHEEP(EntityType.SHEEP, 40, false, null),
     SHULKER(EntityType.SHULKER, 150, false, null),
     SKELETON(EntityType.SKELETON, 90, false, null),
     STRAY(EntityType.STRAY, 90, false, null),
     VINDICATOR(EntityType.VINDICATOR, 150, false, null),
-    WANDERING_TRADER(EntityType.WANDERING_TRADER, 150, false, null),
+    WANDERING_TRADER(EntityType.WANDERING_TRADER, 1050, false, BlockoGame.instance.achievementHandler.getAchievement(EntityCollectorAchievement::class.java)?.translationKey),
     WITCH(EntityType.WITCH, 150, false, null),
     WITHER_SKELETON(EntityType.WITHER_SKELETON, 150, false, null),
     WOLF(EntityType.WOLF, 50, false, null),
 
+    BOGGED(EntityType.BOGGED, 70, false, null),
     ZOMBIE(EntityType.ZOMBIE, 70, false, null),
     ZOMBIE_VILLAGER(EntityType.ZOMBIE_VILLAGER, 70, false, null),
     ZOMBIFIED_PIGLIN(EntityType.ZOMBIFIED_PIGLIN, 70, false, null),

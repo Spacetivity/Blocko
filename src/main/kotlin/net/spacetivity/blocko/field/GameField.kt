@@ -9,11 +9,11 @@ import net.spacetivity.blocko.achievement.impl.MasterEliminatorAchievement
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
-import net.spacetivity.blocko.extensions.addCoins
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.StatsType
 import net.spacetivity.blocko.stats.UpdateOperation
+import net.spacetivity.blocko.stats.addCoins
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.team.GameTeamHandler
 import net.spacetivity.blocko.team.GameTeamLocation

@@ -4,7 +4,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.achievement.container.ProgressRequirement
-import net.spacetivity.blocko.extensions.toStatsPlayerInstance
+import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 

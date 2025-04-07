@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
+import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit

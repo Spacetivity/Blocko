@@ -14,8 +14,3 @@ data class GlobalConfigFile(
 
     val motdEnabled: Boolean
 ) : SpaceFile
-
-enum class DatabaseType {
-    SQLITE,
-    MARIADB;
-}

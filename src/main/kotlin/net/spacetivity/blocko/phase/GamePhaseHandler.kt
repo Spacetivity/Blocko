@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
-import net.spacetivity.blocko.extensions.playSound
+import net.spacetivity.blocko.player.playSound
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils

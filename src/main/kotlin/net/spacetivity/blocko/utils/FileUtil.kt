@@ -8,7 +8,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.reflect.KClass
 
-object FileUtils {
+object FileUtil {
 
     fun <T> read(file: File, clazz: Class<T>): T? {
         return try {
@@ -38,9 +38,9 @@ object FileUtils {
 
         if (!Files.exists(file.toPath())) {
             result = content
-            FileUtils.save(file, result)
+            save(file, result)
         } else {
-            result = FileUtils.read(file, clazz.java)!!
+            result = read(file, clazz.java)!!
         }
 
         return result

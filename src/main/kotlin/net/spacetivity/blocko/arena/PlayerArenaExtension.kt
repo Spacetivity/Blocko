@@ -1,7 +1,6 @@
-package net.spacetivity.blocko.extensions
+package net.spacetivity.blocko.arena
 
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.player.GamePlayer
 import org.bukkit.entity.Player
 

@@ -6,7 +6,7 @@ import java.util.*
 object NumberUtils {
 
     fun format(int: Int): String {
-        val numberFormat: NumberFormat = NumberFormat.getNumberInstance(Locale("de", "DE"))
+        val numberFormat: NumberFormat = NumberFormat.getNumberInstance(Locale.of("de", "DE"))
         val formattedNumber: String = numberFormat.format(int)
         return formattedNumber
     }

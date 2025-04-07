@@ -101,7 +101,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
     fun isGarageInSight(dicedNumber: Int): Boolean {
         if (this.currentFieldId == null) return false
 
-        val startFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!!
+        val startFieldId: Int = this.currentFieldId!!
         val goalFieldId: Int = startFieldId + dicedNumber
 
         var containsGarageField = false

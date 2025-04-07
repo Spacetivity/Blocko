@@ -14,10 +14,10 @@ import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.sign.GameArenaSign
 import net.spacetivity.blocko.arena.sign.GameArenaSignHandler
 import net.spacetivity.blocko.entity.GameEntity
-import net.spacetivity.blocko.extensions.getArena
-import net.spacetivity.blocko.extensions.getTeam
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.player.getTeam
+import net.spacetivity.blocko.arena.toGamePlayerInstance
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase

@@ -7,10 +7,10 @@ import net.spacetivity.blocko.achievement.impl.RushExpertAchievement
 import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.entity.GameEntity
-import net.spacetivity.blocko.extensions.getArena
-import net.spacetivity.blocko.extensions.playSound
-import net.spacetivity.blocko.extensions.toStatsPlayerInstance
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.player.playSound
+import net.spacetivity.blocko.stats.toStatsPlayerInstance
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.player.GamePlayer

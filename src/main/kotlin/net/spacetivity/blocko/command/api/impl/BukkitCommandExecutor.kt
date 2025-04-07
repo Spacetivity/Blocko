@@ -4,7 +4,7 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.command.api.CommandProperties
 import net.spacetivity.blocko.command.api.SpaceCommandExecutor
 import net.spacetivity.blocko.command.api.SpaceCommandSender
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.translation.translateMessage
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
