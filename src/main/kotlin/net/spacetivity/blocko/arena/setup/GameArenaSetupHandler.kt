@@ -5,13 +5,13 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.GameArenaStatus
-import net.spacetivity.blocko.translation.translateActionBar
-import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
 import net.spacetivity.blocko.field.PathFace
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.team.GameTeamLocation
+import net.spacetivity.blocko.translation.translateActionBar
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.MetadataUtils
 import net.spacetivity.blocko.utils.ScoreboardUtils
@@ -186,6 +186,60 @@ class GameArenaSetupHandler {
         player.translateMessage("blocko.setup.team_spawn_added",
             Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
             Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
+    }
+
+    fun selectCorner(player: Player, isLeftClick: Boolean, location: Location) {
+        if (!hasOpenSetup(player.uniqueId)) {
+            player.translateMessage("blocko.setup.not_in_setup_mode")
+            return
+        }
+
+        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
+
+        if (isLeftClick) {
+            arenaSetupData.corner1 = location
+        } else {
+            arenaSetupData.corner2 = location
+        }
+
+        val messageKeyPart = if (isLeftClick) "first" else "second"
+        player.translateMessage("blocko.setup.scanning_board.select_${messageKeyPart}_corner")
+
+        if (arenaSetupData.areCornersSet()) {
+            player.translateMessage("blocko.setup.blocko.setup.scanning_board.confirm")
+        }
+    }
+
+    fun scanBoard(player: Player) {
+        if (!hasOpenSetup(player.uniqueId)) {
+            player.translateMessage("blocko.setup.not_in_setup_mode")
+            return
+        }
+
+        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
+
+        if (!arenaSetupData.areCornersSet()) {
+            player.translateMessage("blocko.setup.scanning_board.corners_not_set")
+            return
+        }
+
+        player.translateMessage("blocko.setup.scanning_board.running")
+
+        val regionData: MutableMap<Location, Pair<ScannerResult, String>> = RegionScanner.scanRegion(arenaSetupData)
+
+        for (entry in regionData) {
+            val scannedDataForLocation: Pair<ScannerResult, String> = entry.value
+
+            val location: Location = entry.key
+            val scannerResult: ScannerResult = scannedDataForLocation.first
+            val teamName: String = scannedDataForLocation.second
+
+            when (scannerResult) {
+                ScannerResult.GARAGE_FIELD -> addGarageField(player = player, teamName = teamName, location = location)
+                ScannerResult.GAME_FIELD -> addField(player = player, location = location)
+                ScannerResult.TEAM_SPAWN -> addTeamSpawn(player = player, teamName = teamName, location = location)
+            }
+        }
     }
 
     fun addField(player: Player, location: Location) {

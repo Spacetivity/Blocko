@@ -70,6 +70,26 @@ class BlockoCommand : SpaceCommandExecutor {
             return
         }
 
+        // /blocko arena setup scanBoard <arenaId>
+
+        if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("scanBoard", true)) {
+            val arenaId: String = args[3]
+            val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
+
+            if (gameArena == null) {
+                player.translateMessage("blocko.command.blocko.arena_not_exists", Placeholder.parsed("id", arenaId))
+                return
+            }
+
+            if (gameArena.status != GameArenaStatus.CONFIGURATING) {
+                player.translateMessage("blocko.command.blocko.arena_fully_configured")
+                return
+            }
+
+            this.arenaSetupHandler.scanBoard(player)
+            return
+        }
+
         if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("start", true)) {
             val arenaId: String = args[3]
             val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)

@@ -24,6 +24,13 @@ blocko.setup:
   arena_already_configurated_by_player: "<prefix> <gray>This arena is already being configured."
   setup_mode_activated: "<prefix> <gray>You are now in setup mode!"
   setup_mode_deactivated: "<prefix> <gray>You are no longer in setup mode!"
+
+  blocko.setup.scanning_board.select_first_corner: "<prefix> <yellow>First <gray>corner selected."
+  blocko.setup.scanning_board.select_second_corner: "<prefix> <yellow>Second <gray>corner selected."
+  blocko.setup.scanning_board.confirm: "<prefix> <gray>Click <click:suggest_command:'/blocko arena setup scanBoard <arenaId>'><yellow><bold><hover:show_text:'<gray>Click to scan the Blocko board'>HERE</hover></bold><gray></click> to scan the BLOCKO board."
+  blocko.setup.scanning_board.corners_not_set: "<prefix> <gray>Select the corners of the board first. (Choose corners at the opposite side!)"
+  blocko.setup.scanning_board.running: "<prefix> <gray>Scanning Blocko board..."
+
   field_already_has_id: "<prefix> <gray>This field already has an id!"
   field_already_a_garage_field: "<prefix> <gray>This field is already a garage field!"
   field_not_able_for_garage_field: "<prefix> <gray>This field cannot be a garage field!"

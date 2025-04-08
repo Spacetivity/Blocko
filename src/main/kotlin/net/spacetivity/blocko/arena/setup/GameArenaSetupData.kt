@@ -4,6 +4,7 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.team.GameTeamLocation
+import org.bukkit.Location
 import java.time.Duration
 
 class GameArenaSetupData(val arenaId: String, val setupTool: GameArenaSetupTool) {
@@ -17,5 +18,10 @@ class GameArenaSetupData(val arenaId: String, val setupTool: GameArenaSetupTool)
     val gameFields: MutableList<GameField> = mutableListOf()
     val gameTeamLocations: MutableList<GameTeamLocation> = mutableListOf()
     val gameTeams: MutableList<GameTeam> = mutableListOf()
+
+    var corner1: Location? = null
+    var corner2: Location? = null
+
+    fun areCornersSet(): Boolean = this.corner1 != null && this.corner2 != null
 
 }

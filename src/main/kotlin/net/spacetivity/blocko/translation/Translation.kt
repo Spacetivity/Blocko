@@ -19,7 +19,7 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
     )
 
     private val miniMessage: MiniMessage = MiniMessage.builder()
-        .tags(TagResolver.builder().resolver(StandardTags.color()).build())
+        .tags(TagResolver.builder().resolvers(defaultResolvers).build())
         .build()
 
     fun validateLineAsString(key: String, vararg args: Any): String {

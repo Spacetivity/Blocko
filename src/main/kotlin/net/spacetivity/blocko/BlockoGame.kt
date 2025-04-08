@@ -1,6 +1,5 @@
 package net.spacetivity.blocko
 
-import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import net.spacetivity.blocko.achievement.AchievementHandler
@@ -51,6 +50,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scoreboard.Team
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -60,7 +60,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.lang.reflect.Constructor
 import java.util.*
 
-class BlockoGame : SuspendingJavaPlugin() {
+class BlockoGame : JavaPlugin() {
 
     val clickableItems: MutableMap<UUID, ItemBuilder> = mutableMapOf()
 
@@ -92,7 +92,7 @@ class BlockoGame : SuspendingJavaPlugin() {
 
     private lateinit var gamePlayActionHandler: GamePlayActionHandler
 
-    override suspend fun onEnableAsync() {
+    override fun onEnable() {
         instance = this
 
         val databaseFile: DatabaseFile = createOrLoadDatabaseFile()

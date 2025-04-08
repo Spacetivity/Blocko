@@ -10,7 +10,6 @@ import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import net.spacetivity.inventory.api.extension.openStaticInventory
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.block.Block
@@ -53,9 +52,10 @@ class GameArenaSetupTool(private val holder: Player) {
 
     fun doAction(event: PlayerInteractEvent) {
         val block: Block = event.clickedBlock ?: return
-        if (!this.currentMode.validBlockTypes.contains(block.type.name)) return
+        if (this.currentMode.validBlockTypes.isNotEmpty() && !this.currentMode.validBlockTypes.contains(block.type.name)) return
 
         when (this.currentMode) {
+            ToolMode.SCAN_BOARD -> BlockoGame.instance.gameArenaSetupHandler.selectCorner(this.holder, event.action.isLeftClick, block.location)
             ToolMode.ADD_FIELD -> BlockoGame.instance.gameArenaSetupHandler.addField(this.holder, block.location)
             ToolMode.SET_TURN -> InventoryUtils.openGameFieldTurnInventory(this.holder, block.location)
             ToolMode.SET_GARAGE_FIELD -> InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.GARAGE, block)
@@ -83,11 +83,12 @@ class GameArenaSetupTool(private val holder: Player) {
     }
 
     enum class ToolMode(val modeName: String, val modeId: Int, val validBlockTypes: List<String>) {
-        ADD_FIELD("Add Field", 0, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK")),
-        SET_TURN("Set Turn", 1, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK")),
-        SET_GARAGE_FIELD("Set Garage Field", 2, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL")),
-        SET_TEAM_ENTRANCE("Set Team Entrance", 3, listOf("BONE_BLOCK")),
-        SET_TEAM_PATH("Set Team Path", 4, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK"));
+        SCAN_BOARD("Scan Board", 0, listOf()),
+        ADD_FIELD("Add Field", 1, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK")),
+        SET_TURN("Set Turn", 2, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK")),             // NOTWENDIG
+        SET_GARAGE_FIELD("Set Garage Field", 3, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL")),
+        SET_TEAM_ENTRANCE("Set Team Entrance", 4, listOf("BONE_BLOCK")),                                                 // NOTWENDIG
+        SET_TEAM_PATH("Set Team Path", 5, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK"));   // NOTWENDIG
     }
 
 }
