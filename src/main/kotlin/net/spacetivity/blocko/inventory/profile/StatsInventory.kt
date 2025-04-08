@@ -8,7 +8,7 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.StatsType
 import net.spacetivity.blocko.translation.Translation
-import net.spacetivity.blocko.utils.HeadUtils
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.NumberUtils
@@ -56,7 +56,7 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
             if (this.statsPlayer.uuid == player.uniqueId)
                 player.playerProfile.properties.first().value
             else
-                gamePlayer.toBukkitInstance()?.playerProfile?.properties?.first()?.value ?: HeadUtils.BOT
+                gamePlayer.toBukkitInstance()?.playerProfile?.properties?.first()?.value ?: Constants.BOT
 
         controller.setItem(InventoryPos.of(4, if (this.showSearchPlayerItem) 2 else 4), InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
             .setName(translation.validateItemName("blocko.inventory.stats.overview_item.display_name"))
@@ -75,7 +75,7 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
 
                 Placeholder.parsed("won_games_key", translation.validateLineAsString("blocko.stats.type.won_games")),
                 Placeholder.parsed("won_games_value", this.statsPlayer.wonGames.toString())))
-            .setOwner(if (gamePlayer.isAI) HeadUtils.BOT else skinValue)
+            .setOwner(if (gamePlayer.isAI) Constants.BOT else skinValue)
             .build()))
 
         if (this.showSearchPlayerItem) {

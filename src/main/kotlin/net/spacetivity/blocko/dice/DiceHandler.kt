@@ -17,7 +17,7 @@ import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
-import net.spacetivity.blocko.utils.HeadUtils
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.ItemBuilder
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -135,7 +135,7 @@ class DiceHandler {
         if (diceSide == null) {
             val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
             Bukkit.getConsoleSender().sendMessage(translation.validateLine("blocko.main_game_loop.dice_error", Placeholder.parsed("number", randomNumber.toString())))
-            return Pair(1, HeadUtils.DICE_ONE)
+            return Pair(1, Constants.DICE_ONE)
         }
 
         if (diceSide.first == blockedDiceNumber) return getDiceSide(blockedDiceNumber)

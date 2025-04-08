@@ -6,18 +6,19 @@ import net.spacetivity.blocko.achievement.AchievementHandler
 import net.spacetivity.blocko.achievement.impl.RushExpertAchievement
 import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
 import net.spacetivity.blocko.arena.GameArena
-import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.arena.getArena
-import net.spacetivity.blocko.player.playSound
-import net.spacetivity.blocko.stats.toStatsPlayerInstance
-import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.player.GamePlayer
+import net.spacetivity.blocko.player.playSound
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.stats.StatsPlayer
+import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
+import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.inventory.api.SpaceInventoryProvider
@@ -58,7 +59,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
             val statsPlayer: StatsPlayer? = gamePlayer.toStatsPlayerInstance()
             if (statsPlayer != null) statsPlayer.wonGames += 1
 
-            BlockoGame.instance.bossbarHandler.unregisterBossbar(player, "timeoutBar")
+            BlockoGame.instance.bossbarHandler.unregisterBossbar(player, Constants.TIMEOUT_BOSSBAR_NAME)
 
             val achievementHandler: AchievementHandler = BlockoGame.instance.achievementHandler
             achievementHandler.getAchievement(RushExpertAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
@@ -152,7 +153,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
     fun setNextControllingTeam(): GameTeam? {
         getArena().currentPlayers.filter { !it.isAI }.forEach { gamePlayer: GamePlayer ->
-            BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
+            BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }
 
         GameScoreboardUtils.updateDicedNumberLine(this.arenaId, null)

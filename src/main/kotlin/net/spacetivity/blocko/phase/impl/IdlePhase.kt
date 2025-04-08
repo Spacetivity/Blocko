@@ -7,7 +7,7 @@ import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.translation.Translation
-import net.spacetivity.blocko.utils.HeadUtils
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import org.bukkit.Material
@@ -51,7 +51,7 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
         hotbarItems[4] = ItemBuilder(Material.PLAYER_HEAD)
             .setName(translation.validateItemName("blocko.items.instant_starter.display_name"))
             .setLoreByComponent(translation.validateItemLore("blocko.items.instant_starter.lore"))
-            .setOwner(HeadUtils.PLAY)
+            .setOwner(Constants.PLAY)
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
                 val gameArena: GameArena = player.getArena() ?: return@onInteract

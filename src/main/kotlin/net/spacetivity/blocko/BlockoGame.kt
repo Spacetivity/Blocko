@@ -43,8 +43,8 @@ import net.spacetivity.blocko.stats.StatsPlayerHandler
 import net.spacetivity.blocko.team.GameTeamHandler
 import net.spacetivity.blocko.team.GameTeamLocationDAO
 import net.spacetivity.blocko.translation.TranslationHandler
-import net.spacetivity.blocko.utils.FileUtil
-import net.spacetivity.blocko.utils.HeadUtils
+import net.spacetivity.blocko.utils.Constants
+import net.spacetivity.blocko.utils.FileUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -217,7 +217,7 @@ class BlockoGame : SuspendingJavaPlugin() {
     }
 
     private fun createOrLoadDatabaseFile(): DatabaseFile {
-        return FileUtil.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile(
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile(
             DatabaseType.SQLITE,
             "-",
             3306,
@@ -228,28 +228,28 @@ class BlockoGame : SuspendingJavaPlugin() {
     }
 
     private fun createOrLoadDiceSidesFile(): DiceSidesFile {
-        return FileUtil.createOrLoadFile(dataFolder.toPath(), "dice", "dice_sides", DiceSidesFile::class, DiceSidesFile(mutableMapOf(
-            Pair(1, HeadUtils.DICE_ONE),
-            Pair(2, HeadUtils.DICE_TWO),
-            Pair(3, HeadUtils.DICE_THREE),
-            Pair(4, HeadUtils.DICE_FOUR),
-            Pair(5, HeadUtils.DICE_FIVE),
-            Pair(6, HeadUtils.DICE_SIX)
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "dice", "dice_sides", DiceSidesFile::class, DiceSidesFile(mutableMapOf(
+            Pair(1, Constants.DICE_ONE),
+            Pair(2, Constants.DICE_TWO),
+            Pair(3, Constants.DICE_THREE),
+            Pair(4, Constants.DICE_FOUR),
+            Pair(5, Constants.DICE_FIVE),
+            Pair(6, Constants.DICE_SIX)
         )))
     }
 
     private fun createOrLoadSetupConfigFile(): SetupConfigFile {
-        return FileUtil.createOrLoadFile(dataFolder.toPath(), "global", "setup", SetupConfigFile::class, SetupConfigFile(
-            setupStepsResettable = false,
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "setup", SetupConfigFile::class, SetupConfigFile(
+            setupStepsResettable = true,
             setupSessionEndless = false,
-            setupSessionTimeoutMinutes = 15,
+            setupSessionTimeoutMinutes = 15, //TODO: make timeout only start if player in setup is AFK
         ))
     }
 
     private fun createOrLoadGlobalConfigFile(): GlobalConfigFile {
         val availableTranslationLanguages: List<String> = this.translationHandler.cachedTranslations.map { it.name }
         val defaultLanguageName: String = if (availableTranslationLanguages.contains("en_US")) "en_US" else availableTranslationLanguages[0]
-        return FileUtil.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(
             defaultLanguageName,
             Material.GOLDEN_HOE.name,
             false,
@@ -262,7 +262,7 @@ class BlockoGame : SuspendingJavaPlugin() {
     }
 
     private fun createOrLoadBotNamesFile(): BotNamesFile {
-        return FileUtil.createOrLoadFile(dataFolder.toPath(), "global", "bot_names", BotNamesFile::class, BotNamesFile())
+        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "bot_names", BotNamesFile::class, BotNamesFile())
     }
 
 }

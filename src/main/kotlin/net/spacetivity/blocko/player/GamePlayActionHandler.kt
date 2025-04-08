@@ -13,6 +13,7 @@ import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -20,6 +21,7 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitTask
+import java.util.concurrent.ThreadLocalRandom
 
 class GamePlayActionHandler {
 
@@ -180,7 +182,17 @@ class GamePlayActionHandler {
             }
 
             when (ingamePhase.phaseMode) {
-                GamePhaseMode.DICE -> if (gamePlayer.isAI) gamePlayer.dice(ingamePhase)
+                GamePhaseMode.DICE -> if (gamePlayer.isAI) {
+                    // small delay to make the AI-dicing more natural
+                    val random: ThreadLocalRandom = ThreadLocalRandom.current()
+                    val chanceForLongerDelay: Boolean = random.nextInt(0, 10) > 5
+                    val aiDiceDelayTicks: Long = if (chanceForLongerDelay) 20L * (random.nextLong(1L, 3L)) else 1L
+                    
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(BlockoGame.instance, Runnable {
+                        gamePlayer.dice(ingamePhase)
+                    }, aiDiceDelayTicks)
+                }
+
                 GamePhaseMode.PICK_ENTITY -> {
                     if (gamePlayer.isAI) {
                         gamePlayer.autoPickEntity(ingamePhase)
@@ -209,6 +221,7 @@ class GamePlayActionHandler {
             timeLeft >= 10 -> NamedTextColor.YELLOW.asHexString()
             else -> NamedTextColor.DARK_RED.asHexString()
         }
+
         val timeColorPlaceholder = Placeholder.parsed("time_color", "<$timeColor>")
 
         val bossbarText: Component = BlockoGame.instance.translationHandler.getSelectedTranslation().validateLine(
@@ -220,18 +233,18 @@ class GamePlayActionHandler {
             unitPlaceholder
         )
 
-        if (bossbarHandler.getBossbars(player.uniqueId).none { it.first == "timeoutBar" }) {
-            bossbarHandler.registerBossbar(player, "timeoutBar", bossbarText, 1.0F, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
+        if (bossbarHandler.getBossbars(player.uniqueId).none { it.first == Constants.TIMEOUT_BOSSBAR_NAME }) {
+            bossbarHandler.registerBossbar(player, Constants.TIMEOUT_BOSSBAR_NAME, bossbarText, 1.0F, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
         } else {
             val progress: Float = ingamePhase.getControllingGamePlayerTimeLeftFraction()
-            bossbarHandler.updateBossbar(player.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.PROGRESS, progress)
-            bossbarHandler.updateBossbar(player.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.NAME, bossbarText)
+            bossbarHandler.updateBossbar(player.uniqueId, Constants.TIMEOUT_BOSSBAR_NAME, BossbarHandler.BossBarUpdate.PROGRESS, progress)
+            bossbarHandler.updateBossbar(player.uniqueId, Constants.TIMEOUT_BOSSBAR_NAME, BossbarHandler.BossBarUpdate.NAME, bossbarText)
             val barColor = when {
                 timeLeft >= 30 -> BossBar.Color.GREEN
                 timeLeft >= 10 -> BossBar.Color.YELLOW
                 else -> BossBar.Color.RED
             }
-            bossbarHandler.updateBossbar(player.uniqueId, "timeoutBar", BossbarHandler.BossBarUpdate.COLOR, barColor)
+            bossbarHandler.updateBossbar(player.uniqueId, Constants.TIMEOUT_BOSSBAR_NAME, BossbarHandler.BossBarUpdate.COLOR, barColor)
         }
     }
 
@@ -254,11 +267,12 @@ class GamePlayActionHandler {
     private fun processPlayerEntitySelection(gamePlayer: GamePlayer, arena: GameArena, ingamePhase: IngamePhase) {
         val dicedNumber = gamePlayer.dicedNumber ?: return
         val teamEntities = BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(arena.id, gamePlayer.teamName!!)
+        
         if (teamEntities.all { (dicedNumber != 6 && it.currentFieldId == null) || !it.isMovableTo(dicedNumber) }) {
             gamePlayer.activeEntity = null
             gamePlayer.lastEntityPickRule = null
             gamePlayer.actionTimeoutTimestamp = null
-            BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, "timeoutBar")
+            BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
             ingamePhase.phaseMode = GamePhaseMode.DICE
             ingamePhase.setNextControllingTeam()
         } else {

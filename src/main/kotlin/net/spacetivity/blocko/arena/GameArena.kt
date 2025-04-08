@@ -16,6 +16,7 @@ import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.team.GameTeamOptions
 import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.utils.Constants
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Sound
@@ -190,7 +191,7 @@ class GameArena(
             gamePlayer.actionTimeoutTimestamp = null
 
             for (currentGamePlayer: GamePlayer in this.currentPlayers.filter { !it.isAI }) {
-                BlockoGame.instance.bossbarHandler.unregisterBossbar(currentGamePlayer.toBukkitInstance()!!, "timeoutBar")
+                BlockoGame.instance.bossbarHandler.unregisterBossbar(currentGamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
             }
 
             ingamePhase.phaseMode = GamePhaseMode.DICE

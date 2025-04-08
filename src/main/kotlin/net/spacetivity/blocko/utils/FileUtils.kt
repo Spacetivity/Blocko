@@ -8,7 +8,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.reflect.KClass
 
-object FileUtil {
+object FileUtils {
 
     fun <T> read(file: File, clazz: Class<T>): T? {
         return try {
