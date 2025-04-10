@@ -29,6 +29,17 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
         player.inventory.remove(setupData.setupTool.itemStack)
     }
 
+//    @EventHandler
+//    fun onBlockBreak(event: BlockBreakEvent) {
+//        val player: Player = event.player
+//
+//        val heldItemStack: ItemStack = player.inventory.itemInMainHand
+//        if (heldItemStack.type == Material.AIR) return
+//        if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, "setupTool")) return
+//
+//        event.isCancelled = true
+//    }
+
     @EventHandler
     fun onInteractWithSetupTool(event: PlayerInteractEvent) {
         val player: Player = event.player
@@ -42,13 +53,14 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
 
         val setupData: GameArenaSetupData = this.setupHandler.getSetupData(player.uniqueId) ?: return
 
-        if (event.action.isLeftClick) {
-            setupData.setupTool.onToggle(!player.isSneaking, heldItemStack)
+        // setup mode changing can only happen when the player is SNEAKING
+        if (player.isSneaking) {
+            val isNextModeRequested: Boolean = event.action.isLeftClick
+            setupData.setupTool.onToggle(isNextModeRequested, heldItemStack)
             return
         }
 
         if (event.clickedBlock == null) return
-
         setupData.setupTool.doAction(event)
     }
 

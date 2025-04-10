@@ -4,12 +4,12 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.impl.*
 import net.spacetivity.blocko.arena.toGamePlayerInstance
-import net.spacetivity.blocko.stats.toStatsPlayerInstance
-import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.StatsType
 import net.spacetivity.blocko.stats.UpdateOperation
+import net.spacetivity.blocko.stats.toStatsPlayerInstance
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.NumberUtils
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -29,7 +29,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     SPIDER(EntityType.SPIDER, 70, false, null),
     CHICKEN(EntityType.CHICKEN, 40, false, null),
     COW(EntityType.COW, 50, false, null),
-    GOAT(EntityType.GOAT, 10, false, BlockoGame.instance.achievementHandler.getAchievement(WinMonsterAchievement::class.java)?.translationKey),
+    GOAT(EntityType.GOAT, 10, false, null),
     CREEPER(EntityType.CREEPER, 80, false, null),
     DROWNED(EntityType.DROWNED, 70, false, BlockoGame.instance.achievementHandler.getAchievement(PlayFirstGameAchievement::class.java)?.translationKey),
     ENDERMAN(EntityType.ENDERMAN, 80, false, null),
@@ -68,7 +68,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     PARROT(EntityType.PARROT, 50, false, null),
     VEX(EntityType.VEX, 75, false, null),
 
-    IRON_GOLEM(EntityType.IRON_GOLEM, 150, false, BlockoGame.instance.achievementHandler.getAchievement(WinMonsterAchievement::class.java)?.translationKey),
+    IRON_GOLEM(EntityType.IRON_GOLEM, 350, false, BlockoGame.instance.achievementHandler.getAchievement(WinMonsterAchievement::class.java)?.translationKey),
 
     HORSE(EntityType.HORSE, 100, true, null),
     ZOMBIE_HORSE(EntityType.ZOMBIE_HORSE, 100, true, null),

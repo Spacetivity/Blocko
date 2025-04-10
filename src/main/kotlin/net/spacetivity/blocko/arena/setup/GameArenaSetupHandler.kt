@@ -1,5 +1,6 @@
 package net.spacetivity.blocko.arena.setup
 
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
@@ -206,7 +207,7 @@ class GameArenaSetupHandler {
         player.translateMessage("blocko.setup.scanning_board.select_${messageKeyPart}_corner")
 
         if (arenaSetupData.areCornersSet()) {
-            player.translateMessage("blocko.setup.blocko.setup.scanning_board.confirm")
+            player.translateMessage("blocko.setup.scanning_board.confirm", Placeholder.parsed("id", arenaSetupData.arenaId))
         }
     }
 
@@ -225,19 +226,49 @@ class GameArenaSetupHandler {
 
         player.translateMessage("blocko.setup.scanning_board.running")
 
-        val regionData: MutableMap<Location, Pair<ScannerResult, String>> = RegionScanner.scanRegion(arenaSetupData)
+        val regionData: MutableMap<Location, Pair<ScannerResult, String?>> = RegionScanner.scanRegion(arenaSetupData)
+
+        val inOrderResults: MutableMap<Location, Pair<ScannerResult, String?>> = mutableMapOf()
 
         for (entry in regionData) {
-            val scannedDataForLocation: Pair<ScannerResult, String> = entry.value
+            val scannedDataForLocation: Pair<ScannerResult, String?> = entry.value
 
             val location: Location = entry.key
             val scannerResult: ScannerResult = scannedDataForLocation.first
-            val teamName: String = scannedDataForLocation.second
+            val teamName: String? = scannedDataForLocation.second
 
             when (scannerResult) {
-                ScannerResult.GARAGE_FIELD -> addGarageField(player = player, teamName = teamName, location = location)
-                ScannerResult.GAME_FIELD -> addField(player = player, location = location)
-                ScannerResult.TEAM_SPAWN -> addTeamSpawn(player = player, teamName = teamName, location = location)
+                ScannerResult.TEAM_SPAWN -> {
+                    if (teamName == null) throw NullPointerException("The team name is required")
+                    addTeamSpawn(player, teamName, location)
+                }
+
+                ScannerResult.GARAGE_FIELD, ScannerResult.GAME_FIELD -> {
+                    // addGarageField(player, teamName, location)
+                    inOrderResults[location] = Pair(scannerResult, teamName)
+                }
+
+                //ScannerResult.GAME_FIELD -> addField(player, location)
+                ScannerResult.UNKNOWN -> {}
+            }
+        }
+
+        val sortedResults = inOrderResults.toList().sortedBy { it.second.first.priority }
+        val scannedSortedResultPipeline = sortedResults.toMap()
+
+        for (pipelineItem in scannedSortedResultPipeline) {
+            val location: Location = pipelineItem.key
+            val scannerResult: ScannerResult = pipelineItem.value.first
+            val teamName: String? = pipelineItem.value.second
+
+            if (scannerResult == ScannerResult.GAME_FIELD){
+                addField(player, location)
+            } else {
+                if (teamName == null) {
+                    throw NullPointerException("The team name is required")
+                    continue
+                }
+                addGarageField(player, teamName, location)
             }
         }
     }
@@ -327,7 +358,10 @@ class GameArenaSetupHandler {
         val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z }
 
         if (possibleField == null) {
-            player.translateMessage("blocko.setup.no_field_found_at_location")
+           // player.translateMessage("blocko.setup.no_field_found_at_location")
+            player.sendMessage(Component.text(
+                "No field found at: (${location.x} | ${location.z})"
+            ))
             return
         }
 

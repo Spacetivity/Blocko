@@ -3,9 +3,11 @@ package net.spacetivity.blocko.arena.setup
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.inventory.setup.GameTeamSetupInventory
 import net.spacetivity.blocko.inventory.setup.InvType
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.PersistentDataUtils
@@ -20,7 +22,7 @@ import org.bukkit.inventory.meta.ItemMeta
 
 class GameArenaSetupTool(private val holder: Player) {
 
-    var currentMode: ToolMode = ToolMode.ADD_FIELD
+    var currentMode: ToolMode = getFallbackToolMode()
 
     val itemStack: ItemStack = ItemBuilder(Material.entries.find { it.name == BlockoGame.instance.globalConfigFile.setupItemType }
         ?: throw NullPointerException("Invalid setup item type!"))
@@ -36,9 +38,9 @@ class GameArenaSetupTool(private val holder: Player) {
         this.holder.inventory.addItem(this.itemStack)
     }
 
-    fun onToggle(increase: Boolean, heldItemStack: ItemStack) {
-        val nextMode: ToolMode = ToolMode.entries.find { it.modeId == if (increase) this.currentMode.modeId.inc() else this.currentMode.modeId.dec() }
-            ?: ToolMode.ADD_FIELD
+    fun onToggle(isNextModeRequested: Boolean, heldItemStack: ItemStack) {
+        val nextMode: ToolMode = ToolMode.entries.find { it.modeId == if (isNextModeRequested) this.currentMode.modeId.inc() else this.currentMode.modeId.dec() }
+            ?: getFallbackToolMode()
 
         this.currentMode = nextMode
 
@@ -47,6 +49,8 @@ class GameArenaSetupTool(private val holder: Player) {
 
         heldItemStack.itemMeta = tempItemMeta
         this.itemStack.itemMeta = tempItemMeta
+
+        this.holder.translateMessage("blocko.setup.setup_tool.mode_change", Placeholder.parsed("mode", this.currentMode.name.lowercase().replaceFirstChar { it.uppercase() }))
         this.holder.playSound(this.holder.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)
     }
 
@@ -80,6 +84,10 @@ class GameArenaSetupTool(private val holder: Player) {
     private fun fetchLine(toolMode: ToolMode): Component {
         val color: NamedTextColor = if (this.currentMode == toolMode) NamedTextColor.GREEN else NamedTextColor.DARK_GRAY
         return Component.text(toolMode.modeName, color)
+    }
+
+    private fun getFallbackToolMode(): ToolMode {
+        return ToolMode.entries.sortedBy { it.modeId }.min()
     }
 
     enum class ToolMode(val modeName: String, val modeId: Int, val validBlockTypes: List<String>) {
