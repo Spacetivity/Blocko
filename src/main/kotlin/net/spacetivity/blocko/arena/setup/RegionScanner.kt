@@ -1,5 +1,7 @@
 package net.spacetivity.blocko.arena.setup
 
+import com.google.common.collect.ArrayListMultimap
+import com.google.common.collect.Multimap
 import org.bukkit.Location
 import org.bukkit.Material
 
@@ -13,7 +15,7 @@ object RegionScanner {
      * Maps sets of materials to their corresponding [ScannerResult] type.
      * Each set represents a category (e.g., garage fields, team start fields) with team colors.
      */
-    private val fieldTypeByTypes = mapOf<Set<Material>, ScannerResult>(
+    private val blocksOfScannableType = mapOf<Set<Material>, ScannerResult>(
         // team spawns
         Pair(setOf(
             Material.RED_GLAZED_TERRACOTTA,
@@ -45,19 +47,11 @@ object RegionScanner {
         ), ScannerResult.GARAGE_FIELD)
     )
 
-    /**
-     * Scans the given rectangular region and detects whitelisted block types.
-     *
-     * @param arenaSetupData Data containing the team definitions for the arena setup.
-     * @return A mutable map where each entry maps a [Location] to a [ScannerResult] and the associated team name.
-     */
+    fun scanRegion(arenaSetupData: GameArenaSetupData): Multimap<Location, Pair<ScannerResult, String?>> {
+        val resultsInRegion: Multimap<Location, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
 
-
-    // NOTE: the results need to be in order
-    // 1. GAME_FIELD then 2. GARAGE_FIELD
-    fun scanRegion(arenaSetupData: GameArenaSetupData): MutableMap<Location, Pair<ScannerResult, String?>> {
-        val corner1 = arenaSetupData.corner1 ?: return mutableMapOf()
-        val corner2 = arenaSetupData.corner2 ?: return mutableMapOf()
+        val corner1 = arenaSetupData.corner1 ?: return resultsInRegion
+        val corner2 = arenaSetupData.corner2 ?: return resultsInRegion
 
         val minX = corner1.blockX.coerceAtMost(corner2.blockX)
         val maxX = corner1.blockX.coerceAtLeast(corner2.blockX)
@@ -65,39 +59,29 @@ object RegionScanner {
         val minZ = corner1.blockZ.coerceAtMost(corner2.blockZ)
         val maxZ = corner1.blockZ.coerceAtLeast(corner2.blockZ)
 
-        // this currently stays empty
-        val resultsInRegion = mutableMapOf<Location, Pair<ScannerResult, String?>>()
-
         for (x in minX..maxX) {
             for (z in minZ..maxZ) {
                 val location = Location(corner1.world, x.toDouble(), corner1.blockY.toDouble(), z.toDouble())
                 val blockType: Material = location.block.type
 
-                val validBlockTypes: Set<Material> = this.fieldTypeByTypes.keys.firstOrNull { it.contains(blockType) } ?: emptySet()
-                if (validBlockTypes.isEmpty()) continue
+                val categoriesCurrentBlockTypeIsRegisteredIn: List<Map.Entry<Set<Material>, ScannerResult>> = this.blocksOfScannableType.entries.filter { it.key.contains(blockType) }
+                if (categoriesCurrentBlockTypeIsRegisteredIn.isEmpty()) continue
 
-                // there can be more than one scanner result for a block (e.g. GAME_FIELD & GARAGE_FIELD)
-                var scannerResult: ScannerResult = ScannerResult.UNKNOWN
-
-                for (fieldTypeByType: Map.Entry<Set<Material>, ScannerResult> in this.fieldTypeByTypes) {
-                    for (blockType in validBlockTypes) {
-                        val whitelistedBlockTypes: Set<Material> = fieldTypeByType.key
-                        if (!whitelistedBlockTypes.contains(blockType)) continue
-                        scannerResult = fieldTypeByType.value
-                    }
+                for (categoryCurrentBlockTypeIsRegisteredIn: Map.Entry<Set<Material>, ScannerResult> in categoriesCurrentBlockTypeIsRegisteredIn) {
+                    val scannerResult = categoryCurrentBlockTypeIsRegisteredIn.value
+                    resultsInRegion.put(location, Pair(scannerResult, getPossibleTeamName(scannerResult, blockType, arenaSetupData)))
                 }
-
-                val isTeamResult = scannerResult == ScannerResult.TEAM_SPAWN || scannerResult == ScannerResult.GARAGE_FIELD
-                val teamName = if (isTeamResult) blockType.name.split("_")[0] else null
-                if (teamName != null && arenaSetupData.gameTeams.none { team -> team.name.equals(teamName, true) }) continue
-
-                resultsInRegion[location] = Pair(scannerResult, teamName)
             }
         }
 
         return resultsInRegion
     }
 
+    private fun getPossibleTeamName(scannerResult: ScannerResult, currentBlockType: Material, arenaSetupData: GameArenaSetupData): String? {
+        val isTeamResult = scannerResult == ScannerResult.TEAM_SPAWN || scannerResult == ScannerResult.GARAGE_FIELD
+        val teamName = if (isTeamResult) currentBlockType.name.split("_")[0].lowercase() else null
+        return if (teamName != null && arenaSetupData.gameTeams.none { team -> team.name.equals(teamName, true) }) null else teamName
+    }
 }
 
 enum class ScannerResult(val priority: Int) {
