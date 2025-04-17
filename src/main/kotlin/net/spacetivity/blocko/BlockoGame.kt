@@ -18,7 +18,6 @@ import net.spacetivity.blocko.command.api.SpaceCommandExecutor
 import net.spacetivity.blocko.command.api.SpaceCommandHandler
 import net.spacetivity.blocko.command.api.impl.BukkitCommandExecutor
 import net.spacetivity.blocko.dice.DiceHandler
-import net.spacetivity.blocko.dice.DiceSidesFile
 import net.spacetivity.blocko.entity.GameEntityHandler
 import net.spacetivity.blocko.entity.GameEntityHistoryDAO
 import net.spacetivity.blocko.entity.GameEntityTypeDAO
@@ -42,11 +41,8 @@ import net.spacetivity.blocko.stats.StatsPlayerHandler
 import net.spacetivity.blocko.team.GameTeamHandler
 import net.spacetivity.blocko.team.GameTeamLocationDAO
 import net.spacetivity.blocko.translation.TranslationHandler
-import net.spacetivity.blocko.utils.Constants
-import net.spacetivity.blocko.utils.FileUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -66,6 +62,7 @@ class BlockoGame : JavaPlugin() {
 
     lateinit var diceSidesFile: DiceSidesFile
     lateinit var setupConfigFile: SetupConfigFile
+    lateinit var blockoBoardFile: BlockoBoardFile
     lateinit var globalConfigFile: GlobalConfigFile
     lateinit var botNamesFile: BotNamesFile
 
@@ -95,10 +92,12 @@ class BlockoGame : JavaPlugin() {
     override fun onEnable() {
         instance = this
 
-        val databaseFile: DatabaseFile = createOrLoadDatabaseFile()
+        val dataFolderPath = this.dataFolder.toPath()
+
+        val databaseFile = DatabaseFile().createOrLoad(dataFolderPath) as DatabaseFile
 
         if (databaseFile.databaseType == DatabaseType.SQLITE) {
-            val sqlitePath = dataFolder.toPath().resolve("blocko.db").toAbsolutePath().toString()
+            val sqlitePath = dataFolderPath.resolve("blocko.db").toAbsolutePath().toString()
             Database.connect("jdbc:sqlite:$sqlitePath", driver = "org.sqlite.JDBC")
         } else {
             Database.connect(
@@ -124,14 +123,15 @@ class BlockoGame : JavaPlugin() {
             )
         }
 
-        this.diceSidesFile = createOrLoadDiceSidesFile()
+        this.diceSidesFile = DiceSidesFile().createOrLoad(dataFolderPath) as DiceSidesFile
 
         this.translationHandler = TranslationHandler()
         this.translationHandler.generateTranslations(this::class.java)
 
-        this.setupConfigFile = createOrLoadSetupConfigFile()
-        this.globalConfigFile = createOrLoadGlobalConfigFile()
-        this.botNamesFile = createOrLoadBotNamesFile()
+        this.setupConfigFile = SetupConfigFile().createOrLoad(dataFolderPath) as SetupConfigFile
+        this.blockoBoardFile = BlockoBoardFile().createOrLoad(dataFolderPath) as BlockoBoardFile
+        this.globalConfigFile = GlobalConfigFile().createOrLoad(dataFolderPath) as GlobalConfigFile
+        this.botNamesFile = BotNamesFile().createOrLoad(dataFolderPath) as BotNamesFile
 
         this.sidebarHandler = SidebarHandler()
         this.playerFormatHandler = PlayerFormatHandler()
@@ -214,55 +214,6 @@ class BlockoGame : JavaPlugin() {
 
     fun getAchievementKey(isName: Boolean, title: String): String {
         return "blocko.achievement.$title.${if (isName) "display_name" else "requirement"}"
-    }
-
-    private fun createOrLoadDatabaseFile(): DatabaseFile {
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "mysql", DatabaseFile::class, DatabaseFile(
-            DatabaseType.SQLITE,
-            "-",
-            3306,
-            "-",
-            "-",
-            "-"
-        ))
-    }
-
-    private fun createOrLoadDiceSidesFile(): DiceSidesFile {
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "dice", "dice_sides", DiceSidesFile::class, DiceSidesFile(mutableMapOf(
-            Pair(1, Constants.DICE_ONE),
-            Pair(2, Constants.DICE_TWO),
-            Pair(3, Constants.DICE_THREE),
-            Pair(4, Constants.DICE_FOUR),
-            Pair(5, Constants.DICE_FIVE),
-            Pair(6, Constants.DICE_SIX)
-        )))
-    }
-
-    private fun createOrLoadSetupConfigFile(): SetupConfigFile {
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "setup", SetupConfigFile::class, SetupConfigFile(
-            setupStepsResettable = true,
-            setupSessionEndless = false,
-            setupSessionTimeoutMinutes = 15, //TODO: make timeout only start if player in setup is AFK
-        ))
-    }
-
-    private fun createOrLoadGlobalConfigFile(): GlobalConfigFile {
-        val availableTranslationLanguages: List<String> = this.translationHandler.cachedTranslations.map { it.name }
-        val defaultLanguageName: String = if (availableTranslationLanguages.contains("en_US")) "en_US" else availableTranslationLanguages[0]
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "config", GlobalConfigFile::class, GlobalConfigFile(
-            defaultLanguageName,
-            Material.GOLDEN_HOE.name,
-            false,
-            10,
-            20,
-            30,
-            10,
-            true
-        ))
-    }
-
-    private fun createOrLoadBotNamesFile(): BotNamesFile {
-        return FileUtils.createOrLoadFile(dataFolder.toPath(), "global", "bot_names", BotNamesFile::class, BotNamesFile())
     }
 
 }

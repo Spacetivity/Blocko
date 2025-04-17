@@ -88,5 +88,11 @@ enum class ScannerResult(val priority: Int) {
     GARAGE_FIELD(2),
     GAME_FIELD(1),
     TEAM_SPAWN(0),
-    UNKNOWN(-1)
+    UNKNOWN(-1);
+
+    companion object {
+        fun containsAllValidResults(results: Collection<ScannerResult>): Boolean {
+            return results.filter { it != UNKNOWN }.containsAll(entries.filter { it != UNKNOWN })
+        }
+    }
 }

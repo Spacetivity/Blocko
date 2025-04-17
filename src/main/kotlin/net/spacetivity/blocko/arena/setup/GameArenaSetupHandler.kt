@@ -181,13 +181,13 @@ class GameArenaSetupHandler {
         )
 
         arenaSetupData.gameTeamLocations.add(teamSpawn)
-        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
+        // player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
 
         val gameTeam: GameTeam = arenaSetupData.gameTeams.find { it.name == teamName } ?: return
 
-        player.translateMessage("blocko.setup.team_spawn_added",
-            Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
-            Placeholder.parsed("team_name", gameTeam.name.lowercase()))
+//        player.translateMessage("blocko.setup.team_spawn_added",
+//            Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+//            Placeholder.parsed("team_name", gameTeam.name.lowercase()))
     }
 
     fun selectCorner(player: Player, isLeftClick: Boolean, location: Location) {
@@ -230,12 +230,23 @@ class GameArenaSetupHandler {
         val regionData: Multimap<Location, Pair<ScannerResult, String?>> = RegionScanner.scanRegion(arenaSetupData)
         val inOrderResults: Multimap<Location, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
 
+        val validResultsFound: MutableMap<ScannerResult, Int> = mutableMapOf()
+
         for (entry: Map.Entry<Location, Pair<ScannerResult, String?>> in regionData.entries()) {
             val scannedDataForLocation: Pair<ScannerResult, String?> = entry.value
 
             val location: Location = entry.key
             val scannerResult: ScannerResult = scannedDataForLocation.first
             val teamName: String? = scannedDataForLocation.second
+
+            if (scannerResult != ScannerResult.UNKNOWN) {
+                if (validResultsFound.containsKey(scannerResult)) {
+                    val newAmount: Int = validResultsFound[scannerResult]?.plus(1) ?: continue
+                    validResultsFound[scannerResult] = newAmount
+                } else {
+                    validResultsFound[scannerResult] = 1
+                }
+            }
 
             when (scannerResult) {
                 ScannerResult.TEAM_SPAWN -> {
@@ -253,17 +264,33 @@ class GameArenaSetupHandler {
 
         val sortedResults: List<Map.Entry<Location, Pair<ScannerResult, String?>>> = inOrderResults.entries().sortedBy { it.value.first.priority }
 
-        for (pipelineItem in sortedResults) {
-            val location: Location = pipelineItem.key
-            val scannerResult: ScannerResult = pipelineItem.value.first
-            val teamName: String? = pipelineItem.value.second
+        val scanningCompleted: Boolean = ScannerResult.containsAllValidResults(validResultsFound.keys)
 
-            if (scannerResult == ScannerResult.GAME_FIELD) {
-                addField(player, location)
-                continue
+        if (scanningCompleted) {
+            for (pipelineItem in sortedResults) {
+                val location: Location = pipelineItem.key
+                val scannerResult: ScannerResult = pipelineItem.value.first
+                val teamName: String? = pipelineItem.value.second
+
+                if (scannerResult == ScannerResult.GAME_FIELD) {
+                    addField(player, location)
+                    continue
+                }
+
+                addGarageField(player, teamName!!, location.block.location)
             }
+        }
 
-            addGarageField(player, teamName!!, location.block.location)
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val statusKey = "blocko.setup.scanning_board.finished.${if (scanningCompleted) "satisfied" else "unsatisfied"}"
+        val statusString = translation.validateLineAsString(statusKey)
+
+        player.translateMessage("blocko.setup.scanning_board.finished.title", Placeholder.parsed("status", statusString))
+
+        for ((scannerResult: ScannerResult, amount: Int) in validResultsFound) {
+            player.translateMessage("blocko.setup.scanning_board.finished.line",
+                Placeholder.parsed("result", scannerResult.name),
+                Placeholder.parsed("amount", amount.toString()))
         }
     }
 
@@ -306,11 +333,11 @@ class GameArenaSetupHandler {
         displayEntity.setGravity(false)
         MetadataUtils.apply(displayEntity, "displayEntity", arenaSetupData.arenaId)
 
-        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.translateMessage("blocko.setup.game_field_set",
-            Placeholder.parsed("field_id", (arenaSetupData.gameFields.size - 1).toString()),
-            Placeholder.parsed("x", x.toString()),
-            Placeholder.parsed("z", z.toString()))
+//        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
+//        player.translateMessage("blocko.setup.game_field_set",
+//            Placeholder.parsed("field_id", (arenaSetupData.gameFields.size - 1).toString()),
+//            Placeholder.parsed("x", x.toString()),
+//            Placeholder.parsed("z", z.toString()))
     }
 
     fun setTurn(player: Player, gameField: GameField, blockLocation: Location, face: PathFace) {
@@ -337,7 +364,6 @@ class GameArenaSetupHandler {
         player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
         player.translateMessage("blocko.setup.turning_point_created", Placeholder.parsed("face", face.name))
     }
-
 
     fun addGarageField(player: Player, teamName: String, location: Location) {
         if (!hasOpenSetup(player.uniqueId)) {
@@ -382,12 +408,12 @@ class GameArenaSetupHandler {
 
         val gameTeam: GameTeam = arenaSetupData.gameTeams.find { it.name == teamName } ?: return
 
-        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.translateMessage("blocko.setup.game_field_set_to_garage_field",
-            Placeholder.parsed("x", x.toString()),
-            Placeholder.parsed("z", z.toString()),
-            Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
-            Placeholder.parsed("team_name", teamName))
+//        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
+//        player.translateMessage("blocko.setup.game_field_set_to_garage_field",
+//            Placeholder.parsed("x", x.toString()),
+//            Placeholder.parsed("z", z.toString()),
+//            Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+//            Placeholder.parsed("team_name", teamName))
     }
 
     fun setFieldId(player: Player, teamName: String, location: Location) {
@@ -417,11 +443,11 @@ class GameArenaSetupHandler {
         possibleField.properties.setFieldId(teamName, currentFieldIndex)
         arenaSetupData.setupTool.fieldIndex += 1
 
-        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.translateMessage("blocko.setup.set_field_id_for_team",
-            Placeholder.parsed("field_id", currentFieldIndex.toString()),
-            Placeholder.parsed("team_color", "<${arenaSetupData.gameTeams.find { it.name == teamName }!!.color.asHexString()}>"),
-            Placeholder.parsed("team_name", teamName))
+//        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
+//        player.translateMessage("blocko.setup.set_field_id_for_team",
+//            Placeholder.parsed("field_id", currentFieldIndex.toString()),
+//            Placeholder.parsed("team_color", "<${arenaSetupData.gameTeams.find { it.name == teamName }!!.color.asHexString()}>"),
+//            Placeholder.parsed("team_name", teamName))
     }
 
     private fun hasOpenSetup(uuid: UUID): Boolean {

@@ -44,12 +44,13 @@ class BlockoCommand : SpaceCommandExecutor {
 
             player.translateMessage("blocko.command.blocko.arena_list.title")
 
-            cachedArenas.forEach { gameArena: GameArena ->
+            for (gameArena: GameArena in cachedArenas) {
                 val currentPlayerAmount: Int = gameArena.currentPlayers.size
                 val maxPlayerAmount: Int = gameArena.teamOptions.playerCount
 
                 player.translateMessage("blocko.command.blocko.arena_list.line",
                     Placeholder.parsed("id", gameArena.id),
+                    Placeholder.parsed("status", gameArena.status.name),
                     Placeholder.parsed("current_player_amount", currentPlayerAmount.toString()),
                     Placeholder.parsed("max_player_amount", maxPlayerAmount.toString()))
             }
@@ -69,8 +70,6 @@ class BlockoCommand : SpaceCommandExecutor {
             player.translateMessage("blocko.command.blocko.arena_created")
             return
         }
-
-        // /blocko arena setup scanBoard <arenaId>
 
         if (args.size == 4 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("scanBoard", true)) {
             val arenaId: String = args[3]
