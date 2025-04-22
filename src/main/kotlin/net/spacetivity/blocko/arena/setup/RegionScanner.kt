@@ -91,6 +91,24 @@ enum class ScannerResult(val priority: Int) {
     UNKNOWN(-1);
 
     companion object {
+        fun getMissingResults(results: Collection<ScannerResult>): Map<ScannerResult, Int> {
+            val missingResults: MutableMap<ScannerResult, Int> = mutableMapOf()
+
+            val neededGarageFieldAmount = 16
+            val neededGameFieldAmount = 40
+            val neededTeamSpawnAmount = 16
+
+            val missingGarageFieldAmount = neededGarageFieldAmount - results.count { it == GARAGE_FIELD }
+            val missingGameFieldAmount = neededGameFieldAmount - results.count { it == GAME_FIELD }
+            val missingTeamSpawnFieldAmount = neededTeamSpawnAmount - results.count { it == TEAM_SPAWN }
+
+            if (missingGarageFieldAmount > 0) missingResults[GARAGE_FIELD] = missingGarageFieldAmount
+            if (missingGameFieldAmount > 0) missingResults[GAME_FIELD] = missingGameFieldAmount
+            if (missingTeamSpawnFieldAmount > 0) missingResults[TEAM_SPAWN] = missingTeamSpawnFieldAmount
+
+            return missingResults
+        }
+
         fun containsAllValidResults(results: Collection<ScannerResult>): Boolean {
             return results.filter { it != UNKNOWN }.containsAll(entries.filter { it != UNKNOWN })
         }

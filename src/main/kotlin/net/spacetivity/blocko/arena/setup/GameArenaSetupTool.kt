@@ -60,9 +60,9 @@ class GameArenaSetupTool(private val holder: Player) {
 
         when (this.currentMode) {
             ToolMode.SCAN_BOARD -> BlockoGame.instance.gameArenaSetupHandler.selectCorner(this.holder, event.action.isLeftClick, block.location)
-            ToolMode.ADD_FIELD -> BlockoGame.instance.gameArenaSetupHandler.addField(this.holder, block.location)
+           // ToolMode.ADD_FIELD -> BlockoGame.instance.gameArenaSetupHandler.addField(this.holder, block.location)
             ToolMode.SET_TURN -> InventoryUtils.openGameFieldTurnInventory(this.holder, block.location)
-            ToolMode.SET_GARAGE_FIELD -> InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.GARAGE, block)
+           // ToolMode.SET_GARAGE_FIELD -> InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.GARAGE, block)
             ToolMode.SET_TEAM_ENTRANCE -> InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.ENTRANCE, block)
             ToolMode.SET_TEAM_PATH -> {
                 if (this.currentTeamName == null || (this.holder.isSneaking && this.currentTeamName != null)) openStaticInventory(this.holder, Component.text("Set team path"), GameTeamSetupInventory(InvType.IDS, block.location))
@@ -92,9 +92,9 @@ class GameArenaSetupTool(private val holder: Player) {
 
     enum class ToolMode(val modeName: String, val modeId: Int, val validBlockTypes: List<String>) {
         SCAN_BOARD("Scan Board", 0, listOf()),
-        ADD_FIELD("Add Field", 1, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK")),
+        // ADD_FIELD("Add Field", 1, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK")),
         SET_TURN("Set Turn", 2, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK")),             // NOTWENDIG
-        SET_GARAGE_FIELD("Set Garage Field", 3, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL")),
+        // SET_GARAGE_FIELD("Set Garage Field", 3, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL")),
         SET_TEAM_ENTRANCE("Set Team Entrance", 4, listOf("BONE_BLOCK")),                                                 // NOTWENDIG
         SET_TEAM_PATH("Set Team Path", 5, listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK"));   // NOTWENDIG
     }

@@ -21,6 +21,7 @@ class GameArenaSetupData(val arenaId: String, val setupTool: GameArenaSetupTool)
 
     var corner1: Location? = null
     var corner2: Location? = null
+    var missingResults: MutableMap<ScannerResult, Int> = mutableMapOf()
 
     fun areCornersSet(): Boolean = this.corner1 != null && this.corner2 != null
 

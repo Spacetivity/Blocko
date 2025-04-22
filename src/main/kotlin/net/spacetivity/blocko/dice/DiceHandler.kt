@@ -135,7 +135,7 @@ class DiceHandler {
         if (diceSide == null) {
             val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
             Bukkit.getConsoleSender().sendMessage(translation.validateLine("blocko.main_game_loop.dice_error", Placeholder.parsed("number", randomNumber.toString())))
-            return Pair(1, Constants.DICE_ONE)
+            return Pair(1, Constants.DICE_ONE_SKULL)
         }
 
         if (diceSide.first == blockedDiceNumber) return getDiceSide(blockedDiceNumber)

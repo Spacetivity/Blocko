@@ -151,14 +151,7 @@ class GameArenaSetupHandler {
         this.arenaSetupCache.remove(player.uniqueId)
     }
 
-    fun addTeamSpawn(player: Player, teamName: String, location: Location) {
-        if (!hasOpenSetup(player.uniqueId)) {
-            player.translateMessage("blocko.setup.not_in_setup_mode")
-            return
-        }
-
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
-
+    fun addTeamSpawn(arenaSetupData: GameArenaSetupData, player: Player, teamName: String, location: Location) {
         if (arenaSetupData.gameTeamLocations.any { it.x == location.x && it.y == location.y && it.z == location.z }) {
             player.translateMessage("blocko.setup.team_spawn_already_set")
             return
@@ -181,13 +174,6 @@ class GameArenaSetupHandler {
         )
 
         arenaSetupData.gameTeamLocations.add(teamSpawn)
-        // player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-
-        val gameTeam: GameTeam = arenaSetupData.gameTeams.find { it.name == teamName } ?: return
-
-//        player.translateMessage("blocko.setup.team_spawn_added",
-//            Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
-//            Placeholder.parsed("team_name", gameTeam.name.lowercase()))
     }
 
     fun selectCorner(player: Player, isLeftClick: Boolean, location: Location) {
@@ -213,11 +199,6 @@ class GameArenaSetupHandler {
     }
 
     fun scanBoard(player: Player) {
-        if (!hasOpenSetup(player.uniqueId)) {
-            player.translateMessage("blocko.setup.not_in_setup_mode")
-            return
-        }
-
         val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
 
         if (!arenaSetupData.areCornersSet()) {
@@ -251,7 +232,7 @@ class GameArenaSetupHandler {
             when (scannerResult) {
                 ScannerResult.TEAM_SPAWN -> {
                     if (teamName == null) throw NullPointerException("The team name is required")
-                    addTeamSpawn(player, teamName, location)
+                    addTeamSpawn(arenaSetupData, player, teamName, location)
                 }
 
                 ScannerResult.GARAGE_FIELD, ScannerResult.GAME_FIELD -> {
@@ -273,34 +254,36 @@ class GameArenaSetupHandler {
                 val teamName: String? = pipelineItem.value.second
 
                 if (scannerResult == ScannerResult.GAME_FIELD) {
-                    addField(player, location)
+                    addField(arenaSetupData, player, location)
                     continue
                 }
 
-                addGarageField(player, teamName!!, location.block.location)
+                addGarageField(arenaSetupData, player, teamName!!, location.block.location)
             }
+        } else {
+            arenaSetupData.missingResults.putAll(ScannerResult.getMissingResults(regionData.values().map { it.first }))
         }
 
         val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
         val statusKey = "blocko.setup.scanning_board.finished.${if (scanningCompleted) "satisfied" else "unsatisfied"}"
-        val statusString = translation.validateLineAsString(statusKey)
+        val statusString = translation.validateLine(statusKey, Placeholder.parsed("id", arenaSetupData.arenaId))
 
-        player.translateMessage("blocko.setup.scanning_board.finished.title", Placeholder.parsed("status", statusString))
+        player.translateMessage("blocko.setup.scanning_board.finished.title",
+            Placeholder.component("status", statusString))
 
         for ((scannerResult: ScannerResult, amount: Int) in validResultsFound) {
+            val resultName = scannerResult.name
+                .replace('_', ' ')
+                .lowercase()
+                .replaceFirstChar { it.uppercase() }
+
             player.translateMessage("blocko.setup.scanning_board.finished.line",
-                Placeholder.parsed("result", scannerResult.name),
+                Placeholder.parsed("result", resultName),
                 Placeholder.parsed("amount", amount.toString()))
         }
     }
 
-    fun addField(player: Player, location: Location) {
-        if (!hasOpenSetup(player.uniqueId)) {
-            player.translateMessage("blocko.setup.not_in_setup_mode")
-            return
-        }
-
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
+    fun addField(arenaSetupData: GameArenaSetupData, player: Player, location: Location) {
         val x: Double = location.x
         val z: Double = location.z
 
@@ -332,12 +315,6 @@ class GameArenaSetupHandler {
         displayEntity.setAI(false)
         displayEntity.setGravity(false)
         MetadataUtils.apply(displayEntity, "displayEntity", arenaSetupData.arenaId)
-
-//        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-//        player.translateMessage("blocko.setup.game_field_set",
-//            Placeholder.parsed("field_id", (arenaSetupData.gameFields.size - 1).toString()),
-//            Placeholder.parsed("x", x.toString()),
-//            Placeholder.parsed("z", z.toString()))
     }
 
     fun setTurn(player: Player, gameField: GameField, blockLocation: Location, face: PathFace) {
@@ -365,14 +342,7 @@ class GameArenaSetupHandler {
         player.translateMessage("blocko.setup.turning_point_created", Placeholder.parsed("face", face.name))
     }
 
-    fun addGarageField(player: Player, teamName: String, location: Location) {
-        if (!hasOpenSetup(player.uniqueId)) {
-            player.translateMessage("blocko.setup.not_in_setup_mode")
-            return
-        }
-
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
-
+    fun addGarageField(arenaSetupData: GameArenaSetupData, player: Player, teamName: String, location: Location) {
         val x: Double = location.x
         val z: Double = location.z
 
@@ -405,15 +375,6 @@ class GameArenaSetupHandler {
         } else {
             player.translateMessage("blocko.setup.cannot_update_entity_display")
         }
-
-        val gameTeam: GameTeam = arenaSetupData.gameTeams.find { it.name == teamName } ?: return
-
-//        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-//        player.translateMessage("blocko.setup.game_field_set_to_garage_field",
-//            Placeholder.parsed("x", x.toString()),
-//            Placeholder.parsed("z", z.toString()),
-//            Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
-//            Placeholder.parsed("team_name", teamName))
     }
 
     fun setFieldId(player: Player, teamName: String, location: Location) {
@@ -442,12 +403,6 @@ class GameArenaSetupHandler {
         val currentFieldIndex: Int = arenaSetupData.setupTool.fieldIndex
         possibleField.properties.setFieldId(teamName, currentFieldIndex)
         arenaSetupData.setupTool.fieldIndex += 1
-
-//        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-//        player.translateMessage("blocko.setup.set_field_id_for_team",
-//            Placeholder.parsed("field_id", currentFieldIndex.toString()),
-//            Placeholder.parsed("team_color", "<${arenaSetupData.gameTeams.find { it.name == teamName }!!.color.asHexString()}>"),
-//            Placeholder.parsed("team_name", teamName))
     }
 
     private fun hasOpenSetup(uuid: UUID): Boolean {

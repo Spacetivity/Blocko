@@ -51,7 +51,7 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
         hotbarItems[4] = ItemBuilder(Material.PLAYER_HEAD)
             .setName(translation.validateItemName("blocko.items.instant_starter.display_name"))
             .setLoreByComponent(translation.validateItemLore("blocko.items.instant_starter.lore"))
-            .setOwner(Constants.PLAY)
+            .setOwner(Constants.PLAY_SKULL)
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
                 val gameArena: GameArena = player.getArena() ?: return@onInteract

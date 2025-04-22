@@ -3,10 +3,10 @@ package net.spacetivity.blocko.inventory.setup
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.setup.GameArenaSetupData
-import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.inventory.api.inventory.InventoryController
@@ -25,7 +25,7 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
     override fun init(player: Player, controller: InventoryController) {
         val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
-        val availablePositions = listOf(
+        val availablePositions: List<InventoryPos> = listOf(
             InventoryPos.of(0, 2),
             InventoryPos.of(0, 3),
             InventoryPos.of(0, 5),
@@ -49,17 +49,12 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
                 .setName(translation.validateItemName("blocko.inventory.game_team_setup.team_item.display_name",
                     Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
                     Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() })))
-                .setLoreByComponent(translation.validateItemLore("blocko.inventory.game_team_setup.team_item.lore.${if (this.type == InvType.GARAGE) "garage" else "entrance"}"))
+                .setLoreByComponent(translation.validateItemLore("blocko.inventory.game_team_setup.team_item.lore.entrance"))
                 .setArmorColor(Color.fromRGB(gameTeam.color.red(), gameTeam.color.green(), gameTeam.color.blue()))
                 .build())
             { _, _, _ ->
                 player.closeInventory()
                 when (this.type) {
-
-                    InvType.GARAGE -> {
-                        BlockoGame.instance.gameArenaSetupHandler.addGarageField(player, gameTeam.name, this.location)
-                    }
-
                     InvType.IDS -> {
                         val setupData: GameArenaSetupData = BlockoGame.instance.gameArenaSetupHandler.getSetupData(player.uniqueId)
                             ?: return@of
@@ -91,7 +86,6 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
 }
 
 enum class InvType {
-    GARAGE,
     ENTRANCE,
     IDS
 }
