@@ -22,8 +22,8 @@ class ProfileInventory(private val isShopItemActive: Boolean) : InventoryProvide
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
 
         controller.setItem(2, 4, InteractiveItem.of(ItemBuilder(Material.ARMOR_STAND)
-            .setName(translation.validateItemName("blocko.inventory.profile.stats_item.display_name"))
-            .setLoreByComponent(translation.validateItemLore("blocko.inventory.profile.stats_item.lore"))
+            .setName(translation.displayName("blocko.inventory.profile.stats_item.display_name"))
+            .setLoreByComponent(translation.lore("blocko.inventory.profile.stats_item.lore"))
             .build()) { _, _, _ ->
             val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)
                 ?: return@of
@@ -34,16 +34,16 @@ class ProfileInventory(private val isShopItemActive: Boolean) : InventoryProvide
         val entityShopLoreKey = "blocko.inventory.profile.entity_shop_item.lore.${if (this.isShopItemActive) "active" else "not_active"}"
 
         controller.setItem(3, 2, InteractiveItem.of(ItemBuilder(if (this.isShopItemActive) Material.SLIME_SPAWN_EGG else Material.BARRIER)
-            .setName(translation.validateItemName(entityShopDisplayNameKey))
-            .setLoreByComponent(translation.validateItemLore(entityShopLoreKey))
+            .setName(translation.displayName(entityShopDisplayNameKey))
+            .setLoreByComponent(translation.lore(entityShopLoreKey))
             .build()) { _, _, _ ->
             if (!this.isShopItemActive) return@of
             InventoryUtils.openEntityShopInventory(player)
         })
 
         controller.setItem(3, 6, InteractiveItem.of(ItemBuilder(Material.NETHER_STAR)
-            .setName(translation.validateItemName("blocko.inventory.profile.achievements_item.display_name"))
-            .setLoreByComponent(translation.validateItemLore("blocko.inventory.profile.achievements_item.lore"))
+            .setName(translation.displayName("blocko.inventory.profile.achievements_item.display_name"))
+            .setLoreByComponent(translation.lore("blocko.inventory.profile.achievements_item.lore"))
             .build()) { _, _, _ -> InventoryUtils.openAchievementsInventory(player) })
     }
 

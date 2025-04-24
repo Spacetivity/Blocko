@@ -41,8 +41,8 @@ class GameFieldTurnSetupInventory(private val blockLocation: Location) : Invento
 
         for (pathFace: PathFace in PathFace.entries) {
             items.add(InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
-                .setName(translation.validateItemName("blocko.inventory.game_field_set_turn.turn_item.display_name", Placeholder.parsed("face", pathFace.name)))
-                .setLoreByComponent(translation.validateItemLore("blocko.inventory.game_field_set_turn.turn_item.lore"))
+                .setName(translation.displayName("blocko.inventory.game_field_set_turn.turn_item.display_name", Placeholder.parsed("face", pathFace.name)))
+                .setLoreByComponent(translation.lore("blocko.inventory.game_field_set_turn.turn_item.lore"))
                 .setOwner(pathFace.headValue)
                 .build())
             { _, _, _ ->

@@ -38,7 +38,7 @@ class GamePhaseHandler {
         if (newGamePhase == null) {
             gameArena.reset(false)
             val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-            Bukkit.getConsoleSender().sendMessage(translation.validateLine("blocko.phase.not_found",
+            Bukkit.getConsoleSender().sendMessage(translation.line("blocko.phase.not_found",
                 Placeholder.parsed("priority", newPhasePriority.toString()),
                 Placeholder.parsed("id", gameArena.id)))
             return

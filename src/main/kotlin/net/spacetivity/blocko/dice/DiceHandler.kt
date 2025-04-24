@@ -125,7 +125,7 @@ class DiceHandler {
 
     private fun getDiceDisplayName(diceNumber: Int): Component {
         val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-        return translation.validateLine("blocko.main_game_loop.dice_display_name", Placeholder.parsed("dice_number", diceNumber.toString()))
+        return translation.line("blocko.main_game_loop.dice_display_name", Placeholder.parsed("dice_number", diceNumber.toString()))
     }
 
     private fun getDiceSide(blockedDiceNumber: Number): Pair<Int, String> {
@@ -134,7 +134,7 @@ class DiceHandler {
 
         if (diceSide == null) {
             val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-            Bukkit.getConsoleSender().sendMessage(translation.validateLine("blocko.main_game_loop.dice_error", Placeholder.parsed("number", randomNumber.toString())))
+            Bukkit.getConsoleSender().sendMessage(translation.line("blocko.main_game_loop.dice_error", Placeholder.parsed("number", randomNumber.toString())))
             return Pair(1, Constants.DICE_ONE_SKULL)
         }
 

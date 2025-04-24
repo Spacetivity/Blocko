@@ -2,7 +2,6 @@ package net.spacetivity.blocko.player
 
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.entity.GameEntity
-import net.spacetivity.blocko.player.ai.AiRule
 import net.spacetivity.blocko.player.ai.impl.*
 
 /*
@@ -23,7 +22,7 @@ import net.spacetivity.blocko.player.ai.impl.*
  */
 class EntityAiHandler {
 
-    private val aiRules = listOf<AiRule>(
+    private val aiRules = listOf(
         MovableOutOfStartRule(),
         MovableAwayFromFirstFieldRule(),
         MovableButLandsAfterOpponentRule(),

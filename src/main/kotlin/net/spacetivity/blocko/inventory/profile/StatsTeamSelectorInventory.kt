@@ -30,7 +30,7 @@ class StatsTeamSelectorInventory(private val gameArena: GameArena) : InventoryPr
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
 
         controller.setItem(0, 4, InteractiveItem.of(ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.validateItemName("blocko.inventory_utils.back_item_display_name"))
+            .setName(translation.displayName("blocko.inventory_utils.back_item_display_name"))
             .build()) { _, _, _ ->
             val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)
                 ?: return@of
@@ -54,10 +54,10 @@ class StatsTeamSelectorInventory(private val gameArena: GameArena) : InventoryPr
         val teamLoreKey = "blocko.inventory.stats_team_selector.team_item.lore.${if (isNotEmptyTeam) "active" else "not_active"}"
 
         val itemBuilder = ItemBuilder(if (isNotEmptyTeam) Material.LEATHER_CHESTPLATE else Material.BARRIER)
-            .setName(translation.validateItemName(teamDisplayNameKey,
+            .setName(translation.displayName(teamDisplayNameKey,
                 Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
                 Placeholder.parsed("team_name", gameTeam.name)))
-            .setLoreByComponent(translation.validateItemLore(teamLoreKey))
+            .setLoreByComponent(translation.lore(teamLoreKey))
             .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_DYE)
             .setData("teamName", gameTeam.name)
 

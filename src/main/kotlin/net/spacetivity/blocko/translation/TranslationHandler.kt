@@ -23,6 +23,7 @@ class TranslationHandler {
             val translation = Translation(validatedLanguageFileName, mutableMapOf())
             this.cachedTranslations.add(translation)
 
+            //TODO: later implement checking if messages were added or deleted
             TranslationFileLoader.copyTranslationFileToDataFolder(validatedLanguageFileName)
 
             val messagesInFile: Map<String, String> = TranslationFileLoader.getFileContent(validatedLanguageFileName)

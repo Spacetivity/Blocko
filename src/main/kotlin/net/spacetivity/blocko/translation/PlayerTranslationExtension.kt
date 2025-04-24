@@ -34,7 +34,7 @@ fun GamePlayer.translateActionBar(key: String, vararg toReplace: TagResolver) {
 private fun validateComponents(key: String, vararg toReplace: TagResolver): MutableList<Component> {
     val selectedTranslation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
     val components: MutableList<Component> = mutableListOf()
-    if (selectedTranslation.hasMultipleLines(key)) components.addAll(selectedTranslation.validateLines(key, *toReplace))
-    else components.add(selectedTranslation.validateLine(key, *toReplace))
+    if (selectedTranslation.hasMultipleLines(key)) components.addAll(selectedTranslation.lines(key, *toReplace))
+    else components.add(selectedTranslation.line(key, *toReplace))
     return components
 }

@@ -31,15 +31,15 @@ class InvitationInventory(private val gameArena: GameArena) : InventoryProvider 
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
 
         controller.setItem(0, 4, InteractiveItem.of(ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.validateItemName("blocko.inventory_utils.back_item_display_name"))
+            .setName(translation.displayName("blocko.inventory_utils.back_item_display_name"))
             .build()) { _, _, _ -> InventoryUtils.openHostSettingsInventory(player, gameArena) })
 
         val pageItems: List<InteractiveItem> = fetchPlayerItems(player, translation)
 
         if (pageItems.isEmpty()) {
             controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(ItemBuilder(Material.BARRIER)
-                .setName(translation.validateItemName("blocko.inventory.invitation.no_players_to_invite_found.display_name"))
-                .setLoreByComponent(translation.validateItemLore("blocko.inventory.invitation.no_players_to_invite_found.lore"))
+                .setName(translation.displayName("blocko.inventory.invitation.no_players_to_invite_found.display_name"))
+                .setLoreByComponent(translation.lore("blocko.inventory.invitation.no_players_to_invite_found.lore"))
                 .build()), InventoryPos.of(2, 3), InventoryPos.of(3, 5))
             return
         }
@@ -50,11 +50,11 @@ class InvitationInventory(private val gameArena: GameArena) : InventoryProvider 
         pagination.distributeItems(pageItems)
 
         controller.setItem(5, 7, InteractiveItem.previousPage(ItemBuilder(Material.ARROW)
-            .setName(translation.validateItemName("blocko.inventory_utils.previous_page_item_display_name"))
+            .setName(translation.displayName("blocko.inventory_utils.previous_page_item_display_name"))
             .build(), pagination))
 
         controller.setItem(5, 8, InteractiveItem.nextPage(ItemBuilder(Material.SPECTRAL_ARROW)
-            .setName(translation.validateItemName("blocko.inventory_utils.next_page_item_display_name"))
+            .setName(translation.displayName("blocko.inventory_utils.next_page_item_display_name"))
             .build(), pagination))
     }
 
@@ -67,8 +67,8 @@ class InvitationInventory(private val gameArena: GameArena) : InventoryProvider 
             val property: ProfileProperty = player.playerProfile.properties.first()
 
             items.add(InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
-                .setName(translation.validateItemName("blocko.inventory.invitation.player_head.display_name", Placeholder.parsed("name", player.name)))
-                .setLoreByComponent(translation.validateItemLore("blocko.inventory.invitation.player_head.lore"))
+                .setName(translation.displayName("blocko.inventory.invitation.player_head.display_name", Placeholder.parsed("name", player.name)))
+                .setLoreByComponent(translation.lore("blocko.inventory.invitation.player_head.lore"))
                 .setOwner(property.value)
                 .build()) { _, _, _ ->
                 this.gameArena.sendArenaInvite(hostGamePlayer, player.name)

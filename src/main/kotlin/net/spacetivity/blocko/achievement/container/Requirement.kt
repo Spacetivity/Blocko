@@ -18,7 +18,7 @@ interface Requirement {
         val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
         val key: String = BlockoGame.instance.getAchievementKey(false, this.translationKey)
 
-        return translation.validateItemName(key, *getPlaceholders(gamePlayer).toTypedArray())
+        return translation.displayName(key, *getPlaceholders(gamePlayer).toTypedArray())
     }
 
 }

@@ -28,7 +28,7 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
         val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
         controller.setItem(0, 1, InteractiveItem.of(ItemBuilder(Material.WRITABLE_BOOK)
-            .setName(translation.validateItemName("blocko.inventory.host.invite_players.display_name"))
+            .setName(translation.displayName("blocko.inventory.host.invite_players.display_name"))
             .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
             .build()) { _, _, _ -> InventoryUtils.openInvitationInventory(player, this.gameArena) })
 
@@ -77,7 +77,7 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
     }
 
     private fun buildTeamModeSelectorDisplayName(translation: Translation): Component {
-        return translation.validateItemName("blocko.inventory.host.team_mode_changer.display_name", Placeholder.parsed("mode", this.gameArena.teamOptions.getDisplayString()))
+        return translation.displayName("blocko.inventory.host.team_mode_changer.display_name", Placeholder.parsed("mode", this.gameArena.teamOptions.getDisplayString()))
     }
 
     private fun buildTeamModeSelectorLore(translation: Translation): MutableList<Component> {
@@ -86,7 +86,7 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
         for (teamOptions: GameTeamOptions in GameTeamOptions.entries) {
             val color: NamedTextColor = if (this.gameArena.teamOptions == teamOptions) NamedTextColor.GREEN else NamedTextColor.DARK_GRAY
 
-            lore.add(translation.validateItemName("blocko.inventory.host.team_mode_changer.lore_line_format",
+            lore.add(translation.displayName("blocko.inventory.host.team_mode_changer.lore_line_format",
                 Placeholder.parsed("mode_color", "<${color.asHexString()}>"),
                 Placeholder.parsed("mode", teamOptions.getDisplayString())))
         }
@@ -102,13 +102,13 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
     private fun getIndicatorDisplayName(indicatorType: IndicatorType, translation: Translation): Component =
         when (indicatorType) {
             IndicatorType.PRIVACY -> {
-                val placeholder: TagResolver.Single = Placeholder.parsed("status", translation.validateLineAsString("blocko.inventory.host.arena_status.${if (this.gameArena.locked) "active" else "not_active"}"))
-                translation.validateItemName("blocko.inventory.host.arena_status.display_name", placeholder)
+                val placeholder: TagResolver.Single = Placeholder.parsed("status", translation.lineAsString("blocko.inventory.host.arena_status.${if (this.gameArena.locked) "active" else "not_active"}"))
+                translation.displayName("blocko.inventory.host.arena_status.display_name", placeholder)
             }
 
             IndicatorType.WAITING_PREDICATE -> {
-                val placeholder: TagResolver.Single = Placeholder.parsed("status", translation.validateLineAsString("blocko.inventory.host.wait_for_players.${if (this.gameArena.waitForActualPlayers) "active" else "not_active"}"))
-                translation.validateItemName("blocko.inventory.host.wait_for_players.display_name", placeholder)
+                val placeholder: TagResolver.Single = Placeholder.parsed("status", translation.lineAsString("blocko.inventory.host.wait_for_players.${if (this.gameArena.waitForActualPlayers) "active" else "not_active"}"))
+                translation.displayName("blocko.inventory.host.wait_for_players.display_name", placeholder)
             }
         }
 

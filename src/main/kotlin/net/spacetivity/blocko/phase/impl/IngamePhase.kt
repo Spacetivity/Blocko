@@ -16,7 +16,6 @@ import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.team.GameTeam
-import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.InventoryUtils
@@ -92,36 +91,36 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
         hotbarItems[0] = BlockoGame.instance.diceHandler.getDiceItem()
 
         for ((entityIndex, i) in (1..4).withIndex()) {
             hotbarItems[i] = ItemBuilder(Material.ARMOR_STAND)
-                .setName(translation.validateItemName("blocko.main_game_loop.entity_selector_display_name", Placeholder.parsed("count", (entityIndex + 1).toString())))
+                .setName(translation.displayName("blocko.main_game_loop.entity_selector_display_name", Placeholder.parsed("count", (entityIndex + 1).toString())))
                 .setData("entitySelector", entityIndex)
                 .build()
         }
 
         hotbarItems[7] = ItemBuilder(Material.CLOCK)
-            .setName(translation.validateItemName("blocko.items.profile.display_name"))
-            .setLoreByComponent(translation.validateItemLore("blocko.items.profile.lore"))
+            .setName(translation.displayName("blocko.items.profile.display_name"))
+            .setLoreByComponent(translation.lore("blocko.items.profile.lore"))
             .onInteract { event: PlayerInteractEvent ->
-                val player: Player = event.player
+                val player = event.player
                 InventoryUtils.openProfileInventory(player, false)
             }
             .build()
 
         hotbarItems[8] = ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.validateItemName("blocko.items.leave.display_name"))
-            .onInteract { event: PlayerInteractEvent ->
-                val player: Player = event.player
-                val gameArena: GameArena = player.getArena() ?: return@onInteract
+            .setName(translation.displayName("blocko.items.leave.display_name"))
+            .onInteract { event ->
+                val player = event.player
+                val gameArena = player.getArena() ?: return@onInteract
 
                 SpaceInventoryProvider.api.openConfirmationInventory(
                     player,
-                    translation.validateItemName("blocko.inventory.leave.title"),
-                    ItemBuilder(Material.OAK_DOOR).setName(translation.validateItemName("blocko.inventory.leave.display_item.display_name")).build(),
+                    translation.displayName("blocko.inventory.leave.title"),
+                    ItemBuilder(Material.OAK_DOOR).setName(translation.displayName("blocko.inventory.leave.display_item.display_name")).build(),
                     {
                         gameArena.quit(player)
                     },
@@ -135,13 +134,13 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     override fun initSpectatorHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
         hotbarItems[8] = ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.validateItemName("blocko.items.leave.display_name"))
+            .setName(translation.displayName("blocko.items.leave.display_name"))
             .onInteract { event: PlayerInteractEvent ->
-                val player: Player = event.player
-                val gameArena: GameArena = player.getArena() ?: return@onInteract
+                val player = event.player
+                val gameArena = player.getArena() ?: return@onInteract
                 gameArena.quitAsSpectator(player)
             }
             .build()
@@ -158,29 +157,29 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
         GameScoreboardUtils.updateDicedNumberLine(this.arenaId, null)
 
-        val oldControllingGamePlayer: GamePlayer? = getControllingGamePlayer()
-        val oldControllingGamePlayerDicedNumber: Int? = oldControllingGamePlayer?.dicedNumber
+        val oldControllingGamePlayer = getControllingGamePlayer()
+        val oldControllingGamePlayerDicedNumber = oldControllingGamePlayer?.dicedNumber
 
         oldControllingGamePlayer?.dicedNumber = null
 
         if (this.controllingTeamId != null && oldControllingGamePlayer != null)
             getHighlightedEntities(oldControllingGamePlayer, getArena()).forEach { it.toggleHighlighting(false) }
 
-        val availableTeams: List<GameTeam> = BlockoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
+        val availableTeams = BlockoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
 
-        val newControllingTeam: GameTeam? = if (hasControllingTeamMemberDicedSix(oldControllingGamePlayerDicedNumber)) getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
-        val newControllingTeamId: Int = newControllingTeam?.teamId ?: availableTeams.minOf { it.teamId }
+        val newControllingTeam = if (hasControllingTeamMemberDicedSix(oldControllingGamePlayerDicedNumber)) getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
+        val newControllingTeamId = newControllingTeam?.teamId ?: availableTeams.minOf { it.teamId }
 
         this.lastControllingTeamId = if (this.controllingTeamId == null) null else this.controllingTeamId
         this.controllingTeamId = newControllingTeamId
 
-        val controllingTeam: GameTeam? = getControllingTeam()
+        val controllingTeam = getControllingTeam()
 
         if (controllingTeam != null) {
             GameScoreboardUtils.updateControllingTeamLine(getArena(), controllingTeam)
             GameScoreboardUtils.updateAllEntityStatusLines(this.arenaId, controllingTeam)
 
-            val gamePlayer: GamePlayer? = getArena().currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
+            val gamePlayer = getArena().currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
 
             if (gamePlayer != null) {
                 gamePlayer.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
@@ -196,20 +195,20 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun getControllingGamePlayer(): GamePlayer? {
-        val controllingTeam: GameTeam = getControllingTeam() ?: return null
-        val currentPlayers: MutableSet<GamePlayer> = getArena().currentPlayers
+        val controllingTeam = getControllingTeam() ?: return null
+        val currentPlayers = getArena().currentPlayers
         if (currentPlayers.isEmpty()) return null
 
-        val uuid: UUID = controllingTeam.teamMembers.firstOrNull() ?: return null
+        val uuid = controllingTeam.teamMembers.firstOrNull() ?: return null
         return currentPlayers.find { it.uuid == uuid }
     }
 
     fun getControllingGamePlayerTimeLeftFraction(): Float {
         val totalActionTime = 60_000L
-        val controllingGamePlayer: GamePlayer = getControllingGamePlayer() ?: return 0f
-        val timeoutTimestamp: Long = controllingGamePlayer.actionTimeoutTimestamp ?: return 0f
+        val controllingGamePlayer = getControllingGamePlayer() ?: return 0f
+        val timeoutTimestamp = controllingGamePlayer.actionTimeoutTimestamp ?: return 0f
         val currentTimeMillis = System.currentTimeMillis()
-        val timeLeftMillis: Long = timeoutTimestamp - currentTimeMillis
+        val timeLeftMillis = timeoutTimestamp - currentTimeMillis
 
         val positiveTimeLeftMillis = if (timeLeftMillis > 0) timeLeftMillis else 0L
         val timeLeftFraction = positiveTimeLeftMillis.toFloat() / totalActionTime.toFloat()
@@ -218,9 +217,9 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun getControllingGamePlayerTimeLeft(): Long {
-        val controllingGamePlayer: GamePlayer = getControllingGamePlayer() ?: return 0L
-        val timeoutTimestamp: Long = controllingGamePlayer.actionTimeoutTimestamp ?: return 0L
-        val timeLeft: Long = timeoutTimestamp - System.currentTimeMillis()
+        val controllingGamePlayer = getControllingGamePlayer() ?: return 0L
+        val timeoutTimestamp = controllingGamePlayer.actionTimeoutTimestamp ?: return 0L
+        val timeLeft = timeoutTimestamp - System.currentTimeMillis()
         return timeLeft.toDuration(DurationUnit.MILLISECONDS).inWholeSeconds
     }
 
@@ -229,12 +228,12 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     private fun hasControllingTeamMemberDicedSix(dicedNumber: Int?): Boolean {
-        val controllingTeam: GameTeam = getControllingTeam() ?: return false
+        val controllingTeam = getControllingTeam() ?: return false
         if (controllingTeam.deactivated) return false
 
         var hasDicedSix = false
 
-        for (teamMemberUniqueId: UUID in controllingTeam.teamMembers) {
+        for (teamMemberUniqueId in controllingTeam.teamMembers) {
             if (dicedNumber == null || dicedNumber != 6) continue
             hasDicedSix = true
         }

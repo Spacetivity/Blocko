@@ -23,7 +23,6 @@ import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.entity.Player
 import java.util.*
-import java.util.function.Predicate
 
 class GameArena(
     val id: String,
@@ -145,7 +144,7 @@ class GameArena(
             this.phase.setupPlayerInventory(gamePlayer.toBukkitInstance()!!)
 
             val neededPlayerCount: Int = if (this.waitForActualPlayers) this.teamOptions.playerCount else 1
-            this.phase.countdown?.tryStartup(Predicate { playerCount -> playerCount == neededPlayerCount })
+            this.phase.countdown?.tryStartup({ playerCount -> playerCount == neededPlayerCount })
 
             togglePlayerVisibility(bukkitPlayer!!, PlayerVisibility.IN_ARENA)
 

@@ -22,29 +22,29 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
         .tags(TagResolver.builder().resolvers(defaultResolvers).build())
         .build()
 
-    fun validateLineAsString(key: String, vararg args: Any): String {
-        val content = cachedMessages[key] ?: return "$key not found..."
-        return MessageFormat.format(content, *args)
+    fun lineAsString(key: String, vararg args: Any): String {
+        val message = cachedMessages[key] ?: return "$key not found..."
+        return MessageFormat.format(message, *args)
     }
 
-    fun validateLine(key: String, vararg additionalResolvers: TagResolver): Component {
+    fun line(key: String, vararg additionalResolvers: TagResolver): Component {
         val message = cachedMessages[key] ?: return errorComponent("$key not found...")
         return deserializeWithResolvers(message, *additionalResolvers)
     }
 
-    fun validateLines(key: String, vararg additionalResolvers: TagResolver): List<Component> {
+    fun lines(key: String, vararg additionalResolvers: TagResolver): List<Component> {
         val message = cachedMessages[key] ?: return listOf(errorComponent("$key not found..."))
         val lines = message.lines()
         if (lines.size <= 1) return listOf(errorComponent("$key is not a multiline message!"))
         return lines.map { line -> deserializeWithResolvers(line, *additionalResolvers) }
     }
 
-    fun validateItemName(key: String, vararg additionalResolvers: TagResolver): Component {
+    fun displayName(key: String, vararg additionalResolvers: TagResolver): Component {
         val message = cachedMessages[key] ?: return errorComponent("$key not found...")
         return deserializeWithResolvers("<!i>$message", *additionalResolvers)
     }
 
-    fun validateItemLore(key: String, vararg additionalResolvers: TagResolver): List<Component> {
+    fun lore(key: String, vararg additionalResolvers: TagResolver): List<Component> {
         val message = cachedMessages[key] ?: return listOf(errorComponent("$key not found..."))
         val lines = message.lines()
         return if (lines.size == 1) {

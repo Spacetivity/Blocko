@@ -266,7 +266,7 @@ class GameArenaSetupHandler {
 
         val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
         val statusKey = "blocko.setup.scanning_board.finished.${if (scanningCompleted) "satisfied" else "unsatisfied"}"
-        val statusString = translation.validateLine(statusKey, Placeholder.parsed("id", arenaSetupData.arenaId))
+        val statusString = translation.line(statusKey, Placeholder.parsed("id", arenaSetupData.arenaId))
 
         player.translateMessage("blocko.setup.scanning_board.finished.title",
             Placeholder.component("status", statusString))

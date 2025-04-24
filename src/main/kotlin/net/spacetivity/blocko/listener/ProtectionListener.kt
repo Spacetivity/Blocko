@@ -34,7 +34,7 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     @EventHandler
     fun onServerListPing(event: ServerListPingEvent) {
         if (!this.plugin.globalConfigFile.motdEnabled) return
-        event.motd(this.plugin.translationHandler.getSelectedTranslation().validateLine("blocko.motd"))
+        event.motd(this.plugin.translationHandler.getSelectedTranslation().line("blocko.motd"))
     }
 
     @EventHandler

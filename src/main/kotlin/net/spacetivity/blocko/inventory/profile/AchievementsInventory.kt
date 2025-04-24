@@ -33,7 +33,7 @@ class AchievementsInventory : InventoryProvider {
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
 
         controller.setItem(0, 4, InteractiveItem.of(ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.validateItemName("blocko.inventory_utils.back_item_display_name"))
+            .setName(translation.displayName("blocko.inventory_utils.back_item_display_name"))
             .build()) { _, _, _ ->
             val gameArena: GameArena = player.getArena() ?: return@of
             val isShopItemActive: Boolean = gameArena.phase.isIdle()
@@ -44,7 +44,7 @@ class AchievementsInventory : InventoryProvider {
 
         if (pageItems.isEmpty()) {
             controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(ItemBuilder(Material.BARRIER)
-                .setName(translation.validateItemName("blocko.inventory.achievements.no_achievements_found.display_name"))
+                .setName(translation.displayName("blocko.inventory.achievements.no_achievements_found.display_name"))
                 .build()), InventoryPos.of(2, 3), InventoryPos.of(3, 5))
             return
         }
@@ -55,11 +55,11 @@ class AchievementsInventory : InventoryProvider {
         pagination.distributeItems(pageItems)
 
         controller.setItem(5, 7, InteractiveItem.previousPage(ItemBuilder(Material.ARROW)
-            .setName(translation.validateItemName("blocko.inventory_utils.previous_page_item_display_name"))
+            .setName(translation.displayName("blocko.inventory_utils.previous_page_item_display_name"))
             .build(), pagination))
 
         controller.setItem(5, 8, InteractiveItem.nextPage(ItemBuilder(Material.SPECTRAL_ARROW)
-            .setName(translation.validateItemName("blocko.inventory_utils.next_page_item_display_name"))
+            .setName(translation.displayName("blocko.inventory_utils.next_page_item_display_name"))
             .build(), pagination))
     }
 
@@ -76,12 +76,12 @@ class AchievementsInventory : InventoryProvider {
             val hasCompleted: Boolean = achievementPlayer.hasCompleted(achievement)
 
             val suffixPlaceholder: TagResolver = if (hasCompleted)
-                Placeholder.parsed("suffix", translation.validateLineAsString("blocko.inventory.achievements.achievement_item.suffix"))
+                Placeholder.parsed("suffix", translation.lineAsString("blocko.inventory.achievements.achievement_item.suffix"))
             else
                 Placeholder.parsed("suffix", "")
 
             val itemBuilder = ItemBuilder(if (hasCompleted) Material.LIME_DYE else Material.GRAY_DYE)
-                .setName(translation.validateItemName("blocko.inventory.achievements.achievement_item.display_name",
+                .setName(translation.displayName("blocko.inventory.achievements.achievement_item.display_name",
                     Placeholder.parsed("achievement_color", "<${if (hasCompleted) NamedTextColor.GREEN.asHexString() else NamedTextColor.DARK_GRAY.asHexString()}>"),
                     Placeholder.parsed("achievement_name", achievement.name),
                     suffixPlaceholder))

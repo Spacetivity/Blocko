@@ -6,7 +6,7 @@ import net.spacetivity.blocko.player.GamePlayer
 
 open class Achievement(val translationKey: String, val rewardedCoins: Int, private val requirements: List<Requirement>) {
 
-    val name: String = BlockoGame.instance.translationHandler.getSelectedTranslation().validateLineAsString(BlockoGame.instance.getAchievementKey(true, this.translationKey))
+    val name: String = BlockoGame.instance.translationHandler.getSelectedTranslation().lineAsString(BlockoGame.instance.getAchievementKey(true, this.translationKey))
 
     fun getDescription(gamePlayer: GamePlayer): MutableList<Component> {
         val description: MutableList<Component> = mutableListOf()

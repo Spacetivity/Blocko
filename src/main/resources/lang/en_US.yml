@@ -26,7 +26,13 @@ blocko.setup:
   arena_already_configurated_by_player: "<prefix> <gray>This arena is already being configured."
   setup_mode_activated: "<prefix> <gray>You are now in setup mode!"
   setup_mode_deactivated: "<prefix> <gray>You are no longer in setup mode!"
-  setup_tool.mode_change: "<prefix> <gray>Tool mode set to: <yellow><mode>"
+
+  tool.display_name: "<yellow><bold>Setup</bold> <gray>(<white>SHIFT <gray>+ <white>Left<gray>/<white>Right-Click<gray> = <white>Change Mode<gray>)"
+  tool.lore.mode_title.active: "<green><mode_id> <mode>"
+  tool.lore.mode_title.not_active: "<blue><mode_id> <white><mode>"
+  tool.lore.separator: "<yellow>=<gray>"
+  tool.lore.mode_keybind_line: "   <blue>- <gray><keybind><data_prefix><optional_data>"
+  tool.mode_change: "<prefix> <gray>Tool mode set to: <yellow><mode>"
 
   scanning_board.select_first_corner: "<prefix> <yellow>First <gray>corner selected."
   scanning_board.select_second_corner: "<prefix> <yellow>Second <gray>corner selected."
@@ -37,7 +43,6 @@ blocko.setup:
   scanning_board.finished.satisfied: "<green>All required results found"
   scanning_board.finished.title: "<prefix> <gray>Scanning finished. <status>"
   scanning_board.finished.line: "<dark_gray>» <yellow><result><dark_gray>: <gray><amount><yellow>x"
-
   scanning_board.missing_fields.not_found: "<prefix> <gray>No missing fields found."
   scanning_board.missing_fields.title: "<prefix> <gray>Missing fields:"
   scanning_board.missing_fields.line: "<dark_gray>» <yellow><result><dark_gray>: <gray><amount><yellow>x"

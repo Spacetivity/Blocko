@@ -3,6 +3,7 @@ package net.spacetivity.blocko.listener
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.setup.GameArenaSetupData
 import net.spacetivity.blocko.arena.setup.GameArenaSetupHandler
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -23,22 +24,15 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
     }
 
     @EventHandler
-    fun onQuitWhilstInSetup(event: PlayerQuitEvent) {
+    fun onQuitWhileInSetup(event: PlayerQuitEvent) {
         val player: Player = event.player
         val setupData: GameArenaSetupData = this.setupHandler.getSetupData(player.uniqueId) ?: return
+
+        this.setupHandler.handleSetupEnd(player, false)
+
+        player.inventory.removeAll { PersistentDataUtils.hasData(it.itemMeta, Constants.SETUP_TOOL_KEY) }
         player.inventory.remove(setupData.setupTool.itemStack)
     }
-
-//    @EventHandler
-//    fun onBlockBreak(event: BlockBreakEvent) {
-//        val player: Player = event.player
-//
-//        val heldItemStack: ItemStack = player.inventory.itemInMainHand
-//        if (heldItemStack.type == Material.AIR) return
-//        if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, "setupTool")) return
-//
-//        event.isCancelled = true
-//    }
 
     @EventHandler
     fun onInteractWithSetupTool(event: PlayerInteractEvent) {
@@ -47,9 +41,8 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
         if (event.hand != EquipmentSlot.HAND) return
 
         val heldItemStack: ItemStack = player.inventory.itemInMainHand
-
         if (heldItemStack.type == Material.AIR) return
-        if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, "setupTool")) return
+        if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
 
         val setupData: GameArenaSetupData = this.setupHandler.getSetupData(player.uniqueId) ?: return
 
@@ -66,7 +59,7 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
 
     @EventHandler
     fun onDropSetupTool(event: PlayerDropItemEvent) {
-        if (!PersistentDataUtils.hasData(event.itemDrop.itemStack.itemMeta, "setupTool")) return
+        if (!PersistentDataUtils.hasData(event.itemDrop.itemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
         event.isCancelled = true
     }
 

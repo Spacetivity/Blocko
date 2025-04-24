@@ -6,9 +6,9 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
-import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
@@ -21,7 +21,7 @@ object GameScoreboardUtils {
         val initialEntityStatus = GameEntityStatus.AT_SPAWN
 
         BlockoGame.instance.sidebarHandler.registerSidebar(SidebarBuilder(player)
-            .setTitle(translation.validateLine("blocko.sidebar.title"))
+            .setTitle(translation.line("blocko.sidebar.title"))
             .addBlankLine()
             .addLine(getTeamComponent(translation, player.toGamePlayerInstance()))
             .addBlankLine()
@@ -90,21 +90,21 @@ object GameScoreboardUtils {
             teamName = gameTeam.name
         }
 
-        return translation.validateLine("blocko.sidebar.line.team_name", Placeholder.parsed("team_color", "<$teamColorHex>"), Placeholder.parsed("team_name", teamName))
+        return translation.line("blocko.sidebar.line.team_name", Placeholder.parsed("team_color", "<$teamColorHex>"), Placeholder.parsed("team_name", teamName))
     }
 
     private fun getStatusComponent(translation: Translation, entityId: Int, status: GameEntityStatus): Component {
-        return translation.validateLine("blocko.sidebar.line.entity_status", Placeholder.parsed("id", entityId.toString()), Placeholder.parsed("status", status.display))
+        return translation.line("blocko.sidebar.line.entity_status", Placeholder.parsed("id", entityId.toString()), Placeholder.parsed("status", status.display))
     }
 
     private fun getControllingTeamComponent(translation: Translation, gameTeam: GameTeam?): Component {
-        if (gameTeam == null) return translation.validateLine("blocko.sidebar.line.controlling_team_name.not_ingame")
-        return translation.validateLine("blocko.sidebar.line.controlling_team_name.ingame", Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"), Placeholder.parsed("team_name", gameTeam.name))
+        if (gameTeam == null) return translation.line("blocko.sidebar.line.controlling_team_name.not_ingame")
+        return translation.line("blocko.sidebar.line.controlling_team_name.ingame", Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"), Placeholder.parsed("team_name", gameTeam.name))
     }
 
     private fun getDicedNumberComponent(translation: Translation, dicedNumber: Int?): Component {
         val placeholder: TagResolver.Single = Placeholder.parsed("number", dicedNumber?.toString() ?: "-/-")
-        return translation.validateLine("blocko.sidebar.line.dice_status", placeholder)
+        return translation.line("blocko.sidebar.line.dice_status", placeholder)
     }
 
     private fun getSidebarLineForEntity(entityId: Int): Int? {

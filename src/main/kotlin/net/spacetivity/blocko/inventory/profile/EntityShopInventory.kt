@@ -40,7 +40,7 @@ class EntityShopInventory : InventoryProvider {
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
 
         controller.setItem(0, 4, InteractiveItem.of(ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.validateItemName("blocko.inventory_utils.back_item_display_name"))
+            .setName(translation.displayName("blocko.inventory_utils.back_item_display_name"))
             .build()) { _, _, _ ->
             val gameArena: GameArena = player.getArena() ?: return@of
             val isShopItemActive: Boolean = gameArena.phase.isIdle()
@@ -53,7 +53,7 @@ class EntityShopInventory : InventoryProvider {
 
         if (pageItems.isEmpty()) {
             controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(ItemBuilder(Material.BARRIER)
-                .setName(translation.validateItemName("blocko.inventory.entity_shop.no_entity_types_found.display_name"))
+                .setName(translation.displayName("blocko.inventory.entity_shop.no_entity_types_found.display_name"))
                 .build()), InventoryPos.of(2, 3), InventoryPos.of(3, 5))
             return
         }
@@ -68,11 +68,11 @@ class EntityShopInventory : InventoryProvider {
             .build()))
 
         controller.setItem(5, 7, InteractiveItem.previousPage(ItemBuilder(Material.ARROW)
-            .setName(translation.validateItemName("blocko.inventory_utils.previous_page_item_display_name"))
+            .setName(translation.displayName("blocko.inventory_utils.previous_page_item_display_name"))
             .build(), pagination))
 
         controller.setItem(5, 8, InteractiveItem.nextPage(ItemBuilder(Material.SPECTRAL_ARROW)
-            .setName(translation.validateItemName("blocko.inventory_utils.next_page_item_display_name"))
+            .setName(translation.displayName("blocko.inventory_utils.next_page_item_display_name"))
             .build(), pagination))
     }
 
@@ -143,7 +143,7 @@ class EntityShopInventory : InventoryProvider {
 
     private fun buildBalanceDisplayName(translation: Translation, player: Player): Component {
         val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)!!
-        return translation.validateItemName("blocko.inventory.entity_shop.balance_item.display_name", Placeholder.parsed("amount", NumberUtils.format(statsPlayer.coins)))
+        return translation.displayName("blocko.inventory.entity_shop.balance_item.display_name", Placeholder.parsed("amount", NumberUtils.format(statsPlayer.coins)))
     }
 
     private fun setEntityTypeItemGlow(player: Player, controller: InventoryController, interactiveItem: InteractiveItem, gameEntityType: GameEntityType) {
@@ -168,11 +168,11 @@ class EntityShopInventory : InventoryProvider {
         val isSelected: Boolean = gamePlayer.selectedEntityType == gameEntityType
 
         val displayNameSuffixPlaceholder = if (isUnlocked) Placeholder.parsed("suffix",
-            translation.validateLineAsString("blocko.inventory.entity_shop.entity_type_item.suffix.${if (isSelected) "selected" else "unlocked"}"))
+            translation.lineAsString("blocko.inventory.entity_shop.entity_type_item.suffix.${if (isSelected) "selected" else "unlocked"}"))
         else
             Placeholder.parsed("suffix", "")
 
-        return translation.validateItemName("blocko.inventory.entity_shop.entity_type_item.display_name",
+        return translation.displayName("blocko.inventory.entity_shop.entity_type_item.display_name",
             Placeholder.parsed("status_color", "<${statusColor.asHexString()}>"),
             Placeholder.parsed("entity_type_name", gameEntityType.getCorrectedTypeName()),
             displayNameSuffixPlaceholder)
@@ -189,11 +189,11 @@ class EntityShopInventory : InventoryProvider {
         val loreSuffixPlaceholder: TagResolver.Single = if (isUnlocked)
             Placeholder.parsed("lore_suffix", "")
         else if (gameEntityType.price > statsPlayer.coins)
-            Placeholder.parsed("lore_suffix", translation.validateLineAsString("blocko.inventory.entity_shop.entity_type_item.lore.suffix.not_buyable"))
+            Placeholder.parsed("lore_suffix", translation.lineAsString("blocko.inventory.entity_shop.entity_type_item.lore.suffix.not_buyable"))
         else
-            Placeholder.parsed("lore_suffix", translation.validateLineAsString("blocko.inventory.entity_shop.entity_type_item.lore.suffix.buyable"))
+            Placeholder.parsed("lore_suffix", translation.lineAsString("blocko.inventory.entity_shop.entity_type_item.lore.suffix.buyable"))
 
-        return translation.validateItemLore(loreKey,
+        return translation.lore(loreKey,
             Placeholder.parsed("price", NumberUtils.format(gameEntityType.price)),
             possibleAchievementPlaceholder,
             loreSuffixPlaceholder)

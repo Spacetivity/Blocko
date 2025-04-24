@@ -40,7 +40,7 @@ object TranslationFileLoader {
         val file = File(localesDirectory, "$languageName.yml")
         if (file.exists()) return
 
-        val inputStream: InputStream = BlockoGame.instance.getResource("lang/$languageName.yml") ?: throw NullPointerException("File (lang/$languageName.yml) not found!!!!")
+        val inputStream: InputStream = BlockoGame.instance.getResource("lang/$languageName.yml") ?: throw NullPointerException("File (lang/$languageName.yml) not found!")
         inputStream.use { source -> FileOutputStream(file).use { output -> source.copyTo(output) } }
     }
 

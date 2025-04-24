@@ -30,8 +30,8 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
         val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
         hotbarItems[0] = ItemBuilder(Material.CLOCK)
-            .setName(translation.validateItemName("blocko.items.profile.display_name"))
-            .setLoreByComponent(translation.validateItemLore("blocko.items.profile.lore"))
+            .setName(translation.displayName("blocko.items.profile.display_name"))
+            .setLoreByComponent(translation.lore("blocko.items.profile.lore"))
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
                 InventoryUtils.openProfileInventory(player, true)
@@ -39,8 +39,8 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
             .build()
 
         hotbarItems[1] = ItemBuilder(Material.RED_BED)
-            .setName(translation.validateItemName("blocko.items.team_selector.display_name"))
-            .setLoreByComponent(translation.validateItemLore("blocko.items.team_selector.lore"))
+            .setName(translation.displayName("blocko.items.team_selector.display_name"))
+            .setLoreByComponent(translation.lore("blocko.items.team_selector.lore"))
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
                 val gameArena: GameArena = player.getArena() ?: return@onInteract
@@ -49,8 +49,8 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
             .build()
 
         hotbarItems[4] = ItemBuilder(Material.PLAYER_HEAD)
-            .setName(translation.validateItemName("blocko.items.instant_starter.display_name"))
-            .setLoreByComponent(translation.validateItemLore("blocko.items.instant_starter.lore"))
+            .setName(translation.displayName("blocko.items.instant_starter.display_name"))
+            .setLoreByComponent(translation.lore("blocko.items.instant_starter.lore"))
             .setOwner(Constants.PLAY_SKULL)
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
@@ -74,8 +74,8 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
             .build()
 
         hotbarItems[7] = ItemBuilder(Material.COMPARATOR)
-            .setName(translation.validateItemName("blocko.items.host_settings.display_name"))
-            .setLoreByComponent(translation.validateItemLore("blocko.items.host_settings.lore"))
+            .setName(translation.displayName("blocko.items.host_settings.display_name"))
+            .setLoreByComponent(translation.lore("blocko.items.host_settings.lore"))
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
                 val gameArena: GameArena = player.getArena() ?: return@onInteract
@@ -90,7 +90,7 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
             .build()
 
         hotbarItems[8] = ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.validateItemName("blocko.items.leave.display_name"))
+            .setName(translation.displayName("blocko.items.leave.display_name"))
             .onInteract { event: PlayerInteractEvent ->
                 val player: Player = event.player
                 val gameArena: GameArena = player.getArena() ?: return@onInteract

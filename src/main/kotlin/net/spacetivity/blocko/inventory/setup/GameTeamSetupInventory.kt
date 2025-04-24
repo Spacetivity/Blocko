@@ -46,10 +46,10 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
 
         for (gameTeam: GameTeam in arenaSetupData.gameTeams) {
             items.add(InteractiveItem.of(ItemBuilder(Material.LEATHER_CHESTPLATE)
-                .setName(translation.validateItemName("blocko.inventory.game_team_setup.team_item.display_name",
+                .setName(translation.displayName("blocko.inventory.game_team_setup.team_item.display_name",
                     Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
                     Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() })))
-                .setLoreByComponent(translation.validateItemLore("blocko.inventory.game_team_setup.team_item.lore.entrance"))
+                .setLoreByComponent(translation.lore("blocko.inventory.game_team_setup.team_item.lore.entrance"))
                 .setArmorColor(Color.fromRGB(gameTeam.color.red(), gameTeam.color.green(), gameTeam.color.blue()))
                 .build())
             { _, _, _ ->
@@ -86,6 +86,6 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
 }
 
 enum class InvType {
-    ENTRANCE,
-    IDS
+    IDS,
+    ENTRANCE
 }

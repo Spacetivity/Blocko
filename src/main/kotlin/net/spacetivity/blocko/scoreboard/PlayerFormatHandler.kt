@@ -32,7 +32,7 @@ class PlayerFormatHandler {
         if (gamePlayer?.teamName != null)
             color = BlockoGame.instance.gameTeamHandler.getTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!.color
 
-        val prefix: Component = BlockoGame.instance.translationHandler.getSelectedTranslation().validateLine("blocko.format.tablist",
+        val prefix: Component = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.format.tablist",
             Placeholder.parsed("color", "<${color.asHexString()}>"))
 
         val team: Team = ScoreboardUtils.registerScoreboardTeamWithContent(scoreboard, teamName, prefix, Component.text(""))

@@ -11,18 +11,18 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.impl.BadMannersAchievement
 import net.spacetivity.blocko.achievement.impl.FairPlayAchievement
 import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.sign.GameArenaSign
 import net.spacetivity.blocko.arena.sign.GameArenaSignHandler
-import net.spacetivity.blocko.entity.GameEntity
-import net.spacetivity.blocko.arena.getArena
-import net.spacetivity.blocko.player.getTeam
 import net.spacetivity.blocko.arena.toGamePlayerInstance
-import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
+import net.spacetivity.blocko.player.getTeam
 import net.spacetivity.blocko.translation.Translation
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
@@ -79,7 +79,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                 .reversed()
 
             if (gameArenas.isEmpty()) {
-                player.kick(this.plugin.translationHandler.getSelectedTranslation().validateLine("no_free_arena_found"))
+                player.kick(this.plugin.translationHandler.getSelectedTranslation().line("no_free_arena_found"))
                 return
             }
 
@@ -134,7 +134,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
         event.viewers().removeIf { isPlaying == (player.getArena() == null) }
 
         event.renderer { _, _, message, _ ->
-            translation.validateLine("blocko.format.chat", locationPlaceholder, colorPlaceholder, namePlaceholder, Placeholder.component("message", message))
+            translation.line("blocko.format.chat", locationPlaceholder, colorPlaceholder, namePlaceholder, Placeholder.component("message", message))
         }
     }
 

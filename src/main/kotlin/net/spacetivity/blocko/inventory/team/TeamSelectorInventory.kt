@@ -86,7 +86,7 @@ class TeamSelectorInventory(private val gameArena: GameArena) : InventoryProvide
     }
 
     private fun buildTeamItemDisplayName(gameTeam: GameTeam, translation: Translation): Component {
-        return translation.validateItemName("blocko.inventory.team_selector.team_item.display_name",
+        return translation.displayName("blocko.inventory.team_selector.team_item.display_name",
             Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
             Placeholder.parsed("team_name", gameTeam.name),
             Placeholder.parsed("member_count", gameTeam.teamMembers.size.toString()),
@@ -98,7 +98,7 @@ class TeamSelectorInventory(private val gameArena: GameArena) : InventoryProvide
         val memberName: String = if (teamMemberUniqueId == null) "-/-" else Bukkit.getPlayer(teamMemberUniqueId)?.name
             ?: "-/-"
 
-        return translation.validateItemLore("blocko.inventory.team_selector.team_item.lore",
+        return translation.lore("blocko.inventory.team_selector.team_item.lore",
             Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
             Placeholder.parsed("member_name", memberName),
             Placeholder.parsed("team_name", gameTeam.name))

@@ -224,7 +224,7 @@ class GamePlayActionHandler {
 
         val timeColorPlaceholder = Placeholder.parsed("time_color", "<$timeColor>")
 
-        val bossbarText: Component = BlockoGame.instance.translationHandler.getSelectedTranslation().validateLine(
+        val bossbarText: Component = BlockoGame.instance.translationHandler.getSelectedTranslation().line(
             "blocko.bossbar.timeout",
             Placeholder.parsed("team_color", "<${team.color.asHexString()}>"),
             Placeholder.parsed("team_name", team.name.lowercase().replaceFirstChar { it.uppercase() }),
