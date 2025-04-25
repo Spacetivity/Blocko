@@ -14,6 +14,7 @@ import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
+import net.spacetivity.blocko.utils.Constants.ENTITY_SELECTOR_KEY
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -91,10 +92,10 @@ class GamePlayActionHandler {
             getHighlightedEntities(gamePlayer, arena).forEach { it.toggleHighlighting(false) }
             return
         }
-        if (!PersistentDataUtils.hasData(itemStack.itemMeta, "entitySelector"))
+        if (!PersistentDataUtils.has(itemStack.itemMeta, ENTITY_SELECTOR_KEY))
             return
 
-        val entityId: Int = PersistentDataUtils.getData(itemStack.itemMeta, "entitySelector", Int::class.java)
+        val entityId: Int = PersistentDataUtils.get(itemStack.itemMeta, ENTITY_SELECTOR_KEY, Int::class.java)
         val gameEntity = BlockoGame.instance.gameEntityHandler
             .getEntitiesFromTeam(arena.id, gamePlayer.teamName!!).find { it.entityId == entityId } ?: return
 

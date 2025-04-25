@@ -10,6 +10,7 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.team.GameTeamLocation
+import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.MetadataUtils
 import org.bukkit.Location
@@ -54,7 +55,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
 
         val gameTeam: GameTeam = BlockoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
         this.livingEntity!!.customName(Component.text(this.teamName.uppercase(), gameTeam.color, TextDecoration.BOLD))
-        MetadataUtils.apply(this.livingEntity!!, "teamName", this.teamName)
+        MetadataUtils.apply(this.livingEntity!!, TEAM_NAME_KEY, this.teamName)
     }
 
     fun toggleHighlighting(active: Boolean) {

@@ -8,6 +8,7 @@ import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.entity.GameEntity
+import net.spacetivity.blocko.item.*
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.player.GamePlayer
@@ -18,13 +19,12 @@ import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
+import net.spacetivity.blocko.utils.Constants.ENTITY_SELECTOR_KEY
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.inventory.api.SpaceInventoryProvider
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import java.time.Duration
 import java.util.*
@@ -96,54 +96,61 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         hotbarItems[0] = BlockoGame.instance.diceHandler.getDiceItem()
 
         for ((entityIndex, i) in (1..4).withIndex()) {
-            hotbarItems[i] = ItemBuilder(Material.ARMOR_STAND)
-                .setName(translation.displayName("blocko.main_game_loop.entity_selector_display_name", Placeholder.parsed("count", (entityIndex + 1).toString())))
-                .setData("entitySelector", entityIndex)
-                .build()
+            hotbarItems[i] = itemStack(Material.ARMOR_STAND) {
+                meta {
+                    name = translation.displayName("blocko.main_game_loop.entity_selector_display_name", Placeholder.parsed("count", (entityIndex + 1).toString()))
+                    applyPersistentData(ENTITY_SELECTOR_KEY, entityIndex)
+                }
+            }
         }
 
-        hotbarItems[7] = ItemBuilder(Material.CLOCK)
-            .setName(translation.displayName("blocko.items.profile.display_name"))
-            .setLoreByComponent(translation.lore("blocko.items.profile.lore"))
-            .onInteract { event: PlayerInteractEvent ->
-                val player = event.player
-                InventoryUtils.openProfileInventory(player, false)
+        hotbarItems[7] = itemStack(Material.CLOCK) {
+            meta {
+                name = translation.displayName("blocko.items.profile.display_name")
+                lore(translation.lore("blocko.items.profile.lore"))
             }
-            .build()
+        }.onInteract { event ->
+            InventoryUtils.openProfileInventory(event.player, false)
+        }
 
-        hotbarItems[8] = ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.displayName("blocko.items.leave.display_name"))
-            .onInteract { event ->
-                val player = event.player
-                val gameArena = player.getArena() ?: return@onInteract
+        hotbarItems[8] = itemStack(Material.SLIME_BALL) {
+            meta {
+                name = translation.displayName("blocko.items.leave.display_name")
+            }
+        }.onInteract { event ->
+            val player = event.player
+            val gameArena = player.getArena() ?: return@onInteract
 
-                SpaceInventoryProvider.api.openConfirmationInventory(
-                    player,
-                    translation.displayName("blocko.inventory.leave.title"),
-                    ItemBuilder(Material.OAK_DOOR).setName(translation.displayName("blocko.inventory.leave.display_item.display_name")).build(),
-                    {
-                        gameArena.quit(player)
-                    },
-                    {
-                        player.closeInventory()
+            SpaceInventoryProvider.api.openConfirmationInventory(
+                player,
+                translation.displayName("blocko.inventory.leave.title"),
+                itemStack(Material.OAK_DOOR) {
+                    meta {
+                        name = translation.displayName("blocko.inventory.leave.display_item.display_name")
                     }
-                )
-            }
-            .build()
-
+                },
+                {
+                    gameArena.quit(player)
+                },
+                {
+                    player.closeInventory()
+                }
+            )
+        }
     }
 
     override fun initSpectatorHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
         val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
-        hotbarItems[8] = ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.displayName("blocko.items.leave.display_name"))
-            .onInteract { event: PlayerInteractEvent ->
-                val player = event.player
-                val gameArena = player.getArena() ?: return@onInteract
-                gameArena.quitAsSpectator(player)
+        hotbarItems[8] = itemStack(Material.SLIME_BALL) {
+            meta {
+                name = translation.displayName("blocko.items.leave.display_name")
             }
-            .build()
+        }.onInteract { event ->
+            val player = event.player
+            val gameArena = player.getArena() ?: return@onInteract
+            gameArena.quitAsSpectator(player)
+        }
     }
 
     fun isInControllingTeam(uuid: UUID): Boolean {
@@ -227,18 +234,12 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         return getArena().currentPlayers.filter { it.hasSavedAllEntities() }.size
     }
 
+    //TODO: check if this new impl works lol (old function was quite dumb...)
     private fun hasControllingTeamMemberDicedSix(dicedNumber: Int?): Boolean {
         val controllingTeam = getControllingTeam() ?: return false
         if (controllingTeam.deactivated) return false
 
-        var hasDicedSix = false
-
-        for (teamMemberUniqueId in controllingTeam.teamMembers) {
-            if (dicedNumber == null || dicedNumber != 6) continue
-            hasDicedSix = true
-        }
-
-        return hasDicedSix
+        return dicedNumber != null && dicedNumber == 6
     }
 
     private fun getHighlightedEntities(gamePlayer: GamePlayer, gameArena: GameArena): List<GameEntity> {

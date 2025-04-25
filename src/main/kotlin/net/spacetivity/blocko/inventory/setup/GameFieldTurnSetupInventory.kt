@@ -5,8 +5,11 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.setup.GameArenaSetupData
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.PathFace
+import net.spacetivity.blocko.item.itemStack
+import net.spacetivity.blocko.item.meta
+import net.spacetivity.blocko.item.name
+import net.spacetivity.blocko.item.setValue
 import net.spacetivity.blocko.translation.Translation
-import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.inventory.api.inventory.InventoryController
 import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
@@ -15,6 +18,7 @@ import net.spacetivity.inventory.api.item.InventoryPos
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.meta.SkullMeta
 
 @InventoryProperties(id = "turn_inv", rows = 1, columns = 9)
 class GameFieldTurnSetupInventory(private val blockLocation: Location) : InventoryProvider {
@@ -40,11 +44,13 @@ class GameFieldTurnSetupInventory(private val blockLocation: Location) : Invento
         val items: MutableList<InteractiveItem> = mutableListOf()
 
         for (pathFace: PathFace in PathFace.entries) {
-            items.add(InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
-                .setName(translation.displayName("blocko.inventory.game_field_set_turn.turn_item.display_name", Placeholder.parsed("face", pathFace.name)))
-                .setLoreByComponent(translation.lore("blocko.inventory.game_field_set_turn.turn_item.lore"))
-                .setOwner(pathFace.headValue)
-                .build())
+            items.add(InteractiveItem.of(itemStack(Material.PLAYER_HEAD){
+                meta<SkullMeta> {
+                    name = translation.displayName("blocko.inventory.game_field_set_turn.turn_item.display_name", Placeholder.parsed("face", pathFace.name))
+                    lore(translation.lore("blocko.inventory.game_field_set_turn.turn_item.lore"))
+                    setValue(pathFace.headValue)
+                }
+            })
             { _, _, _ ->
                 player.closeInventory()
                 val setupData: GameArenaSetupData = BlockoGame.instance.gameArenaSetupHandler.getSetupData(player.uniqueId)

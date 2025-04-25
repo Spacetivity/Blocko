@@ -4,13 +4,14 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.item.*
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
+import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.inventory.api.inventory.InventoryController
 import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
@@ -18,7 +19,7 @@ import net.spacetivity.inventory.api.item.InteractiveItem
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemFlag
+import org.bukkit.inventory.meta.LeatherArmorMeta
 
 @InventoryProperties(id = "stats_team_selector_inv", rows = 5, columns = 9)
 class StatsTeamSelectorInventory(private val gameArena: GameArena) : InventoryProvider {
@@ -29,9 +30,11 @@ class StatsTeamSelectorInventory(private val gameArena: GameArena) : InventoryPr
         controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
 
-        controller.setItem(0, 4, InteractiveItem.of(ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.displayName("blocko.inventory_utils.back_item_display_name"))
-            .build()) { _, _, _ ->
+        controller.setItem(0, 4, InteractiveItem.of(itemStack(Material.SLIME_BALL) {
+            meta {
+                name = translation.displayName("blocko.inventory_utils.back_item_display_name")
+            }
+        }) { _, _, _ ->
             val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)
                 ?: return@of
             InventoryUtils.openStatsInventory(player, statsPlayer)
@@ -53,18 +56,30 @@ class StatsTeamSelectorInventory(private val gameArena: GameArena) : InventoryPr
         val teamDisplayNameKey = "blocko.inventory.stats_team_selector.team_item.display_name.${if (isNotEmptyTeam) "active" else "not_active"}"
         val teamLoreKey = "blocko.inventory.stats_team_selector.team_item.lore.${if (isNotEmptyTeam) "active" else "not_active"}"
 
-        val itemBuilder = ItemBuilder(if (isNotEmptyTeam) Material.LEATHER_CHESTPLATE else Material.BARRIER)
-            .setName(translation.displayName(teamDisplayNameKey,
-                Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
-                Placeholder.parsed("team_name", gameTeam.name)))
-            .setLoreByComponent(translation.lore(teamLoreKey))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_DYE)
-            .setData("teamName", gameTeam.name)
+        val teamItemStack = itemStack(if (isNotEmptyTeam) Material.LEATHER_CHESTPLATE else Material.BARRIER) {
+            if (isNotEmptyTeam) {
+                meta<LeatherArmorMeta> {
+                    name = translation.displayName(teamDisplayNameKey,
+                        Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+                        Placeholder.parsed("team_name", gameTeam.name))
+                    lore(translation.lore(teamLoreKey))
+                    hideExtraInfo()
+                    setColor(Color.fromRGB(teamColor.red(), teamColor.green(), teamColor.blue()))
+                    applyPersistentData(TEAM_NAME_KEY, gameTeam.name)
+                }
+            } else {
+                meta {
+                    name = translation.displayName(teamDisplayNameKey,
+                        Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+                        Placeholder.parsed("team_name", gameTeam.name))
+                    lore(translation.lore(teamLoreKey))
+                    hideExtraInfo()
+                    applyPersistentData(TEAM_NAME_KEY, gameTeam.name)
+                }
+            }
+        }
 
-        if (isNotEmptyTeam)
-            itemBuilder.setArmorColor(Color.fromRGB(teamColor.red(), teamColor.green(), teamColor.blue()))
-
-        return InteractiveItem.of(itemBuilder.build()) { _, _, _ ->
+        return InteractiveItem.of(teamItemStack) { _, _, _ ->
 
             if (!isNotEmptyTeam) return@of
 

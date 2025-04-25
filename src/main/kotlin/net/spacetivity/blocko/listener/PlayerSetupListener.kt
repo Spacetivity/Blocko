@@ -30,7 +30,7 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
 
         this.setupHandler.handleSetupEnd(player, false)
 
-        player.inventory.removeAll { PersistentDataUtils.hasData(it.itemMeta, Constants.SETUP_TOOL_KEY) }
+        player.inventory.removeAll { PersistentDataUtils.has(it.itemMeta, Constants.SETUP_TOOL_KEY) }
         player.inventory.remove(setupData.setupTool.itemStack)
     }
 
@@ -42,7 +42,7 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
 
         val heldItemStack: ItemStack = player.inventory.itemInMainHand
         if (heldItemStack.type == Material.AIR) return
-        if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
+        if (!PersistentDataUtils.has(heldItemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
 
         val setupData: GameArenaSetupData = this.setupHandler.getSetupData(player.uniqueId) ?: return
 
@@ -59,7 +59,7 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
 
     @EventHandler
     fun onDropSetupTool(event: PlayerDropItemEvent) {
-        if (!PersistentDataUtils.hasData(event.itemDrop.itemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
+        if (!PersistentDataUtils.has(event.itemDrop.itemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
         event.isCancelled = true
     }
 

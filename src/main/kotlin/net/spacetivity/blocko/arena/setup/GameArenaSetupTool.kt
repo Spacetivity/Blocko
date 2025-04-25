@@ -5,45 +5,51 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.inventory.setup.InvType
+import net.spacetivity.blocko.item.hideExtraInfo
+import net.spacetivity.blocko.item.itemStack
+import net.spacetivity.blocko.item.meta
+import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
 class GameArenaSetupTool(private val holder: Player) {
 
-    var currentMode: ToolMode = getFallbackToolMode()
-
-    val itemStack: ItemStack
-
-    var currentTeamName: String? = null
-    var fieldIndex: Int = 0
 
     val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+    val itemStack: ItemStack
+
+    var currentMode: ToolMode = getFallbackToolMode()
+    var currentTeamName: String? = null
+    var fieldIndex: Int = 0
 
     init {
         val type = Material.entries.find { it.name == BlockoGame.instance.globalConfigFile.setupItemType }
             ?: throw NullPointerException("Invalid setup item type!")
 
-        this.itemStack = ItemBuilder(type)
-            .setName(this.translation.displayName("blocko.setup.tool.display_name"))
-            .setLoreByComponent(fetchLore(this.translation))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
-            .build()
+        this.itemStack = itemStack(type) {
+            meta {
+                name = translation.displayName("blocko.setup.tool.display_name")
+                lore(fetchLore(translation))
+                hideExtraInfo()
+            }
+        }
     }
 
     fun setToPlayer() {
-        PersistentDataUtils.setData(this.itemStack, this.itemStack.itemMeta, Constants.SETUP_TOOL_KEY, this.holder.uniqueId.toString())
+        val meta = itemStack.itemMeta
+        PersistentDataUtils.apply(meta, Constants.SETUP_TOOL_KEY, this.holder.uniqueId.toString())
+        this.itemStack.itemMeta = meta
+
         this.holder.inventory.addItem(this.itemStack)
     }
 

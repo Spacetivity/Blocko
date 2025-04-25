@@ -4,11 +4,14 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.setup.GameArenaSetupData
 import net.spacetivity.blocko.field.GameField
+import net.spacetivity.blocko.item.hideExtraInfo
+import net.spacetivity.blocko.item.itemStack
+import net.spacetivity.blocko.item.meta
+import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.inventory.api.inventory.InventoryController
 import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
@@ -18,6 +21,7 @@ import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.meta.LeatherArmorMeta
 
 @InventoryProperties(id = "garage_field_inv", rows = 1, 9)
 class GameTeamSetupInventory(private val type: InvType, private val location: Location) : InventoryProvider {
@@ -45,13 +49,17 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
             ?: return items
 
         for (gameTeam: GameTeam in arenaSetupData.gameTeams) {
-            items.add(InteractiveItem.of(ItemBuilder(Material.LEATHER_CHESTPLATE)
-                .setName(translation.displayName("blocko.inventory.game_team_setup.team_item.display_name",
-                    Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
-                    Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() })))
-                .setLoreByComponent(translation.lore("blocko.inventory.game_team_setup.team_item.lore.entrance"))
-                .setArmorColor(Color.fromRGB(gameTeam.color.red(), gameTeam.color.green(), gameTeam.color.blue()))
-                .build())
+            items.add(InteractiveItem.of(itemStack(Material.LEATHER_CHESTPLATE) {
+                meta<LeatherArmorMeta> {
+                    name = translation.displayName("blocko.inventory.game_team_setup.team_item.display_name",
+                        Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+                        Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
+
+                    lore(translation.lore("blocko.inventory.game_team_setup.team_item.lore.entrance"))
+                    setColor(Color.fromRGB(gameTeam.color.red(), gameTeam.color.green(), gameTeam.color.blue()))
+                    hideExtraInfo()
+                }
+            })
             { _, _, _ ->
                 player.closeInventory()
                 when (this.type) {

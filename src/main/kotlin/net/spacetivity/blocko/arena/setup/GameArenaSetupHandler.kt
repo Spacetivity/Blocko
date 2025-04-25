@@ -14,6 +14,7 @@ import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.team.GameTeamLocation
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.utils.Constants.DISPLAY_ENTITY_KEY
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.MetadataUtils
 import net.spacetivity.blocko.utils.ScoreboardUtils
@@ -132,9 +133,9 @@ class GameArenaSetupHandler {
         for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {
             for (entity: Entity in entities) {
                 if (entity !is LivingEntity) continue
-                if (!entity.hasMetadata("displayEntity")) continue
+                if (!entity.hasMetadata(DISPLAY_ENTITY_KEY)) continue
 
-                val arenaId: String = MetadataUtils.get(entity, "displayEntity")!!
+                val arenaId: String = MetadataUtils.get(entity, DISPLAY_ENTITY_KEY)!!
                 if (!arenaSetupData.arenaId.equals(arenaId, true)) continue
 
                 for (team: Team in Bukkit.getScoreboardManager().mainScoreboard.teams) {
@@ -314,7 +315,7 @@ class GameArenaSetupHandler {
         displayEntity.isGlowing = true
         displayEntity.setAI(false)
         displayEntity.setGravity(false)
-        MetadataUtils.apply(displayEntity, "displayEntity", arenaSetupData.arenaId)
+        MetadataUtils.apply(displayEntity, DISPLAY_ENTITY_KEY, arenaSetupData.arenaId)
     }
 
     fun setTurn(player: Player, gameField: GameField, blockLocation: Location, face: PathFace) {

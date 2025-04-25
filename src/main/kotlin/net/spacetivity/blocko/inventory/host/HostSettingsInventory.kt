@@ -6,10 +6,13 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.item.hideExtraInfo
+import net.spacetivity.blocko.item.itemStack
+import net.spacetivity.blocko.item.meta
+import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.team.GameTeamOptions
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.blocko.utils.ItemBuilder
 import net.spacetivity.inventory.api.inventory.InventoryController
 import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
@@ -18,8 +21,6 @@ import net.spacetivity.inventory.api.item.InventoryPos
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.ItemFlag
 
 @InventoryProperties(id = "host_settings_inv", rows = 1, columns = 9)
 class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvider {
@@ -27,17 +28,20 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
     override fun init(player: Player, controller: InventoryController) {
         val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
-        controller.setItem(0, 1, InteractiveItem.of(ItemBuilder(Material.WRITABLE_BOOK)
-            .setName(translation.displayName("blocko.inventory.host.invite_players.display_name"))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
-            .build()) { _, _, _ -> InventoryUtils.openInvitationInventory(player, this.gameArena) })
+        controller.setItem(0, 1, InteractiveItem.of(itemStack(Material.WRITABLE_BOOK) {
+            meta {
+                name = translation.displayName("blocko.inventory.host.invite_players.display_name")
+                hideExtraInfo()
+            }
+        }) { _, _, _ -> InventoryUtils.openInvitationInventory(player, this.gameArena) })
 
-        controller.setItem(0, 2, InteractiveItem.of(ItemBuilder(Material.END_CRYSTAL)
-            .setName(buildTeamModeSelectorDisplayName(translation))
-            .setLoreByComponent(buildTeamModeSelectorLore(translation))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
-            .build()) { _, item: InteractiveItem, event: InventoryClickEvent ->
-
+        controller.setItem(0, 2, InteractiveItem.of(itemStack(Material.END_CRYSTAL) {
+            meta {
+                name = buildTeamModeSelectorDisplayName(translation)
+                lore(buildTeamModeSelectorLore(translation))
+                hideExtraInfo()
+            }
+        }) { _, item, event ->
             val nextMode: GameTeamOptions = GameTeamOptions.entries.find { it.id == if (event.isLeftClick) this.gameArena.teamOptions.id.inc() else this.gameArena.teamOptions.id.dec() }
                 ?: GameTeamOptions.FOUR_BY_ONE
 
@@ -56,11 +60,12 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
     }
 
     private fun setIndicatorItem(controller: InventoryController, position: InventoryPos, indicatorType: IndicatorType, translation: Translation, player: Player) {
-        controller.setItem(position, InteractiveItem.of(ItemBuilder(getIndicatorMaterialType(indicatorType))
-            .setName(getIndicatorDisplayName(indicatorType, translation))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
-            .build()) { _, item: InteractiveItem, _ ->
-
+        controller.setItem(position, InteractiveItem.of(itemStack(getIndicatorMaterialType(indicatorType)) {
+            meta {
+                name = getIndicatorDisplayName(indicatorType, translation)
+                hideExtraInfo()
+            }
+        }) { _, item, _ ->
             if (indicatorType == IndicatorType.PRIVACY) this.gameArena.locked = !this.gameArena.locked
             else this.gameArena.waitForActualPlayers = !this.gameArena.waitForActualPlayers
 

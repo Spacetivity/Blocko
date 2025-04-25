@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap
 import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.MetadataUtils
 import org.bukkit.entity.LivingEntity
 import org.jetbrains.exposed.sql.ResultRow
@@ -76,7 +77,7 @@ class GameTeamHandler {
     }
 
     fun getTeamOfEntity(arenaId: String, entity: LivingEntity): GameTeam? {
-        val teamName: String = MetadataUtils.get<String>(entity, "teamName") ?: return null
+        val teamName: String = MetadataUtils.get<String>(entity, TEAM_NAME_KEY) ?: return null
         return getTeam(arenaId, teamName)
     }
 

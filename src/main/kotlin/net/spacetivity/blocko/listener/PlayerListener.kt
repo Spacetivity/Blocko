@@ -23,6 +23,7 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.getTeam
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.utils.Constants.ENTITY_SELECTOR_KEY
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
@@ -270,9 +271,9 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                     return
                 }
 
-                if (!PersistentDataUtils.hasData(itemInHand.itemMeta, "entitySelector")) return
+                if (!PersistentDataUtils.has(itemInHand.itemMeta, ENTITY_SELECTOR_KEY)) return
 
-                val entityId: Int = PersistentDataUtils.getData(itemInHand.itemMeta, "entitySelector", Int::class.java)
+                val entityId: Int = PersistentDataUtils.get(itemInHand.itemMeta, ENTITY_SELECTOR_KEY, Int::class.java)
                 val gameEntity: GameEntity = BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName!!).find { it.entityId == entityId }
                     ?: return
 

@@ -17,6 +17,13 @@ object Constants {
     const val DICE_FIVE_SKULL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM1MWFmNDk5ZjRiZjBiNmNmYWI3YTFmNjI2MWM1YzExYWUyY2RjMDE5ODI1YWFkYjk2OWQ1NjdmZjM1NDUzNSJ9fX0="
     const val DICE_SIX_SKULL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNjZDc1M2RiMTlmYmZjZDNhNTRmNmZkZDBhYTQ1ZDFhM2JmMjVjNjM3ZDY2N2M0M2U2NDZiMWEzOTBmYTYyZCJ9fX0="
 
+    const val INTERACTIVE_ITEMSTACK_KEY = "interactiveItemStack"
+    const val BALANCE_ITEM_KEY = "balanceItem"
+    const val GAME_ENTITY_TYPE_KEY = "gameEntityType"
+    const val TEAM_NAME_KEY = "teamName"
+    const val ENTITY_SELECTOR_KEY = "entitySelector"
+    const val DISPLAY_ENTITY_KEY = "displayEntity"
+
     const val SETUP_TOOL_KEY = "setupTool"
     const val TIMEOUT_BOSSBAR_NAME = "timeoutBar"
 

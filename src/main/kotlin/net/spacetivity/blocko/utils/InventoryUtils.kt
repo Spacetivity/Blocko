@@ -13,11 +13,17 @@ import net.spacetivity.blocko.inventory.setup.GameFieldTurnSetupInventory
 import net.spacetivity.blocko.inventory.setup.GameTeamSetupInventory
 import net.spacetivity.blocko.inventory.setup.InvType
 import net.spacetivity.blocko.inventory.team.TeamSelectorInventory
+import net.spacetivity.blocko.item.itemStack
+import net.spacetivity.blocko.item.meta
+import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.inventory.api.extension.openStaticInventory
+import net.spacetivity.inventory.api.inventory.InventoryController
+import net.spacetivity.inventory.api.item.InteractiveItem
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 
@@ -84,6 +90,28 @@ object InventoryUtils {
     fun openEntityShopInventory(opener: Player) {
         val title: Component = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.entity_shop.title")
         openStaticInventory(opener, title, EntityShopInventory())
+    }
+
+    fun setPreviousPageItem(row: Int, column: Int, controller: InventoryController) {
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val pagination = controller.pagination ?: return
+
+        controller.setItem(row, column, InteractiveItem.previousPage(itemStack(Material.ARROW) {
+            meta {
+                name = translation.displayName("blocko.inventory_utils.previous_page_item_display_name")
+            }
+        }, pagination))
+    }
+
+    fun setNextPageItem(row: Int, column: Int, controller: InventoryController) {
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val pagination = controller.pagination ?: return
+
+        controller.setItem(row, column, InteractiveItem.previousPage(itemStack(Material.SPECTRAL_ARROW) {
+            meta {
+                name = translation.displayName("blocko.inventory_utils.next_page_item_display_name")
+            }
+        }, pagination))
     }
 
 }

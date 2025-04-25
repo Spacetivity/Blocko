@@ -2,7 +2,7 @@ package net.spacetivity.blocko.listener
 
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.lobby.LobbySpawn
-import net.spacetivity.blocko.utils.ItemBuilder
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.GameMode
 import org.bukkit.World
@@ -22,7 +22,6 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.event.server.ServerListPingEvent
 import org.bukkit.event.weather.WeatherChangeEvent
-import org.bukkit.inventory.ItemStack
 import java.util.*
 
 class ProtectionListener(private val plugin: BlockoGame) : Listener {
@@ -38,16 +37,10 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     }
 
     @EventHandler
-    fun onInteractWithClickableItem(event: PlayerInteractEvent) {
-        val item: ItemStack = event.item ?: return
-
-        if (item.itemMeta == null) return
-        if (!PersistentDataUtils.hasData(item.itemMeta, "clickableItem")) return
-
-        val clickableItemId: UUID = PersistentDataUtils.getData(item.itemMeta, "clickableItem", UUID::class.java)
-        val itemBuilder: ItemBuilder = this.plugin.clickableItems[clickableItemId] ?: return
-
-        itemBuilder.action.invoke(event)
+    fun onInteractWithInteractiveItemStack(event: PlayerInteractEvent) {
+        val itemMeta = event.item?.itemMeta ?: return
+        val interactiveItemId = PersistentDataUtils.get(itemMeta, Constants.INTERACTIVE_ITEMSTACK_KEY, UUID::class.java)
+        BlockoGame.instance.interactiveActions[interactiveItemId]?.invoke(event)
     }
 
     @EventHandler

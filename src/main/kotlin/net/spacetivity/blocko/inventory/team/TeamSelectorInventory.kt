@@ -6,11 +6,12 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.toGamePlayerInstance
+import net.spacetivity.blocko.item.*
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
-import net.spacetivity.blocko.utils.ItemBuilder
+import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import net.spacetivity.inventory.api.inventory.InventoryController
 import net.spacetivity.inventory.api.inventory.InventoryProperties
@@ -22,7 +23,7 @@ import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.ItemFlag
+import org.bukkit.inventory.meta.LeatherArmorMeta
 import java.util.*
 
 @InventoryProperties(id = "team_selector_inv", rows = 1, columns = 9)
@@ -41,13 +42,15 @@ class TeamSelectorInventory(private val gameArena: GameArena) : InventoryProvide
     private fun getTeamItem(controller: InventoryController, gameTeam: GameTeam, translation: Translation): InteractiveItem {
         val teamColor: NamedTextColor = gameTeam.color
 
-        return InteractiveItem.of(ItemBuilder(Material.LEATHER_CHESTPLATE)
-            .setName(buildTeamItemDisplayName(gameTeam, translation))
-            .setArmorColor(Color.fromRGB(teamColor.red(), teamColor.green(), teamColor.blue()))
-            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_DYE)
-            .setLoreByComponent(buildTeamItemLore(gameTeam, translation))
-            .setData("teamName", gameTeam.name)
-            .build()) { _, item: InteractiveItem, event: InventoryClickEvent ->
+        return InteractiveItem.of(itemStack(Material.LEATHER_CHESTPLATE) {
+            meta<LeatherArmorMeta> {
+                name = buildTeamItemDisplayName(gameTeam, translation)
+                lore(buildTeamItemLore(gameTeam, translation))
+                hideExtraInfo()
+                setColor(Color.fromRGB(teamColor.red(), teamColor.green(), teamColor.blue()))
+                applyPersistentData(TEAM_NAME_KEY, gameTeam.name)
+            }
+        }) { _, item: InteractiveItem, event: InventoryClickEvent ->
             val player: Player = event.whoClicked as Player
             val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return@of
 
@@ -65,8 +68,8 @@ class TeamSelectorInventory(private val gameArena: GameArena) : InventoryProvide
 
                     val oldTeamItem: InteractiveItem = controller.contents.values
                         .filter { it != null && it.item.type == Material.LEATHER_CHESTPLATE }
-                        .filter { PersistentDataUtils.hasData(it!!.item.itemMeta, "teamName") }
-                        .first { PersistentDataUtils.getData(it!!.item.itemMeta, "teamName", String::class.java) == oldTeamName }
+                        .filter { PersistentDataUtils.has(it!!.item.itemMeta, TEAM_NAME_KEY) }
+                        .first { PersistentDataUtils.get(it!!.item.itemMeta, TEAM_NAME_KEY, String::class.java) == oldTeamName }
                         ?: return@of
 
                     oldTeamItem.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildTeamItemDisplayName(oldGameTeam, translation))

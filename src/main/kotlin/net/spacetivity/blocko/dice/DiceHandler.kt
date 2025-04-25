@@ -6,19 +6,17 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.item.itemStack
+import net.spacetivity.blocko.item.meta
+import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
-import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.player.accessStorageContents
-import net.spacetivity.blocko.player.getDiceSession
-import net.spacetivity.blocko.player.isDicing
-import net.spacetivity.blocko.player.playSound
+import net.spacetivity.blocko.player.*
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
-import net.spacetivity.blocko.utils.ItemBuilder
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -80,10 +78,15 @@ class DiceHandler {
     }
 
     fun getDiceItem(): ItemStack {
-        return ItemBuilder(Material.PLAYER_HEAD)
-            .setOwner(this.diceSides[1]!!)
-            .setName(getDiceDisplayName(1))
-            .build()
+        val profile: PlayerProfile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
+        profile.setProperty(ProfileProperty("textures", this.diceSides[1]!!))
+
+        return itemStack(Material.PLAYER_HEAD) {
+            meta<SkullMeta> {
+                name = getDiceDisplayName(1)
+                playerProfile = profile
+            }
+        }
     }
 
     fun startDicing(gamePlayer: GamePlayer, ingamePhase: IngamePhase) {

@@ -41,11 +41,11 @@ import net.spacetivity.blocko.stats.StatsPlayerHandler
 import net.spacetivity.blocko.team.GameTeamHandler
 import net.spacetivity.blocko.team.GameTeamLocationDAO
 import net.spacetivity.blocko.translation.TranslationHandler
-import net.spacetivity.blocko.utils.ItemBuilder
 import org.bukkit.Bukkit
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scoreboard.Team
 import org.jetbrains.exposed.sql.Database
@@ -58,7 +58,7 @@ import java.util.*
 
 class BlockoGame : JavaPlugin() {
 
-    val clickableItems: MutableMap<UUID, ItemBuilder> = mutableMapOf()
+    val interactiveActions = mutableMapOf<UUID, (PlayerInteractEvent) -> Unit>()
 
     lateinit var diceSidesFile: DiceSidesFile
     lateinit var setupConfigFile: SetupConfigFile
