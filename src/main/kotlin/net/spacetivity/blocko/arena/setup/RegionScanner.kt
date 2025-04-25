@@ -15,7 +15,7 @@ object RegionScanner {
      * Maps sets of materials to their corresponding [ScannerResult] type.
      * Each set represents a category (e.g., garage fields, team start fields) with team colors.
      */
-    private val blocksOfScannableType = mapOf<Set<Material>, ScannerResult>(
+    private val blocksOfScannableType = mapOf(
         // team spawns
         Pair(setOf(
             Material.RED_GLAZED_TERRACOTTA,

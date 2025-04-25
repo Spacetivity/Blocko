@@ -168,7 +168,7 @@ class GameArenaSetupTool(private val holder: Player) {
                 ToolModeKeybindHint(ToolModeKeybind.LEFT_CLICK, "Opens Team Selector"),
                 ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, "Sets teamId to gameField")
             ),
-            listOf("RED_WOOL", "GREEN_WOOL", "BLUE_WOOL", "YELLOW_WOOL", "BONE_BLOCK")
+            listOf("RED_CONCRETE", "GREEN_CONCRETE", "BLUE_CONCRETE", "YELLOW_CONCRETE", "BONE_BLOCK")
         );
     }
 
