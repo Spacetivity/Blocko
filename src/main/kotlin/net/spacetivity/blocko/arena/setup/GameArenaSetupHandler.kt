@@ -25,11 +25,10 @@ import java.util.*
 
 class GameArenaSetupHandler {
 
-    private val activeSetupSessions: MutableMap<UUID, GameArenaSetupSession> = mutableMapOf()
-
-    private var setupTask: BukkitTask? = null
+    private val activeSetupSessions = mutableMapOf<UUID, GameArenaSetupSession>()
 
     private val isSetupEndless = BlockoGame.instance.setupConfigFile.setupSessionEndless
+    private var setupTask: BukkitTask? = null
 
     init {
         this.setupTask = Bukkit.getScheduler().runTaskTimer(BlockoGame.instance, Runnable {
@@ -37,7 +36,7 @@ class GameArenaSetupHandler {
                 val setupSession = player.getSetupSession() ?: continue
                 val activeSetupStep = setupSession.getActiveSetupStep() ?: continue
 
-                val facing: BlockFace = player.facing
+                val facing = player.facing
                 if ((activeSetupStep is SetTurningPointsStep || activeSetupStep is SetTeamEntrancesStep) && (facing == BlockFace.NORTH || facing == BlockFace.SOUTH || facing == BlockFace.EAST || facing == BlockFace.WEST)) {
                     player.translateActionBar("blocko.setup.turn_direction", Placeholder.parsed("face", facing.name))
                 }
@@ -154,7 +153,7 @@ class GameArenaSetupHandler {
     }
 
     fun scanBoard(player: Player) {
-        val setupSession: GameArenaSetupSession = player.getSetupSession() ?: return
+        val setupSession = player.getSetupSession() ?: return
         val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
         if (!setupStep.areCornersSet()) {
@@ -164,21 +163,21 @@ class GameArenaSetupHandler {
 
         player.translateMessage("blocko.setup.scanning_board.running")
 
-        val regionData: Multimap<Location, Pair<ScannerResult, String?>> = RegionScanner.scanRegion(setupSession)
+        val regionData = RegionScanner.scanRegion(setupSession)
         val inOrderResults: Multimap<Location, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
 
-        val validResultsFound: MutableMap<ScannerResult, Int> = mutableMapOf()
+        val validResultsFound = mutableMapOf<ScannerResult, Int>()
 
-        for (entry: Map.Entry<Location, Pair<ScannerResult, String?>> in regionData.entries()) {
-            val scannedDataForLocation: Pair<ScannerResult, String?> = entry.value
+        for (entry in regionData.entries()) {
+            val scannedDataForLocation = entry.value
 
-            val location: Location = entry.key
-            val scannerResult: ScannerResult = scannedDataForLocation.first
-            val teamName: String? = scannedDataForLocation.second
+            val location = entry.key
+            val scannerResult = scannedDataForLocation.first
+            val teamName = scannedDataForLocation.second
 
             if (scannerResult != ScannerResult.UNKNOWN) {
                 if (validResultsFound.containsKey(scannerResult)) {
-                    val newAmount: Int = validResultsFound[scannerResult]?.plus(1) ?: continue
+                    val newAmount = validResultsFound[scannerResult]?.plus(1) ?: continue
                     validResultsFound[scannerResult] = newAmount
                 } else {
                     validResultsFound[scannerResult] = 1
@@ -199,15 +198,15 @@ class GameArenaSetupHandler {
             }
         }
 
-        val sortedResults: List<Map.Entry<Location, Pair<ScannerResult, String?>>> = inOrderResults.entries().sortedBy { it.value.first.priority }
+        val sortedResults = inOrderResults.entries().sortedBy { it.value.first.priority }
 
-        val scanningCompleted: Boolean = ScannerResult.containsAllValidResults(validResultsFound.keys)
+        val scanningCompleted = ScannerResult.containsAllValidResults(validResultsFound.keys)
 
         if (scanningCompleted) {
             for (pipelineItem in sortedResults) {
-                val location: Location = pipelineItem.key
-                val scannerResult: ScannerResult = pipelineItem.value.first
-                val teamName: String? = pipelineItem.value.second
+                val location = pipelineItem.key
+                val scannerResult = pipelineItem.value.first
+                val teamName = pipelineItem.value.second
 
                 if (scannerResult == ScannerResult.GAME_FIELD) {
                     addField(setupSession, player, location)
@@ -227,7 +226,7 @@ class GameArenaSetupHandler {
         player.translateMessage("blocko.setup.scanning_board.finished.title",
             Placeholder.component("status", statusString))
 
-        for ((scannerResult: ScannerResult, amount: Int) in validResultsFound) {
+        for ((scannerResult, amount) in validResultsFound) {
             val resultName = scannerResult.name
                 .replace('_', ' ')
                 .lowercase()
@@ -247,8 +246,8 @@ class GameArenaSetupHandler {
             return
         }
 
-        val centeredLocation: Location = LocationUtils.centerLocation(location)
-        val yLevel: Double = BlockoGame.instance.gameArenaHandler.getArena(setupSession.arenaId)!!.yLevel
+        val centeredLocation = LocationUtils.centerLocation(location)
+        val yLevel = BlockoGame.instance.gameArenaHandler.getArena(setupSession.arenaId)!!.yLevel
 
         val teamSpawn = GameTeamLocation(
             setupSession.arenaId,
@@ -274,8 +273,8 @@ class GameArenaSetupHandler {
     fun addField(setupSession: GameArenaSetupSession, player: Player, location: Location) {
         val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
-        val x: Double = location.x
-        val z: Double = location.z
+        val x = location.x
+        val z = location.z
 
         if (setupStep.gameFields.any { it.x == x && it.z == z }) {
             player.translateMessage("blocko.setup.game_field_already_set")
@@ -294,7 +293,7 @@ class GameArenaSetupHandler {
             )
         )
 
-        val centeredLocation: Location = LocationUtils.centerLocation(location)
+        val centeredLocation = LocationUtils.centerLocation(location)
         BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
             setupSession.arenaId,
             centeredLocation,
@@ -328,7 +327,7 @@ class GameArenaSetupHandler {
         possibleField.isGarageField = true
         possibleField.properties.garageForTeam = teamName
 
-        val centeredLocation: Location = LocationUtils.centerLocation(location)
+        val centeredLocation = LocationUtils.centerLocation(location)
         BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
             setupSession.arenaId,
             centeredLocation,
@@ -350,7 +349,7 @@ class GameArenaSetupHandler {
 
         gameField.properties.rotation = face
 
-        val centeredLocation: Location = LocationUtils.centerLocation(location)
+        val centeredLocation = LocationUtils.centerLocation(location)
         BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
             setupSession.arenaId,
             centeredLocation,
@@ -390,7 +389,7 @@ class GameArenaSetupHandler {
         possibleField.properties.setFieldId(teamName, setupStep.fieldIndex)
         setupStep.fieldIndex++
 
-        val centeredLocation: Location = LocationUtils.centerLocation(location)
+        val centeredLocation = LocationUtils.centerLocation(location)
         BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
             setupSession.arenaId,
             centeredLocation,

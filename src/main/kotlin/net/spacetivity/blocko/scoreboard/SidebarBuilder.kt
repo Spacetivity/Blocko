@@ -8,7 +8,7 @@ import org.bukkit.entity.Player
 class SidebarBuilder(private val viewer: Player) {
 
     private var title: Component = Component.text("Not found", NamedTextColor.RED)
-    private val lines: LinkedHashMap<Int, Component> = linkedMapOf()
+    private val lines = linkedMapOf<Int, Component>()
 
     fun setTitle(title: Component): SidebarBuilder {
         this.title = title
@@ -35,12 +35,12 @@ class SidebarBuilder(private val viewer: Player) {
     }
 
     private fun modifyEmptyLines(lines: LinkedHashMap<Int, Component>): LinkedHashMap<Int, Component> {
-        val modifiedLines: LinkedHashMap<Int, Component> = linkedMapOf()
+        val modifiedLines = linkedMapOf<Int, Component>()
         var emptyLineCount = 0
 
-        for (entry: MutableMap.MutableEntry<Int, Component> in lines.entries) {
-            val lineId: Int = entry.key
-            val line: String = PlainTextComponentSerializer.plainText().serialize(entry.value)
+        for (entry in lines.entries) {
+            val lineId = entry.key
+            val line = PlainTextComponentSerializer.plainText().serialize(entry.value)
 
             if (line.isBlank()) {
                 val modifiedLine = Component.text(" ".repeat(emptyLineCount + 1))

@@ -3,7 +3,6 @@ package net.spacetivity.blocko.command.api.impl
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.command.api.CommandProperties
 import net.spacetivity.blocko.command.api.SpaceCommandExecutor
-import net.spacetivity.blocko.command.api.SpaceCommandSender
 import net.spacetivity.blocko.translation.translateMessage
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -17,7 +16,7 @@ class BukkitCommandExecutor(private val command: CommandProperties, plugin: Bloc
 
     init {
 
-        val pluginCommand: Command = object : Command(command.name) {
+        val pluginCommand = object : Command(command.name) {
             override fun execute(sender: CommandSender, commandLabel: String, args: Array<String>): Boolean {
                 return onCommand(sender, this, commandLabel, args)
             }
@@ -37,7 +36,7 @@ class BukkitCommandExecutor(private val command: CommandProperties, plugin: Bloc
     }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        val commandSender: SpaceCommandSender = BukkitCommandSender(sender)
+        val commandSender = BukkitCommandSender(sender)
         if (commandSender.isPlayer && this.command.permission.isNotBlank() && !sender.hasPermission(this.command.permission)) {
             commandSender.castTo(Player::class.java).translateMessage("blocko.utils.no_permission")
             return true
@@ -53,7 +52,7 @@ class BukkitCommandExecutor(private val command: CommandProperties, plugin: Bloc
         label: String,
         args: Array<String>
     ): MutableList<String> {
-        val commandSender: SpaceCommandSender = BukkitCommandSender(sender)
+        val commandSender = BukkitCommandSender(sender)
         return commandExecutor.onTabComplete(commandSender, args.toMutableList())
     }
 }

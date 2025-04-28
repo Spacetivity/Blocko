@@ -9,10 +9,10 @@ import java.util.*
 
 class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
 
-    val teamMembers: MutableSet<UUID> = mutableSetOf()
-    val teamLocations: MutableSet<GameTeamLocation> = mutableSetOf()
+    val teamMembers = mutableSetOf<UUID>()
+    val teamLocations = mutableSetOf<GameTeamLocation>()
 
-    var deactivated: Boolean = false
+    var deactivated = false
 
     fun join(gamePlayer: GamePlayer) {
         if (isFull()) {
@@ -49,9 +49,9 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
     }
 
     fun getFreeSpawnLocation(): GameTeamLocation? {
-        val freeSpawns: MutableList<GameTeamLocation> = mutableListOf()
+        val freeSpawns = mutableListOf<GameTeamLocation>()
 
-        for (teamLocation: GameTeamLocation in this.teamLocations) {
+        for (teamLocation in this.teamLocations) {
             if (teamLocation.isTaken) continue
             freeSpawns.add(teamLocation)
         }

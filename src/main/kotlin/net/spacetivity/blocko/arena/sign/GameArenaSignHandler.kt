@@ -4,28 +4,29 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.World
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteIgnoreWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class GameArenaSignHandler {
 
-    private val cachedArenaSigns: MutableList<GameArenaSign> = mutableListOf()
+    private val cachedArenaSigns = mutableListOf<GameArenaSign>()
 
     init {
         transaction {
-            val resultRows: MutableList<ResultRow> = GameArenaSignDAO.selectAll().toMutableList()
+            val resultRows = GameArenaSignDAO.selectAll().toMutableList()
 
-            for (index: Int in resultRows.indices) {
-                val resultRow: ResultRow = resultRows[index]
-                val gameWorld: World = Bukkit.getWorld(resultRow[GameArenaSignDAO.worldName]) ?: continue
+            for (index in resultRows.indices) {
+                val resultRow = resultRows[index]
+                val gameWorld = Bukkit.getWorld(resultRow[GameArenaSignDAO.worldName]) ?: continue
                 val x: Double = resultRow[GameArenaSignDAO.x]
                 val y: Double = resultRow[GameArenaSignDAO.y]
                 val z: Double = resultRow[GameArenaSignDAO.z]
 
-                val gameArena: GameArena? = BlockoGame.instance.gameArenaHandler.cachedArenas.getOrNull(index)
+                val gameArena = BlockoGame.instance.gameArenaHandler.cachedArenas.getOrNull(index)
                 cachedArenaSigns.add(GameArenaSign(Location(gameWorld, x, y, z), gameArena?.id))
             }
         }
@@ -41,7 +42,7 @@ class GameArenaSignHandler {
 
     fun createSignLocation(location: Location) {
         transaction {
-            GameArenaSignDAO.insert { statement: InsertStatement<Number> ->
+            GameArenaSignDAO.insert { statement ->
                 statement[worldName] = location.world.name
                 statement[x] = location.x
                 statement[y] = location.y
@@ -65,20 +66,20 @@ class GameArenaSignHandler {
     }
 
     fun updateArenaSign(gameArena: GameArena) {
-        val arenaSign: GameArenaSign = this.cachedArenaSigns.find { it.arenaId == gameArena.id } ?: return
+        val arenaSign = this.cachedArenaSigns.find { it.arenaId == gameArena.id } ?: return
         BlockoGame.instance.gameArenaHandler.loadJoinSign(arenaSign.location, gameArena)
     }
 
     fun loadArenaSigns() {
-        for (arenaSign: GameArenaSign in this.cachedArenaSigns) {
-            val arenaId: String? = arenaSign.arenaId
-            val gameArena: GameArena? = if (arenaId == null) null else BlockoGame.instance.gameArenaHandler.getArena(arenaId)
+        for (arenaSign in this.cachedArenaSigns) {
+            val arenaId = arenaSign.arenaId
+            val gameArena = if (arenaId == null) null else BlockoGame.instance.gameArenaHandler.getArena(arenaId)
             BlockoGame.instance.gameArenaHandler.loadJoinSign(arenaSign.location, gameArena)
         }
     }
 
     private fun recalculateSignData() {
-        for (index: Int in this.cachedArenaSigns.indices) {
+        for (index in this.cachedArenaSigns.indices) {
             cachedArenaSigns[index].arenaId = BlockoGame.instance.gameArenaHandler.cachedArenas.getOrNull(index)?.id
         }
     }

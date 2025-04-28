@@ -9,14 +9,12 @@ object PersistentDataUtils {
 
     fun apply(itemMeta: ItemMeta, key: String, data: Any) {
         val namespacedKey = NamespacedKey(BlockoGame.instance, key)
-
         if (itemMeta.persistentDataContainer.has(namespacedKey, PersistentDataType.STRING)) return
         itemMeta.persistentDataContainer.set(namespacedKey, PersistentDataType.STRING, BlockoGame.GSON.toJson(data))
     }
 
     fun remove(itemMeta: ItemMeta, key: String) {
         val namespacedKey = NamespacedKey(BlockoGame.instance, key)
-
         if (!itemMeta.persistentDataContainer.has(namespacedKey, PersistentDataType.STRING)) return
         itemMeta.persistentDataContainer.remove(namespacedKey)
     }
@@ -28,7 +26,7 @@ object PersistentDataUtils {
 
     fun <T> get(itemMeta: ItemMeta, key: String, clazz: Class<T>): T {
         val namespacedKey = NamespacedKey(BlockoGame.instance, key)
-        val jsonString: String = itemMeta.persistentDataContainer.getOrDefault(namespacedKey, PersistentDataType.STRING, "")
+        val jsonString = itemMeta.persistentDataContainer.getOrDefault(namespacedKey, PersistentDataType.STRING, "")
         return BlockoGame.GSON.fromJson(jsonString, clazz)
     }
 

@@ -10,7 +10,7 @@ import java.util.*
 
 class Translation(val name: String, val cachedMessages: MutableMap<String, String>) {
 
-    private val defaultResolvers: Set<TagResolver> = setOf(
+    private val defaultResolvers = setOf(
         StandardTags.gradient(),
         StandardTags.color(),
         StandardTags.decorations(),
@@ -18,7 +18,7 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
         StandardTags.hoverEvent()
     )
 
-    private val miniMessage: MiniMessage = MiniMessage.builder()
+    private val miniMessage = MiniMessage.builder()
         .tags(TagResolver.builder().resolvers(defaultResolvers).build())
         .build()
 

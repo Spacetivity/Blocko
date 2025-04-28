@@ -1,6 +1,5 @@
 package net.spacetivity.blocko.item
 
-import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
@@ -78,7 +77,7 @@ class ItemMetaLoreBuilder {
 }
 
 fun SkullMeta.setValue(value: String) {
-    val profile: PlayerProfile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
+    val profile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
     profile.setProperty(ProfileProperty("textures", value))
     playerProfile = profile
 }

@@ -26,7 +26,7 @@ class BossbarHandler {
     }
 
     fun updateBossbar(uuid: UUID, key: String, updateType: BossBarUpdate, newValue: Any) {
-        val bossbar: BossBar = getBossbar(uuid, key) ?: return
+        val bossbar = getBossbar(uuid, key) ?: return
         when (updateType) {
             BossBarUpdate.NAME -> bossbar.name(newValue as ComponentLike)
             BossBarUpdate.PROGRESS -> bossbar.progress(newValue as Float)
@@ -35,13 +35,13 @@ class BossbarHandler {
     }
 
     fun registerBossbar(player: Player, key: String, name: Component, progress: Float, color: Color, style: Overlay) {
-        val bossbar: BossBar = BossBar.bossBar(name, progress, color, style)
+        val bossbar = BossBar.bossBar(name, progress, color, style)
         this.cachedBossbars.put(player.uniqueId, Pair(key, bossbar))
         player.showBossBar(bossbar)
     }
 
     fun unregisterBossbar(player: Player, key: String) {
-        val bossbar: BossBar = getBossbar(player.uniqueId, key) ?: return
+        val bossbar = getBossbar(player.uniqueId, key) ?: return
         this.cachedBossbars.entries().removeIf { it.key == player.uniqueId && it.value.first.equals(key, true) }
         player.hideBossBar(bossbar)
     }

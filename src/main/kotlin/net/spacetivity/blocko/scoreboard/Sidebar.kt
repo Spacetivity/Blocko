@@ -4,7 +4,10 @@ import net.kyori.adventure.text.Component
 import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import org.bukkit.scoreboard.*
+import org.bukkit.scoreboard.Criteria
+import org.bukkit.scoreboard.DisplaySlot
+import org.bukkit.scoreboard.Objective
+import org.bukkit.scoreboard.Scoreboard
 
 class Sidebar(val viewer: Player, private val title: Component, private val lines: Map<Int, Component>) {
 
@@ -12,7 +15,7 @@ class Sidebar(val viewer: Player, private val title: Component, private val line
     private var objective: Objective
 
     init {
-        val scoreboardManager: ScoreboardManager = Bukkit.getScoreboardManager()
+        val scoreboardManager = Bukkit.getScoreboardManager()
 
         if (this.viewer.scoreboard == scoreboardManager.mainScoreboard)
             this.viewer.scoreboard = scoreboardManager.newScoreboard
@@ -48,13 +51,13 @@ class Sidebar(val viewer: Player, private val title: Component, private val line
     }
 
     private fun initLines() {
-        for (team: Team in HashSet(this.scoreboard.teams)) team.unregister()
+        for (team in HashSet(this.scoreboard.teams)) team.unregister()
 
-        for (line: Map.Entry<Int, Component> in this.lines.entries) {
-            val lineId: Int = line.key
-            val team: Team = ScoreboardUtils.registerScoreboardTeamWithContent(this.scoreboard, "x$lineId", Component.text(""), Component.text(""))
+        for (line in this.lines.entries) {
+            val lineId = line.key
+            val team = ScoreboardUtils.registerScoreboardTeamWithContent(this.scoreboard, "x$lineId", Component.text(""), Component.text(""))
 
-            val entryName: String = if (lineId < 10) "§$lineId§7" else "§${getColorCodeByName(lineId)}§7"
+            val entryName = if (lineId < 10) "§$lineId§7" else "§${getColorCodeByName(lineId)}§7"
             if (team.hasEntry(entryName)) return
 
             team.prefix(line.value)

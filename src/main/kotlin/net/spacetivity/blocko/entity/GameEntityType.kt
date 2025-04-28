@@ -107,7 +107,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
 
     fun getSpawnEggType(): Material {
         val typeName = "${this.name.uppercase()}_SPAWN_EGG"
-        val type: Material? = Material.entries.find { it.name == typeName }
+        val type = Material.entries.find { it.name == typeName }
         if (type == null) Bukkit.getConsoleSender().sendMessage(Component.text("There is no spawn egg with the name $typeName", NamedTextColor.DARK_RED))
         return type ?: Material.BARRIER
     }

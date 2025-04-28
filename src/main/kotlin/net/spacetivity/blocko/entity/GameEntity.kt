@@ -3,13 +3,9 @@ package net.spacetivity.blocko.entity
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.field.GameField
-import net.spacetivity.blocko.field.PathFace
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
-import net.spacetivity.blocko.team.GameTeam
-import net.spacetivity.blocko.team.GameTeamLocation
 import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.MetadataUtils
@@ -30,7 +26,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
     var lastStartField: Int? = null
     var isHighlighted = false
 
-    var entityStatus: GameEntityStatus = GameEntityStatus.AT_SPAWN
+    var entityStatus = GameEntityStatus.AT_SPAWN
 
     private var forceYaw: Float? = null
 
@@ -48,12 +44,12 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
         this.livingEntity!!.isCustomNameVisible = true
 
         if (this.gameEntityType.isBaby && this.livingEntity!! is Animals) {
-            val animal: Animals = this.livingEntity as Animals
+            val animal = this.livingEntity as Animals
             animal.ageLock = true
             animal.setBaby()
         }
 
-        val gameTeam: GameTeam = BlockoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
+        val gameTeam = BlockoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
         this.livingEntity!!.customName(Component.text(this.teamName.uppercase(), gameTeam.color, TextDecoration.BOLD))
         MetadataUtils.apply(this.livingEntity!!, TEAM_NAME_KEY, this.teamName)
     }
@@ -73,15 +69,15 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
     }
 
     fun landsAfterOpponent(dicedNumber: Int): Boolean {
-        val startFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!!
-        val goalFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + dicedNumber
+        val startFieldId = if (this.currentFieldId == null) 0 else this.currentFieldId!!
+        val goalFieldId = if (this.currentFieldId == null) 0 else this.currentFieldId!! + dicedNumber
 
         if (isTeamGarageField(startFieldId)) return false
 
         var isAfterOpponent = false
 
-        for (currentFieldId: Int in startFieldId..goalFieldId) {
-            val field: GameField = getTeamField(currentFieldId) ?: continue
+        for (currentFieldId in startFieldId..goalFieldId) {
+            val field = getTeamField(currentFieldId) ?: continue
             if (currentFieldId == goalFieldId) continue
 
             if (field.isTaken && field.currentHolder?.teamName != this.teamName) isAfterOpponent = true
@@ -102,13 +98,13 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
     fun isGarageInSight(dicedNumber: Int): Boolean {
         if (this.currentFieldId == null) return false
 
-        val startFieldId: Int = this.currentFieldId!!
-        val goalFieldId: Int = startFieldId + dicedNumber
+        val startFieldId = this.currentFieldId!!
+        val goalFieldId = startFieldId + dicedNumber
 
         var containsGarageField = false
 
-        for (currentFieldId: Int in startFieldId..goalFieldId) {
-            val field: GameField = getTeamField(currentFieldId) ?: continue
+        for (currentFieldId in startFieldId..goalFieldId) {
+            val field = getTeamField(currentFieldId) ?: continue
             if (!field.isGarageField) continue
             containsGarageField = true
         }
@@ -119,23 +115,23 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
     fun isMovableTo(dicedNumber: Int): Boolean {
         if (dicedNumber != 6 && this.currentFieldId == null) return false
 
-        val goalFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + dicedNumber
-        val goalField: GameField = getTeamField(goalFieldId) ?: return false
+        val goalFieldId = if (this.currentFieldId == null) 0 else this.currentFieldId!! + dicedNumber
+        val goalField = getTeamField(goalFieldId) ?: return false
         if (goalField.isTaken && goalField.currentHolder?.teamName == this.teamName) return false
 
-        val lastFieldForTeam: GameField = BlockoGame.instance.gameFieldHandler.getLastFieldForTeam(this.arenaId, this.teamName)
+        val lastFieldForTeam = BlockoGame.instance.gameFieldHandler.getLastFieldForTeam(this.arenaId, this.teamName)
             ?: throw NullPointerException("Last field cannot be found for team $teamName")
 
         return !(this.currentFieldId != null && this.currentFieldId == lastFieldForTeam.properties.getFieldId(this.teamName))
     }
 
     fun hasTargetAtGoalField(dicedNumber: Int): Boolean {
-        val startFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!!
-        val goalFieldId: Int = startFieldId + dicedNumber
+        val startFieldId = if (this.currentFieldId == null) 0 else this.currentFieldId!!
+        val goalFieldId = startFieldId + dicedNumber
 
         if (isTeamGarageField(startFieldId)) return false
 
-        val goalField: GameField = getTeamField(goalFieldId) ?: return false
+        val goalField = getTeamField(goalFieldId) ?: return false
         return goalField.isTaken && goalField.currentHolder?.teamName != this.teamName
     }
 
@@ -147,31 +143,31 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
             else this.lastStartField = this.currentFieldId
         }
 
-        val newFieldId: Int = if (this.currentFieldId == null) 0 else this.currentFieldId!! + 1
-        val goalFieldId: Int = if (this.currentFieldId == null) 0 else if (dicedNumber == 1) newFieldId else this.lastStartField!! + dicedNumber
+        val newFieldId = if (this.currentFieldId == null) 0 else this.currentFieldId!! + 1
+        val goalFieldId = if (this.currentFieldId == null) 0 else if (dicedNumber == 1) newFieldId else this.lastStartField!! + dicedNumber
 
-        val goalField: GameField = getTeamField(goalFieldId) ?: return false
-        val newField: GameField = getTeamField(newFieldId) ?: return false
+        val goalField = getTeamField(goalFieldId) ?: return false
+        val newField = getTeamField(newFieldId) ?: return false
 
-        val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!
+        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!
         gameArena.sendArenaSound(Sound.BLOCK_BONE_BLOCK_STEP, 1.0F)
 
         if (this.currentFieldId != null) {
-            val oldField: GameField = getTeamField(this.currentFieldId!!)!!
+            val oldField = getTeamField(this.currentFieldId!!)!!
             if (oldField.isTaken && (oldField.currentHolder != null && oldField.currentHolder?.teamName == this.teamName && oldField.currentHolder?.livingEntity?.uniqueId == this.livingEntity?.uniqueId)) {
                 oldField.isTaken = false
                 oldField.currentHolder = null
             }
         } else {
-            val location: Location = LocationUtils.centerLocation(this.livingEntity!!.location)
-            val spawnLocation: GameTeamLocation = BlockoGame.instance.gameTeamHandler.getLocationOfTeam(this.arenaId, this.teamName, location.x, location.y, location.z)
+            val location = LocationUtils.centerLocation(this.livingEntity!!.location)
+            val spawnLocation = BlockoGame.instance.gameTeamHandler.getLocationOfTeam(this.arenaId, this.teamName, location.x, location.y, location.z)
                 ?: throw NullPointerException("Spawn location of team ${this.teamName} is not found!")
 
             spawnLocation.isTaken = false
         }
 
-        val rotation: PathFace? = newField.properties.rotation
-        val teamEntranceName: String? = newField.properties.teamEntrance
+        val rotation = newField.properties.rotation
+        val teamEntranceName = newField.properties.teamEntrance
 
         this.currentFieldId = newFieldId
 
@@ -181,12 +177,12 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
         if ((newFieldId != goalFieldId) && newField.isTaken)
             return false
 
-        val worldPosition: Location = newField.getWorldPosition()
+        val worldPosition = newField.getWorldPosition()
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
 
         this.livingEntity!!.teleport(worldPosition)
 
-        val currentHolderTeamName: String = newField.currentHolder?.teamName ?: "-/-"
+        val currentHolderTeamName = newField.currentHolder?.teamName ?: "-/-"
 
         if ((newFieldId == goalFieldId) && (newField.isTaken && currentHolderTeamName != this.teamName))
             goalField.trowOutOldHolder(controller!!, this.livingEntity!!)
@@ -194,7 +190,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
         newField.isTaken = true
         newField.currentHolder = this
 
-        val reachedGoal: Boolean = this.currentFieldId == goalFieldId
+        val reachedGoal = this.currentFieldId == goalFieldId
 
         if (reachedGoal) {
             if (goalField.isGarageField) this.entityStatus = GameEntityStatus.SAVED

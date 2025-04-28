@@ -38,7 +38,7 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
         var fieldName: String? = null
 
         while (reader.hasNext()) {
-            val token: JsonToken = reader.peek()
+            val token = reader.peek()
             if (token == JsonToken.NAME) fieldName = reader.nextName()
 
             when (fieldName) {
@@ -48,17 +48,17 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
                 }
                 "garageForTeam" -> {
                     reader.peek()
-                    val garageValue: String = reader.nextString()
+                    val garageValue = reader.nextString()
                     garageForTeam = if (garageValue == "-") null else garageValue
                 }
                 "teamEntrance" -> {
                     reader.peek()
-                    val teamEntranceValue: String = reader.nextString()
+                    val teamEntranceValue = reader.nextString()
                     teamEntrance = if (teamEntranceValue == "-") null else teamEntranceValue
                 }
                 "turnComponent" -> {
                     reader.peek()
-                    val turnComponentValue: String = reader.nextString()
+                    val turnComponentValue = reader.nextString()
                     turnComponent = if (turnComponentValue == "-") null else PathFace.valueOf(turnComponentValue)
                 }
             }

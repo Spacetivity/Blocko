@@ -7,8 +7,8 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.ai.AiRule
 
 class MovableAndTargetInSightRule : AiRule {
-    override val weight: Int = EntityPickRule.MOVABLE_AND_TARGET_IN_SIGHT.weight
-    override val probability: Double = EntityPickRule.MOVABLE_AND_TARGET_IN_SIGHT.probability
+    override val weight = EntityPickRule.MOVABLE_AND_TARGET_IN_SIGHT.weight
+    override val probability = EntityPickRule.MOVABLE_AND_TARGET_IN_SIGHT.probability
 
     override fun evaluate(entity: GameEntity, player: GamePlayer, dicedNumber: Int, startField: GameField): Boolean {
         return entity.isMovableTo(dicedNumber) && entity.hasTargetAtGoalField(dicedNumber)

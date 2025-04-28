@@ -12,19 +12,19 @@ import org.bukkit.entity.Player
 
 class ScanBoardStep : SetupStep {
 
-    override val id: Int = 0
-    override val name: String = "Scan Board"
-    override val keybindHints: Set<ToolModeKeybindHint> = setOf(ToolModeKeybindHint(ToolModeKeybind.LEFT_CLICK, "Pos1"), ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, "Pos2"))
-    override val validBlockTypes: Set<Material> = setOf()
-    override var active: Boolean = true
+    override val id = 0
+    override val name = "Scan Board"
+    override val keybindHints = setOf(ToolModeKeybindHint(ToolModeKeybind.LEFT_CLICK, "Pos1"), ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, "Pos2"))
+    override val validBlockTypes = setOf<Material>()
+    override var active = true
 
-    var fieldIndex: Int = 0
-    val gameFields: MutableList<GameField> = mutableListOf()
-    val gameTeamLocations: MutableList<GameTeamLocation> = mutableListOf()
+    var fieldIndex = 0
+    val gameFields = mutableListOf<GameField>()
+    val gameTeamLocations = mutableListOf<GameTeamLocation>()
 
     var corner1: Location? = null
     var corner2: Location? = null
-    var missingResults: MutableMap<ScannerResult, Int> = mutableMapOf()
+    var missingResults = mutableMapOf<ScannerResult, Int>()
 
     fun areCornersSet(): Boolean = this.corner1 != null && this.corner2 != null
 

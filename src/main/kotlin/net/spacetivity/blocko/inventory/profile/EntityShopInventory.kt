@@ -5,13 +5,10 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.achievement.AchievementPlayer
-import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.entity.GameEntityType
 import net.spacetivity.blocko.item.*
-import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
@@ -35,7 +32,7 @@ import org.bukkit.entity.Player
 class EntityShopInventory : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
         controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
@@ -45,13 +42,13 @@ class EntityShopInventory : InventoryProvider {
                 name = translation.displayName("blocko.inventory_utils.back_item_display_name")
             }
         }) { _, _, _ ->
-            val gameArena: GameArena = player.getArena() ?: return@of
-            val isShopItemActive: Boolean = gameArena.phase.isIdle()
+            val gameArena = player.getArena() ?: return@of
+            val isShopItemActive = gameArena.phase.isIdle()
             InventoryUtils.openProfileInventory(player, isShopItemActive)
         })
 
-        val pagination: InventoryPagination = controller.createPagination()
-        val pageItems: List<InteractiveItem> = fetchEntityTypeItems(controller, pagination, player, translation)
+        val pagination = controller.createPagination()
+        val pageItems = fetchEntityTypeItems(controller, pagination, player, translation)
 
         if (pageItems.isEmpty()) {
             controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(itemStack(Material.BARRIER) {
@@ -78,10 +75,10 @@ class EntityShopInventory : InventoryProvider {
     }
 
     private fun fetchEntityTypeItems(controller: InventoryController, pagination: InventoryPagination, player: Player, translation: Translation): List<InteractiveItem> {
-        val items: MutableList<InteractiveItem> = mutableListOf()
-        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return items
+        val items = mutableListOf<InteractiveItem>()
+        val gamePlayer = player.toGamePlayerInstance() ?: return items
 
-        for (gameEntityType: GameEntityType in GameEntityType.entries) {
+        for (gameEntityType in GameEntityType.entries) {
             val entityItemStack = itemStack(buildEntityTypeItemType(player, gameEntityType)) {
                 meta {
                     name = buildEntityTypeDisplayName(translation, player, gameEntityType)
@@ -94,13 +91,13 @@ class EntityShopInventory : InventoryProvider {
             }
 
             items.add(InteractiveItem.of(entityItemStack) { _, item, event ->
-                val playerWhoClicked: Player = event.whoClicked as Player
+                val playerWhoClicked = event.whoClicked as Player
 
                 if (BlockoGame.instance.gameEntityHandler.hasUnlockedEntityType(player.uniqueId, gameEntityType) && playerWhoClicked.toGamePlayerInstance()!!.selectedEntityType != gameEntityType) {
-                    val gamePlayerWoClicked: GamePlayer = playerWhoClicked.toGamePlayerInstance() ?: return@of
+                    val gamePlayerWoClicked = playerWhoClicked.toGamePlayerInstance() ?: return@of
 
-                    val oldSelectedEntityType: GameEntityType = gamePlayerWoClicked.selectedEntityType
-                    val oldEntityTypeItem: InteractiveItem? = pagination.getPaginationItems()
+                    val oldSelectedEntityType = gamePlayerWoClicked.selectedEntityType
+                    val oldEntityTypeItem = pagination.getPaginationItems()
                         .filter { PersistentDataUtils.has(it.item.itemMeta, GAME_ENTITY_TYPE_KEY) }
                         .find { PersistentDataUtils.get(it.item.itemMeta, GAME_ENTITY_TYPE_KEY, String::class.java) == gamePlayerWoClicked.selectedEntityType.name }
 
@@ -119,18 +116,18 @@ class EntityShopInventory : InventoryProvider {
                     return@of
                 }
 
-                val achievementPlayer: AchievementPlayer? = BlockoGame.instance.achievementHandler.getAchievementPlayer(player.uniqueId)
+                val achievementPlayer = BlockoGame.instance.achievementHandler.getAchievementPlayer(player.uniqueId)
                 if (gameEntityType.neededAchievementKey != null && achievementPlayer != null && !achievementPlayer.achievementNames.contains(gameEntityType.neededAchievementKey))
                     return@of
 
-                val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)!!
+                val statsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)!!
 
                 if (statsPlayer.coins < gameEntityType.price)
                     return@of
 
                 gameEntityType.buyEntityType(playerWhoClicked)
 
-                val balanceItem: InteractiveItem? = controller.contents.values.firstOrNull { it != null && PersistentDataUtils.has(it.item.itemMeta, BALANCE_ITEM_KEY) }
+                val balanceItem = controller.contents.values.firstOrNull { it != null && PersistentDataUtils.has(it.item.itemMeta, BALANCE_ITEM_KEY) }
                 balanceItem?.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildBalanceDisplayName(translation, player))
 
                 setEntityTypeItemGlow(playerWhoClicked, controller, item, gameEntityType)
@@ -145,13 +142,13 @@ class EntityShopInventory : InventoryProvider {
     }
 
     private fun buildBalanceDisplayName(translation: Translation, player: Player): Component {
-        val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)!!
+        val statsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)!!
         return translation.displayName("blocko.inventory.entity_shop.balance_item.display_name", Placeholder.parsed("amount", NumberUtils.format(statsPlayer.coins)))
     }
 
     private fun setEntityTypeItemGlow(player: Player, controller: InventoryController, interactiveItem: InteractiveItem, gameEntityType: GameEntityType) {
-        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
-        val isSelected: Boolean = gamePlayer.selectedEntityType == gameEntityType
+        val gamePlayer = player.toGamePlayerInstance() ?: return
+        val isSelected = gamePlayer.selectedEntityType == gameEntityType
 
         if (isSelected) BlockoGame.instance.gameEntityHandler.setSelectedEntityType(player.uniqueId, gameEntityType)
 
@@ -159,16 +156,16 @@ class EntityShopInventory : InventoryProvider {
     }
 
     private fun buildEntityTypeItemType(player: Player, gameEntityType: GameEntityType): Material {
-        val isUnlocked: Boolean = gameEntityType.isUnlockedByPlayer(player.uniqueId)
+        val isUnlocked = gameEntityType.isUnlockedByPlayer(player.uniqueId)
         return if (isUnlocked) gameEntityType.getSpawnEggType() else Material.BARRIER
     }
 
     private fun buildEntityTypeDisplayName(translation: Translation, player: Player, gameEntityType: GameEntityType): Component {
-        val isUnlocked: Boolean = gameEntityType.isUnlockedByPlayer(player.uniqueId)
-        val statusColor: NamedTextColor = if (isUnlocked) NamedTextColor.GREEN else NamedTextColor.DARK_GRAY
+        val isUnlocked = gameEntityType.isUnlockedByPlayer(player.uniqueId)
+        val statusColor = if (isUnlocked) NamedTextColor.GREEN else NamedTextColor.DARK_GRAY
 
-        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return Component.text("")
-        val isSelected: Boolean = gamePlayer.selectedEntityType == gameEntityType
+        val gamePlayer = player.toGamePlayerInstance() ?: return Component.text("")
+        val isSelected = gamePlayer.selectedEntityType == gameEntityType
 
         val displayNameSuffixPlaceholder = if (isUnlocked) Placeholder.parsed("suffix",
             translation.lineAsString("blocko.inventory.entity_shop.entity_type_item.suffix.${if (isSelected) "selected" else "unlocked"}"))
@@ -182,7 +179,7 @@ class EntityShopInventory : InventoryProvider {
     }
 
     private fun buildEntityTypeItemLore(translation: Translation, player: Player, statsPlayer: StatsPlayer, gameEntityType: GameEntityType): List<Component> {
-        val isUnlocked: Boolean = gameEntityType.isUnlockedByPlayer(player.uniqueId)
+        val isUnlocked = gameEntityType.isUnlockedByPlayer(player.uniqueId)
         val loreKey = "blocko.inventory.entity_shop.entity_type_item.lore.${if (isUnlocked) "active" else "not_active"}"
 
         val possibleAchievementPlaceholder: TagResolver.Single = if (gameEntityType.neededAchievementKey == null) Placeholder.parsed("possible_achievement_name", "-/-")

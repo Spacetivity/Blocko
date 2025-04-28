@@ -7,8 +7,8 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.ai.AiRule
 
 class MovableAwayFromFirstFieldRule : AiRule {
-    override val weight: Int = EntityPickRule.MOVABLE_AWAY_FROM_FIRST_FIELD.weight
-    override val probability: Double = EntityPickRule.MOVABLE_AWAY_FROM_FIRST_FIELD.probability
+    override val weight = EntityPickRule.MOVABLE_AWAY_FROM_FIRST_FIELD.weight
+    override val probability = EntityPickRule.MOVABLE_AWAY_FROM_FIRST_FIELD.probability
 
     override fun evaluate(entity: GameEntity, player: GamePlayer, dicedNumber: Int, startField: GameField): Boolean {
         return entity.currentFieldId == 0 && entity.isMovableTo(dicedNumber)

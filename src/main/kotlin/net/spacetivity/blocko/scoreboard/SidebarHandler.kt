@@ -4,7 +4,7 @@ import java.util.*
 
 class SidebarHandler {
 
-    private val cachedSidebars: MutableSet<Sidebar> = mutableSetOf()
+    private val cachedSidebars = mutableSetOf<Sidebar>()
 
     fun getSidebar(uuid: UUID): Sidebar? = this.cachedSidebars.find { it.viewer.uniqueId == uuid }
 
@@ -13,7 +13,7 @@ class SidebarHandler {
     }
 
     fun unregisterSidebar(uuid: UUID) {
-        val sidebar: Sidebar = getSidebar(uuid) ?: return
+        val sidebar = getSidebar(uuid) ?: return
         sidebar.reset()
         this.cachedSidebars.remove(sidebar)
     }

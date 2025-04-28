@@ -2,16 +2,11 @@ package net.spacetivity.blocko.command.api
 
 class SpaceCommandHandler {
 
-    private val commandExecutors: HashMap<String, SpaceCommandExecutor?> = HashMap()
-    private val commands: MutableList<CommandProperties> = ArrayList()
-
-    fun getCommands(): List<CommandProperties> {
-        return commands
-    }
+    private val commandExecutors = mutableMapOf<String, SpaceCommandExecutor?>()
+    private val commands = mutableListOf<CommandProperties>()
 
     fun registerCommand(commandExecutor: SpaceCommandExecutor?): CommandProperties? {
-        val command: CommandProperties =
-            commandExecutor!!.javaClass.getAnnotation(CommandProperties::class.java) ?: return null
+        val command = commandExecutor!!.javaClass.getAnnotation(CommandProperties::class.java) ?: return null
 
         if (!(command.permission.isEmpty() || command.permission.isBlank()))
             commandExecutors[command.name] = commandExecutor

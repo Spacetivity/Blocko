@@ -13,7 +13,7 @@ fun Player.isSpectating(): Boolean {
 }
 
 fun Player.clearPhaseItems() {
-    val gameArena: GameArena = getArena() ?: return
+    val gameArena = getArena() ?: return
     gameArena.phase.clearPlayerInventory(this)
 }
 

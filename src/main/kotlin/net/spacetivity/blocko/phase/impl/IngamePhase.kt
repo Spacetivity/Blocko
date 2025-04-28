@@ -14,7 +14,6 @@ import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.playSound
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
-import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.translateMessage
@@ -24,7 +23,6 @@ import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.inventory.api.SpaceInventoryProvider
 import org.bukkit.Material
 import org.bukkit.Sound
-import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.time.Duration
 import java.util.*
@@ -45,17 +43,17 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
         if (this.matchStartTime == null) this.matchStartTime = System.currentTimeMillis()
 
-        for (gamePlayer: GamePlayer in getArena().currentPlayers.filter { !it.isAI }) {
-            val player: Player = gamePlayer.toBukkitInstance() ?: continue
+        for (gamePlayer in getArena().currentPlayers.filter { !it.isAI }) {
+            val player = gamePlayer.toBukkitInstance() ?: continue
             setupPlayerInventory(player)
         }
     }
 
     override fun stop() {
-        for (gamePlayer: GamePlayer in getArena().currentPlayers) {
-            val player: Player = gamePlayer.toBukkitInstance() ?: return
+        for (gamePlayer in getArena().currentPlayers) {
+            val player = gamePlayer.toBukkitInstance() ?: return
 
-            val statsPlayer: StatsPlayer? = gamePlayer.toStatsPlayerInstance()
+            val statsPlayer = gamePlayer.toStatsPlayerInstance()
             if (statsPlayer != null) statsPlayer.wonGames += 1
 
             BlockoGame.instance.bossbarHandler.unregisterBossbar(player, Constants.TIMEOUT_BOSSBAR_NAME)
@@ -63,17 +61,17 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
             gamePlayer.grantIfCompletedBy(RushExpertAchievement::class)
             gamePlayer.grantIfCompletedBy(WinMonsterAchievement::class)
 
-            val matchDuration: kotlin.time.Duration = (System.currentTimeMillis() - this.matchStartTime!!).toDuration(DurationUnit.MILLISECONDS)
+            val matchDuration = (System.currentTimeMillis() - this.matchStartTime!!).toDuration(DurationUnit.MILLISECONDS)
 
             matchDuration.toComponents { hours, minutes, seconds, _ ->
-                val hoursString: String = if (hours in 0..9) "0$hours" else hours.toString()
-                val minutesString: String = if (minutes in 0..9) "0$minutes" else minutes.toString()
-                val secondsString: String = if (seconds in 0..9) "0$seconds" else seconds.toString()
+                val hoursString = if (hours in 0..9) "0$hours" else hours.toString()
+                val minutesString = if (minutes in 0..9) "0$minutes" else minutes.toString()
+                val secondsString = if (seconds in 0..9) "0$seconds" else seconds.toString()
 
                 val timeString = "$hoursString:$minutesString:$secondsString"
 
-                val lastPosition: Int = getArena().teamOptions.playerCount
-                val positionString: String = if (gamePlayer.matchStats.position == null) lastPosition.toString() else gamePlayer.matchStats.position!!.toString()
+                val lastPosition = getArena().teamOptions.playerCount
+                val positionString = if (gamePlayer.matchStats.position == null) lastPosition.toString() else gamePlayer.matchStats.position!!.toString()
 
                 gamePlayer.toBukkitInstance()?.translateMessage("blocko.stats.show_match_stats",
                     Placeholder.parsed("eliminations", gamePlayer.matchStats.eliminations.toString()),
@@ -157,7 +155,7 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun setNextControllingTeam(): GameTeam? {
-        for (gamePlayer: GamePlayer in getArena().currentPlayers) {
+        for (gamePlayer in getArena().currentPlayers) {
             if (gamePlayer.isAI) continue
             BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }

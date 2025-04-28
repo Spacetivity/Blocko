@@ -16,24 +16,24 @@ fun Player.translateActionBar(key: String, vararg toReplace: TagResolver) {
 }
 
 fun Player.translateTitle(key: String, vararg toReplace: TagResolver) {
-    val titleParts: MutableList<Component> = validateComponents(key, *toReplace)
+    val titleParts = validateComponents(key, *toReplace)
     if (titleParts.size > 2) throw UnsupportedOperationException("Title $key can only have two lines!")
     showTitle(Title.title(titleParts[0], titleParts[1]))
 }
 
 fun GamePlayer.translateMessage(key: String, vararg toReplace: TagResolver) {
-    val player: Player = toBukkitInstance() ?: return
+    val player = toBukkitInstance() ?: return
     validateComponents(key, *toReplace).forEach { player.sendMessage(it) }
 }
 
 fun GamePlayer.translateActionBar(key: String, vararg toReplace: TagResolver) {
-    val player: Player = toBukkitInstance() ?: return
+    val player = toBukkitInstance() ?: return
     validateComponents(key, *toReplace).forEach { player.sendActionBar(it) }
 }
 
 private fun validateComponents(key: String, vararg toReplace: TagResolver): MutableList<Component> {
-    val selectedTranslation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-    val components: MutableList<Component> = mutableListOf()
+    val selectedTranslation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+    val components = mutableListOf<Component>()
     if (selectedTranslation.hasMultipleLines(key)) components.addAll(selectedTranslation.lines(key, *toReplace))
     else components.add(selectedTranslation.line(key, *toReplace))
     return components

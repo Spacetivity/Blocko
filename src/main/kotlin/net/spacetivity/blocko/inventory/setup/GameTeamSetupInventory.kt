@@ -2,16 +2,13 @@ package net.spacetivity.blocko.inventory.setup
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.setup.GameArenaSetupSession
 import net.spacetivity.blocko.arena.setup.getSetupSession
 import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
-import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.highlighting.scoreboard.impl.TeamPathHighlightMode
 import net.spacetivity.blocko.item.hideExtraInfo
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
 import net.spacetivity.blocko.item.name
-import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.InventoryUtils
@@ -30,16 +27,16 @@ import org.bukkit.inventory.meta.LeatherArmorMeta
 class GameTeamSetupInventory(private val type: InvType, private val location: Location) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
-        val availablePositions: List<InventoryPos> = listOf(
+        val availablePositions = listOf(
             InventoryPos.of(0, 2),
             InventoryPos.of(0, 3),
             InventoryPos.of(0, 5),
             InventoryPos.of(0, 6)
         )
 
-        val items: List<InteractiveItem> = initItems(translation, player)
+        val items = initItems(translation, player)
 
         for (i in items.indices) {
             controller.setItem(availablePositions[i], items[i])
@@ -47,10 +44,10 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
     }
 
     private fun initItems(translation: Translation, player: Player): List<InteractiveItem> {
-        val items: MutableList<InteractiveItem> = mutableListOf()
-        val setupSession: GameArenaSetupSession = player.getSetupSession() ?: return items
+        val items = mutableListOf<InteractiveItem>()
+        val setupSession = player.getSetupSession() ?: return items
 
-        for (gameTeam: GameTeam in setupSession.gameTeams) {
+        for (gameTeam in setupSession.gameTeams) {
             items.add(InteractiveItem.of(itemStack(Material.LEATHER_CHESTPLATE) {
                 meta<LeatherArmorMeta> {
                     name = translation.displayName("blocko.inventory.game_team_setup.team_item.display_name",
@@ -79,7 +76,7 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
                     }
 
                     else -> {
-                        val possibleField: GameField? = setupStep.gameFields.find { it.world == location.world && it.x == this.location.x && it.z == this.location.z }
+                        val possibleField = setupStep.gameFields.find { it.world == location.world && it.x == this.location.x && it.z == this.location.z }
 
                         if (possibleField == null) {
                             player.translateMessage("blocko.inventory.game_team_setup.team_item.click.cannot_set_team_entrance")

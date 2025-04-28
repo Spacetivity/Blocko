@@ -4,8 +4,6 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
 import net.spacetivity.blocko.item.name
-import net.spacetivity.blocko.stats.StatsPlayer
-import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.inventory.api.inventory.InventoryController
 import net.spacetivity.inventory.api.inventory.InventoryProperties
@@ -18,7 +16,7 @@ import org.bukkit.entity.Player
 class ProfileInventory(private val isShopItemActive: Boolean) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
         controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
@@ -29,8 +27,7 @@ class ProfileInventory(private val isShopItemActive: Boolean) : InventoryProvide
                 lore(translation.lore("blocko.inventory.profile.stats_item.lore"))
             }
         }) { _, _, _ ->
-            val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)
-                ?: return@of
+            val statsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId) ?: return@of
             InventoryUtils.openStatsInventory(player, statsPlayer)
         })
 

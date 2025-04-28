@@ -1,7 +1,6 @@
 package net.spacetivity.blocko.listener
 
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.GameMode
@@ -139,7 +138,7 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     }
 
     private fun isLobbyWorld(world: World): Boolean {
-        val lobbySpawn: LobbySpawn = this.plugin.lobbySpawnHandler.lobbySpawn ?: return false
+        val lobbySpawn = this.plugin.lobbySpawnHandler.lobbySpawn ?: return false
         return lobbySpawn.worldName == world.name
     }
 

@@ -1,11 +1,9 @@
 package net.spacetivity.blocko.dice
 
-import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
 import net.spacetivity.blocko.item.name
@@ -13,7 +11,6 @@ import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.*
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
-import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
@@ -28,29 +25,29 @@ import java.util.concurrent.ThreadLocalRandom
 
 class DiceHandler {
 
-    val dicingPlayers: MutableMap<UUID, DiceSession> = mutableMapOf()
+    val dicingPlayers = mutableMapOf<UUID, DiceSession>()
 
-    private val diceSides: MutableMap<Int, String> = BlockoGame.instance.diceSidesFile.diceSides
+    private val diceSides = BlockoGame.instance.diceSidesFile.diceSides
     private var diceAnimationTask: BukkitTask? = null
 
     fun startDiceAnimation() {
         this.diceAnimationTask = Bukkit.getScheduler().runTaskTimer(BlockoGame.instance, Runnable {
-            for (gameArena: GameArena in BlockoGame.instance.gameArenaHandler.cachedArenas) {
+            for (gameArena in BlockoGame.instance.gameArenaHandler.cachedArenas) {
                 if (!gameArena.phase.isIngame()) continue
-                val ingamePhase: IngamePhase = gameArena.phase as IngamePhase
+                val ingamePhase = gameArena.phase as IngamePhase
 
-                for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
+                for (gamePlayer in gameArena.currentPlayers) {
                     if (!ingamePhase.isInControllingTeam(gamePlayer.uuid)) continue
                     if (!gamePlayer.isDicing()) continue
-                    val diceSession: DiceSession = gamePlayer.getDiceSession() ?: continue
+                    val diceSession = gamePlayer.getDiceSession() ?: continue
 
-                    val endTimestamp: Long = diceSession.dicingEndTimestamp
-                    val currentTimestamp: Long = System.currentTimeMillis()
+                    val endTimestamp = diceSession.dicingEndTimestamp
+                    val currentTimestamp = System.currentTimeMillis()
 
                     if (currentTimestamp >= endTimestamp) {
                         ingamePhase.phaseMode = GamePhaseMode.PICK_ENTITY
 
-                        val dicedNumber: Int = diceSession.currentDiceNumber
+                        val dicedNumber = diceSession.currentDiceNumber
 
                         gamePlayer.dicedNumber = dicedNumber
                         gamePlayer.playSound(Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM)
@@ -78,7 +75,7 @@ class DiceHandler {
     }
 
     fun getDiceItem(): ItemStack {
-        val profile: PlayerProfile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
+        val profile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
         profile.setProperty(ProfileProperty("textures", this.diceSides[1]!!))
 
         return itemStack(Material.PLAYER_HEAD) {
@@ -103,14 +100,14 @@ class DiceHandler {
     private fun rollDice(gamePlayer: GamePlayer, diceSession: DiceSession) {
         if (!gamePlayer.isDicing()) return
 
-        val blockNumber: Int = diceSession.currentDiceNumber
-        val diceSide: Pair<Int, String> = getDiceSide(blockNumber)
+        val blockNumber = diceSession.currentDiceNumber
+        val diceSide = getDiceSide(blockNumber)
 
         if (!gamePlayer.isAI) {
-            val storageContents: Array<ItemStack?> = gamePlayer.accessStorageContents() ?: return
-            val itemStack: ItemStack = storageContents.find { it != null && it.type == Material.PLAYER_HEAD } ?: return
-            val skullMeta: SkullMeta = itemStack.itemMeta as SkullMeta
-            val diceProfile: PlayerProfile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
+            val storageContents = gamePlayer.accessStorageContents() ?: return
+            val itemStack = storageContents.find { it != null && it.type == Material.PLAYER_HEAD } ?: return
+            val skullMeta = itemStack.itemMeta as SkullMeta
+            val diceProfile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
             diceProfile.setProperty(ProfileProperty("textures", diceSide.second))
 
             skullMeta.playerProfile = diceProfile
@@ -127,16 +124,16 @@ class DiceHandler {
     }
 
     private fun getDiceDisplayName(diceNumber: Int): Component {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
         return translation.line("blocko.main_game_loop.dice_display_name", Placeholder.parsed("dice_number", diceNumber.toString()))
     }
 
     private fun getDiceSide(blockedDiceNumber: Number): Pair<Int, String> {
-        val randomNumber: Int = ThreadLocalRandom.current().nextInt(1, 7)
-        val diceSide: Pair<Int, String>? = this.diceSides.entries.find { it.key == randomNumber }?.toPair()
+        val randomNumber = ThreadLocalRandom.current().nextInt(1, 7)
+        val diceSide = this.diceSides.entries.find { it.key == randomNumber }?.toPair()
 
         if (diceSide == null) {
-            val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+            val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
             Bukkit.getConsoleSender().sendMessage(translation.line("blocko.main_game_loop.dice_error", Placeholder.parsed("number", randomNumber.toString())))
             return Pair(1, Constants.DICE_ONE_SKULL)
         }

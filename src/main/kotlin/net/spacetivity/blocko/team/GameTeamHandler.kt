@@ -93,9 +93,8 @@ class GameTeamHandler {
     }
 
     fun getLocationOfTeam(arenaId: String, teamName: String, x: Double, y: Double, z: Double): GameTeamLocation? {
-        val teamLocations: List<GameTeamLocation> = getLocationsOfAllTeams(arenaId).filter { it.teamName == teamName }
-
         var result: GameTeamLocation? = null
+        val teamLocations = getLocationsOfAllTeams(arenaId).filter { it.teamName == teamName }
 
         for (teamLocation: GameTeamLocation in teamLocations) {
             val worldPosition = teamLocation.getWorldPosition()

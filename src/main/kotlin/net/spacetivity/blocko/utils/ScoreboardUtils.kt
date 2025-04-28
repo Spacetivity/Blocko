@@ -10,10 +10,10 @@ import java.util.*
 object ScoreboardUtils {
 
     fun registerScoreboardTeam(teamName: String, color: NamedTextColor): Team {
-        val scoreboard: Scoreboard = Bukkit.getScoreboardManager().mainScoreboard
+        val scoreboard = Bukkit.getScoreboardManager().mainScoreboard
         val safeTeamName = "${UUID.randomUUID().toString().split("-")[0]}_$teamName"
 
-        var sbTeam: Team? = scoreboard.getTeam(safeTeamName)
+        var sbTeam = scoreboard.getTeam(safeTeamName)
         if (sbTeam == null) sbTeam = scoreboard.registerNewTeam(safeTeamName)
 
         sbTeam.color(color)
@@ -22,7 +22,7 @@ object ScoreboardUtils {
     }
 
     fun registerScoreboardTeamWithContent(scoreboard: Scoreboard, teamName: String, prefix: Component, suffix: Component): Team {
-        var sbTeam: Team? = scoreboard.getTeam(teamName)
+        var sbTeam = scoreboard.getTeam(teamName)
         if (sbTeam == null) sbTeam = scoreboard.registerNewTeam(teamName)
 
         sbTeam.prefix(prefix)

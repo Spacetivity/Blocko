@@ -12,8 +12,8 @@ import org.bukkit.inventory.ItemStack
 
 abstract class GamePhase(protected val arenaId: String, val name: String, val priority: Int, var countdown: GameCountdown?) {
 
-    private val hotbarItems: MutableMap<Int, ItemStack> = mutableMapOf()
-    private val spectatorItems: MutableMap<Int, ItemStack> = mutableMapOf()
+    private val hotbarItems = mutableMapOf<Int, ItemStack>()
+    private val spectatorItems = mutableMapOf<Int, ItemStack>()
 
     init {
         this.initPhaseHotbarItems(this.hotbarItems)
@@ -32,7 +32,7 @@ abstract class GamePhase(protected val arenaId: String, val name: String, val pr
     fun setupPlayerInventory(player: Player) {
         clearPlayerInventory(player)
 
-        for (entry: MutableMap.MutableEntry<Int, ItemStack> in if (player.isSpectating()) this.spectatorItems.entries else this.hotbarItems.entries) {
+        for (entry in if (player.isSpectating()) this.spectatorItems.entries else this.hotbarItems.entries) {
             player.inventory.setItem(entry.key, entry.value)
         }
     }

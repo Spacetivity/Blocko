@@ -34,7 +34,7 @@ object FileUtils {
         val result: T
 
         if (!Files.exists(filePath.toPath())) Files.createDirectories(filePath.toPath())
-        val file: File = Paths.get("${filePath}/$fileName.json").toFile()
+        val file = Paths.get("${filePath}/$fileName.json").toFile()
 
         if (!Files.exists(file.toPath())) {
             result = content
@@ -50,7 +50,7 @@ object FileUtils {
         val filePath = File("${dataFolderPath}/$subFolderName")
 
         if (!Files.exists(filePath.toPath())) return null
-        val file: File = Paths.get("${filePath}/$fileName.json").toFile()
+        val file = Paths.get("${filePath}/$fileName.json").toFile()
 
         return file
     }

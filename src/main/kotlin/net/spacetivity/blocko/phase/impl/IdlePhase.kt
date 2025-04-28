@@ -1,7 +1,6 @@
 package net.spacetivity.blocko.phase.impl
 
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.countdown.impl.IdleCountdown
 import net.spacetivity.blocko.item.itemStack
@@ -9,12 +8,10 @@ import net.spacetivity.blocko.item.meta
 import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.item.onInteract
 import net.spacetivity.blocko.phase.GamePhase
-import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.InventoryUtils
 import org.bukkit.Material
 import org.bukkit.Sound
-import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 
@@ -29,7 +26,7 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
     }
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
         hotbarItems[0] = itemStack(Material.CLOCK) {
             meta {
@@ -37,7 +34,7 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
                 lore(translation.lore("blocko.items.profile.lore"))
             }
         }.onInteract { event ->
-            val player: Player = event.player
+            val player = event.player
             InventoryUtils.openProfileInventory(player, true)
         }
 
@@ -47,8 +44,8 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
                 lore(translation.lore("blocko.items.team_selector.lore"))
             }
         }.onInteract { event ->
-            val player: Player = event.player
-            val gameArena: GameArena = player.getArena() ?: return@onInteract
+            val player = event.player
+            val gameArena = player.getArena() ?: return@onInteract
             InventoryUtils.openTeamSelectorInventory(player, gameArena)
         }
 
@@ -58,8 +55,8 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
                 lore(translation.lore("blocko.items.instant_starter.lore"))
             }
         }.onInteract { event ->
-            val player: Player = event.player
-            val gameArena: GameArena = player.getArena() ?: return@onInteract
+            val player = event.player
+            val gameArena = player.getArena() ?: return@onInteract
 
             if (gameArena.arenaHost!!.uuid != player.uniqueId) {
                 player.translateMessage("blocko.phase.host_item_blocked")
@@ -83,8 +80,8 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
                 lore(translation.lore("blocko.items.host_settings.lore"))
             }
         }.onInteract { event ->
-            val player: Player = event.player
-            val gameArena: GameArena = player.getArena() ?: return@onInteract
+            val player = event.player
+            val gameArena = player.getArena() ?: return@onInteract
 
             if (gameArena.arenaHost!!.uuid != player.uniqueId) {
                 player.translateMessage("blocko.phase.host_item_blocked")
@@ -99,8 +96,8 @@ class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown
                 name = translation.displayName("blocko.items.leave.display_name")
             }
         }.onInteract { event ->
-            val player: Player = event.player
-            val gameArena: GameArena = player.getArena() ?: return@onInteract
+            val player = event.player
+            val gameArena = player.getArena() ?: return@onInteract
             gameArena.quit(player)
         }
     }

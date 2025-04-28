@@ -4,8 +4,6 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.phase.GamePhase
-import net.spacetivity.blocko.phase.GamePhaseHandler
 import net.spacetivity.blocko.phase.impl.EndingPhase
 import net.spacetivity.blocko.phase.impl.IdlePhase
 import net.spacetivity.blocko.phase.impl.IngamePhase
@@ -14,26 +12,26 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.WorldCreator
-import org.bukkit.block.Block
 import org.bukkit.block.Sign
 import org.bukkit.block.sign.Side
-import org.bukkit.block.sign.SignSide
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class GameArenaHandler {
 
-    private val gamePhaseHandler: GamePhaseHandler = BlockoGame.instance.gamePhaseHandler
-    val cachedArenas: MutableList<GameArena> = mutableListOf()
+    private val gamePhaseHandler = BlockoGame.instance.gamePhaseHandler
+    val cachedArenas = mutableListOf<GameArena>()
 
     init {
         transaction {
-            for (resultRow: ResultRow in GameArenaDAO.selectAll().toMutableList()) {
-                val arenaId: String = resultRow[GameArenaDAO.id]
+            for (resultRow in GameArenaDAO.selectAll().toMutableList()) {
+                val arenaId = resultRow[GameArenaDAO.id]
 
                 val worldName = resultRow[GameArenaDAO.worldName]
                 var gameWorld: World? = null
@@ -47,14 +45,14 @@ class GameArenaHandler {
                 }
 
                 val serializedLocation = resultRow[GameArenaDAO.playerLocation].split(":")
-                val x: Double = serializedLocation[0].toDouble()
-                val y: Double = serializedLocation[1].toDouble()
-                val z: Double = serializedLocation[2].toDouble()
-                val yaw: Float = serializedLocation[3].toFloat()
-                val pitch: Float = serializedLocation[4].toFloat()
+                val x = serializedLocation[0].toDouble()
+                val y = serializedLocation[1].toDouble()
+                val z = serializedLocation[2].toDouble()
+                val yaw = serializedLocation[3].toFloat()
+                val pitch = serializedLocation[4].toFloat()
 
                 val playerLocation = Location(gameWorld, x, y, z, yaw, pitch)
-                val status: GameArenaStatus = GameArenaStatus.valueOf(resultRow[GameArenaDAO.status])
+                val status = GameArenaStatus.valueOf(resultRow[GameArenaDAO.status])
 
                 val idlePhase = IdlePhase(arenaId)
                 gamePhaseHandler.cachedGamePhases.put(arenaId, idlePhase)
@@ -77,14 +75,14 @@ class GameArenaHandler {
     }
 
     fun createArena(worldName: String, location: Location): Boolean {
-        val id: String = UUID.randomUUID().toString().split("-")[0]
+        val id = UUID.randomUUID().toString().split("-")[0]
         val serializedLocation = "${location.x}:${location.y}:${location.z}:${location.yaw}:${location.pitch}"
-        val status: GameArenaStatus = GameArenaStatus.CONFIGURATING
+        val status = GameArenaStatus.CONFIGURATING
 
         if (getArena(id) != null || (BlockoGame.instance.gameArenaHandler.cachedArenas.size >= BlockoGame.instance.globalConfigFile.gameArenaMaxParallelAmount)) return false
 
         transaction {
-            GameArenaDAO.insert { statement: InsertStatement<Number> ->
+            GameArenaDAO.insert { statement ->
                 statement[GameArenaDAO.id] = id
                 statement[GameArenaDAO.worldName] = worldName
                 statement[playerLocation] = serializedLocation
@@ -135,11 +133,11 @@ class GameArenaHandler {
 
     //TODO: make the sign layout configurable
     fun loadJoinSign(location: Location, gameArena: GameArena?) {
-        val block: Block = location.block
+        val block = location.block
         if (!block.type.name.contains("WALL_SIGN", true)) return
 
-        val sign: Sign = block.state as Sign
-        val signSide: SignSide = sign.getSide(Side.FRONT)
+        val sign = block.state as Sign
+        val signSide = sign.getSide(Side.FRONT)
 
         signSide.line(0, Component.text("BLOCKO", NamedTextColor.BLUE, TextDecoration.BOLD))
 
@@ -147,10 +145,10 @@ class GameArenaHandler {
             signSide.line(1, Component.text("Searching", NamedTextColor.GRAY))
             signSide.line(2, Component.text("for arena...", NamedTextColor.GRAY))
         } else {
-            val arenaStatus: GameArenaStatus = gameArena.status
-            val arenaPhase: GamePhase = gameArena.phase
+            val arenaStatus = gameArena.status
+            val arenaPhase = gameArena.phase
 
-            val statusLine: Component = when (arenaStatus) {
+            val statusLine = when (arenaStatus) {
                 GameArenaStatus.READY -> when (arenaPhase) {
                     is IdlePhase -> Component.text("${gameArena.currentPlayers.size}/${gameArena.teamOptions.playerCount}", NamedTextColor.YELLOW)
                     is IngamePhase -> Component.text("Ingame...", NamedTextColor.RED)

@@ -95,7 +95,7 @@ class GameArenaSetupTool(private val holder: Player) {
     }
 
     private fun fetchLore(translation: Translation): MutableList<Component> {
-        val lore: MutableList<Component> = mutableListOf()
+        val lore = mutableListOf<Component>()
         val optionalDataPrefix = translation.displayName("blocko.setup.tool.lore.separator")
 
         val setupSession = this.holder.getSetupSession() ?: return lore

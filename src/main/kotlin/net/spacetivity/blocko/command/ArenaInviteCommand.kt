@@ -2,14 +2,13 @@ package net.spacetivity.blocko.command
 
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
-import net.spacetivity.blocko.command.api.CommandProperties
-import net.spacetivity.blocko.command.api.SpaceCommandExecutor
-import net.spacetivity.blocko.command.api.SpaceCommandSender
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.getPossibleInvitationDestination
 import net.spacetivity.blocko.arena.toGamePlayerInstance
+import net.spacetivity.blocko.command.api.CommandProperties
+import net.spacetivity.blocko.command.api.SpaceCommandExecutor
+import net.spacetivity.blocko.command.api.SpaceCommandSender
 import net.spacetivity.blocko.translation.translateMessage
-import net.spacetivity.blocko.player.GamePlayer
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
@@ -19,10 +18,10 @@ class ArenaInviteCommand : SpaceCommandExecutor {
     override fun execute(sender: SpaceCommandSender, args: List<String>) {
         if (!sender.isPlayer) return
 
-        val player: Player = sender.castTo(Player::class.java)
+        val player = sender.castTo(Player::class.java)
 
         if (args.size == 2 && args[0].equals("send", true)) {
-            val gameArena: GameArena? = player.getArena()
+            val gameArena = player.getArena()
 
             if (gameArena == null) {
                 player.translateMessage("blocko.command.arena_invite.not_in_a_game")
@@ -34,17 +33,17 @@ class ArenaInviteCommand : SpaceCommandExecutor {
                 return
             }
 
-            val name: String = args[1]
-            val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
+            val name = args[1]
+            val gamePlayer = player.toGamePlayerInstance() ?: return
             gameArena.sendArenaInvite(gamePlayer, name)
             return
         }
 
         if (args.size == 2 && args[0].equals("accept", true)) {
-            val arenaId: String = args[1]
+            val arenaId = args[1]
 
-            validateInvitation(arenaId, player) { gameArena: GameArena ->
-                val wasJoinSuccessful: Boolean = gameArena.join(player.uniqueId, false)
+            validateInvitation(arenaId, player) { gameArena ->
+                val wasJoinSuccessful = gameArena.join(player.uniqueId, false)
                 if (wasJoinSuccessful) gameArena.invitedPlayers.remove(player.uniqueId)
             }
 
@@ -52,9 +51,9 @@ class ArenaInviteCommand : SpaceCommandExecutor {
         }
 
         if (args.size == 2 && args[0].equals("deny", true)) {
-            val arenaId: String = args[1]
+            val arenaId = args[1]
 
-            validateInvitation(arenaId, player) { gameArena: GameArena ->
+            validateInvitation(arenaId, player) { gameArena ->
                 gameArena.invitedPlayers.remove(player.uniqueId)
                 player.translateMessage("blocko.command.arena_invite.invitation_denied")
             }
@@ -70,10 +69,10 @@ class ArenaInviteCommand : SpaceCommandExecutor {
     }
 
     override fun onTabComplete(sender: SpaceCommandSender, args: List<String>): MutableList<String> {
-        val result: MutableList<String> = mutableListOf()
+        val result = mutableListOf<String>()
 
         if (!sender.isPlayer) return result
-        val player: Player = sender.castTo(Player::class.java)
+        val player = sender.castTo(Player::class.java)
 
         if (args.size == 1)
             result.addAll(listOf("send", "accept", "deny"))
@@ -83,7 +82,7 @@ class ArenaInviteCommand : SpaceCommandExecutor {
         }
 
         if (args.size == 2 && (args[0].equals("accept", true) || args[0].equals("deny", true))) {
-            val gameArena: GameArena = player.getPossibleInvitationDestination() ?: return mutableListOf()
+            val gameArena = player.getPossibleInvitationDestination() ?: return mutableListOf()
             result.add(gameArena.id)
         }
 
@@ -91,7 +90,7 @@ class ArenaInviteCommand : SpaceCommandExecutor {
     }
 
     private fun validateInvitation(arenaId: String, player: Player, result: (GameArena) -> Unit) {
-        val gameArena: GameArena? = BlockoGame.instance.gameArenaHandler.getArena(arenaId)
+        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(arenaId)
 
         if (gameArena == null) {
             player.translateMessage("blocko.command.blocko.arena_not_exists")

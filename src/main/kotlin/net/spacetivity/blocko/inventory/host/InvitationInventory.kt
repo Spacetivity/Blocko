@@ -8,7 +8,6 @@ import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
 import net.spacetivity.blocko.item.name
-import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.inventory.api.inventory.InventoryController
@@ -16,7 +15,6 @@ import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
 import net.spacetivity.inventory.api.item.InteractiveItem
 import net.spacetivity.inventory.api.item.InventoryPos
-import net.spacetivity.inventory.api.pagination.InventoryPagination
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -27,7 +25,7 @@ import org.bukkit.inventory.meta.SkullMeta
 class InvitationInventory(private val gameArena: GameArena) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
 
         controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
@@ -38,7 +36,7 @@ class InvitationInventory(private val gameArena: GameArena) : InventoryProvider 
             }
         }) { _, _, _ -> InventoryUtils.openHostSettingsInventory(player, gameArena) })
 
-        val pageItems: List<InteractiveItem> = fetchPlayerItems(player, translation)
+        val pageItems = fetchPlayerItems(player, translation)
 
         if (pageItems.isEmpty()) {
             controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(itemStack(Material.BARRIER) {
@@ -50,7 +48,7 @@ class InvitationInventory(private val gameArena: GameArena) : InventoryProvider 
             return
         }
 
-        val pagination: InventoryPagination = controller.createPagination()
+        val pagination = controller.createPagination()
         pagination.limitItemsPerPage(36)
         pagination.setItemField(1, 0, 4, 8)
         pagination.distributeItems(pageItems)
@@ -60,11 +58,11 @@ class InvitationInventory(private val gameArena: GameArena) : InventoryProvider 
     }
 
     private fun fetchPlayerItems(host: Player, translation: Translation): List<InteractiveItem> {
-        val hostGamePlayer: GamePlayer = host.toGamePlayerInstance() ?: return emptyList()
+        val hostGamePlayer = host.toGamePlayerInstance() ?: return emptyList()
 
-        val items: MutableList<InteractiveItem> = mutableListOf()
+        val items = mutableListOf<InteractiveItem>()
 
-        for (player: Player in Bukkit.getOnlinePlayers().filter { it.name != host.name && it.getArena() == null }) {
+        for (player in Bukkit.getOnlinePlayers().filter { it.name != host.name && it.getArena() == null }) {
             items.add(InteractiveItem.of(itemStack(Material.PLAYER_HEAD) {
                 meta<SkullMeta> {
                     name = translation.displayName("blocko.inventory.invitation.player_head.display_name", Placeholder.parsed("name", player.name))

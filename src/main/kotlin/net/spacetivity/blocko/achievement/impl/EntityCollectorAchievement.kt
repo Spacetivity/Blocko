@@ -12,7 +12,7 @@ class EntityCollectorAchievement(translationKey: String) : Achievement(translati
 class EntityCollectorRequirement(override val translationKey: String, override val neededCount: Int) : ProgressRequirement<Int> {
 
     override fun getPlaceholders(gamePlayer: GamePlayer): List<TagResolver> {
-        val size: Int = BlockoGame.instance.gameEntityHandler.getUnlockedEntityTypes(gamePlayer.uuid).size
+        val size = BlockoGame.instance.gameEntityHandler.getUnlockedEntityTypes(gamePlayer.uuid).size
 
         return listOf(
             Placeholder.parsed("current_amount", size.toString()),

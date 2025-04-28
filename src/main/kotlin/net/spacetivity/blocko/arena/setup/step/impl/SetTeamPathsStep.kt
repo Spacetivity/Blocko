@@ -9,15 +9,15 @@ import org.bukkit.entity.Player
 
 class SetTeamPathsStep : SetupStep {
 
-    override val id: Int = 3
-    override val name: String = "Set Team Path"
+    override val id = 3
+    override val name = "Set Team Path"
 
-    override val keybindHints: Set<ToolModeKeybindHint> = setOf(
+    override val keybindHints = setOf(
         ToolModeKeybindHint(ToolModeKeybind.LEFT_CLICK, "Opens Team Selector"),
         ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, "Sets teamId to gameField")
     )
 
-    override val validBlockTypes: Set<Material> = setOf(
+    override val validBlockTypes = setOf(
         Material.RED_CONCRETE,
         Material.GREEN_CONCRETE,
         Material.BLUE_CONCRETE,
@@ -25,7 +25,7 @@ class SetTeamPathsStep : SetupStep {
         Material.BONE_BLOCK
     )
 
-    override var active: Boolean = false
+    override var active = false
 
     override fun reset(player: Player) {
         val setupSession = player.getSetupSession() ?: return

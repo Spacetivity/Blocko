@@ -64,12 +64,12 @@ object RegionScanner {
         for (x in minX..maxX) {
             for (z in minZ..maxZ) {
                 val location = Location(corner1.world, x.toDouble(), corner1.blockY.toDouble(), z.toDouble())
-                val blockType: Material = location.block.type
+                val blockType = location.block.type
 
-                val categoriesCurrentBlockTypeIsRegisteredIn: List<Map.Entry<Set<Material>, ScannerResult>> = this.blocksOfScannableType.entries.filter { it.key.contains(blockType) }
+                val categoriesCurrentBlockTypeIsRegisteredIn = this.blocksOfScannableType.entries.filter { it.key.contains(blockType) }
                 if (categoriesCurrentBlockTypeIsRegisteredIn.isEmpty()) continue
 
-                for (categoryCurrentBlockTypeIsRegisteredIn: Map.Entry<Set<Material>, ScannerResult> in categoriesCurrentBlockTypeIsRegisteredIn) {
+                for (categoryCurrentBlockTypeIsRegisteredIn in categoriesCurrentBlockTypeIsRegisteredIn) {
                     val scannerResult = categoryCurrentBlockTypeIsRegisteredIn.value
                     resultsInRegion.put(location, Pair(scannerResult, getPossibleTeamName(scannerResult, blockType, setupSession)))
                 }
@@ -94,7 +94,7 @@ enum class ScannerResult(val priority: Int) {
 
     companion object {
         fun getMissingResults(results: Collection<ScannerResult>): Map<ScannerResult, Int> {
-            val missingResults: MutableMap<ScannerResult, Int> = mutableMapOf()
+            val missingResults = mutableMapOf<ScannerResult, Int>()
 
             val neededGarageFieldAmount = 16
             val neededGameFieldAmount = 40

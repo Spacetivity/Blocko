@@ -9,11 +9,11 @@ import org.bukkit.entity.Player
 
 class SetTeamEntrancesStep : SetupStep {
 
-    override val id: Int = 2
-    override val name: String = "Set Team Entrance"
-    override val keybindHints: Set<ToolModeKeybindHint> = setOf(ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, null))
-    override val validBlockTypes: Set<Material> = setOf(Material.BONE_BLOCK)
-    override var active: Boolean = false
+    override val id = 2
+    override val name = "Set Team Entrance"
+    override val keybindHints = setOf(ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, null))
+    override val validBlockTypes = setOf(Material.BONE_BLOCK)
+    override var active = false
 
     override fun reset(player: Player) {
         val setupSession = player.getSetupSession() ?: return

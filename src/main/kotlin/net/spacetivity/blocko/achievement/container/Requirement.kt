@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.translation.Translation
 
 interface Requirement {
 
@@ -15,8 +14,8 @@ interface Requirement {
     fun isCompletedBy(gamePlayer: GamePlayer): Boolean
 
     fun getExplanationLine(gamePlayer: GamePlayer): Component {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-        val key: String = BlockoGame.instance.getAchievementKey(false, this.translationKey)
+        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val key = BlockoGame.instance.getAchievementKey(false, this.translationKey)
 
         return translation.displayName(key, *getPlaceholders(gamePlayer).toTypedArray())
     }

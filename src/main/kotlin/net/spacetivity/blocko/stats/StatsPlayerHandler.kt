@@ -2,15 +2,18 @@ package net.spacetivity.blocko.stats
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class StatsPlayerHandler {
 
-    val cachedStatsPlayers: MutableList<StatsPlayer> = mutableListOf()
+    val cachedStatsPlayers = mutableListOf<StatsPlayer>()
 
     fun deleteStatsPlayer(uuid: UUID) {
         transaction {
@@ -22,7 +25,7 @@ class StatsPlayerHandler {
 
     fun createOrLoadStatsPlayer(uuid: UUID) {
         transaction {
-            val resultRow: ResultRow? = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
+            val resultRow = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
             val statsPlayer: StatsPlayer
 
             if (resultRow == null) {
@@ -52,7 +55,7 @@ class StatsPlayerHandler {
     }
 
     fun unloadStatsPlayer(uuid: UUID) {
-        val statsPlayer: StatsPlayer = getStatsPlayer(uuid) ?: return
+        val statsPlayer = getStatsPlayer(uuid) ?: return
         statsPlayer.updateDbEntry()
         this.cachedStatsPlayers.removeIf { it.uuid == uuid }
     }
@@ -77,7 +80,7 @@ class StatsPlayerHandler {
         var statsPlayer: StatsPlayer? = null
 
         transaction {
-            val resultRow: ResultRow? = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
+            val resultRow = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
             if (resultRow != null) {
                 statsPlayer = StatsPlayer(
                     uuid,

@@ -6,11 +6,11 @@ import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.net.URISyntaxException
-import java.nio.file.*
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
-import java.util.stream.Stream
 
 object TranslationFileLoader {
 
@@ -40,7 +40,7 @@ object TranslationFileLoader {
         val file = File(localesDirectory, "$languageName.yml")
         if (file.exists()) return
 
-        val inputStream: InputStream = BlockoGame.instance.getResource("lang/$languageName.yml") ?: throw NullPointerException("File (lang/$languageName.yml) not found!")
+        val inputStream = BlockoGame.instance.getResource("lang/$languageName.yml") ?: throw NullPointerException("File (lang/$languageName.yml) not found!")
         inputStream.use { source -> FileOutputStream(file).use { output -> source.copyTo(output) } }
     }
 
@@ -48,8 +48,8 @@ object TranslationFileLoader {
         val languageNames: MutableSet<String> = HashSet()
 
         try {
-            val fileSystem: FileSystem = FileSystems.newFileSystem(Objects.requireNonNull(clazz.getResource("")).toURI(), emptyMap<String, Any>())
-            val pathStream: Stream<Path> = Files.list(fileSystem.rootDirectories.iterator().next().resolve(rawPath))
+            val fileSystem = FileSystems.newFileSystem(Objects.requireNonNull(clazz.getResource("")).toURI(), emptyMap<String, Any>())
+            val pathStream = Files.list(fileSystem.rootDirectories.iterator().next().resolve(rawPath))
 
             if (!rawPath.contains("lang/shared")) {
                 pathStream.filter { !it.toString().contains("lang/shared") }.forEach { languageNames.add(it.toString()) }

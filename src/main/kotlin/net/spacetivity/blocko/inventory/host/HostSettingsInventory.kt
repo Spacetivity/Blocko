@@ -42,8 +42,7 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
                 hideExtraInfo()
             }
         }) { _, item, event ->
-            val nextMode: GameTeamOptions = GameTeamOptions.entries.find { it.id == if (event.isLeftClick) this.gameArena.teamOptions.id.inc() else this.gameArena.teamOptions.id.dec() }
-                ?: GameTeamOptions.FOUR_BY_ONE
+            val nextMode = GameTeamOptions.entries.find { it.id == if (event.isLeftClick) this.gameArena.teamOptions.id.inc() else this.gameArena.teamOptions.id.dec() } ?: GameTeamOptions.FOUR_BY_ONE
 
             this.gameArena.teamOptions = nextMode
 
@@ -86,10 +85,10 @@ class HostSettingsInventory(private val gameArena: GameArena) : InventoryProvide
     }
 
     private fun buildTeamModeSelectorLore(translation: Translation): MutableList<Component> {
-        val lore: MutableList<Component> = mutableListOf()
+        val lore = mutableListOf<Component>()
 
-        for (teamOptions: GameTeamOptions in GameTeamOptions.entries) {
-            val color: NamedTextColor = if (this.gameArena.teamOptions == teamOptions) NamedTextColor.GREEN else NamedTextColor.DARK_GRAY
+        for (teamOptions in GameTeamOptions.entries) {
+            val color = if (this.gameArena.teamOptions == teamOptions) NamedTextColor.GREEN else NamedTextColor.DARK_GRAY
 
             lore.add(translation.displayName("blocko.inventory.host.team_mode_changer.lore_line_format",
                 Placeholder.parsed("mode_color", "<${color.asHexString()}>"),

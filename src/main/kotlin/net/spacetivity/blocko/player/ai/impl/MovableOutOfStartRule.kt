@@ -7,8 +7,8 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.ai.AiRule
 
 class MovableOutOfStartRule : AiRule {
-    override val weight: Int = EntityPickRule.MOVABLE_OUT_OF_START.weight
-    override val probability: Double = EntityPickRule.MOVABLE_OUT_OF_START.probability
+    override val weight = EntityPickRule.MOVABLE_OUT_OF_START.weight
+    override val probability = EntityPickRule.MOVABLE_OUT_OF_START.probability
 
     override fun evaluate(entity: GameEntity, player: GamePlayer, dicedNumber: Int, startField: GameField): Boolean {
         return entity.isAtSpawn() &&

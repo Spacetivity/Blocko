@@ -3,9 +3,6 @@ package net.spacetivity.blocko.arena
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.dice.DiceHandler
-import net.spacetivity.blocko.field.GameField
-import net.spacetivity.blocko.lobby.LobbySpawn
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
@@ -13,7 +10,6 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.getTeam
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import net.spacetivity.blocko.stats.StatsPlayer
-import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.team.GameTeamOptions
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
@@ -33,27 +29,27 @@ class GameArena(
     val location: Location,
 ) {
 
-    var locked: Boolean = false
-    var waitForActualPlayers: Boolean = true
-    var teamOptions: GameTeamOptions = GameTeamOptions.TWO_BY_ONE
+    var locked = false
+    var waitForActualPlayers = true
+    var teamOptions = GameTeamOptions.TWO_BY_ONE
 
-    val currentPlayers: MutableSet<GamePlayer> = mutableSetOf()
-    val spectatorPlayers: MutableSet<UUID> = mutableSetOf()
+    val currentPlayers = mutableSetOf<GamePlayer>()
+    val spectatorPlayers = mutableSetOf<UUID>()
 
     var arenaHost: GamePlayer? = null
 
-    val invitedPlayers: MutableSet<UUID> = mutableSetOf()
+    val invitedPlayers = mutableSetOf<UUID>()
 
     init {
         if (this.status == GameArenaStatus.READY) this.phase.start()
     }
 
     fun sendArenaMessage(key: String, vararg toReplace: TagResolver) {
-        for (player: Player in getAllPlayers()) player.translateMessage(key, *toReplace)
+        for (player in getAllPlayers()) player.translateMessage(key, *toReplace)
     }
 
     fun sendArenaSound(sound: Sound, volume: Float) {
-        for (player: Player in getAllPlayers()) player.playSound(player.location, sound, volume, 1F)
+        for (player in getAllPlayers()) player.playSound(player.location, sound, volume, 1F)
     }
 
     fun joinAsSpectator(player: Player) {
@@ -77,8 +73,8 @@ class GameArena(
         player.translateMessage("blocko.arena.spectate_join")
         GameScoreboardUtils.setGameSidebar(player)
 
-        val ingamePhase: IngamePhase = this.phase as IngamePhase
-        val controllingTeam: GameTeam = ingamePhase.getControllingTeam() ?: return
+        val ingamePhase = this.phase as IngamePhase
+        val controllingTeam = ingamePhase.getControllingTeam() ?: return
         GameScoreboardUtils.updateControllingTeamLine(this, controllingTeam)
         BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
 
@@ -91,7 +87,7 @@ class GameArena(
         player.translateMessage("blocko.arena.spectate_quit")
         player.clearPhaseItems()
 
-        val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
+        val lobbySpawn = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
         if (lobbySpawn != null && player.world.name != lobbySpawn.worldName) player.teleportAsync(lobbySpawn.toBukkitInstance()).thenAccept {
             togglePlayerVisibility(player, PlayerVisibility.IN_LOBBY)
             player.allowFlight = true
@@ -106,8 +102,8 @@ class GameArena(
     }
 
     fun join(uuid: UUID, isAI: Boolean): Boolean {
-        val bukkitPlayer: Player? = Bukkit.getPlayer(uuid)
-        val name: String = bukkitPlayer?.name ?: BlockoGame.instance.botNamesFile.botNames.random()
+        val bukkitPlayer = Bukkit.getPlayer(uuid)
+        val name = bukkitPlayer?.name ?: BlockoGame.instance.botNamesFile.botNames.random()
 
         val gamePlayer = GamePlayer(uuid, name, this.id, null, isAI)
 
@@ -143,7 +139,7 @@ class GameArena(
         if (!isAI) {
             this.phase.setupPlayerInventory(gamePlayer.toBukkitInstance()!!)
 
-            val neededPlayerCount: Int = if (this.waitForActualPlayers) this.teamOptions.playerCount else 1
+            val neededPlayerCount = if (this.waitForActualPlayers) this.teamOptions.playerCount else 1
             this.phase.countdown?.tryStartup({ playerCount -> playerCount == neededPlayerCount })
 
             togglePlayerVisibility(bukkitPlayer!!, PlayerVisibility.IN_ARENA)
@@ -165,7 +161,7 @@ class GameArena(
         sendArenaMessage("blocko.arena.quit", Placeholder.parsed("name", player.name))
         player.clearPhaseItems()
 
-        val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
+        val lobbySpawn = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
         if (lobbySpawn != null && player.world.name != lobbySpawn.worldName) player.teleportAsync(lobbySpawn.toBukkitInstance()).thenAccept {
             togglePlayerVisibility(player, PlayerVisibility.IN_LOBBY)
             player.allowFlight = true
@@ -174,7 +170,7 @@ class GameArena(
 
         BlockoGame.instance.bossbarHandler.clearBossbars(player)
 
-        val gamePlayer: GamePlayer = this.currentPlayers.find { it.uuid == player.uniqueId } ?: return
+        val gamePlayer = this.currentPlayers.find { it.uuid == player.uniqueId } ?: return
 
         if (BlockoGame.instance.diceHandler.dicingPlayers.containsKey(gamePlayer.uuid))
             BlockoGame.instance.diceHandler.dicingPlayers.remove(gamePlayer.uuid)
@@ -185,11 +181,11 @@ class GameArena(
         }
 
         if (phase.isIngame()) {
-            val ingamePhase: IngamePhase = phase as IngamePhase
+            val ingamePhase = phase as IngamePhase
             BlockoGame.instance.gameEntityHandler.clearEntitiesForTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
             gamePlayer.actionTimeoutTimestamp = null
 
-            for (currentGamePlayer: GamePlayer in this.currentPlayers.filter { !it.isAI }) {
+            for (currentGamePlayer in this.currentPlayers.filter { !it.isAI }) {
                 BlockoGame.instance.bossbarHandler.unregisterBossbar(currentGamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
             }
 
@@ -234,8 +230,8 @@ class GameArena(
     fun reset(shutdown: Boolean) {
         this.phase.countdown?.cancel()
 
-        for (player: Player in getAllPlayers()) {
-            val lobbySpawn: LobbySpawn? = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
+        for (player in getAllPlayers()) {
+            val lobbySpawn = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
             if (lobbySpawn != null && player.world.name != lobbySpawn.worldName)
                 player.teleport(lobbySpawn.toBukkitInstance())
 
@@ -245,30 +241,30 @@ class GameArena(
             this.phase.clearPlayerInventory(player)
         }
 
-        for (gamePlayer: GamePlayer in this.currentPlayers) {
+        for (gamePlayer in this.currentPlayers) {
             gamePlayer.actionTimeoutTimestamp = null
             gamePlayer.activeEntity = null
             gamePlayer.lastEntityPickRule = null
 
-            val statsPlayer: StatsPlayer? = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)
+            val statsPlayer= BlockoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)
 
             if (gamePlayer.isAI)
                 BlockoGame.instance.statsPlayerHandler.cachedStatsPlayers.removeIf { it.uuid == gamePlayer.uuid }
 
             if (!gamePlayer.isAI && statsPlayer != null && !shutdown) statsPlayer.updateDbEntry()
 
-            for (gameTeam: GameTeam in BlockoGame.instance.gameTeamHandler.gameTeams[this.id]) {
+            for (gameTeam in BlockoGame.instance.gameTeamHandler.gameTeams[this.id]) {
                 gameTeam.quit(gamePlayer)
             }
         }
 
-        for (gameTeam: GameTeam in BlockoGame.instance.gameTeamHandler.gameTeams[this.id]) {
+        for (gameTeam in BlockoGame.instance.gameTeamHandler.gameTeams[this.id]) {
             gameTeam.deactivated = false
         }
 
-        val diceHandler: DiceHandler = BlockoGame.instance.diceHandler
+        val diceHandler = BlockoGame.instance.diceHandler
 
-        for (currentPlayer: GamePlayer in this.currentPlayers) {
+        for (currentPlayer in this.currentPlayers) {
             if (!diceHandler.dicingPlayers.containsKey(currentPlayer.uuid)) continue
             diceHandler.dicingPlayers.remove(currentPlayer.uuid)
         }
@@ -284,7 +280,7 @@ class GameArena(
 
         BlockoGame.instance.gameEntityHandler.clearEntitiesFromArena(this.id)
 
-        for (gameField: GameField in BlockoGame.instance.gameFieldHandler.cachedGameFields[this.id]) {
+        for (gameField in BlockoGame.instance.gameFieldHandler.cachedGameFields[this.id]) {
             gameField.isTaken = false
             gameField.currentHolder = null
         }
@@ -294,22 +290,22 @@ class GameArena(
     }
 
     fun sendArenaInvite(sender: GamePlayer, receiverName: String) {
-        val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(sender.arenaId) ?: return
+        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(sender.arenaId) ?: return
 
         if (!gameArena.phase.isIdle()) {
             sender.translateMessage("blocko.arena.game_already_started")
             return
         }
 
-        val senderBukkitPlayer: Player = sender.toBukkitInstance() ?: return
-        val receiverBukkitPlayer: Player? = Bukkit.getPlayer(receiverName)
+        val senderBukkitPlayer = sender.toBukkitInstance() ?: return
+        val receiverBukkitPlayer = Bukkit.getPlayer(receiverName)
 
         if (receiverBukkitPlayer == null) {
             sender.translateMessage("blocko.utils.player_not_found")
             return
         }
 
-        val receiverGamePlayer: GamePlayer? = receiverBukkitPlayer.toGamePlayerInstance()
+        val receiverGamePlayer = receiverBukkitPlayer.toGamePlayerInstance()
         if (receiverGamePlayer != null && receiverGamePlayer.arenaId == sender.arenaId) {
             sender.translateMessage("blocko.arena.player_already_in_arena")
             return
@@ -339,14 +335,14 @@ class GameArena(
     }
 
     fun getAllPlayers(): List<Player> {
-        val players: MutableList<Player> = this.spectatorPlayers.mapNotNull { Bukkit.getPlayer(it) }.toMutableList()
+        val players = this.spectatorPlayers.mapNotNull { Bukkit.getPlayer(it) }.toMutableList()
         players.addAll(this.currentPlayers.filter { !it.isAI }.mapNotNull { it.toBukkitInstance() })
         return players
     }
 
     fun isGameOver(): Boolean {
-        val finishedGamePlayers: List<GamePlayer> = this.currentPlayers.filter { it.getTeam().deactivated }.toList()
-        val enoughGamePlayersFinished: Boolean = finishedGamePlayers.size == (this.currentPlayers.size - 1)
+        val finishedGamePlayers = this.currentPlayers.filter { it.getTeam().deactivated }.toList()
+        val enoughGamePlayersFinished = finishedGamePlayers.size == (this.currentPlayers.size - 1)
         return enoughGamePlayersFinished
     }
 
@@ -355,23 +351,22 @@ class GameArena(
     }
 
     private fun findNewHost(): GamePlayer? {
-        val actualCurrentPlayers: List<GamePlayer> = this.currentPlayers.filter { !it.isAI }
+        val actualCurrentPlayers = this.currentPlayers.filter { !it.isAI }
 
         if (actualCurrentPlayers.isEmpty()) return null
 
-        val newHostPlayer: GamePlayer = if (this.arenaHost == null)
-            actualCurrentPlayers.random()
-        else
-            actualCurrentPlayers.filter { it.uuid != this.arenaHost?.uuid }.random()
+        val newHostPlayer =
+            if (this.arenaHost == null) actualCurrentPlayers.random()
+            else actualCurrentPlayers.filter { it.uuid != this.arenaHost?.uuid }.random()
 
         return newHostPlayer
     }
 
     private fun togglePlayerVisibility(bukkitPlayer: Player, visibility: PlayerVisibility) {
-        for (currentPlayer: Player in Bukkit.getOnlinePlayers()) {
+        for (currentPlayer in Bukkit.getOnlinePlayers()) {
             when (visibility) {
                 PlayerVisibility.IN_ARENA -> {
-                    val playersInSameArena: Boolean = (bukkitPlayer.getArena() != null && currentPlayer.getArena() != null) && (bukkitPlayer.getArena()!!.id == currentPlayer.getArena()!!.id)
+                    val playersInSameArena = (bukkitPlayer.getArena() != null && currentPlayer.getArena() != null) && (bukkitPlayer.getArena()!!.id == currentPlayer.getArena()!!.id)
 
                     if (playersInSameArena) {
                         bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)
@@ -393,7 +388,7 @@ class GameArena(
                 }
 
                 PlayerVisibility.SPECTATING -> {
-                    val isCurrentPlayerAlsoSpectator: Boolean = this.spectatorPlayers.contains(currentPlayer.uniqueId)
+                    val isCurrentPlayerAlsoSpectator = this.spectatorPlayers.contains(currentPlayer.uniqueId)
 
                     if (isCurrentPlayerAlsoSpectator) {
                         bukkitPlayer.showPlayer(BlockoGame.instance, currentPlayer)

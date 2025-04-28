@@ -6,21 +6,20 @@ import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
 import net.spacetivity.blocko.arena.setup.step.impl.SetTeamEntrancesStep
 import net.spacetivity.blocko.arena.setup.step.impl.SetTeamPathsStep
 import net.spacetivity.blocko.arena.setup.step.impl.SetTurningPointsStep
-import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.utils.Constants
 import java.time.Duration
 import kotlin.reflect.KClass
 
 class GameArenaSetupSession(val arenaId: String, val setupTool: GameArenaSetupTool) {
 
-    val timeoutTimestamp: Long =
+    val timeoutTimestamp =
         if (BlockoGame.instance.setupConfigFile.setupSessionEndless) -1
         else System.currentTimeMillis() + Duration.ofMinutes(BlockoGame.instance.setupConfigFile.setupSessionTimeoutMinutes.toLong()).toMillis()
 
     var currentTeamName: String? = null
-    val gameTeams: List<GameTeam> = Constants.GAME_TEAMS
+    val gameTeams = Constants.GAME_TEAMS
 
-    val setupSteps: MutableMap<KClass<out SetupStep>, SetupStep> = mutableMapOf(
+    val setupSteps = mutableMapOf<KClass<out SetupStep>, SetupStep>(
         Pair(ScanBoardStep::class, ScanBoardStep()),
         Pair(SetTurningPointsStep::class, SetTurningPointsStep()),
         Pair(SetTeamEntrancesStep::class, SetTeamEntrancesStep()),

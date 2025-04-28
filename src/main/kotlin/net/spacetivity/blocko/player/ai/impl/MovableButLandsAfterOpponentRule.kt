@@ -7,8 +7,8 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.ai.AiRule
 
 class MovableButLandsAfterOpponentRule : AiRule {
-    override val weight: Int = EntityPickRule.MOVABLE_BUT_LANDS_AFTER_OPPONENT.weight
-    override val probability: Double = EntityPickRule.MOVABLE_BUT_LANDS_AFTER_OPPONENT.probability
+    override val weight = EntityPickRule.MOVABLE_BUT_LANDS_AFTER_OPPONENT.weight
+    override val probability = EntityPickRule.MOVABLE_BUT_LANDS_AFTER_OPPONENT.probability
 
     override fun evaluate(entity: GameEntity, player: GamePlayer, dicedNumber: Int, startField: GameField): Boolean {
         return entity.isMovableTo(dicedNumber) && entity.landsAfterOpponent(dicedNumber)

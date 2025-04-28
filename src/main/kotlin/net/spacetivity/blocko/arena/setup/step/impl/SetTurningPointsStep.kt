@@ -9,14 +9,14 @@ import org.bukkit.entity.Player
 
 class SetTurningPointsStep : SetupStep {
 
-    override val id: Int = 0
-    override val name: String = "Set Turning Point"
+    override val id = 0
+    override val name = "Set Turning Point"
 
-    override val keybindHints: Set<ToolModeKeybindHint> = setOf(
+    override val keybindHints = setOf(
         ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, null)
     )
 
-    override val validBlockTypes: Set<Material> = setOf(
+    override val validBlockTypes = setOf(
         Material.RED_WOOL,
         Material.GREEN_WOOL,
         Material.BLUE_WOOL,
@@ -24,7 +24,7 @@ class SetTurningPointsStep : SetupStep {
         Material.BONE_BLOCK
     )
 
-    override var active: Boolean = false
+    override var active = false
 
     override fun reset(player: Player) {
         val setupSession = player.getSetupSession() ?: return

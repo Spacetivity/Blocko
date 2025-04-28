@@ -1,7 +1,6 @@
 package net.spacetivity.blocko.player
 
 import net.kyori.adventure.bossbar.BossBar
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
@@ -10,7 +9,6 @@ import net.spacetivity.blocko.bossbar.BossbarHandler
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
-import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
@@ -20,7 +18,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitTask
 import java.util.concurrent.ThreadLocalRandom
 
@@ -86,7 +83,7 @@ class GamePlayActionHandler {
 
     private fun handleEntityHighlighting(gamePlayer: GamePlayer, arena: GameArena) {
         val player = gamePlayer.toBukkitInstance() ?: return
-        val itemStack: ItemStack = player.inventory.itemInMainHand
+        val itemStack = player.inventory.itemInMainHand
 
         if (itemStack.type != Material.ARMOR_STAND) {
             getHighlightedEntities(gamePlayer, arena).forEach { it.toggleHighlighting(false) }
@@ -95,7 +92,7 @@ class GamePlayActionHandler {
         if (!PersistentDataUtils.has(itemStack.itemMeta, ENTITY_SELECTOR_KEY))
             return
 
-        val entityId: Int = PersistentDataUtils.get(itemStack.itemMeta, ENTITY_SELECTOR_KEY, Int::class.java)
+        val entityId = PersistentDataUtils.get(itemStack.itemMeta, ENTITY_SELECTOR_KEY, Int::class.java)
         val gameEntity = BlockoGame.instance.gameEntityHandler
             .getEntitiesFromTeam(arena.id, gamePlayer.teamName!!).find { it.entityId == entityId } ?: return
 
@@ -185,9 +182,9 @@ class GamePlayActionHandler {
             when (ingamePhase.phaseMode) {
                 GamePhaseMode.DICE -> if (gamePlayer.isAI) {
                     // small delay to make the AI-dicing more natural
-                    val random: ThreadLocalRandom = ThreadLocalRandom.current()
-                    val chanceForLongerDelay: Boolean = random.nextInt(0, 10) > 5
-                    val aiDiceDelayTicks: Long = if (chanceForLongerDelay) 20L * (random.nextLong(1L, 3L)) else 1L
+                    val random = ThreadLocalRandom.current()
+                    val chanceForLongerDelay = random.nextInt(0, 10) > 5
+                    val aiDiceDelayTicks = if (chanceForLongerDelay) 20L * (random.nextLong(1L, 3L)) else 1L
                     
                     Bukkit.getScheduler().runTaskLaterAsynchronously(BlockoGame.instance, Runnable {
                         gamePlayer.dice(ingamePhase)
@@ -210,10 +207,9 @@ class GamePlayActionHandler {
     private fun updateBossbarForPlayer(player: Player, ingamePhase: IngamePhase, controllingPlayer: GamePlayer) {
         if (controllingPlayer.actionTimeoutTimestamp == null) return
 
-        val bossbarHandler: BossbarHandler = BlockoGame.instance.bossbarHandler
-        val team: GameTeam = BlockoGame.instance.gameTeamHandler
-            .getTeamOfPlayer(controllingPlayer.arenaId, controllingPlayer.uuid) ?: return
-        val timeLeft: Long = ingamePhase.getControllingGamePlayerTimeLeft()
+        val bossbarHandler = BlockoGame.instance.bossbarHandler
+        val team = BlockoGame.instance.gameTeamHandler.getTeamOfPlayer(controllingPlayer.arenaId, controllingPlayer.uuid) ?: return
+        val timeLeft = ingamePhase.getControllingGamePlayerTimeLeft()
 
         val timePlaceholder = Placeholder.parsed("time", if (timeLeft == 1L) "one" else timeLeft.toString())
         val unitPlaceholder = Placeholder.parsed("unit", if (timeLeft == 1L) "second" else "seconds")
@@ -225,7 +221,7 @@ class GamePlayActionHandler {
 
         val timeColorPlaceholder = Placeholder.parsed("time_color", "<$timeColor>")
 
-        val bossbarText: Component = BlockoGame.instance.translationHandler.getSelectedTranslation().line(
+        val bossbarText = BlockoGame.instance.translationHandler.getSelectedTranslation().line(
             "blocko.bossbar.timeout",
             Placeholder.parsed("team_color", "<${team.color.asHexString()}>"),
             Placeholder.parsed("team_name", team.name.lowercase().replaceFirstChar { it.uppercase() }),
@@ -237,7 +233,7 @@ class GamePlayActionHandler {
         if (bossbarHandler.getBossbars(player.uniqueId).none { it.first == Constants.TIMEOUT_BOSSBAR_NAME }) {
             bossbarHandler.registerBossbar(player, Constants.TIMEOUT_BOSSBAR_NAME, bossbarText, 1.0F, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
         } else {
-            val progress: Float = ingamePhase.getControllingGamePlayerTimeLeftFraction()
+            val progress = ingamePhase.getControllingGamePlayerTimeLeftFraction()
             bossbarHandler.updateBossbar(player.uniqueId, Constants.TIMEOUT_BOSSBAR_NAME, BossbarHandler.BossBarUpdate.PROGRESS, progress)
             bossbarHandler.updateBossbar(player.uniqueId, Constants.TIMEOUT_BOSSBAR_NAME, BossbarHandler.BossBarUpdate.NAME, bossbarText)
             val barColor = when {

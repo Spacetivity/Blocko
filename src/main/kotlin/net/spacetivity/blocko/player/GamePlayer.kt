@@ -35,7 +35,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
         this.activeEntity!!.entityStatus = GameEntityStatus.MOVING
         this.actionTimeoutTimestamp = null
 
-        for (gamePlayer: GamePlayer in BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
+        for (gamePlayer in BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
             BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }
 
@@ -46,7 +46,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
     fun autoPickEntity(ingamePhase: IngamePhase) {
         if (this.dicedNumber == null) return
 
-        val situation: Pair<EntityPickRule, GameEntity?> = BlockoGame.instance.entityAiHandler.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
+        val situation = BlockoGame.instance.entityAiHandler.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
         this.actionTimeoutTimestamp = null
 
         if (situation.first == EntityPickRule.NOT_MOVABLE && situation.second == null) {
@@ -63,7 +63,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
         this.activeEntity!!.toggleHighlighting(true)
         this.lastEntityPickRule = situation.first
 
-        for (gamePlayer: GamePlayer in BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
+        for (gamePlayer in BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
             BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }
 
@@ -75,12 +75,12 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
         if (this.dicedNumber == null) return
         if (this.activeEntity == null) return
 
-        val currentFieldId: Int? = this.activeEntity!!.currentFieldId
+        val currentFieldId = this.activeEntity!!.currentFieldId
         val teamStartPoint = 0
 
         this.activeEntity?.newGoalFieldId = if (currentFieldId == null) teamStartPoint + this.dicedNumber!! else currentFieldId + this.dicedNumber!!
 
-        val activeEntity1: GameEntity = this.activeEntity ?: throw NullPointerException("Active entity is null")
+        val activeEntity1 = this.activeEntity ?: throw NullPointerException("Active entity is null")
 
         if (!activeEntity1.shouldMove)
             this.activeEntity!!.shouldMove = true
