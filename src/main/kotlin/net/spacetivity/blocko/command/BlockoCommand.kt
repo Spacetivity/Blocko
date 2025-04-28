@@ -5,9 +5,10 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.GameArenaHandler
 import net.spacetivity.blocko.arena.GameArenaStatus
-import net.spacetivity.blocko.arena.setup.GameArenaSetupData
 import net.spacetivity.blocko.arena.setup.GameArenaSetupHandler
+import net.spacetivity.blocko.arena.setup.GameArenaSetupSession
 import net.spacetivity.blocko.arena.setup.ScannerResult
+import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
 import net.spacetivity.blocko.command.api.CommandProperties
 import net.spacetivity.blocko.command.api.SpaceCommandExecutor
 import net.spacetivity.blocko.command.api.SpaceCommandSender
@@ -92,7 +93,7 @@ class BlockoCommand : SpaceCommandExecutor {
 
         // /blocko arena setup board scan <id>
         if (args.size == 5 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("board", true) && args[3].equals("scan", true)) {
-            checkSetupMode(player) { arenaSetupData ->
+            checkSetupMode(player) { setupSession ->
                 val arenaId: String = args[4]
                 val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
 
@@ -113,7 +114,7 @@ class BlockoCommand : SpaceCommandExecutor {
 
         // /blocko arena setup board check <id>
         if (args.size == 5 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("board", true) && args[3].equals("check", true)) {
-            checkSetupMode(player) { arenaSetupData ->
+            checkSetupMode(player) { setupSession ->
                 val arenaId: String = args[4]
                 val gameArena: GameArena? = this.gameArenaHandler.getArena(arenaId)
 
@@ -127,7 +128,8 @@ class BlockoCommand : SpaceCommandExecutor {
                     return@checkSetupMode
                 }
 
-                val missingScannerResults = arenaSetupData.missingResults
+                val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return@checkSetupMode
+                val missingScannerResults = setupStep.missingResults
 
                 if (missingScannerResults.isEmpty()) {
                     player.translateMessage("blocko.setup.scanning_board.missing_fields.not_found")
@@ -151,8 +153,8 @@ class BlockoCommand : SpaceCommandExecutor {
         }
 
         if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("cancel", true)) {
-            checkSetupMode(player) { arenaSetupData: GameArenaSetupData ->
-                if (this.gameArenaHandler.cachedArenas.none { it.id == arenaSetupData.arenaId }) {
+            checkSetupMode(player) { setupSession: GameArenaSetupSession ->
+                if (this.gameArenaHandler.cachedArenas.none { it.id == setupSession.arenaId }) {
                     player.translateMessage("blocko.command.blocko.arena_not_exists")
                     return@checkSetupMode
                 }
@@ -163,8 +165,8 @@ class BlockoCommand : SpaceCommandExecutor {
         }
 
         if (args.size == 3 && args[0].equals("arena", true) && args[1].equals("setup", true) && args[2].equals("finish", true)) {
-            checkSetupMode(player) { arenaSetupData: GameArenaSetupData ->
-                if (this.gameArenaHandler.cachedArenas.none { it.id == arenaSetupData.arenaId }) {
+            checkSetupMode(player) { setupSession: GameArenaSetupSession ->
+                if (this.gameArenaHandler.cachedArenas.none { it.id == setupSession.arenaId }) {
                     player.translateMessage("blocko.command.blocko.arena_not_exists")
                     return@checkSetupMode
                 }
@@ -255,15 +257,15 @@ class BlockoCommand : SpaceCommandExecutor {
         return this.gameArenaHandler.cachedArenas.map { it.id }
     }
 
-    private fun checkSetupMode(player: Player, result: (GameArenaSetupData) -> Unit) {
-        val arenaSetupData: GameArenaSetupData? = this.arenaSetupHandler.getSetupData(player.uniqueId)
+    private fun checkSetupMode(player: Player, result: (GameArenaSetupSession) -> Unit) {
+        val setupSession: GameArenaSetupSession? = this.arenaSetupHandler.getSetupData(player.uniqueId)
 
-        if (arenaSetupData == null) {
+        if (setupSession == null) {
             player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
-        result.invoke(arenaSetupData)
+        result.invoke(setupSession)
     }
 
 }

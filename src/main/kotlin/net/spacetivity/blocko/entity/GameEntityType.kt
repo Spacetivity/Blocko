@@ -1,16 +1,19 @@
 package net.spacetivity.blocko.entity
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.achievement.getAchievementByClass
+import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.*
 import net.spacetivity.blocko.arena.toGamePlayerInstance
-import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.StatsType
 import net.spacetivity.blocko.stats.UpdateOperation
 import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.NumberUtils
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.EntityType
@@ -31,7 +34,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     COW(EntityType.COW, 50, false, null),
     GOAT(EntityType.GOAT, 10, false, null),
     CREEPER(EntityType.CREEPER, 80, false, null),
-    DROWNED(EntityType.DROWNED, 70, false, BlockoGame.instance.achievementHandler.getAchievement(PlayFirstGameAchievement::class.java)?.translationKey),
+    DROWNED(EntityType.DROWNED, 70, false, getAchievementByClass(PlayFirstGameAchievement::class)?.translationKey),
     ENDERMAN(EntityType.ENDERMAN, 80, false, null),
     EVOKER(EntityType.EVOKER, 120, false, null),
     FOX(EntityType.FOX, 60, false, null),
@@ -39,7 +42,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     FROG(EntityType.FROG, 40, false, null),
     TURTLE(EntityType.TURTLE, 45, false, null),
     HUSK(EntityType.HUSK, 70, false, null),
-    //TODO: MUSHROOM_COW(EntityType.COW, 3500, false, BlockoGame.instance.achievementHandler.getAchievement(EntityCollectorAchievement::class.java)?.translationKey),
+    MOOSHROOM(EntityType.MOOSHROOM, 3500, false, getAchievementByClass(EntityCollectorAchievement::class)?.translationKey),
     OCELOT(EntityType.OCELOT, 50, false, null),
     PIG(EntityType.PIG, 40, false, null),
     PIGLIN(EntityType.PIGLIN, 70, false, null),
@@ -48,13 +51,13 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     HOGLIN(EntityType.HOGLIN, 120, true, null),
     PILLAGER(EntityType.PILLAGER, 90, false, null),
     ILLUSIONER(EntityType.ILLUSIONER, 90, false, null),
-    RABBIT(EntityType.RABBIT, 40, false, BlockoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java)?.translationKey),
+    RABBIT(EntityType.RABBIT, 40, false, getAchievementByClass(FirstEliminationAchievement::class)?.translationKey),
     SHEEP(EntityType.SHEEP, 40, false, null),
     SHULKER(EntityType.SHULKER, 150, false, null),
     SKELETON(EntityType.SKELETON, 90, false, null),
     STRAY(EntityType.STRAY, 90, false, null),
     VINDICATOR(EntityType.VINDICATOR, 150, false, null),
-    WANDERING_TRADER(EntityType.WANDERING_TRADER, 1050, false, BlockoGame.instance.achievementHandler.getAchievement(EntityCollectorAchievement::class.java)?.translationKey),
+    WANDERING_TRADER(EntityType.WANDERING_TRADER, 1050, false, getAchievementByClass(EntityCollectorAchievement::class)?.translationKey),
     WITCH(EntityType.WITCH, 150, false, null),
     WITHER_SKELETON(EntityType.WITHER_SKELETON, 150, false, null),
     WOLF(EntityType.WOLF, 50, false, null),
@@ -68,7 +71,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     PARROT(EntityType.PARROT, 50, false, null),
     VEX(EntityType.VEX, 75, false, null),
 
-    IRON_GOLEM(EntityType.IRON_GOLEM, 350, false, BlockoGame.instance.achievementHandler.getAchievement(WinMonsterAchievement::class.java)?.translationKey),
+    IRON_GOLEM(EntityType.IRON_GOLEM, 350, false, getAchievementByClass(WinMonsterAchievement::class)?.translationKey),
 
     HORSE(EntityType.HORSE, 100, true, null),
     ZOMBIE_HORSE(EntityType.ZOMBIE_HORSE, 100, true, null),
@@ -90,41 +93,22 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     TROPICAL_FISH(EntityType.TROPICAL_FISH, 40, false, null),
     DOLPHIN(EntityType.DOLPHIN, 100, false, null),
 
-    WARDEN(EntityType.WARDEN, 15000, false, BlockoGame.instance.achievementHandler.getAchievement(MasterEliminatorAchievement::class.java)?.translationKey);
+    WARDEN(EntityType.WARDEN, 15000, false, getAchievementByClass(MasterEliminatorAchievement::class)?.translationKey);
 
     fun getCorrectedTypeName(): String {
-        val rawEntityTypeName: String = this.bukkitEntityType.name.lowercase()
-        val entityTypeName: String
-
-        if (rawEntityTypeName.contains("_")) {
-            val words: List<String> = rawEntityTypeName.split("_")
-            val correctedWordList: List<String>
-
-            if (words.any { it.equals("llama", true) })
-                correctedWordList = words.map { it.replaceFirst("l", "") }
-            else
-                correctedWordList = words
-
-            entityTypeName = correctedWordList.joinToString(" ") { it.replaceFirstChar { firstChar -> firstChar.uppercase() } }
+        val rawEntityTypeName = this.bukkitEntityType.name.lowercase()
+        return if (rawEntityTypeName.contains("_")) {
+            val words = rawEntityTypeName.split("_")
+            words.joinToString(" ") { it.replaceFirstChar { firstChar -> firstChar.uppercase() } }
         } else {
-            if (rawEntityTypeName.contains("llama", true))
-                entityTypeName = rawEntityTypeName.replaceFirst("l", "").replaceFirstChar { it.uppercase() }
-            else
-                entityTypeName = rawEntityTypeName.replaceFirstChar { it.uppercase() }
+            rawEntityTypeName.replaceFirstChar { it.uppercase() }
         }
-
-        return entityTypeName
     }
 
     fun getSpawnEggType(): Material {
-        val typeName: String = when (this) {
-            //MUSHROOM_COW -> "COW_SPAWN_EGG"
-            else -> "${this.name.uppercase()}_SPAWN_EGG"
-        }
-
+        val typeName = "${this.name.uppercase()}_SPAWN_EGG"
         val type: Material? = Material.entries.find { it.name == typeName }
-        if (type == null) println("There is no spawn egg with the name $typeName")
-
+        if (type == null) Bukkit.getConsoleSender().sendMessage(Component.text("There is no spawn egg with the name $typeName", NamedTextColor.DARK_RED))
         return type ?: Material.BARRIER
     }
 
@@ -135,14 +119,14 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     fun buyEntityType(player: Player) {
         if (isUnlockedByPlayer(player.uniqueId)) return
 
-        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return
-        val statsPlayer: StatsPlayer = player.toGamePlayerInstance()?.toStatsPlayerInstance() ?: return
+        val gamePlayer = player.toGamePlayerInstance() ?: return
+        val statsPlayer = gamePlayer.toStatsPlayerInstance() ?: return
 
         BlockoGame.instance.gameEntityHandler.unlockEntityType(player.uniqueId, this)
         statsPlayer.update(StatsType.COINS, UpdateOperation.DECREASE, this.price)
         statsPlayer.updateDbEntry()
 
-        BlockoGame.instance.achievementHandler.getAchievement(EntityCollectorAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+        gamePlayer.grantIfCompletedBy(EntityCollectorAchievement::class)
 
         player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1F)
         player.translateMessage("blocko.entity_shop.successfully_bought_entity_type",

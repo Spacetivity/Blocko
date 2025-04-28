@@ -2,9 +2,9 @@ package net.spacetivity.blocko.team
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import net.kyori.adventure.text.format.NamedTextColor
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.MetadataUtils
 import org.bukkit.entity.LivingEntity
@@ -23,10 +23,7 @@ class GameTeamHandler {
 
     init {
         for (gameArena: GameArena in BlockoGame.instance.gameArenaHandler.cachedArenas) {
-            addTeam(gameArena.id, GameTeam("red", NamedTextColor.RED, 0))
-            addTeam(gameArena.id, GameTeam("blue", NamedTextColor.BLUE, 1))
-            addTeam(gameArena.id, GameTeam("yellow", NamedTextColor.YELLOW, 2))
-            addTeam(gameArena.id, GameTeam("green", NamedTextColor.GREEN, 3))
+            this.gameTeams.putAll(gameArena.id, Constants.GAME_TEAMS)
         }
 
         transaction {

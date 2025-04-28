@@ -1,8 +1,8 @@
 package net.spacetivity.blocko.listener
 
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.setup.GameArenaSetupData
 import net.spacetivity.blocko.arena.setup.GameArenaSetupHandler
+import net.spacetivity.blocko.arena.setup.GameArenaSetupSession
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Material
@@ -26,7 +26,7 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
     @EventHandler
     fun onQuitWhileInSetup(event: PlayerQuitEvent) {
         val player: Player = event.player
-        val setupData: GameArenaSetupData = this.setupHandler.getSetupData(player.uniqueId) ?: return
+        val setupData: GameArenaSetupSession = this.setupHandler.getSetupData(player.uniqueId) ?: return
 
         this.setupHandler.handleSetupEnd(player, false)
 
@@ -44,17 +44,17 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
         if (heldItemStack.type == Material.AIR) return
         if (!PersistentDataUtils.has(heldItemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
 
-        val setupData: GameArenaSetupData = this.setupHandler.getSetupData(player.uniqueId) ?: return
+        val setupSession: GameArenaSetupSession = this.setupHandler.getSetupData(player.uniqueId) ?: return
 
         // setup mode changing can only happen when the player is SNEAKING
         if (player.isSneaking) {
             val isNextModeRequested: Boolean = event.action.isLeftClick
-            setupData.setupTool.onToggle(isNextModeRequested, heldItemStack)
+            setupSession.setupTool.onToggle(isNextModeRequested, heldItemStack)
             return
         }
 
         if (event.clickedBlock == null) return
-        setupData.setupTool.doAction(event)
+        setupSession.setupTool.doAction(event)
     }
 
     @EventHandler

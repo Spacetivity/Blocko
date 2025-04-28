@@ -47,6 +47,7 @@ blocko.setup:
   scanning_board.missing_fields.title: "<prefix> <gray>Missing fields:"
   scanning_board.missing_fields.line: "<dark_gray>» <yellow><result><dark_gray>: <gray><amount><yellow>x"
 
+  team_path_already_completed: "<prefix> <gray>You completed the path for team <team_color><team_name><gray>."
   field_already_has_id: "<prefix> <gray>This field already has an id!"
   field_already_a_garage_field: "<prefix> <gray>This field is already a garage field!"
   field_not_able_for_garage_field: "<prefix> <gray>This field cannot be a garage field!"

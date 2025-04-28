@@ -25,6 +25,7 @@ import net.spacetivity.blocko.field.GameFieldDAO
 import net.spacetivity.blocko.field.GameFieldHandler
 import net.spacetivity.blocko.field.GameFieldProperties
 import net.spacetivity.blocko.field.GameFieldPropertiesTypeAdapter
+import net.spacetivity.blocko.field.highlighting.GameFieldHighlightHandler
 import net.spacetivity.blocko.files.*
 import net.spacetivity.blocko.listener.PlayerListener
 import net.spacetivity.blocko.listener.PlayerSetupListener
@@ -72,6 +73,7 @@ class BlockoGame : JavaPlugin() {
     lateinit var commandHandler: SpaceCommandHandler
     lateinit var bossbarHandler: BossbarHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
+    lateinit var gameFieldHighlightHandler: GameFieldHighlightHandler
     lateinit var diceHandler: DiceHandler
     lateinit var gameArenaHandler: GameArenaHandler
     lateinit var gameArenaSetupHandler: GameArenaSetupHandler
@@ -139,6 +141,7 @@ class BlockoGame : JavaPlugin() {
         this.commandHandler = SpaceCommandHandler()
         this.bossbarHandler = BossbarHandler()
         this.gamePhaseHandler = GamePhaseHandler()
+        this.gameFieldHighlightHandler = GameFieldHighlightHandler()
         this.diceHandler = DiceHandler()
         this.diceHandler.startDiceAnimation()
         this.gameArenaHandler = GameArenaHandler()
@@ -186,6 +189,12 @@ class BlockoGame : JavaPlugin() {
                 if (!team.hasEntry(player.name)) continue
                 team.removeEntry(player.name)
             }
+        }
+
+        for (team in Bukkit.getScoreboardManager().mainScoreboard.teams) {
+            val teamNames = this.gameFieldHighlightHandler.highlightModes.map { it.value.teamName }
+            if (!teamNames.contains(team.name)) continue
+            team.unregister()
         }
 
         this.diceHandler.stopDiceAnimation()

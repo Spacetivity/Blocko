@@ -2,38 +2,30 @@ package net.spacetivity.blocko.arena.setup
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
 import net.spacetivity.blocko.arena.GameArenaStatus
+import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
+import net.spacetivity.blocko.arena.setup.step.impl.SetTeamEntrancesStep
+import net.spacetivity.blocko.arena.setup.step.impl.SetTurningPointsStep
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
 import net.spacetivity.blocko.field.PathFace
-import net.spacetivity.blocko.team.GameTeam
+import net.spacetivity.blocko.field.highlighting.scoreboard.impl.*
 import net.spacetivity.blocko.team.GameTeamLocation
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
-import net.spacetivity.blocko.utils.Constants.DISPLAY_ENTITY_KEY
 import net.spacetivity.blocko.utils.LocationUtils
-import net.spacetivity.blocko.utils.MetadataUtils
-import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.Sound
 import org.bukkit.block.BlockFace
-import org.bukkit.entity.*
+import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
-import org.bukkit.scoreboard.Team
 import java.util.*
 
 class GameArenaSetupHandler {
 
-    private val arenaSetupCache: MutableMap<UUID, GameArenaSetupData> = mutableMapOf()
-
-    private val garageFieldScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("garage_field_setup", NamedTextColor.LIGHT_PURPLE)
-    private val fieldScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("garage_field_setup", NamedTextColor.GREEN)
-    private val turnScoreboardTeam: Team = ScoreboardUtils.registerScoreboardTeam("turn_setup", NamedTextColor.YELLOW)
+    private val activeSetupSessions: MutableMap<UUID, GameArenaSetupSession> = mutableMapOf()
 
     private var setupTask: BukkitTask? = null
 
@@ -41,18 +33,16 @@ class GameArenaSetupHandler {
 
     init {
         this.setupTask = Bukkit.getScheduler().runTaskTimer(BlockoGame.instance, Runnable {
-            for (entry: MutableMap.MutableEntry<UUID, GameArenaSetupData> in this.arenaSetupCache.entries) {
-                val player: Player = Bukkit.getPlayer(entry.key) ?: continue
-                val arenaSetupData: GameArenaSetupData = entry.value
-                val toolMode: GameArenaSetupTool.ToolMode = arenaSetupData.setupTool.currentMode
+            for (player in Bukkit.getOnlinePlayers()) {
+                val setupSession = player.getSetupSession() ?: continue
+                val activeSetupStep = setupSession.getActiveSetupStep() ?: continue
 
-                if (toolMode == GameArenaSetupTool.ToolMode.SET_TURN || toolMode == GameArenaSetupTool.ToolMode.SET_TEAM_ENTRANCE) {
-                    val facing: BlockFace = player.facing
-                    if (facing == BlockFace.NORTH || facing == BlockFace.SOUTH || facing == BlockFace.EAST || facing == BlockFace.WEST)
-                        player.translateActionBar("blocko.setup.turn_direction", Placeholder.parsed("face", facing.name))
+                val facing: BlockFace = player.facing
+                if ((activeSetupStep is SetTurningPointsStep || activeSetupStep is SetTeamEntrancesStep) && (facing == BlockFace.NORTH || facing == BlockFace.SOUTH || facing == BlockFace.EAST || facing == BlockFace.WEST)) {
+                    player.translateActionBar("blocko.setup.turn_direction", Placeholder.parsed("face", facing.name))
                 }
 
-                if (isSetupEndless || (System.currentTimeMillis() < arenaSetupData.timeoutTimestamp)) continue
+                if (isSetupEndless || (System.currentTimeMillis() < setupSession.timeoutTimestamp)) continue
                 handleSetupEnd(player, false)
             }
         }, 0L, 20L)
@@ -64,17 +54,17 @@ class GameArenaSetupHandler {
         this.setupTask = null
     }
 
-    fun getSetupData(uuid: UUID): GameArenaSetupData? {
-        return this.arenaSetupCache[uuid]
+    fun getSetupData(uuid: UUID): GameArenaSetupSession? {
+        return this.activeSetupSessions[uuid]
     }
 
     fun startSetup(player: Player, arenaId: String) {
-        if (hasOpenSetup(player.uniqueId)) {
+        if (this.activeSetupSessions.contains(player.uniqueId)) {
             player.translateMessage("blocko.setup.already_in_setup_mode")
             return
         }
 
-        if (this.arenaSetupCache.entries.any { it.value.arenaId.equals(arenaId, true) }) {
+        if (this.activeSetupSessions.entries.any { it.value.arenaId.equals(arenaId, true) }) {
             player.translateMessage("blocko.setup.arena_already_configurated_by_player")
             return
         }
@@ -84,132 +74,97 @@ class GameArenaSetupHandler {
 
         player.translateMessage("blocko.setup.setup_mode_activated")
 
-        val arenaSetupData = GameArenaSetupData(arenaId, setupTool)
-        arenaSetupData.gameTeams.addAll(
-            listOf(
-                GameTeam("red", NamedTextColor.RED, 0),
-                GameTeam("blue", NamedTextColor.BLUE, 1),
-                GameTeam("yellow", NamedTextColor.YELLOW, 2),
-                GameTeam("green", NamedTextColor.GREEN, 3),
-            )
-        )
-
-        this.arenaSetupCache[player.uniqueId] = arenaSetupData
+        this.activeSetupSessions[player.uniqueId] = GameArenaSetupSession(arenaId, setupTool)
     }
 
     fun handleSetupEnd(player: Player, success: Boolean) {
-        if (!hasOpenSetup(player.uniqueId)) {
+        val setupSession = player.getSetupSession()
+        if (setupSession == null) {
             player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
-
         if (success) {
-            if (!hasConfiguredFieldsAlready(player.uniqueId)) {
+            val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+
+            val hasNotConfiguredFieldsAlready = setupStep.gameFields.isEmpty()
+            if (hasNotConfiguredFieldsAlready) {
                 player.translateMessage("blocko.setup.no_fields_configured")
                 return
             }
 
-            if (!hasConfiguredAllGarageFields(player.uniqueId)) {
+            val hasNotConfiguredAllGarageFields = setupStep.gameFields.filter { it.isGarageField }.size < 16
+            if (hasNotConfiguredAllGarageFields) {
                 player.translateMessage("blocko.setup.no_garage_fields_configured")
                 return
             }
 
-            if (!hasConfiguredAllTeamSpawns(player.uniqueId)) {
+            val hasNotConfiguredAllTeamSpawnLocations = setupStep.gameTeamLocations.size < (setupSession.gameTeams.size * 4)
+            if (hasNotConfiguredAllTeamSpawnLocations) {
                 player.translateMessage("blocko.setup.not_enough_team_spawns_configured")
                 return
             }
 
-            BlockoGame.instance.gameArenaHandler.updateArenaStatus(arenaSetupData.arenaId, GameArenaStatus.READY)
-            BlockoGame.instance.gameFieldHandler.initFields(arenaSetupData.gameFields)
-            BlockoGame.instance.gameTeamHandler.initTeamSpawns(arenaSetupData.gameTeamLocations)
+            BlockoGame.instance.gameFieldHandler.initFields(setupStep.gameFields)
+            BlockoGame.instance.gameTeamHandler.initTeamSpawns(setupStep.gameTeamLocations)
+
+            val gameArena = BlockoGame.instance.gameArenaHandler.getArena(setupSession.arenaId) ?: return
             BlockoGame.instance.gameArenaSignHandler.loadArenaSigns()
-
-            val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(arenaSetupData.arenaId) ?: return
             BlockoGame.instance.gameArenaSignHandler.updateArenaSign(gameArena)
+
+            BlockoGame.instance.gameArenaHandler.updateArenaStatus(setupSession.arenaId, GameArenaStatus.READY)
         }
 
-        for (entities: MutableList<Entity> in Bukkit.getWorlds().map { it.entities }) {
-            for (entity: Entity in entities) {
-                if (entity !is LivingEntity) continue
-                if (!entity.hasMetadata(DISPLAY_ENTITY_KEY)) continue
-
-                val arenaId: String = MetadataUtils.get(entity, DISPLAY_ENTITY_KEY)!!
-                if (!arenaSetupData.arenaId.equals(arenaId, true)) continue
-
-                for (team: Team in Bukkit.getScoreboardManager().mainScoreboard.teams) {
-                    if (!team.hasEntity(entity)) continue
-                    team.removeEntity(entity)
-                }
-
-                entity.remove()
-            }
-        }
-
-        player.inventory.remove(arenaSetupData.setupTool.itemStack)
-        player.translateMessage("blocko.setup.setup_mode_deactivated")
-        this.arenaSetupCache.remove(player.uniqueId)
-    }
-
-    fun addTeamSpawn(arenaSetupData: GameArenaSetupData, player: Player, teamName: String, location: Location) {
-        if (arenaSetupData.gameTeamLocations.any { it.x == location.x && it.y == location.y && it.z == location.z }) {
-            player.translateMessage("blocko.setup.team_spawn_already_set")
-            return
-        }
-
-        val centeredLocation: Location = LocationUtils.centerLocation(location)
-
-        val yLevel: Double = BlockoGame.instance.gameArenaHandler.getArena(arenaSetupData.arenaId)!!.yLevel
-
-        val teamSpawn = GameTeamLocation(
-            arenaSetupData.arenaId,
-            teamName,
-            location.world.name,
-            centeredLocation.x,
-            yLevel,
-            centeredLocation.z,
-            location.yaw,
-            location.pitch,
-            false
+        BlockoGame.instance.gameFieldHighlightHandler.removeHighlightEntities(
+            setupSession.arenaId,
+            GameFieldHighlightMode::class,
+            GarageFieldHighlightMode::class,
+            TurningPointHighlightMode::class,
+            TeamPathHighlightMode::class,
+            TeamSpawnHighlightMode::class
         )
 
-        arenaSetupData.gameTeamLocations.add(teamSpawn)
+        player.inventory.remove(setupSession.setupTool.itemStack)
+        player.translateMessage("blocko.setup.setup_mode_deactivated")
+        this.activeSetupSessions.remove(player.uniqueId)
     }
 
     fun selectCorner(player: Player, isLeftClick: Boolean, location: Location) {
-        if (!hasOpenSetup(player.uniqueId)) {
+        val setupSession = player.getSetupSession()
+
+        if (setupSession == null) {
             player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
+        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
         if (isLeftClick) {
-            arenaSetupData.corner1 = location
+            setupStep.corner1 = location
         } else {
-            arenaSetupData.corner2 = location
+            setupStep.corner2 = location
         }
 
         val messageKeyPart = if (isLeftClick) "first" else "second"
         player.translateMessage("blocko.setup.scanning_board.select_${messageKeyPart}_corner")
 
-        if (arenaSetupData.areCornersSet()) {
-            player.translateMessage("blocko.setup.scanning_board.confirm", Placeholder.parsed("id", arenaSetupData.arenaId))
+        if (setupStep.areCornersSet()) {
+            player.translateMessage("blocko.setup.scanning_board.confirm", Placeholder.parsed("id", setupSession.arenaId))
         }
     }
 
     fun scanBoard(player: Player) {
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
+        val setupSession: GameArenaSetupSession = player.getSetupSession() ?: return
+        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
-        if (!arenaSetupData.areCornersSet()) {
+        if (!setupStep.areCornersSet()) {
             player.translateMessage("blocko.setup.scanning_board.corners_not_set")
             return
         }
 
         player.translateMessage("blocko.setup.scanning_board.running")
 
-        val regionData: Multimap<Location, Pair<ScannerResult, String?>> = RegionScanner.scanRegion(arenaSetupData)
+        val regionData: Multimap<Location, Pair<ScannerResult, String?>> = RegionScanner.scanRegion(setupSession)
         val inOrderResults: Multimap<Location, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
 
         val validResultsFound: MutableMap<ScannerResult, Int> = mutableMapOf()
@@ -233,7 +188,7 @@ class GameArenaSetupHandler {
             when (scannerResult) {
                 ScannerResult.TEAM_SPAWN -> {
                     if (teamName == null) throw NullPointerException("The team name is required")
-                    addTeamSpawn(arenaSetupData, player, teamName, location)
+                    setTeamSpawnLocation(setupSession, player, teamName, location)
                 }
 
                 ScannerResult.GARAGE_FIELD, ScannerResult.GAME_FIELD -> {
@@ -255,19 +210,19 @@ class GameArenaSetupHandler {
                 val teamName: String? = pipelineItem.value.second
 
                 if (scannerResult == ScannerResult.GAME_FIELD) {
-                    addField(arenaSetupData, player, location)
+                    addField(setupSession, player, location)
                     continue
                 }
 
-                addGarageField(arenaSetupData, player, teamName!!, location.block.location)
+                addGarageField(setupSession, player, teamName!!, location.block.location)
             }
         } else {
-            arenaSetupData.missingResults.putAll(ScannerResult.getMissingResults(regionData.values().map { it.first }))
+            setupStep.missingResults.putAll(ScannerResult.getMissingResults(regionData.values().map { it.first }))
         }
 
         val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
         val statusKey = "blocko.setup.scanning_board.finished.${if (scanningCompleted) "satisfied" else "unsatisfied"}"
-        val statusString = translation.line(statusKey, Placeholder.parsed("id", arenaSetupData.arenaId))
+        val statusString = translation.line(statusKey, Placeholder.parsed("id", setupSession.arenaId))
 
         player.translateMessage("blocko.setup.scanning_board.finished.title",
             Placeholder.component("status", statusString))
@@ -284,18 +239,52 @@ class GameArenaSetupHandler {
         }
     }
 
-    fun addField(arenaSetupData: GameArenaSetupData, player: Player, location: Location) {
+    fun setTeamSpawnLocation(setupSession: GameArenaSetupSession, player: Player, teamName: String, location: Location) {
+        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+
+        if (setupStep.gameTeamLocations.any { it.x == location.x && it.y == location.y && it.z == location.z }) {
+            player.translateMessage("blocko.setup.team_spawn_already_set")
+            return
+        }
+
+        val centeredLocation: Location = LocationUtils.centerLocation(location)
+        val yLevel: Double = BlockoGame.instance.gameArenaHandler.getArena(setupSession.arenaId)!!.yLevel
+
+        val teamSpawn = GameTeamLocation(
+            setupSession.arenaId,
+            teamName,
+            location.world.name,
+            centeredLocation.x,
+            yLevel,
+            centeredLocation.z,
+            location.yaw,
+            location.pitch,
+            false
+        )
+
+        setupStep.gameTeamLocations.add(teamSpawn)
+
+        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
+            setupSession.arenaId,
+            centeredLocation,
+            TeamSpawnHighlightMode::class
+        )
+    }
+
+    fun addField(setupSession: GameArenaSetupSession, player: Player, location: Location) {
+        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+
         val x: Double = location.x
         val z: Double = location.z
 
-        if (arenaSetupData.gameFields.any { it.x == x && it.z == z }) {
+        if (setupStep.gameFields.any { it.x == x && it.z == z }) {
             player.translateMessage("blocko.setup.game_field_already_set")
             return
         }
 
-        arenaSetupData.gameFields.add(
+        setupStep.gameFields.add(
             GameField(
-                arenaSetupData.arenaId,
+                setupSession.arenaId,
                 location.world,
                 x,
                 z,
@@ -305,49 +294,21 @@ class GameArenaSetupHandler {
             )
         )
 
-        val entityLocation: Location = location.block.location.clone().toCenterLocation()
-        val displayEntity: MagmaCube = location.world.spawnEntity(entityLocation, EntityType.MAGMA_CUBE) as MagmaCube
-
-        displayEntity.isInvisible = true
-        displayEntity.size = 1
-        displayEntity.isSilent = true
-        displayEntity.isInvulnerable = true
-        displayEntity.isGlowing = true
-        displayEntity.setAI(false)
-        displayEntity.setGravity(false)
-        MetadataUtils.apply(displayEntity, DISPLAY_ENTITY_KEY, arenaSetupData.arenaId)
+        val centeredLocation: Location = LocationUtils.centerLocation(location)
+        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
+            setupSession.arenaId,
+            centeredLocation,
+            GameFieldHighlightMode::class
+        )
     }
 
-    fun setTurn(player: Player, gameField: GameField, blockLocation: Location, face: PathFace) {
-        if (!hasOpenSetup(player.uniqueId)) {
-            player.translateMessage("blocko.setup.not_in_setup_mode")
-            return
-        }
+    fun addGarageField(setupSession: GameArenaSetupSession, player: Player, teamName: String, location: Location) {
+        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
-        if (gameField.isGarageField) {
-            player.translateMessage("blocko.setup.turn_not_creatable_at_garage_field")
-            return
-        }
+        val x = location.x
+        val z = location.z
 
-        gameField.properties.rotation = face
-
-        val entityLocation: Location = blockLocation.block.location.clone().toCenterLocation()
-        val displayEntity: MagmaCube? = entityLocation.world.entities.find { it.world == entityLocation.world && it.location.x == entityLocation.x && it.location.z == entityLocation.z && it.type == EntityType.MAGMA_CUBE } as MagmaCube?
-
-        if (displayEntity != null) {
-            this.fieldScoreboardTeam.removeEntity(displayEntity)
-            this.turnScoreboardTeam.addEntity(displayEntity)
-        }
-
-        player.playSound(player.location, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.5F, 1.0F)
-        player.translateMessage("blocko.setup.turning_point_created", Placeholder.parsed("face", face.name))
-    }
-
-    fun addGarageField(arenaSetupData: GameArenaSetupData, player: Player, teamName: String, location: Location) {
-        val x: Double = location.x
-        val z: Double = location.z
-
-        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z }
+        val possibleField = setupStep.gameFields.find { it.world == location.world && it.x == x && it.z == z }
 
         if (possibleField == null) {
             player.translateMessage("blocko.setup.no_field_found_at_location")
@@ -367,32 +328,57 @@ class GameArenaSetupHandler {
         possibleField.isGarageField = true
         possibleField.properties.garageForTeam = teamName
 
-        val entityLocation: Location = location.block.location.clone().toCenterLocation()
-        val displayEntity: MagmaCube? = entityLocation.world.entities.find { it.world == entityLocation.world && it.location.x == entityLocation.x && it.location.z == entityLocation.z && it.type == EntityType.MAGMA_CUBE } as MagmaCube?
-
-        if (displayEntity != null) {
-            this.fieldScoreboardTeam.removeEntity(displayEntity)
-            this.garageFieldScoreboardTeam.addEntity(displayEntity)
-        } else {
-            player.translateMessage("blocko.setup.cannot_update_entity_display")
-        }
+        val centeredLocation: Location = LocationUtils.centerLocation(location)
+        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
+            setupSession.arenaId,
+            centeredLocation,
+            GarageFieldHighlightMode::class
+        )
     }
 
-    fun setFieldId(player: Player, teamName: String, location: Location) {
-        if (!hasOpenSetup(player.uniqueId)) {
+    fun setTurningPoint(player: Player, gameField: GameField, location: Location, face: PathFace) {
+        val setupSession = player.getSetupSession()
+        if (setupSession == null) {
             player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
-        val arenaSetupData: GameArenaSetupData = this.arenaSetupCache[player.uniqueId]!!
+        if (gameField.isGarageField) {
+            player.translateMessage("blocko.setup.turn_not_creatable_at_garage_field")
+            return
+        }
 
-        val x: Double = location.x
-        val z: Double = location.z
+        gameField.properties.rotation = face
 
-        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == x && it.z == z }
+        val centeredLocation: Location = LocationUtils.centerLocation(location)
+        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
+            setupSession.arenaId,
+            centeredLocation,
+            TurningPointHighlightMode::class
+        )
+    }
+
+    fun setFieldTeamId(player: Player, teamName: String, location: Location) {
+        val setupSession = player.getSetupSession()
+        if (setupSession == null) {
+            player.translateMessage("blocko.setup.not_in_setup_mode")
+            return
+        }
+
+        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+        val possibleField = setupStep.gameFields.find { it.world == location.world && it.x == location.x && it.z == location.z }
 
         if (possibleField == null) {
-            player.translateMessage("blocko.setup.not_in_setup_mode")
+            player.translateMessage("blocko.setup.no_field_found_at_location")
+            return
+        }
+
+        val hasConfiguredCompleteTeamPath = setupStep.gameFields.all { it.properties.getFieldId(teamName) != null }
+        if (hasConfiguredCompleteTeamPath) {
+            val gameTeam = BlockoGame.instance.gameTeamHandler.getTeam(setupSession.arenaId, teamName) ?: return
+            player.translateMessage("blocko.setup.team_path_already_completed",
+                Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+                Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
             return
         }
 
@@ -401,29 +387,15 @@ class GameArenaSetupHandler {
             return
         }
 
-        val currentFieldIndex: Int = arenaSetupData.setupTool.fieldIndex
-        possibleField.properties.setFieldId(teamName, currentFieldIndex)
-        arenaSetupData.setupTool.fieldIndex += 1
-    }
+        possibleField.properties.setFieldId(teamName, setupStep.fieldIndex)
+        setupStep.fieldIndex++
 
-    private fun hasOpenSetup(uuid: UUID): Boolean {
-        return this.arenaSetupCache[uuid] != null
-    }
-
-    private fun hasConfiguredFieldsAlready(uuid: UUID): Boolean {
-        val arenaSetupData: GameArenaSetupData = getSetupData(uuid) ?: return false
-        return arenaSetupData.gameFields.isNotEmpty()
-    }
-
-    private fun hasConfiguredAllGarageFields(uuid: UUID): Boolean {
-        val arenaSetupData: GameArenaSetupData = getSetupData(uuid) ?: return false
-        return arenaSetupData.gameFields.filter { it.isGarageField }.size == 16
-    }
-
-    private fun hasConfiguredAllTeamSpawns(uuid: UUID): Boolean {
-        val arenaSetupData: GameArenaSetupData = getSetupData(uuid) ?: return false
-        val maxGameLocSpawns: Int = arenaSetupData.gameTeams.size * 4
-        return maxGameLocSpawns == 16
+        val centeredLocation: Location = LocationUtils.centerLocation(location)
+        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
+            setupSession.arenaId,
+            centeredLocation,
+            TeamPathHighlightMode::class
+        )
     }
 
 }

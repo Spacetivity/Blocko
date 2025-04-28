@@ -2,7 +2,8 @@ package net.spacetivity.blocko.inventory.setup
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.setup.GameArenaSetupData
+import net.spacetivity.blocko.arena.setup.getSetupSession
+import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.PathFace
 import net.spacetivity.blocko.item.itemStack
@@ -44,7 +45,7 @@ class GameFieldTurnSetupInventory(private val blockLocation: Location) : Invento
         val items: MutableList<InteractiveItem> = mutableListOf()
 
         for (pathFace: PathFace in PathFace.entries) {
-            items.add(InteractiveItem.of(itemStack(Material.PLAYER_HEAD){
+            items.add(InteractiveItem.of(itemStack(Material.PLAYER_HEAD) {
                 meta<SkullMeta> {
                     name = translation.displayName("blocko.inventory.game_field_set_turn.turn_item.display_name", Placeholder.parsed("face", pathFace.name))
                     lore(translation.lore("blocko.inventory.game_field_set_turn.turn_item.lore"))
@@ -53,11 +54,11 @@ class GameFieldTurnSetupInventory(private val blockLocation: Location) : Invento
             })
             { _, _, _ ->
                 player.closeInventory()
-                val setupData: GameArenaSetupData = BlockoGame.instance.gameArenaSetupHandler.getSetupData(player.uniqueId)
-                    ?: return@of
-                val gameField: GameField = setupData.gameFields.find { it.x == this.blockLocation.x && it.z == this.blockLocation.z }
-                    ?: return@of
-                BlockoGame.instance.gameArenaSetupHandler.setTurn(player, gameField, this.blockLocation, pathFace)
+                val setupSession = player.getSetupSession() ?: return@of
+                val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return@of
+                val gameField: GameField = setupStep.gameFields.find { it.x == this.blockLocation.x && it.z == this.blockLocation.z } ?: return@of
+
+                BlockoGame.instance.gameArenaSetupHandler.setTurningPoint(player, gameField, this.blockLocation, pathFace)
             })
         }
 

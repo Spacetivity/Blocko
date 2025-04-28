@@ -2,6 +2,7 @@ package net.spacetivity.blocko.arena.setup
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
+import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
 import org.bukkit.Location
 import org.bukkit.Material
 
@@ -47,11 +48,12 @@ object RegionScanner {
         ), ScannerResult.GARAGE_FIELD)
     )
 
-    fun scanRegion(arenaSetupData: GameArenaSetupData): Multimap<Location, Pair<ScannerResult, String?>> {
+    fun scanRegion(setupSession: GameArenaSetupSession): Multimap<Location, Pair<ScannerResult, String?>> {
         val resultsInRegion: Multimap<Location, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
+        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return resultsInRegion
 
-        val corner1 = arenaSetupData.corner1 ?: return resultsInRegion
-        val corner2 = arenaSetupData.corner2 ?: return resultsInRegion
+        val corner1 = setupStep.corner1 ?: return resultsInRegion
+        val corner2 = setupStep.corner2 ?: return resultsInRegion
 
         val minX = corner1.blockX.coerceAtMost(corner2.blockX)
         val maxX = corner1.blockX.coerceAtLeast(corner2.blockX)
@@ -69,7 +71,7 @@ object RegionScanner {
 
                 for (categoryCurrentBlockTypeIsRegisteredIn: Map.Entry<Set<Material>, ScannerResult> in categoriesCurrentBlockTypeIsRegisteredIn) {
                     val scannerResult = categoryCurrentBlockTypeIsRegisteredIn.value
-                    resultsInRegion.put(location, Pair(scannerResult, getPossibleTeamName(scannerResult, blockType, arenaSetupData)))
+                    resultsInRegion.put(location, Pair(scannerResult, getPossibleTeamName(scannerResult, blockType, setupSession)))
                 }
             }
         }
@@ -77,7 +79,7 @@ object RegionScanner {
         return resultsInRegion
     }
 
-    private fun getPossibleTeamName(scannerResult: ScannerResult, currentBlockType: Material, arenaSetupData: GameArenaSetupData): String? {
+    private fun getPossibleTeamName(scannerResult: ScannerResult, currentBlockType: Material, arenaSetupData: GameArenaSetupSession): String? {
         val isTeamResult = scannerResult == ScannerResult.TEAM_SPAWN || scannerResult == ScannerResult.GARAGE_FIELD
         val teamName = if (isTeamResult) currentBlockType.name.split("_")[0].lowercase() else null
         return if (teamName != null && arenaSetupData.gameTeams.none { team -> team.name.equals(teamName, true) }) null else teamName

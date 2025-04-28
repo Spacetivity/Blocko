@@ -8,6 +8,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.BadMannersAchievement
 import net.spacetivity.blocko.achievement.impl.FairPlayAchievement
 import net.spacetivity.blocko.arena.GameArena
@@ -113,11 +114,8 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
         val gamePlayer: GamePlayer? = player.toGamePlayerInstance()
 
         if (gamePlayer != null) {
-            if (rawMessage.contains("gg", true))
-                this.plugin.achievementHandler.getAchievement(FairPlayAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
-
-            if (rawMessage.contains("bg", true))
-                this.plugin.achievementHandler.getAchievement(BadMannersAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+            if (rawMessage.contains("gg", true)) gamePlayer.grantIfCompletedBy(FairPlayAchievement::class)
+            if (rawMessage.contains("bg", true)) gamePlayer.grantIfCompletedBy(BadMannersAchievement::class)
         }
 
         val translation: Translation = this.plugin.translationHandler.getSelectedTranslation()

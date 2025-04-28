@@ -2,7 +2,7 @@ package net.spacetivity.blocko.field
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.achievement.container.Achievement
+import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.FirstEliminationAchievement
 import net.spacetivity.blocko.achievement.impl.FirstKnockoutAchievement
 import net.spacetivity.blocko.achievement.impl.MasterEliminatorAchievement
@@ -79,18 +79,14 @@ class GameField(
     }
 
     private fun handleStatsReward(gamePlayer: GamePlayer, isReward: Boolean) {
-        val possibleAchievements: MutableSet<Achievement?> = mutableSetOf()
-
         if (!gamePlayer.isAI) {
             if (isReward) {
-                possibleAchievements.add(BlockoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java))
-                possibleAchievements.add(BlockoGame.instance.achievementHandler.getAchievement(MasterEliminatorAchievement::class.java))
+                gamePlayer.grantIfCompletedBy(FirstEliminationAchievement::class)
+                gamePlayer.grantIfCompletedBy(MasterEliminatorAchievement::class)
             } else {
-                possibleAchievements.add(BlockoGame.instance.achievementHandler.getAchievement(FirstKnockoutAchievement::class.java))
+                gamePlayer.grantIfCompletedBy(FirstKnockoutAchievement::class)
             }
         }
-
-        possibleAchievements.forEach { it?.grantIfCompletedBy(gamePlayer) }
 
         val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
         val statsType: StatsType = if (isReward) StatsType.ELIMINATED_OPPONENTS else StatsType.KNOCKED_OUT_BY_OPPONENTS

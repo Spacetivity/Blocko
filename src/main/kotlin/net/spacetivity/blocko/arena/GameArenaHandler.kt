@@ -133,6 +133,7 @@ class GameArenaHandler {
         return this.cachedArenas.find { it.spectatorPlayers.contains(uuid) }
     }
 
+    //TODO: make the sign layout configurable
     fun loadJoinSign(location: Location, gameArena: GameArena?) {
         val block: Block = location.block
         if (!block.type.name.contains("WALL_SIGN", true)) return

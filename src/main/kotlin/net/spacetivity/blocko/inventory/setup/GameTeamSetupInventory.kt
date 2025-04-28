@@ -2,8 +2,11 @@ package net.spacetivity.blocko.inventory.setup
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.setup.GameArenaSetupData
+import net.spacetivity.blocko.arena.setup.GameArenaSetupSession
+import net.spacetivity.blocko.arena.setup.getSetupSession
+import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
 import net.spacetivity.blocko.field.GameField
+import net.spacetivity.blocko.field.highlighting.scoreboard.impl.TeamPathHighlightMode
 import net.spacetivity.blocko.item.hideExtraInfo
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
@@ -45,10 +48,9 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
 
     private fun initItems(translation: Translation, player: Player): List<InteractiveItem> {
         val items: MutableList<InteractiveItem> = mutableListOf()
-        val arenaSetupData: GameArenaSetupData = BlockoGame.instance.gameArenaSetupHandler.getSetupData(player.uniqueId)
-            ?: return items
+        val setupSession: GameArenaSetupSession = player.getSetupSession() ?: return items
 
-        for (gameTeam: GameTeam in arenaSetupData.gameTeams) {
+        for (gameTeam: GameTeam in setupSession.gameTeams) {
             items.add(InteractiveItem.of(itemStack(Material.LEATHER_CHESTPLATE) {
                 meta<LeatherArmorMeta> {
                     name = translation.displayName("blocko.inventory.game_team_setup.team_item.display_name",
@@ -62,19 +64,22 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
             })
             { _, _, _ ->
                 player.closeInventory()
+
+                val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return@of
+
                 when (this.type) {
                     InvType.IDS -> {
-                        val setupData: GameArenaSetupData = BlockoGame.instance.gameArenaSetupHandler.getSetupData(player.uniqueId)
-                            ?: return@of
-                        setupData.setupTool.currentTeamName = gameTeam.name
-                        setupData.setupTool.fieldIndex = 0
+                        BlockoGame.instance.gameFieldHighlightHandler.removeHighlightEntities(setupSession.arenaId, TeamPathHighlightMode::class)
+                        setupSession.currentTeamName = gameTeam.name
+                        setupStep.fieldIndex = 0
+
                         player.translateMessage("blocko.inventory.game_team_setup.team_item.click.set_field_ids",
                             Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
                             Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
                     }
 
                     else -> {
-                        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == this.location.x && it.z == this.location.z }
+                        val possibleField: GameField? = setupStep.gameFields.find { it.world == location.world && it.x == this.location.x && it.z == this.location.z }
 
                         if (possibleField == null) {
                             player.translateMessage("blocko.inventory.game_team_setup.team_item.click.cannot_set_team_entrance")

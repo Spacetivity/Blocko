@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.phase.impl
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.BadLuckAchievement
 import net.spacetivity.blocko.achievement.impl.PlayFirstGameAchievement
 import net.spacetivity.blocko.arena.GameArena
@@ -15,8 +15,8 @@ class EndingPhase(arenaId: String) : GamePhase(arenaId, "ending", 2, EndingCount
         val gameArena: GameArena = getArena()
 
         for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
-            BlockoGame.instance.achievementHandler.getAchievement(PlayFirstGameAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
-            BlockoGame.instance.achievementHandler.getAchievement(BadLuckAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+            gamePlayer.grantIfCompletedBy(PlayFirstGameAchievement::class)
+            gamePlayer.grantIfCompletedBy(BadLuckAchievement::class)
         }
 
         countdown?.tryStartup()

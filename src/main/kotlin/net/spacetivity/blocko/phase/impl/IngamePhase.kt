@@ -2,7 +2,7 @@ package net.spacetivity.blocko.phase.impl
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.achievement.AchievementHandler
+import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.RushExpertAchievement
 import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
 import net.spacetivity.blocko.arena.GameArena
@@ -60,9 +60,8 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
 
             BlockoGame.instance.bossbarHandler.unregisterBossbar(player, Constants.TIMEOUT_BOSSBAR_NAME)
 
-            val achievementHandler: AchievementHandler = BlockoGame.instance.achievementHandler
-            achievementHandler.getAchievement(RushExpertAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
-            achievementHandler.getAchievement(WinMonsterAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+            gamePlayer.grantIfCompletedBy(RushExpertAchievement::class)
+            gamePlayer.grantIfCompletedBy(WinMonsterAchievement::class)
 
             val matchDuration: kotlin.time.Duration = (System.currentTimeMillis() - this.matchStartTime!!).toDuration(DurationUnit.MILLISECONDS)
 
@@ -158,7 +157,8 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun setNextControllingTeam(): GameTeam? {
-        getArena().currentPlayers.filter { !it.isAI }.forEach { gamePlayer: GamePlayer ->
+        for (gamePlayer: GamePlayer in getArena().currentPlayers) {
+            if (gamePlayer.isAI) continue
             BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }
 
@@ -173,7 +173,6 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
             getHighlightedEntities(oldControllingGamePlayer, getArena()).forEach { it.toggleHighlighting(false) }
 
         val availableTeams = BlockoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
-
         val newControllingTeam = if (hasControllingTeamMemberDicedSix(oldControllingGamePlayerDicedNumber)) getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
         val newControllingTeamId = newControllingTeam?.teamId ?: availableTeams.minOf { it.teamId }
 

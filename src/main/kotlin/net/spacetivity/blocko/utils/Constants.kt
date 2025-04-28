@@ -1,9 +1,11 @@
 package net.spacetivity.blocko.utils
 
+import net.kyori.adventure.text.format.NamedTextColor
+import net.spacetivity.blocko.team.GameTeam
+
 object Constants {
 
     const val BOT_SKULL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmFiYmY1NGQ2ZDI1MDE0N2U2ZTdhYjA3OWM5ZThjNzYyOTAwNTBjMDA4NmUyNDRjOWZmODFjMTU4M2Q5MDg5YSJ9fX0="
-    const val PLAY_SKULL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmE4ZjZiMTMxZWY4NDdkOTE2MGU1MTZhNmY0NGJmYTkzMjU1NGQ0MGMxOGE4MTc5NmQ3NjZhNTQ4N2I5ZjcxMCJ9fX0="
 
     const val NORTH_SKULL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjEyYzdhZmVhNDhlNTMzMjVlNTEyOTAzOGE0NWFlYzUxYWZlMjU2YWJjYTk0MWI2YmM4MjA2ZmFlMWNlZiJ9fX0="
     const val SOUTH_SKULL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWYyMmQ3Y2Q1M2Q1YmZlNjFlYWZiYzJmYjFhYzk0NDQzZWVjMjRmNDU1MjkyMTM5YWM5ZmJkYjgzZDBkMDkifX19"
@@ -17,14 +19,20 @@ object Constants {
     const val DICE_FIVE_SKULL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM1MWFmNDk5ZjRiZjBiNmNmYWI3YTFmNjI2MWM1YzExYWUyY2RjMDE5ODI1YWFkYjk2OWQ1NjdmZjM1NDUzNSJ9fX0="
     const val DICE_SIX_SKULL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNjZDc1M2RiMTlmYmZjZDNhNTRmNmZkZDBhYTQ1ZDFhM2JmMjVjNjM3ZDY2N2M0M2U2NDZiMWEzOTBmYTYyZCJ9fX0="
 
-    const val INTERACTIVE_ITEMSTACK_KEY = "interactiveItemStack"
-    const val BALANCE_ITEM_KEY = "balanceItem"
-    const val GAME_ENTITY_TYPE_KEY = "gameEntityType"
-    const val TEAM_NAME_KEY = "teamName"
-    const val ENTITY_SELECTOR_KEY = "entitySelector"
-    const val DISPLAY_ENTITY_KEY = "displayEntity"
+    const val INTERACTIVE_ITEMSTACK_KEY = "interactive_item_stack"
+    const val BALANCE_ITEM_KEY = "balance_item"
+    const val GAME_ENTITY_TYPE_KEY = "game_entity_type"
+    const val TEAM_NAME_KEY = "team_name"
+    const val ENTITY_SELECTOR_KEY = "entity_selector"
 
-    const val SETUP_TOOL_KEY = "setupTool"
-    const val TIMEOUT_BOSSBAR_NAME = "timeoutBar"
+    const val SETUP_TOOL_KEY = "setup_tool"
+    const val TIMEOUT_BOSSBAR_NAME = "timeout_bar"
+
+    val GAME_TEAMS: List<GameTeam> = listOf(
+        GameTeam("red", NamedTextColor.RED, 0),
+        GameTeam("blue", NamedTextColor.BLUE, 1),
+        GameTeam("yellow", NamedTextColor.YELLOW, 2),
+        GameTeam("green", NamedTextColor.GREEN, 3),
+    )
 
 }
