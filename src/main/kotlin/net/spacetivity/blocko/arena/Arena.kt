@@ -3,6 +3,7 @@ package net.spacetivity.blocko.arena
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
@@ -20,10 +21,10 @@ import org.bukkit.World
 import org.bukkit.entity.Player
 import java.util.*
 
-class GameArena(
-    val id: String,
+class Arena(
+    val id: ArenaId,
     val gameWorld: World,
-    var status: GameArenaStatus,
+    var status: ArenaStatus,
     var phase: GamePhase,
     val yLevel: Double,
     val location: Location,
@@ -41,7 +42,7 @@ class GameArena(
     val invitedPlayers = mutableSetOf<UUID>()
 
     init {
-        if (this.status == GameArenaStatus.READY) this.phase.start()
+        if (this.status == ArenaStatus.READY) this.phase.start()
     }
 
     fun sendArenaMessage(key: String, vararg toReplace: TagResolver) {
@@ -151,7 +152,7 @@ class GameArena(
             BlockoGame.instance.statsPlayerHandler.cachedStatsPlayers.add(aiStatsPlayer)
         }
 
-        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
+        BlockoGame.instance.arenaSignHandler.updateArenaSign(this)
         return true
     }
 
@@ -224,7 +225,7 @@ class GameArena(
             }
         }
 
-        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
+        BlockoGame.instance.arenaSignHandler.updateArenaSign(this)
     }
 
     fun reset(shutdown: Boolean) {
@@ -286,11 +287,11 @@ class GameArena(
         }
 
         if (!this.phase.isIdle()) BlockoGame.instance.gamePhaseHandler.initIndexPhase(this)
-        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
+        BlockoGame.instance.arenaSignHandler.updateArenaSign(this)
     }
 
     fun sendArenaInvite(sender: GamePlayer, receiverName: String) {
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(sender.arenaId) ?: return
+        val gameArena = BlockoGame.instance.arenaHandler.getArena(sender.arenaId) ?: return
 
         if (!gameArena.phase.isIdle()) {
             sender.translateMessage("blocko.arena.game_already_started")
@@ -329,9 +330,9 @@ class GameArena(
         this.invitedPlayers.add(receiverBukkitPlayer.uniqueId)
 
         senderBukkitPlayer.translateMessage("blocko.arena.invite_sent", Placeholder.parsed("name", receiverName))
-        receiverBukkitPlayer.translateMessage("blocko.arena.invite_received", Placeholder.parsed("name", senderBukkitPlayer.name), Placeholder.parsed("id", sender.arenaId))
+        receiverBukkitPlayer.translateMessage("blocko.arena.invite_received", Placeholder.parsed("name", senderBukkitPlayer.name), Placeholder.parsed("id", sender.arenaId.value))
 
-        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(this)
+        BlockoGame.instance.arenaSignHandler.updateArenaSign(this)
     }
 
     fun getAllPlayers(): List<Player> {

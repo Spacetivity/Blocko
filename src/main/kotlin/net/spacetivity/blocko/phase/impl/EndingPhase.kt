@@ -3,11 +3,12 @@ package net.spacetivity.blocko.phase.impl
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.BadLuckAchievement
 import net.spacetivity.blocko.achievement.impl.PlayFirstGameAchievement
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.countdown.impl.EndingCountdown
 import net.spacetivity.blocko.phase.GamePhase
 import org.bukkit.inventory.ItemStack
 
-class EndingPhase(arenaId: String) : GamePhase(arenaId, "ending", 2, EndingCountdown(arenaId)) {
+class EndingPhase(arenaId: ArenaId) : GamePhase(arenaId, "ending", 2, EndingCountdown(arenaId)) {
 
     override fun start() {
         val gameArena = getArena()

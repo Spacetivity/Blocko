@@ -12,7 +12,7 @@ class FairPlayRequirement(override val translationKey: String) : Requirement {
     override fun getPlaceholders(gamePlayer: GamePlayer): List<TagResolver> = emptyList()
 
     override fun isCompletedBy(gamePlayer: GamePlayer): Boolean {
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(gamePlayer.arenaId) ?: return false
+        val gameArena = BlockoGame.instance.arenaHandler.getArena(gamePlayer.arenaId) ?: return false
         return gameArena.phase.isEnding()
     }
 }

@@ -14,7 +14,7 @@ class RushExpertRequirement(override val translationKey: String) : Requirement {
     override fun getPlaceholders(gamePlayer: GamePlayer): List<TagResolver> = emptyList()
 
     override fun isCompletedBy(gamePlayer: GamePlayer): Boolean {
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(gamePlayer.arenaId) ?: return false
+        val gameArena = BlockoGame.instance.arenaHandler.getArena(gamePlayer.arenaId) ?: return false
         if (!gameArena.phase.isIngame()) return false
 
         val ingamePhase = gameArena.phase as IngamePhase

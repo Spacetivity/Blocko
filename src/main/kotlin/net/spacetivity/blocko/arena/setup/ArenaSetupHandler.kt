@@ -4,7 +4,8 @@ import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArenaStatus
+import net.spacetivity.blocko.arena.ArenaStatus
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
 import net.spacetivity.blocko.arena.setup.step.impl.SetTeamEntrancesStep
 import net.spacetivity.blocko.arena.setup.step.impl.SetTurningPointsStep
@@ -23,9 +24,9 @@ import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
 
-class GameArenaSetupHandler {
+class ArenaSetupHandler {
 
-    private val activeSetupSessions = mutableMapOf<UUID, GameArenaSetupSession>()
+    private val activeSetupSessions = mutableMapOf<UUID, ArenaSetupSession>()
 
     private val isSetupEndless = BlockoGame.instance.setupConfigFile.setupSessionEndless
     private var setupTask: BukkitTask? = null
@@ -53,27 +54,27 @@ class GameArenaSetupHandler {
         this.setupTask = null
     }
 
-    fun getSetupData(uuid: UUID): GameArenaSetupSession? {
+    fun getSetupData(uuid: UUID): ArenaSetupSession? {
         return this.activeSetupSessions[uuid]
     }
 
-    fun startSetup(player: Player, arenaId: String) {
+    fun startSetup(player: Player, arenaId: ArenaId) {
         if (this.activeSetupSessions.contains(player.uniqueId)) {
             player.translateMessage("blocko.setup.already_in_setup_mode")
             return
         }
 
-        if (this.activeSetupSessions.entries.any { it.value.arenaId.equals(arenaId, true) }) {
+        if (this.activeSetupSessions.entries.any { it.value.arenaId.value.equals(arenaId.value, true) }) {
             player.translateMessage("blocko.setup.arena_already_configurated_by_player")
             return
         }
 
-        val setupTool = GameArenaSetupTool(player)
+        val setupTool = SetupTool(player)
         setupTool.setToPlayer()
 
         player.translateMessage("blocko.setup.setup_mode_activated")
 
-        this.activeSetupSessions[player.uniqueId] = GameArenaSetupSession(arenaId, setupTool)
+        this.activeSetupSessions[player.uniqueId] = ArenaSetupSession(arenaId, setupTool)
     }
 
     fun handleSetupEnd(player: Player, success: Boolean) {
@@ -107,11 +108,11 @@ class GameArenaSetupHandler {
             BlockoGame.instance.gameFieldHandler.initFields(setupStep.gameFields)
             BlockoGame.instance.gameTeamHandler.initTeamSpawns(setupStep.gameTeamLocations)
 
-            val gameArena = BlockoGame.instance.gameArenaHandler.getArena(setupSession.arenaId) ?: return
-            BlockoGame.instance.gameArenaSignHandler.loadArenaSigns()
-            BlockoGame.instance.gameArenaSignHandler.updateArenaSign(gameArena)
+            val gameArena = BlockoGame.instance.arenaHandler.getArena(setupSession.arenaId) ?: return
+            BlockoGame.instance.arenaSignHandler.loadArenaSigns()
+            BlockoGame.instance.arenaSignHandler.updateArenaSign(gameArena)
 
-            BlockoGame.instance.gameArenaHandler.updateArenaStatus(setupSession.arenaId, GameArenaStatus.READY)
+            BlockoGame.instance.arenaHandler.updateArenaStatus(setupSession.arenaId, ArenaStatus.READY)
         }
 
         BlockoGame.instance.gameFieldHighlightHandler.removeHighlightEntities(
@@ -148,7 +149,7 @@ class GameArenaSetupHandler {
         player.translateMessage("blocko.setup.scanning_board.select_${messageKeyPart}_corner")
 
         if (setupStep.areCornersSet()) {
-            player.translateMessage("blocko.setup.scanning_board.confirm", Placeholder.parsed("id", setupSession.arenaId))
+            player.translateMessage("blocko.setup.scanning_board.confirm", Placeholder.parsed("id", setupSession.arenaId.value))
         }
     }
 
@@ -221,7 +222,7 @@ class GameArenaSetupHandler {
 
         val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
         val statusKey = "blocko.setup.scanning_board.finished.${if (scanningCompleted) "satisfied" else "unsatisfied"}"
-        val statusString = translation.line(statusKey, Placeholder.parsed("id", setupSession.arenaId))
+        val statusString = translation.line(statusKey, Placeholder.parsed("id", setupSession.arenaId.value))
 
         player.translateMessage("blocko.setup.scanning_board.finished.title",
             Placeholder.component("status", statusString))
@@ -238,7 +239,7 @@ class GameArenaSetupHandler {
         }
     }
 
-    fun setTeamSpawnLocation(setupSession: GameArenaSetupSession, player: Player, teamName: String, location: Location) {
+    fun setTeamSpawnLocation(setupSession: ArenaSetupSession, player: Player, teamName: String, location: Location) {
         val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
         if (setupStep.gameTeamLocations.any { it.x == location.x && it.y == location.y && it.z == location.z }) {
@@ -247,7 +248,7 @@ class GameArenaSetupHandler {
         }
 
         val centeredLocation = LocationUtils.centerLocation(location)
-        val yLevel = BlockoGame.instance.gameArenaHandler.getArena(setupSession.arenaId)!!.yLevel
+        val yLevel = BlockoGame.instance.arenaHandler.getArena(setupSession.arenaId)!!.yLevel
 
         val teamSpawn = GameTeamLocation(
             setupSession.arenaId,
@@ -270,7 +271,7 @@ class GameArenaSetupHandler {
         )
     }
 
-    fun addField(setupSession: GameArenaSetupSession, player: Player, location: Location) {
+    fun addField(setupSession: ArenaSetupSession, player: Player, location: Location) {
         val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
         val x = location.x
@@ -301,7 +302,7 @@ class GameArenaSetupHandler {
         )
     }
 
-    fun addGarageField(setupSession: GameArenaSetupSession, player: Player, teamName: String, location: Location) {
+    fun addGarageField(setupSession: ArenaSetupSession, player: Player, teamName: String, location: Location) {
         val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
         val x = location.x

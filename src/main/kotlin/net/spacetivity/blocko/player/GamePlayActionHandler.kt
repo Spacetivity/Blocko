@@ -4,7 +4,7 @@ import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.bossbar.BossbarHandler
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.phase.GamePhaseMode
@@ -29,7 +29,7 @@ class GamePlayActionHandler {
 
     fun startMainTask() {
         mainTask = Bukkit.getScheduler().runTaskTimerAsynchronously(BlockoGame.instance, Runnable {
-            for (arena in BlockoGame.instance.gameArenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
+            for (arena in BlockoGame.instance.arenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
                 handleArenaMainTask(arena)
             }
         }, 0L, 1L)
@@ -45,7 +45,7 @@ class GamePlayActionHandler {
 
     fun startPlayerTask() {
         playerTask = Bukkit.getScheduler().runTaskTimerAsynchronously(BlockoGame.instance, Runnable {
-            for (arena in BlockoGame.instance.gameArenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
+            for (arena in BlockoGame.instance.arenaHandler.cachedArenas.filter { it.phase.isIngame() }) {
                 handleArenaPlayerTask(arena)
             }
         }, 0L, 10L)
@@ -57,7 +57,7 @@ class GamePlayActionHandler {
         playerTask?.cancel().also { playerTask = null }
     }
 
-    private fun handleArenaMainTask(arena: GameArena) {
+    private fun handleArenaMainTask(arena: Arena) {
         val ingamePhase = arena.phase as? IngamePhase ?: return
         arena.currentPlayers.forEach { gamePlayer ->
             val bukkitPlayer = gamePlayer.toBukkitInstance() ?: return@forEach
@@ -72,7 +72,7 @@ class GamePlayActionHandler {
         }
     }
 
-    private fun handlePlayerTeleportIfNeeded(player: Player, arena: GameArena) {
+    private fun handlePlayerTeleportIfNeeded(player: Player, arena: Arena) {
         if (player.location.y <= (arena.yLevel - 10)) {
             val yDiff = arena.yLevel - player.location.y
             player.teleportAsync(player.location.clone().add(0.0, yDiff + 2.0, 1.0)).thenAccept {
@@ -81,7 +81,7 @@ class GamePlayActionHandler {
         }
     }
 
-    private fun handleEntityHighlighting(gamePlayer: GamePlayer, arena: GameArena) {
+    private fun handleEntityHighlighting(gamePlayer: GamePlayer, arena: Arena) {
         val player = gamePlayer.toBukkitInstance() ?: return
         val itemStack = player.inventory.itemInMainHand
 
@@ -101,7 +101,7 @@ class GamePlayActionHandler {
     }
 
     private fun handleEntityMovement(entity: GameEntity) {
-        val arena = BlockoGame.instance.gameArenaHandler.getArena(entity.arenaId) ?: return
+        val arena = BlockoGame.instance.arenaHandler.getArena(entity.arenaId) ?: return
         if (!arena.phase.isIngame()) return
         val ingamePhase = arena.phase as? IngamePhase ?: return
 
@@ -157,7 +157,7 @@ class GamePlayActionHandler {
         ingamePhase.phaseMode = GamePhaseMode.DICE
     }
 
-    private fun handleArenaPlayerTask(arena: GameArena) {
+    private fun handleArenaPlayerTask(arena: Arena) {
         val ingamePhase = arena.phase as? IngamePhase ?: return
         val controllingPlayer = ingamePhase.getControllingGamePlayer() ?: return
 
@@ -261,7 +261,7 @@ class GamePlayActionHandler {
         gamePlayer.playSound(Sound.BLOCK_SCULK_SHRIEKER_HIT)
     }
 
-    private fun processPlayerEntitySelection(gamePlayer: GamePlayer, arena: GameArena, ingamePhase: IngamePhase) {
+    private fun processPlayerEntitySelection(gamePlayer: GamePlayer, arena: Arena, ingamePhase: IngamePhase) {
         val dicedNumber = gamePlayer.dicedNumber ?: return
         val teamEntities = BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(arena.id, gamePlayer.teamName!!)
         
@@ -277,12 +277,12 @@ class GamePlayActionHandler {
         }
     }
 
-    private fun getHighlightedEntities(gamePlayer: GamePlayer, arena: GameArena): List<GameEntity> {
+    private fun getHighlightedEntities(gamePlayer: GamePlayer, arena: Arena): List<GameEntity> {
         return BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(arena.id, gamePlayer.teamName!!)
             .filter { it.isHighlighted }
     }
 
-    private fun getOtherHighlightedEntities(gamePlayer: GamePlayer, arena: GameArena, highlightedEntity: GameEntity): List<GameEntity> {
+    private fun getOtherHighlightedEntities(gamePlayer: GamePlayer, arena: Arena, highlightedEntity: GameEntity): List<GameEntity> {
         return BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(arena.id, gamePlayer.teamName!!)
             .filter { it.livingEntity?.uniqueId != highlightedEntity.livingEntity?.uniqueId }
     }

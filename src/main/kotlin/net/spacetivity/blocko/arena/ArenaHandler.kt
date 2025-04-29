@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.phase.impl.EndingPhase
 import net.spacetivity.blocko.phase.impl.IdlePhase
 import net.spacetivity.blocko.phase.impl.IngamePhase
@@ -18,22 +19,22 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import java.util.*
 
-class GameArenaHandler {
+class ArenaHandler {
 
     private val gamePhaseHandler = BlockoGame.instance.gamePhaseHandler
-    val cachedArenas = mutableListOf<GameArena>()
+    val cachedArenaIds = mutableListOf<ArenaId>()
+    val cachedArenas = mutableListOf<Arena>()
 
     init {
         transaction {
-            for (resultRow in GameArenaDAO.selectAll().toMutableList()) {
-                val arenaId = resultRow[GameArenaDAO.id]
+            for (resultRow in ArenaDAO.selectAll().toMutableList()) {
+                val arenaId = resultRow[ArenaDAO.id]
 
-                val worldName = resultRow[GameArenaDAO.worldName]
+                val worldName = resultRow[ArenaDAO.worldName]
                 var gameWorld: World? = null
 
                 if (Bukkit.getWorld(worldName) == null)
@@ -44,7 +45,7 @@ class GameArenaHandler {
                     continue
                 }
 
-                val serializedLocation = resultRow[GameArenaDAO.playerLocation].split(":")
+                val serializedLocation = resultRow[ArenaDAO.playerLocation].split(":")
                 val x = serializedLocation[0].toDouble()
                 val y = serializedLocation[1].toDouble()
                 val z = serializedLocation[2].toDouble()
@@ -52,22 +53,23 @@ class GameArenaHandler {
                 val pitch = serializedLocation[4].toFloat()
 
                 val playerLocation = Location(gameWorld, x, y, z, yaw, pitch)
-                val status = GameArenaStatus.valueOf(resultRow[GameArenaDAO.status])
+                val status = ArenaStatus.valueOf(resultRow[ArenaDAO.status])
 
                 val idlePhase = IdlePhase(arenaId)
                 gamePhaseHandler.cachedGamePhases.put(arenaId, idlePhase)
                 gamePhaseHandler.cachedGamePhases.put(arenaId, IngamePhase(arenaId))
                 gamePhaseHandler.cachedGamePhases.put(arenaId, EndingPhase(arenaId))
 
-                cachedArenas.add(GameArena(arenaId, gameWorld, status, idlePhase, playerLocation.y, playerLocation))
+                cachedArenaIds.add(arenaId)
+                cachedArenas.add(Arena(arenaId, gameWorld, status, idlePhase, playerLocation.y, playerLocation))
             }
         }
     }
 
-    fun updateArenaStatus(id: String, status: GameArenaStatus) {
+    fun updateArenaStatus(id: ArenaId, status: ArenaStatus) {
         transaction {
-            GameArenaDAO.update({ GameArenaDAO.id eq id }) { statement: UpdateStatement ->
-                statement[GameArenaDAO.status] = status.name
+            ArenaDAO.update({ ArenaDAO.id eq id }) { statement ->
+                statement[ArenaDAO.status] = status.name
             }
         }
 
@@ -75,19 +77,19 @@ class GameArenaHandler {
     }
 
     fun createArena(worldName: String, location: Location): Boolean {
-        val id = UUID.randomUUID().toString().split("-")[0]
+        val id = ArenaId(UUID.randomUUID().toString().split("-")[0])
         val serializedLocation = "${location.x}:${location.y}:${location.z}:${location.yaw}:${location.pitch}"
-        val status = GameArenaStatus.CONFIGURATING
+        val status = ArenaStatus.CONFIGURATING
 
-        if (getArena(id) != null || (BlockoGame.instance.gameArenaHandler.cachedArenas.size >= BlockoGame.instance.globalConfigFile.gameArenaMaxParallelAmount)) return false
+        if (getArena(id) != null || (BlockoGame.instance.arenaHandler.cachedArenas.size >= BlockoGame.instance.globalConfigFile.gameArenaMaxParallelAmount)) return false
 
         transaction {
-            GameArenaDAO.insert { statement ->
-                statement[GameArenaDAO.id] = id
-                statement[GameArenaDAO.worldName] = worldName
+            ArenaDAO.insert { statement ->
+                statement[ArenaDAO.id] = id
+                statement[ArenaDAO.worldName] = worldName
                 statement[playerLocation] = serializedLocation
                 statement[maxPlayers] = 4
-                statement[GameArenaDAO.status] = status.name
+                statement[ArenaDAO.status] = status.name
             }
         }
 
@@ -96,20 +98,22 @@ class GameArenaHandler {
         gamePhaseHandler.cachedGamePhases.put(id, IngamePhase(id))
         gamePhaseHandler.cachedGamePhases.put(id, EndingPhase(id))
 
-        this.cachedArenas.add(GameArena(id, Bukkit.getWorld(worldName)!!, status, idlePhase, location.y, location))
+        this.cachedArenaIds.add(id)
+        this.cachedArenas.add(Arena(id, Bukkit.getWorld(worldName)!!, status, idlePhase, location.y, location))
         return true
     }
 
-    fun deleteArena(id: String) {
+    fun deleteArena(id: ArenaId) {
         BlockoGame.instance.gameFieldHandler.deleteFields(id)
         BlockoGame.instance.gameTeamHandler.deleteTeamSpawns(id)
         BlockoGame.instance.gamePhaseHandler.deletePhases(id)
         BlockoGame.instance.gameTeamHandler.gameTeams.removeAll(id)
 
         transaction {
-            GameArenaDAO.deleteWhere { GameArenaDAO.id eq id }
+            ArenaDAO.deleteWhere { ArenaDAO.id eq id }
         }
 
+        this.cachedArenaIds.remove(id)
         this.cachedArenas.removeIf { it.id == id }
     }
 
@@ -119,20 +123,24 @@ class GameArenaHandler {
         }
     }
 
-    fun getArena(id: String): GameArena? {
+    fun getArenaId(value: String): ArenaId? {
+        return this.cachedArenaIds.find { it.value == value }
+    }
+
+    fun getArena(id: ArenaId): Arena? {
         return this.cachedArenas.find { it.id == id }
     }
 
-    fun getArenaOfPlayer(uuid: UUID): GameArena? {
+    fun getArenaOfPlayer(uuid: UUID): Arena? {
         return this.cachedArenas.find { it.currentPlayers.any { gamePlayer: GamePlayer -> gamePlayer.uuid == uuid } } ?: getArenaOfSpectator(uuid)
     }
 
-    fun getArenaOfSpectator(uuid: UUID): GameArena? {
+    fun getArenaOfSpectator(uuid: UUID): Arena? {
         return this.cachedArenas.find { it.spectatorPlayers.contains(uuid) }
     }
 
     //TODO: make the sign layout configurable
-    fun loadJoinSign(location: Location, gameArena: GameArena?) {
+    fun loadJoinSign(location: Location, arena: Arena?) {
         val block = location.block
         if (!block.type.name.contains("WALL_SIGN", true)) return
 
@@ -141,31 +149,31 @@ class GameArenaHandler {
 
         signSide.line(0, Component.text("BLOCKO", NamedTextColor.BLUE, TextDecoration.BOLD))
 
-        if (gameArena == null) {
+        if (arena == null) {
             signSide.line(1, Component.text("Searching", NamedTextColor.GRAY))
             signSide.line(2, Component.text("for arena...", NamedTextColor.GRAY))
         } else {
-            val arenaStatus = gameArena.status
-            val arenaPhase = gameArena.phase
+            val arenaStatus = arena.status
+            val arenaPhase = arena.phase
 
             val statusLine = when (arenaStatus) {
-                GameArenaStatus.READY -> when (arenaPhase) {
-                    is IdlePhase -> Component.text("${gameArena.currentPlayers.size}/${gameArena.teamOptions.playerCount}", NamedTextColor.YELLOW)
+                ArenaStatus.READY -> when (arenaPhase) {
+                    is IdlePhase -> Component.text("${arena.currentPlayers.size}/${arena.teamOptions.playerCount}", NamedTextColor.YELLOW)
                     is IngamePhase -> Component.text("Ingame...", NamedTextColor.RED)
                     is EndingPhase -> Component.text("Ending...", NamedTextColor.RED)
                     else -> Component.text("Phase 404", NamedTextColor.RED)
                 }
 
-                GameArenaStatus.CONFIGURATING -> Component.text("Configuration...", NamedTextColor.RED)
-                GameArenaStatus.RESETTING -> Component.text("Resetting...", NamedTextColor.RED)
+                ArenaStatus.CONFIGURATING -> Component.text("Configuration...", NamedTextColor.RED)
+                ArenaStatus.RESETTING -> Component.text("Resetting...", NamedTextColor.RED)
             }
 
-            signSide.line(1, Component.text(gameArena.teamOptions.getDisplayString(), NamedTextColor.AQUA))
+            signSide.line(1, Component.text(arena.teamOptions.getDisplayString(), NamedTextColor.AQUA))
             signSide.line(2, statusLine)
 
-            if (arenaStatus == GameArenaStatus.READY && arenaPhase.isIdle()) {
+            if (arenaStatus == ArenaStatus.READY && arenaPhase.isIdle()) {
                 signSide.line(3, Component.text("[JOIN]", NamedTextColor.GREEN))
-            } else if (arenaStatus == GameArenaStatus.READY && arenaPhase.isIngame()) {
+            } else if (arenaStatus == ArenaStatus.READY && arenaPhase.isIngame()) {
                 signSide.line(3, Component.text("[SPECTATE]", NamedTextColor.GOLD))
             } else {
                 signSide.line(3, Component.text(" "))

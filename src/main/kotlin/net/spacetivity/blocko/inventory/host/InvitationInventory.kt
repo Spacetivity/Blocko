@@ -2,7 +2,7 @@ package net.spacetivity.blocko.inventory.host
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.item.itemStack
@@ -22,7 +22,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.SkullMeta
 
 @InventoryProperties(id = "invitation_inv", rows = 6, columns = 9)
-class InvitationInventory(private val gameArena: GameArena) : InventoryProvider {
+class InvitationInventory(private val arena: Arena) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
         val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
@@ -34,7 +34,7 @@ class InvitationInventory(private val gameArena: GameArena) : InventoryProvider 
             meta {
                 name = translation.displayName("blocko.inventory_utils.back_item_display_name")
             }
-        }) { _, _, _ -> InventoryUtils.openHostSettingsInventory(player, gameArena) })
+        }) { _, _, _ -> InventoryUtils.openHostSettingsInventory(player, arena) })
 
         val pageItems = fetchPlayerItems(player, translation)
 
@@ -70,7 +70,7 @@ class InvitationInventory(private val gameArena: GameArena) : InventoryProvider 
                     playerProfile = player.playerProfile
                 }
             }) { _, _, _ ->
-                this.gameArena.sendArenaInvite(hostGamePlayer, player.name)
+                this.arena.sendArenaInvite(hostGamePlayer, player.name)
                 host.playSound(host.location, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.0F)
             })
         }

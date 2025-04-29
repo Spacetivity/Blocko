@@ -14,7 +14,7 @@ import org.bukkit.inventory.EquipmentSlot
 
 class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
 
-    private val setupHandler = this.plugin.gameArenaSetupHandler
+    private val setupHandler = this.plugin.arenaSetupHandler
 
     init {
         this.plugin.server.pluginManager.registerEvents(this, this.plugin)

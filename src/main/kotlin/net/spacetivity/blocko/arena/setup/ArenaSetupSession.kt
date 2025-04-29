@@ -1,6 +1,7 @@
 package net.spacetivity.blocko.arena.setup
 
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.arena.setup.step.SetupStep
 import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
 import net.spacetivity.blocko.arena.setup.step.impl.SetTeamEntrancesStep
@@ -10,7 +11,7 @@ import net.spacetivity.blocko.utils.Constants
 import java.time.Duration
 import kotlin.reflect.KClass
 
-class GameArenaSetupSession(val arenaId: String, val setupTool: GameArenaSetupTool) {
+class ArenaSetupSession(val arenaId: ArenaId, val setupTool: SetupTool) {
 
     val timeoutTimestamp =
         if (BlockoGame.instance.setupConfigFile.setupSessionEndless) -1

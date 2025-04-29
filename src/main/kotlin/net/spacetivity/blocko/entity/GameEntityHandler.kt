@@ -2,6 +2,7 @@ package net.spacetivity.blocko.entity
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.team.GameTeamLocation
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
@@ -11,20 +12,20 @@ import java.util.*
 
 class GameEntityHandler {
 
-    val gameEntities: Multimap<String, GameEntity> = ArrayListMultimap.create()
+    val gameEntities: Multimap<ArenaId, GameEntity> = ArrayListMultimap.create()
 
     private val unlockedGameEntityTypes: Multimap<UUID, GameEntityType> = ArrayListMultimap.create()
     private val gameEntityHistories = mutableMapOf<UUID, GameEntityHistory>()
 
-    fun getEntitiesFromTeam(arenaId: String, teamName: String): List<GameEntity> {
+    fun getEntitiesFromTeam(arenaId: ArenaId, teamName: String): List<GameEntity> {
         return this.gameEntities.get(arenaId).filter { it.teamName.equals(teamName, true) }
     }
 
-    fun clearEntitiesForTeam(arenaId: String, teamName: String) {
+    fun clearEntitiesForTeam(arenaId: ArenaId, teamName: String) {
         getEntitiesFromTeam(arenaId, teamName).forEach { it.despawn() }
     }
 
-    fun clearEntitiesFromArena(arenaId: String) {
+    fun clearEntitiesFromArena(arenaId: ArenaId) {
         val entities = this.gameEntities.get(arenaId).toMutableList()
         entities.forEach { it.despawn() }
         this.gameEntities.removeAll(arenaId)

@@ -1,5 +1,6 @@
 package net.spacetivity.blocko.field.highlighting
 
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.field.highlighting.scoreboard.HighlightMode
 import net.spacetivity.blocko.field.highlighting.scoreboard.impl.*
 import net.spacetivity.blocko.utils.Constants
@@ -16,7 +17,7 @@ import kotlin.reflect.KClass
 
 class GameFieldHighlightHandler {
 
-    private val highlightEntities = mutableMapOf<UUID, Pair<String, HighlightMode>>()
+    private val highlightEntities = mutableMapOf<UUID, Pair<ArenaId, HighlightMode>>()
 
     val highlightModes = mutableMapOf(
         Pair(GameFieldHighlightMode::class, GameFieldHighlightMode()),
@@ -36,7 +37,7 @@ class GameFieldHighlightHandler {
         }
     }
 
-    fun spawnOrUpdateHighlightEntity(arenaId: String, location: Location, highlightModeClass: KClass<out HighlightMode>) {
+    fun spawnOrUpdateHighlightEntity(arenaId: ArenaId, location: Location, highlightModeClass: KClass<out HighlightMode>) {
         val block = location.block
         val centerLocation = block.location.toCenterLocation()
 
@@ -63,7 +64,7 @@ class GameFieldHighlightHandler {
         this.highlightEntities[displayEntity.uniqueId] = Pair(arenaId, highlightMode)
     }
 
-    fun removeHighlightEntities(arenaId: String, vararg highlightModeClasses: KClass<out HighlightMode>) {
+    fun removeHighlightEntities(arenaId: ArenaId, vararg highlightModeClasses: KClass<out HighlightMode>) {
         val tempMap = this.highlightEntities
         for ((entityId, arenaData) in tempMap) {
             if (arenaData.first != arenaId) continue
@@ -82,7 +83,7 @@ class GameFieldHighlightHandler {
         }
     }
 
-    fun getHighlightEntity(arenaId: String, location: Location): BlockDisplay? {
+    fun getHighlightEntity(arenaId: ArenaId, location: Location): BlockDisplay? {
         var displayEntity: BlockDisplay? = null
 
         for ((entityId, arenaData) in this.highlightEntities) {

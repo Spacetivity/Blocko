@@ -1,7 +1,8 @@
 package net.spacetivity.blocko.command
 
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.getPossibleInvitationDestination
 import net.spacetivity.blocko.arena.toGamePlayerInstance
@@ -83,17 +84,20 @@ class ArenaInviteCommand : SpaceCommandExecutor {
 
         if (args.size == 2 && (args[0].equals("accept", true) || args[0].equals("deny", true))) {
             val gameArena = player.getPossibleInvitationDestination() ?: return mutableListOf()
-            result.add(gameArena.id)
+            result.add(gameArena.id.value)
         }
 
         return result
     }
 
-    private fun validateInvitation(arenaId: String, player: Player, result: (GameArena) -> Unit) {
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(arenaId)
+    private fun validateInvitation(arenaIdAsString: String, player: Player, result: (Arena) -> Unit) {
+        val arenaHandler = BlockoGame.instance.arenaHandler
 
-        if (gameArena == null) {
-            player.translateMessage("blocko.command.blocko.arena_not_exists")
+        val arenaId = arenaHandler.getArenaId(arenaIdAsString)
+        val gameArena = arenaId?.let { arenaHandler.getArena(it) }
+
+        if (arenaId == null || gameArena == null) {
+            player.translateMessage("blocko.command.blocko.arena_not_exists", Placeholder.parsed("id", arenaIdAsString))
             return
         }
 

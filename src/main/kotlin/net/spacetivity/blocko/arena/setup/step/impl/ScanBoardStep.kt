@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.arena.setup.step.impl
 
-import net.spacetivity.blocko.arena.setup.GameArenaSetupTool.ToolModeKeybind
-import net.spacetivity.blocko.arena.setup.GameArenaSetupTool.ToolModeKeybindHint
+import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
+import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
 import net.spacetivity.blocko.arena.setup.ScannerResult
 import net.spacetivity.blocko.arena.setup.step.SetupStep
 import net.spacetivity.blocko.field.GameField

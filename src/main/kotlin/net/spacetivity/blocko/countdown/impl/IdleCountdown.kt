@@ -2,17 +2,18 @@ package net.spacetivity.blocko.countdown.impl
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.Arena
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.countdown.GameCountdown
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
 import org.bukkit.Sound
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
 
-class IdleCountdown(arenaId: String) : GameCountdown(arenaId, BlockoGame.instance.globalConfigFile.idleCountdownSeconds) {
+class IdleCountdown(arenaId: ArenaId) : GameCountdown(arenaId, BlockoGame.instance.globalConfigFile.idleCountdownSeconds) {
 
     override fun handleCountdownIdle(countdownTask: BukkitTask, remainingSeconds: Int) {
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
+        val gameArena = BlockoGame.instance.arenaHandler.getArena(this.arenaId) ?: return
         val isOne = remainingSeconds == 1
 
         if (remainingSeconds % 10 == 0 || remainingSeconds < 6) {
@@ -24,7 +25,7 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, BlockoGame.instanc
     }
 
     override fun handleCountdownEnd() {
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
+        val gameArena = BlockoGame.instance.arenaHandler.getArena(this.arenaId) ?: return
 
         for (gamePlayer in gameArena.currentPlayers.filter { !it.isAI }) {
             val player = gamePlayer.toBukkitInstance() ?: continue
@@ -55,12 +56,12 @@ class IdleCountdown(arenaId: String) : GameCountdown(arenaId, BlockoGame.instanc
         BlockoGame.instance.gamePhaseHandler.nextPhase(gameArena)
     }
 
-    private fun addMissingPlayers(gameArena: GameArena) {
-        val missingPlayerCount = gameArena.teamOptions.playerCount - gameArena.currentPlayers.size
+    private fun addMissingPlayers(arena: Arena) {
+        val missingPlayerCount = arena.teamOptions.playerCount - arena.currentPlayers.size
         if (missingPlayerCount <= 0) return
 
         for (i in 0..<missingPlayerCount) {
-            gameArena.join(UUID.randomUUID(), true)
+            arena.join(UUID.randomUUID(), true)
         }
     }
 

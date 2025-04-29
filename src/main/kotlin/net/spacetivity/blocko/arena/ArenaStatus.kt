@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.arena
 
-enum class GameArenaStatus {
+enum class ArenaStatus {
     CONFIGURATING,
     RESETTING,
     READY;

@@ -5,8 +5,9 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.RushExpertAchievement
 import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.item.*
 import net.spacetivity.blocko.phase.GamePhase
@@ -29,15 +30,15 @@ import java.util.*
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
+class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
 
     var lastControllingTeamId: Int? = null
     var controllingTeamId: Int? = null
-    var phaseMode: GamePhaseMode = GamePhaseMode.DICE
+    var phaseMode = GamePhaseMode.DICE
     var matchStartTime: Long? = null
 
     override fun start() {
-        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(getArena())
+        BlockoGame.instance.arenaSignHandler.updateArenaSign(getArena())
 
         this.phaseMode = GamePhaseMode.DICE
 
@@ -239,8 +240,8 @@ class IngamePhase(arenaId: String) : GamePhase(arenaId, "ingame", 1, null) {
         return dicedNumber != null && dicedNumber == 6
     }
 
-    private fun getHighlightedEntities(gamePlayer: GamePlayer, gameArena: GameArena): List<GameEntity> {
-        return BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName!!).filter { it.isHighlighted }
+    private fun getHighlightedEntities(gamePlayer: GamePlayer, arena: Arena): List<GameEntity> {
+        return BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(arena.id, gamePlayer.teamName!!).filter { it.isHighlighted }
     }
 
 }

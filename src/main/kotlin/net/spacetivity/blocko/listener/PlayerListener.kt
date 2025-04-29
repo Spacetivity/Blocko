@@ -10,7 +10,7 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.BadMannersAchievement
 import net.spacetivity.blocko.achievement.impl.FairPlayAchievement
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.entity.GameEntity
@@ -37,7 +37,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 
 class PlayerListener(private val plugin: BlockoGame) : Listener {
 
-    private val gameArenaSignHandler = BlockoGame.instance.gameArenaSignHandler
+    private val gameArenaSignHandler = BlockoGame.instance.arenaSignHandler
 
     init {
         this.plugin.server.pluginManager.registerEvents(this, this.plugin)
@@ -66,7 +66,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
         }
 
         if (this.plugin.globalConfigFile.gameArenaAutoJoin) {
-            val gameArenas = this.plugin.gameArenaHandler.cachedArenas
+            val gameArenas = this.plugin.arenaHandler.cachedArenas
                 .filter { !it.isFull() && it.phase.isIdle() }
                 .sortedBy { it.currentPlayers.size }
                 .reversed()
@@ -133,7 +133,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
     fun openSignEvent(event: PlayerOpenSignEvent) {
         val player = event.player
 
-        if (player.inventory.itemInMainHand.type == Material.DIAMOND_HOE || BlockoGame.instance.gameArenaSignHandler.existsLocation(event.sign.location))
+        if (player.inventory.itemInMainHand.type == Material.DIAMOND_HOE || BlockoGame.instance.arenaSignHandler.existsLocation(event.sign.location))
             event.isCancelled = true
     }
 
@@ -189,8 +189,8 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
 
                 event.isCancelled = true
 
-                val arenaSign = BlockoGame.instance.gameArenaSignHandler.getSign(block.location) ?: return
-                val gameArena = if (arenaSign.arenaId == null) null else BlockoGame.instance.gameArenaHandler.getArena(arenaSign.arenaId!!)
+                val arenaSign = BlockoGame.instance.arenaSignHandler.getSign(block.location) ?: return
+                val gameArena = if (arenaSign.arenaId == null) null else BlockoGame.instance.arenaHandler.getArena(arenaSign.arenaId!!)
 
                 if (gameArena == null) {
                     player.translateMessage("blocko.sign.no_arena_assigned")
@@ -306,8 +306,8 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
         }
     }
 
-    private fun getOtherHighlightedEntities(gamePlayer: GamePlayer, gameArena: GameArena, highlightedEntity: GameEntity): List<GameEntity> {
-        return BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName!!).filter { it.livingEntity?.uniqueId != highlightedEntity.livingEntity?.uniqueId }
+    private fun getOtherHighlightedEntities(gamePlayer: GamePlayer, arena: Arena, highlightedEntity: GameEntity): List<GameEntity> {
+        return BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(arena.id, gamePlayer.teamName!!).filter { it.livingEntity?.uniqueId != highlightedEntity.livingEntity?.uniqueId }
     }
 
 }

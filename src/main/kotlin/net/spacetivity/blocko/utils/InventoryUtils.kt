@@ -2,7 +2,7 @@ package net.spacetivity.blocko.utils
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.inventory.host.HostSettingsInventory
 import net.spacetivity.blocko.inventory.host.InvitationInventory
@@ -35,19 +35,19 @@ object InventoryUtils {
         openStaticInventory(opener, title, GameTeamSetupInventory(invType, block.location))
     }
 
-    fun openHostSettingsInventory(opener: Player, gameArena: GameArena) {
+    fun openHostSettingsInventory(opener: Player, arena: Arena) {
         val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.host.title")
-        openStaticInventory(opener, title, HostSettingsInventory(gameArena))
+        openStaticInventory(opener, title, HostSettingsInventory(arena))
     }
 
-    fun openInvitationInventory(opener: Player, gameArena: GameArena) {
+    fun openInvitationInventory(opener: Player, arena: Arena) {
         val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.invitation.title")
-        openStaticInventory(opener, title, InvitationInventory(gameArena))
+        openStaticInventory(opener, title, InvitationInventory(arena))
     }
 
-    fun openTeamSelectorInventory(opener: Player, gameArena: GameArena) {
+    fun openTeamSelectorInventory(opener: Player, arena: Arena) {
         val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.team_selector.title")
-        openStaticInventory(opener, title, TeamSelectorInventory(gameArena))
+        openStaticInventory(opener, title, TeamSelectorInventory(arena))
     }
 
     fun openProfileInventory(opener: Player, isShopItemActive: Boolean) {

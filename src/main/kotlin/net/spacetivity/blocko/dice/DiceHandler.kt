@@ -32,7 +32,7 @@ class DiceHandler {
 
     fun startDiceAnimation() {
         this.diceAnimationTask = Bukkit.getScheduler().runTaskTimer(BlockoGame.instance, Runnable {
-            for (gameArena in BlockoGame.instance.gameArenaHandler.cachedArenas) {
+            for (gameArena in BlockoGame.instance.arenaHandler.cachedArenas) {
                 if (!gameArena.phase.isIngame()) continue
                 val ingamePhase = gameArena.phase as IngamePhase
 
@@ -115,7 +115,7 @@ class DiceHandler {
             itemStack.itemMeta = skullMeta
         }
 
-        BlockoGame.instance.gameArenaHandler.getArena(gamePlayer.arenaId)?.sendArenaSound(Sound.BLOCK_BAMBOO_BREAK, 0.2F)
+        BlockoGame.instance.arenaHandler.getArena(gamePlayer.arenaId)?.sendArenaSound(Sound.BLOCK_BAMBOO_BREAK, 0.2F)
         diceSession.currentDiceNumber = diceSide.first
 
         gamePlayer.translateActionBar("blocko.main_game_loop.current_dice_number", Placeholder.parsed("dice_number", diceSide.first.toString()))

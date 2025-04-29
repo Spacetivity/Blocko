@@ -1,10 +1,11 @@
 package net.spacetivity.blocko.team
 
+import net.spacetivity.blocko.arena.id.ArenaId
 import org.bukkit.Bukkit
 import org.bukkit.Location
 
 data class GameTeamLocation(
-    val arenaId: String,
+    val arenaId: ArenaId,
     val teamName: String,
     val worldName: String,
     val x: Double,

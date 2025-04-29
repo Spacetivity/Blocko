@@ -134,7 +134,7 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     }
 
     private fun isArenaWorld(world: World): Boolean {
-        return this.plugin.gameArenaHandler.cachedArenas.any { it.gameWorld.name == world.name }
+        return this.plugin.arenaHandler.cachedArenas.any { it.gameWorld.name == world.name }
     }
 
     private fun isLobbyWorld(world: World): Boolean {

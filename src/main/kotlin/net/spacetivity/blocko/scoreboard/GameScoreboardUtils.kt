@@ -4,7 +4,8 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.Arena
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
@@ -43,21 +44,21 @@ object GameScoreboardUtils {
         sidebar.updateLine(8, getTeamComponent(BlockoGame.instance.translationHandler.getSelectedTranslation(), player.toGamePlayerInstance()))
     }
 
-    fun updateControllingTeamLine(gameArena: GameArena, controllingTeam: GameTeam) {
-        for (player in gameArena.getAllPlayers()) {
+    fun updateControllingTeamLine(arena: Arena, controllingTeam: GameTeam) {
+        for (player in arena.getAllPlayers()) {
             val sidebar = BlockoGame.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
             sidebar.updateLine(6, getControllingTeamComponent(BlockoGame.instance.translationHandler.getSelectedTranslation(), controllingTeam))
         }
     }
 
-    fun updateAllEntityStatusLines(arenaId: String, newControllingTeam: GameTeam) {
+    fun updateAllEntityStatusLines(arenaId: ArenaId, newControllingTeam: GameTeam) {
         for (gameEntity in BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(arenaId, newControllingTeam.name)) {
             updateEntityStatusLine(gameEntity)
         }
     }
 
     fun updateEntityStatusLine(gameEntity: GameEntity) {
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(gameEntity.arenaId) ?: return
+        val gameArena = BlockoGame.instance.arenaHandler.getArena(gameEntity.arenaId) ?: return
 
         for (player in gameArena.getAllPlayers()) {
             val sidebar = BlockoGame.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
@@ -66,8 +67,8 @@ object GameScoreboardUtils {
         }
     }
 
-    fun updateDicedNumberLine(arenaId: String, currentDicedNumber: Int?) {
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(arenaId) ?: return
+    fun updateDicedNumberLine(arenaId: ArenaId, currentDicedNumber: Int?) {
+        val gameArena = BlockoGame.instance.arenaHandler.getArena(arenaId) ?: return
         if (!gameArena.phase.isIngame()) return
 
         for (player in gameArena.getAllPlayers()) {

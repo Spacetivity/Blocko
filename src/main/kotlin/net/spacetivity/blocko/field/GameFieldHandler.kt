@@ -3,17 +3,17 @@ package net.spacetivity.blocko.field
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.arena.id.ArenaId
 import org.bukkit.Bukkit
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class GameFieldHandler {
 
-    val cachedGameFields: Multimap<String, GameField> = ArrayListMultimap.create()
+    val cachedGameFields: Multimap<ArenaId, GameField> = ArrayListMultimap.create()
 
     init {
         transaction {
@@ -30,11 +30,11 @@ class GameFieldHandler {
         }
     }
 
-    fun getFirstFieldForTeam(arenaId: String, teamName: String): GameField? {
+    fun getFirstFieldForTeam(arenaId: ArenaId, teamName: String): GameField? {
         return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == 0 }
     }
 
-    fun getLastFieldForTeam(arenaId: String, teamName: String): GameField? {
+    fun getLastFieldForTeam(arenaId: ArenaId, teamName: String): GameField? {
         val gameFieldsForTeam = this.cachedGameFields[arenaId]
         val validTeamFieldIds = mutableListOf<Int>()
 
@@ -49,15 +49,15 @@ class GameFieldHandler {
         return lastGameField
     }
 
-    fun getFieldForTeam(arenaId: String, teamName: String, id: Int): GameField? {
+    fun getFieldForTeam(arenaId: ArenaId, teamName: String, id: Int): GameField? {
         return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == id }
     }
 
-    fun getField(arenaId: String, x: Double, z: Double): GameField? {
+    fun getField(arenaId: ArenaId, x: Double, z: Double): GameField? {
         return this.cachedGameFields.get(arenaId).find { it.x == x && it.z == z }
     }
 
-    fun deleteFields(arenaId: String) {
+    fun deleteFields(arenaId: ArenaId) {
         transaction { GameFieldDAO.deleteWhere { GameFieldDAO.arenaId eq arenaId } }
         this.cachedGameFields.removeAll(arenaId)
     }
@@ -65,7 +65,7 @@ class GameFieldHandler {
     fun initFields(gameFields: MutableList<GameField>) {
         transaction {
             for (gameField in gameFields) {
-                GameFieldDAO.insert { statement: InsertStatement<Number> ->
+                GameFieldDAO.insert { statement ->
                     statement[arenaId] = gameField.arenaId
                     statement[worldName] = gameField.world.name
                     statement[x] = gameField.x

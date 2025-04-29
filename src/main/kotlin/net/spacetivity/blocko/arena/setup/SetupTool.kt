@@ -24,7 +24,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 
-class GameArenaSetupTool(private val holder: Player) {
+class SetupTool(private val holder: Player) {
 
     val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
     val itemStack: ItemStack
@@ -73,7 +73,7 @@ class GameArenaSetupTool(private val holder: Player) {
 
         when (activeStep::class) {
             ScanBoardStep::class -> {
-                BlockoGame.instance.gameArenaSetupHandler.selectCorner(this.holder, event.action.isLeftClick, block.location)
+                BlockoGame.instance.arenaSetupHandler.selectCorner(this.holder, event.action.isLeftClick, block.location)
             }
 
             SetTurningPointsStep::class -> {
@@ -88,7 +88,7 @@ class GameArenaSetupTool(private val holder: Player) {
                 if (setupSession.currentTeamName == null || (event.action.isLeftClick && setupSession.currentTeamName != null)) {
                     InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.IDS, block)
                 } else {
-                    BlockoGame.instance.gameArenaSetupHandler.setFieldTeamId(this.holder, setupSession.currentTeamName!!, block.location)
+                    BlockoGame.instance.arenaSetupHandler.setFieldTeamId(this.holder, setupSession.currentTeamName!!, block.location)
                 }
             }
         }

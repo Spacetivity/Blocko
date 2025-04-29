@@ -48,7 +48,7 @@ object RegionScanner {
         ), ScannerResult.GARAGE_FIELD)
     )
 
-    fun scanRegion(setupSession: GameArenaSetupSession): Multimap<Location, Pair<ScannerResult, String?>> {
+    fun scanRegion(setupSession: ArenaSetupSession): Multimap<Location, Pair<ScannerResult, String?>> {
         val resultsInRegion: Multimap<Location, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
         val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return resultsInRegion
 
@@ -79,7 +79,7 @@ object RegionScanner {
         return resultsInRegion
     }
 
-    private fun getPossibleTeamName(scannerResult: ScannerResult, currentBlockType: Material, arenaSetupData: GameArenaSetupSession): String? {
+    private fun getPossibleTeamName(scannerResult: ScannerResult, currentBlockType: Material, arenaSetupData: ArenaSetupSession): String? {
         val isTeamResult = scannerResult == ScannerResult.TEAM_SPAWN || scannerResult == ScannerResult.GARAGE_FIELD
         val teamName = if (isTeamResult) currentBlockType.name.split("_")[0].lowercase() else null
         return if (teamName != null && arenaSetupData.gameTeams.none { team -> team.name.equals(teamName, true) }) null else teamName

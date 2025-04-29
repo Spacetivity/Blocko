@@ -6,6 +6,7 @@ import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.FirstEliminationAchievement
 import net.spacetivity.blocko.achievement.impl.FirstKnockoutAchievement
 import net.spacetivity.blocko.achievement.impl.MasterEliminatorAchievement
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
 import net.spacetivity.blocko.player.GamePlayer
@@ -18,7 +19,7 @@ import org.bukkit.World
 import org.bukkit.entity.LivingEntity
 
 class GameField(
-    val arenaId: String,
+    val arenaId: ArenaId,
     val world: World,
     val x: Double,
     val z: Double,
@@ -30,7 +31,7 @@ class GameField(
     var currentHolder: GameEntity? = null
 
     fun trowOutOldHolder(newHolder: GamePlayer, newHolderEntity: LivingEntity) {
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
+        val gameArena = BlockoGame.instance.arenaHandler.getArena(this.arenaId) ?: return
 
         if (!this.isTaken) return
 
@@ -65,7 +66,7 @@ class GameField(
     }
 
     fun getWorldPosition(): Location {
-        val yLevel = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)?.yLevel ?: 0.0
+        val yLevel = BlockoGame.instance.arenaHandler.getArena(this.arenaId)?.yLevel ?: 0.0
         val location = Location(this.world, this.x, yLevel, this.z, 0.0F, 0.0F)
         val fixedLocation = location.clone().toCenterLocation()
         fixedLocation.y = yLevel

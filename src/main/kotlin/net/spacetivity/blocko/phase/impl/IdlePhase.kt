@@ -2,6 +2,7 @@ package net.spacetivity.blocko.phase.impl
 
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.countdown.impl.IdleCountdown
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
@@ -15,7 +16,7 @@ import org.bukkit.Sound
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 
-class IdlePhase(arenaId: String) : GamePhase(arenaId, "idling", 0, IdleCountdown(arenaId)) {
+class IdlePhase(arenaId: ArenaId) : GamePhase(arenaId, "idling", 0, IdleCountdown(arenaId)) {
 
     override fun start() {
 

@@ -4,12 +4,12 @@ import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.player.GamePlayer
 import org.bukkit.entity.Player
 
-fun Player.getArena(): GameArena? {
-    return BlockoGame.instance.gameArenaHandler.getArenaOfPlayer(uniqueId)
+fun Player.getArena(): Arena? {
+    return BlockoGame.instance.arenaHandler.getArenaOfPlayer(uniqueId)
 }
 
 fun Player.isSpectating(): Boolean {
-    return BlockoGame.instance.gameArenaHandler.cachedArenas.any { it.spectatorPlayers.contains(this.uniqueId) }
+    return BlockoGame.instance.arenaHandler.cachedArenas.any { it.spectatorPlayers.contains(this.uniqueId) }
 }
 
 fun Player.clearPhaseItems() {
@@ -17,8 +17,8 @@ fun Player.clearPhaseItems() {
     gameArena.phase.clearPlayerInventory(this)
 }
 
-fun Player.getPossibleInvitationDestination(): GameArena? {
-    return BlockoGame.instance.gameArenaHandler.cachedArenas.firstOrNull { it.invitedPlayers.contains(this.uniqueId) }
+fun Player.getPossibleInvitationDestination(): Arena? {
+    return BlockoGame.instance.arenaHandler.cachedArenas.firstOrNull { it.invitedPlayers.contains(this.uniqueId) }
 }
 
 fun Player.toGamePlayerInstance(): GamePlayer? {

@@ -57,7 +57,7 @@ class GameFieldTurnSetupInventory(private val blockLocation: Location) : Invento
                 val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return@of
                 val gameField = setupStep.gameFields.find { it.x == this.blockLocation.x && it.z == this.blockLocation.z } ?: return@of
 
-                BlockoGame.instance.gameArenaSetupHandler.setTurningPoint(player, gameField, this.blockLocation, pathFace)
+                BlockoGame.instance.arenaSetupHandler.setTurningPoint(player, gameField, this.blockLocation, pathFace)
             })
         }
 

@@ -2,7 +2,7 @@ package net.spacetivity.blocko.inventory.profile
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
@@ -24,7 +24,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.SkullMeta
 
 @InventoryProperties(id = "stats_inv", rows = 5, columns = 9)
-class StatsInventory(private val gameArena: GameArena, private val statsPlayer: StatsPlayer, private val showSearchPlayerItem: Boolean) : InventoryProvider {
+class StatsInventory(private val arena: Arena, private val statsPlayer: StatsPlayer, private val showSearchPlayerItem: Boolean) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
         val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
@@ -49,7 +49,7 @@ class StatsInventory(private val gameArena: GameArena, private val statsPlayer: 
             InventoryUtils.openProfileInventory(player, isShopItemActive)
         })
 
-        val gamePlayer = this.gameArena.currentPlayers.find { it.uuid == this.statsPlayer.uuid } ?: return
+        val gamePlayer = this.arena.currentPlayers.find { it.uuid == this.statsPlayer.uuid } ?: return
 
         for (column in 0..<4) {
             val statsType = StatsType.entries[column]

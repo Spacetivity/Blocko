@@ -5,11 +5,11 @@ import com.google.gson.GsonBuilder
 import net.spacetivity.blocko.achievement.AchievementHandler
 import net.spacetivity.blocko.achievement.AchievementPlayerDAO
 import net.spacetivity.blocko.achievement.impl.*
-import net.spacetivity.blocko.arena.GameArenaDAO
-import net.spacetivity.blocko.arena.GameArenaHandler
-import net.spacetivity.blocko.arena.setup.GameArenaSetupHandler
-import net.spacetivity.blocko.arena.sign.GameArenaSignDAO
-import net.spacetivity.blocko.arena.sign.GameArenaSignHandler
+import net.spacetivity.blocko.arena.ArenaDAO
+import net.spacetivity.blocko.arena.ArenaHandler
+import net.spacetivity.blocko.arena.setup.ArenaSetupHandler
+import net.spacetivity.blocko.arena.sign.ArenaSignDAO
+import net.spacetivity.blocko.arena.sign.ArenaSignHandler
 import net.spacetivity.blocko.bossbar.BossbarHandler
 import net.spacetivity.blocko.command.ArenaInviteCommand
 import net.spacetivity.blocko.command.BlockoCommand
@@ -75,12 +75,12 @@ class BlockoGame : JavaPlugin() {
     lateinit var gamePhaseHandler: GamePhaseHandler
     lateinit var gameFieldHighlightHandler: GameFieldHighlightHandler
     lateinit var diceHandler: DiceHandler
-    lateinit var gameArenaHandler: GameArenaHandler
-    lateinit var gameArenaSetupHandler: GameArenaSetupHandler
+    lateinit var arenaHandler: ArenaHandler
+    lateinit var arenaSetupHandler: ArenaSetupHandler
     lateinit var gameTeamHandler: GameTeamHandler
     lateinit var gameEntityHandler: GameEntityHandler
     lateinit var gameFieldHandler: GameFieldHandler
-    lateinit var gameArenaSignHandler: GameArenaSignHandler
+    lateinit var arenaSignHandler: ArenaSignHandler
 
     lateinit var statsPlayerHandler: StatsPlayerHandler
     lateinit var achievementHandler: AchievementHandler
@@ -113,10 +113,10 @@ class BlockoGame : JavaPlugin() {
         transaction {
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(
-                GameArenaDAO,
+                ArenaDAO,
                 GameFieldDAO,
                 GameTeamLocationDAO,
-                GameArenaSignDAO,
+                ArenaSignDAO,
                 AchievementPlayerDAO,
                 StatsPlayerDAO,
                 GameEntityTypeDAO,
@@ -144,13 +144,13 @@ class BlockoGame : JavaPlugin() {
         this.gameFieldHighlightHandler = GameFieldHighlightHandler()
         this.diceHandler = DiceHandler()
         this.diceHandler.startDiceAnimation()
-        this.gameArenaHandler = GameArenaHandler()
-        this.gameArenaSetupHandler = GameArenaSetupHandler()
+        this.arenaHandler = ArenaHandler()
+        this.arenaSetupHandler = ArenaSetupHandler()
         this.gameTeamHandler = GameTeamHandler()
         this.gameEntityHandler = GameEntityHandler()
         this.gameFieldHandler = GameFieldHandler()
-        this.gameArenaSignHandler = GameArenaSignHandler()
-        this.gameArenaSignHandler.loadArenaSigns()
+        this.arenaSignHandler = ArenaSignHandler()
+        this.arenaSignHandler.loadArenaSigns()
 
         this.statsPlayerHandler = StatsPlayerHandler()
 
@@ -199,9 +199,9 @@ class BlockoGame : JavaPlugin() {
 
         this.diceHandler.stopDiceAnimation()
         this.gamePlayActionHandler.stopTasks()
-        this.gameArenaSetupHandler.stopTask()
-        this.gameArenaHandler.resetArenas(true)
-        this.gameArenaHandler.cachedArenas.map { it.gameWorld }.map { it.entities }.forEach { it.filter { entity -> entity.type != EntityType.PLAYER }.forEach(Entity::remove) }
+        this.arenaSetupHandler.stopTask()
+        this.arenaHandler.resetArenas(true)
+        this.arenaHandler.cachedArenas.map { it.gameWorld }.map { it.entities }.forEach { it.filter { entity -> entity.type != EntityType.PLAYER }.forEach(Entity::remove) }
     }
 
     private fun registerCommand(commandExecutor: SpaceCommandExecutor) {

@@ -1,6 +1,7 @@
 package net.spacetivity.blocko.player
 
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
 import net.spacetivity.blocko.entity.GameEntityType
@@ -13,7 +14,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
 
-class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var teamName: String?, val isAI: Boolean) {
+class GamePlayer(val uuid: UUID, val name: String, val arenaId: ArenaId, var teamName: String?, val isAI: Boolean) {
 
     val matchStats = GamePlayerMatchStats()
 
@@ -35,7 +36,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
         this.activeEntity!!.entityStatus = GameEntityStatus.MOVING
         this.actionTimeoutTimestamp = null
 
-        for (gamePlayer in BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
+        for (gamePlayer in BlockoGame.instance.arenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
             BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }
 
@@ -63,7 +64,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: String, var team
         this.activeEntity!!.toggleHighlighting(true)
         this.lastEntityPickRule = situation.first
 
-        for (gamePlayer in BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
+        for (gamePlayer in BlockoGame.instance.arenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
             BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }
 

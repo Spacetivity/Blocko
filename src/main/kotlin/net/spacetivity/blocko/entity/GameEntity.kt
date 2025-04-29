@@ -3,6 +3,7 @@ package net.spacetivity.blocko.entity
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
@@ -14,7 +15,7 @@ import org.bukkit.Sound
 import org.bukkit.entity.Animals
 import org.bukkit.entity.LivingEntity
 
-data class GameEntity(val arenaId: String, val teamName: String, val gameEntityType: GameEntityType, val entityId: Int) {
+data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntityType: GameEntityType, val entityId: Int) {
 
     var newGoalFieldId: Int? = null
     var currentFieldId: Int? = null
@@ -149,7 +150,7 @@ data class GameEntity(val arenaId: String, val teamName: String, val gameEntityT
         val goalField = getTeamField(goalFieldId) ?: return false
         val newField = getTeamField(newFieldId) ?: return false
 
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!
+        val gameArena = BlockoGame.instance.arenaHandler.getArena(this.arenaId)!!
         gameArena.sendArenaSound(Sound.BLOCK_BONE_BLOCK_STEP, 1.0F)
 
         if (this.currentFieldId != null) {

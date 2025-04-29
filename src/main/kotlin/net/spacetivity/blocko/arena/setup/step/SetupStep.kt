@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.arena.setup.step
 
-import net.spacetivity.blocko.arena.setup.GameArenaSetupTool.ToolModeKeybindHint
+import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
 import org.bukkit.Material
 import org.bukkit.entity.Player
 

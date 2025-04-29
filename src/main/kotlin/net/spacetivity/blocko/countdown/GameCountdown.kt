@@ -1,20 +1,21 @@
 package net.spacetivity.blocko.countdown
 
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.arena.id.ArenaId
 import org.bukkit.Bukkit
 import org.bukkit.scheduler.BukkitTask
 import java.util.function.Predicate
 
-abstract class GameCountdown(protected val arenaId: String, private val duration: Int) {
+abstract class GameCountdown(protected val arenaId: ArenaId, private val duration: Int) {
 
-    var modifiableDuration: Int = this.duration
-    private var fallbackDuration: Int = this.duration
+    var modifiableDuration = this.duration
+    private var fallbackDuration = this.duration
 
     private var countdownTask: BukkitTask? = null
-    var isRunning: Boolean = false
+    var isRunning = false
 
     fun tryStartup(vararg startCondition: Predicate<Int>) {
-        val gameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
+        val gameArena = BlockoGame.instance.arenaHandler.getArena(this.arenaId) ?: return
         if (this.countdownTask != null) return
         if (startCondition.isNotEmpty() && !startCondition[0].test(gameArena.currentPlayers.size)) return
 

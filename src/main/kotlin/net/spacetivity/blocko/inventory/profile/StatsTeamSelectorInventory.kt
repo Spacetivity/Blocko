@@ -2,7 +2,7 @@ package net.spacetivity.blocko.inventory.profile
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.item.*
 import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.team.GameTeam
@@ -19,7 +19,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.LeatherArmorMeta
 
 @InventoryProperties(id = "stats_team_selector_inv", rows = 5, columns = 9)
-class StatsTeamSelectorInventory(private val gameArena: GameArena) : InventoryProvider {
+class StatsTeamSelectorInventory(private val arena: Arena) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
         val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
@@ -36,7 +36,7 @@ class StatsTeamSelectorInventory(private val gameArena: GameArena) : InventoryPr
             InventoryUtils.openStatsInventory(player, statsPlayer)
         })
 
-        val gameTeams = BlockoGame.instance.gameTeamHandler.gameTeams[this.gameArena.id]
+        val gameTeams = BlockoGame.instance.gameTeamHandler.gameTeams[this.arena.id]
 
         for (column in 0..<4) {
             val gameTeam = gameTeams.find { it.teamId == column } ?: continue
@@ -78,7 +78,7 @@ class StatsTeamSelectorInventory(private val gameArena: GameArena) : InventoryPr
         return InteractiveItem.of(teamItemStack) { _, _, _ ->
             if (!isNotEmptyTeam) return@of
 
-            val gamePlayer = this.gameArena.currentPlayers.find { it.uuid == gameTeam.teamMembers.first() } ?: return@of
+            val gamePlayer = this.arena.currentPlayers.find { it.uuid == gameTeam.teamMembers.first() } ?: return@of
             val statsPlayer = gamePlayer.toStatsPlayerInstance() ?: return@of
 
             InventoryUtils.openStatsInventory(player, statsPlayer)
