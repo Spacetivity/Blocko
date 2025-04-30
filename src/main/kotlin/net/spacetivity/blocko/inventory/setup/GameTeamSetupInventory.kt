@@ -66,9 +66,22 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
 
                 when (this.type) {
                     InvType.IDS -> {
-                        //TODO: Das wollen wir nicht! Die Entities sollen NICHT gelöscht, sondern nur in ihr altes Team zurückkommen.
-                        //TODO: Also z.b VORHER GAME_FIELD_HIGHLIGHT, dann BLUE_HIGHLIGHT und dann wieder GAME_FIELD_HIGHLIGHT
-                        BlockoGame.instance.gameFieldHighlightHandler.removeHighlightEntities(setupSession.arenaId, TeamPathHighlightMode::class)
+                        println(0)
+                        if (setupSession.currentTeamName == gameTeam.name) {
+                            //TODO: send message that you already have selected this team and show hint in item lore!
+                            return@of
+                        }
+
+                        val gameField = BlockoGame.instance.gameFieldHandler.getField(setupSession.arenaId, this.location.x, this.location.z) ?: return@of
+                        val oldHighlightMode = gameField.currentHighlightMode
+
+                        if (oldHighlightMode != null) {
+                            BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, this.location, oldHighlightMode)
+                        } else {
+                            BlockoGame.instance.gameFieldHighlightHandler.removeHighlightEntities(setupSession.arenaId, TeamPathHighlightMode::class)
+                        }
+
+
                         setupSession.currentTeamName = gameTeam.name
                         setupStep.fieldIndex = 0
 

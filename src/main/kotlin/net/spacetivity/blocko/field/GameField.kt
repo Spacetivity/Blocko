@@ -9,6 +9,7 @@ import net.spacetivity.blocko.achievement.impl.MasterEliminatorAchievement
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
+import net.spacetivity.blocko.field.highlighting.scoreboard.HighlightMode
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsType
 import net.spacetivity.blocko.stats.UpdateOperation
@@ -28,6 +29,7 @@ class GameField(
     var isTaken: Boolean = false
 ) {
 
+    var currentHighlightMode: HighlightMode? = null
     var currentHolder: GameEntity? = null
 
     fun trowOutOldHolder(newHolder: GamePlayer, newHolderEntity: LivingEntity) {

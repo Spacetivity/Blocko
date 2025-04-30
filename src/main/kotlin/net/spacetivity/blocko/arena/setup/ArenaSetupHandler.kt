@@ -86,9 +86,13 @@ class ArenaSetupHandler {
             return
         }
 
-        if (success) {
-            val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
+        for (gameField in setupStep.gameFields) {
+            gameField.currentHighlightMode = null
+        }
+
+        if (success) {
             val hasNotConfiguredFieldsAlready = setupStep.gameFields.isEmpty()
             if (hasNotConfiguredFieldsAlready) {
                 player.translateMessage("blocko.setup.no_fields_configured")
@@ -281,20 +285,22 @@ class ArenaSetupHandler {
             return
         }
 
-        setupStep.gameFields.add(
-            GameField(
-                setupSession.arenaId,
-                location.world,
-                x,
-                z,
-                GameFieldProperties(mutableMapOf(), null, null, null),
-                false,
-                false
-            )
+        val gameField = GameField(
+            setupSession.arenaId,
+            location.world,
+            x,
+            z,
+            GameFieldProperties(mutableMapOf(), null, null, null),
+            false,
+            false
         )
+
 
         val highlightMode = this.highlightHandler.getHighlightModeByClass(GameFieldHighlightMode::class) ?: return
         BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(location), highlightMode)
+
+        gameField.currentHighlightMode = highlightMode
+        setupStep.gameFields.add(gameField)
     }
 
     fun addGarageField(setupSession: ArenaSetupSession, player: Player, teamName: String, location: Location) {
