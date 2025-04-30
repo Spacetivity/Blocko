@@ -3,11 +3,13 @@ package net.spacetivity.blocko.field.highlighting
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.field.highlighting.scoreboard.HighlightMode
 import net.spacetivity.blocko.field.highlighting.scoreboard.impl.*
+import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.MagmaCube
 import java.util.*
@@ -18,16 +20,19 @@ class GameFieldHighlightHandler {
     private val highlightEntities = mutableMapOf<UUID, Pair<ArenaId, HighlightMode>>()
 
     val highlightModes = mutableMapOf(
-        Pair(GameFieldHighlightMode::class, GameFieldHighlightMode()),
-        Pair(TurningPointHighlightMode::class, TurningPointHighlightMode()),
-        Pair(GarageFieldHighlightMode::class, GarageFieldHighlightMode()),
-        Pair(GameEntityGoalFieldHighlightMode::class, GameEntityGoalFieldHighlightMode()),
+        Pair("game_field_highlight", GameFieldHighlightMode()),
+        Pair("turning_point_highlight", TurningPointHighlightMode()),
+        Pair("garage_field_highlight", GarageFieldHighlightMode()),
+        Pair("game_entity_goal_field_highlight", GameEntityGoalFieldHighlightMode()),
     )
 
     init {
         for (gameTeam in Constants.GAME_TEAMS) {
-            this.highlightModes.put(TeamSpawnHighlightMode::class, TeamSpawnHighlightMode(gameTeam))
-            this.highlightModes.put(TeamPathHighlightMode::class, TeamPathHighlightMode(gameTeam))
+            val teamSpawnHighlightMode = TeamSpawnHighlightMode(gameTeam)
+            this.highlightModes.put(teamSpawnHighlightMode.teamName, teamSpawnHighlightMode)
+
+            val teamPathHighlightMode = TeamPathHighlightMode(gameTeam)
+            this.highlightModes.put(teamPathHighlightMode.teamName, teamPathHighlightMode)
         }
 
         for (highlightMode in this.highlightModes.values) {
@@ -35,26 +40,25 @@ class GameFieldHighlightHandler {
         }
     }
 
-    fun spawnOrUpdateHighlightEntity(arenaId: ArenaId, location: Location, highlightModeClass: KClass<out HighlightMode>) {
+    fun spawnOrUpdateHighlightEntity(arenaId: ArenaId, location: Location, highlightMode: HighlightMode) {
         val block = location.block
-        val blockLocation =  LocationUtils.centerLocation(block.location)
+        val blockLocation = LocationUtils.centerLocation(block.location)
 
         var displayEntity = getHighlightEntity(arenaId, blockLocation)
 
         if (displayEntity == null) {
             displayEntity = blockLocation.world.spawnEntity(blockLocation, EntityType.MAGMA_CUBE) as MagmaCube
             displayEntity.size = 2
+            displayEntity.isGlowing = true
+            displayEntity.isSilent = true
+            displayEntity.isInvulnerable = true
+            displayEntity.isCollidable = false
+            displayEntity.isAggressive = false
+            displayEntity.isAware = false
+            displayEntity.isInvisible = true
+            displayEntity.setGravity(false)
+            displayEntity.setAI(false)
         }
-
-        displayEntity.isGlowing = true
-        displayEntity.isSilent = true
-        displayEntity.isInvulnerable = true
-        displayEntity.isCollidable = false
-        displayEntity.isAggressive = false
-        displayEntity.isAware = false
-        displayEntity.isInvisible = true
-        displayEntity.setGravity(false)
-        displayEntity.setAI(false)
 
         val scoreboard = Bukkit.getScoreboardManager().mainScoreboard
 
@@ -63,9 +67,8 @@ class GameFieldHighlightHandler {
             team.removeEntity(displayEntity)
         }
 
-        val highlightMode = getHighlightMode(highlightModeClass) ?: return
-
         scoreboard.getTeam(highlightMode.teamName)?.addEntity(displayEntity)
+
         this.highlightEntities[displayEntity.uniqueId] = Pair(arenaId, highlightMode)
     }
 
@@ -105,8 +108,23 @@ class GameFieldHighlightHandler {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T : HighlightMode> getHighlightMode(clazz: KClass<T>): T? {
-        return this.highlightModes[clazz] as? T
+    fun <T : HighlightMode> getHighlightModeByTeam(gameTeam: GameTeam, clazz: KClass<T>): T? {
+        val highlightModesByClass = this.highlightModes.values.filter { it::class.java.name.equals(clazz.java.name) }
+        return highlightModesByClass.find { it.color.asHexString() == gameTeam.color.asHexString() } as T?
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T : HighlightMode> getHighlightModeByBlockType(type: Material, clazz: KClass<T>): T? {
+        if (!type.name.contains("red", true) && !type.name.contains("green", true) && !type.name.contains("blue", true) && !type.name.contains("yellow", true)) return null
+
+        val blockTypeColorString = type.name.split("_")[0].lowercase()
+        val highlightModesByClass = this.highlightModes.values.filter { it::class.java.name.equals(clazz.java.name) }
+        return highlightModesByClass.find { it.teamName.split("_")[0].equals(blockTypeColorString, true) } as T?
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T : HighlightMode> getHighlightModeByClass(clazz: KClass<T>): T? {
+        return this.highlightModes.values.find { it::class.java.name.equals(clazz.java.name) } as T?
     }
 
 }

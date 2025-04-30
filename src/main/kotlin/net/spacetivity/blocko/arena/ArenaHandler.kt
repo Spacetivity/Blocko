@@ -41,7 +41,7 @@ class ArenaHandler {
                     gameWorld = WorldCreator(worldName).createWorld()
 
                 if (gameWorld == null) {
-                    println("Cannot load game world $worldName!")
+                    Bukkit.getConsoleSender().sendMessage(Component.text("Cannot load game world $worldName!", NamedTextColor.RED))
                     continue
                 }
 

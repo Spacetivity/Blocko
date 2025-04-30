@@ -22,6 +22,12 @@ class SetTeamPathsStep : SetupStep {
         Material.GREEN_CONCRETE,
         Material.BLUE_CONCRETE,
         Material.YELLOW_CONCRETE,
+
+        Material.RED_WOOL,
+        Material.GREEN_WOOL,
+        Material.BLUE_WOOL,
+        Material.YELLOW_WOOL,
+
         Material.BONE_BLOCK
     )
 

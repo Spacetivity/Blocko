@@ -5,6 +5,6 @@ import net.spacetivity.blocko.field.highlighting.scoreboard.HighlightMode
 
 class GarageFieldHighlightMode : HighlightMode("garage_field_highlight") {
 
-    override val color: NamedTextColor = NamedTextColor.DARK_GREEN
+    override val color: NamedTextColor = NamedTextColor.GRAY
 
 }

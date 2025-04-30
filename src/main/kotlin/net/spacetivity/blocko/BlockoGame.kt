@@ -178,8 +178,6 @@ class BlockoGame : JavaPlugin() {
         PlayerSetupListener(this)
         PlayerListener(this)
         ProtectionListener(this)
-
-        println("Found ${Bukkit.getScoreboardManager().mainScoreboard.teams.size} teams")
     }
 
     override fun onDisable() {

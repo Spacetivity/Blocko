@@ -26,6 +26,8 @@ import java.util.*
 
 class ArenaSetupHandler {
 
+    private val highlightHandler = BlockoGame.instance.gameFieldHighlightHandler
+
     private val activeSetupSessions = mutableMapOf<UUID, ArenaSetupSession>()
 
     private val isSetupEndless = BlockoGame.instance.setupConfigFile.setupSessionEndless
@@ -264,11 +266,8 @@ class ArenaSetupHandler {
 
         setupStep.gameTeamLocations.add(teamSpawn)
 
-        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
-            setupSession.arenaId,
-            centeredLocation,
-            TeamSpawnHighlightMode::class
-        )
+        val highlightMode = this.highlightHandler.getHighlightModeByBlockType(location.block.type, TeamSpawnHighlightMode::class) ?: return
+        this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, centeredLocation, highlightMode)
     }
 
     fun addField(setupSession: ArenaSetupSession, player: Player, location: Location) {
@@ -294,12 +293,8 @@ class ArenaSetupHandler {
             )
         )
 
-        val centeredLocation = LocationUtils.centerLocation(location)
-        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
-            setupSession.arenaId,
-            centeredLocation,
-            GameFieldHighlightMode::class
-        )
+        val highlightMode = this.highlightHandler.getHighlightModeByClass(GameFieldHighlightMode::class) ?: return
+        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(location), highlightMode)
     }
 
     fun addGarageField(setupSession: ArenaSetupSession, player: Player, teamName: String, location: Location) {
@@ -328,12 +323,8 @@ class ArenaSetupHandler {
         possibleField.isGarageField = true
         possibleField.properties.garageForTeam = teamName
 
-        val centeredLocation = LocationUtils.centerLocation(location)
-        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
-            setupSession.arenaId,
-            centeredLocation,
-            GarageFieldHighlightMode::class
-        )
+        val highlightMode = this.highlightHandler.getHighlightModeByBlockType(location.block.type, GarageFieldHighlightMode::class) ?: return
+        this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(location), highlightMode)
     }
 
     fun setTurningPoint(player: Player, gameField: GameField, location: Location, face: PathFace) {
@@ -350,12 +341,8 @@ class ArenaSetupHandler {
 
         gameField.properties.rotation = face
 
-        val centeredLocation = LocationUtils.centerLocation(location)
-        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
-            setupSession.arenaId,
-            centeredLocation,
-            TurningPointHighlightMode::class
-        )
+        val highlightMode = this.highlightHandler.getHighlightModeByClass(TurningPointHighlightMode::class) ?: return
+        this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(location), highlightMode)
     }
 
     fun setFieldTeamId(player: Player, teamName: String, location: Location) {
@@ -390,12 +377,10 @@ class ArenaSetupHandler {
         possibleField.properties.setFieldId(teamName, setupStep.fieldIndex)
         setupStep.fieldIndex++
 
-        val centeredLocation = LocationUtils.centerLocation(location)
-        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(
-            setupSession.arenaId,
-            centeredLocation,
-            TeamPathHighlightMode::class
-        )
+        val gameTeam = BlockoGame.instance.gameTeamHandler.getTeam(setupSession.arenaId, teamName) ?: return
+        val highlightMode = this.highlightHandler.getHighlightModeByTeam(gameTeam, TeamPathHighlightMode::class) ?: return
+
+        this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(location), highlightMode)
     }
 
 }
