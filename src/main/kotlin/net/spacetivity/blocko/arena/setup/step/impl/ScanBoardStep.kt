@@ -1,10 +1,13 @@
 package net.spacetivity.blocko.arena.setup.step.impl
 
+import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.arena.setup.ScannerResult
 import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
 import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
-import net.spacetivity.blocko.arena.setup.ScannerResult
 import net.spacetivity.blocko.arena.setup.step.SetupStep
 import net.spacetivity.blocko.field.GameField
+import net.spacetivity.blocko.field.highlighting.scoreboard.impl.*
 import net.spacetivity.blocko.team.GameTeamLocation
 import org.bukkit.Location
 import org.bukkit.Material
@@ -34,6 +37,16 @@ class ScanBoardStep : SetupStep {
         this.corner1 = null
         this.corner2 = null
         this.missingResults.clear()
+
+        val arenaId = player.getArena()?.id ?: return
+        BlockoGame.instance.gameFieldHighlightHandler.removeHighlightEntities(
+            arenaId,
+            GameFieldHighlightMode::class,
+            TeamSpawnHighlightMode::class,
+            TeamPathHighlightMode::class,
+            GarageFieldHighlightMode::class,
+            TurningPointHighlightMode::class
+        )
     }
 
 }

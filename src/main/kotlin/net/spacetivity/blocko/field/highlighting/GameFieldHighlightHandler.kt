@@ -4,14 +4,12 @@ import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.field.highlighting.scoreboard.HighlightMode
 import net.spacetivity.blocko.field.highlighting.scoreboard.impl.*
 import net.spacetivity.blocko.utils.Constants
+import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.EntityType
-import org.bukkit.util.Transformation
-import org.joml.Quaternionf
-import org.joml.Vector3f
+import org.bukkit.entity.MagmaCube
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -28,8 +26,8 @@ class GameFieldHighlightHandler {
 
     init {
         for (gameTeam in Constants.GAME_TEAMS) {
-            highlightModes.put(TeamSpawnHighlightMode::class, TeamSpawnHighlightMode(gameTeam))
-            highlightModes.put(TeamPathHighlightMode::class, TeamPathHighlightMode(gameTeam))
+            this.highlightModes.put(TeamSpawnHighlightMode::class, TeamSpawnHighlightMode(gameTeam))
+            this.highlightModes.put(TeamPathHighlightMode::class, TeamPathHighlightMode(gameTeam))
         }
 
         for (highlightMode in this.highlightModes.values) {
@@ -39,17 +37,24 @@ class GameFieldHighlightHandler {
 
     fun spawnOrUpdateHighlightEntity(arenaId: ArenaId, location: Location, highlightModeClass: KClass<out HighlightMode>) {
         val block = location.block
-        val centerLocation = block.location.toCenterLocation()
+        val blockLocation =  LocationUtils.centerLocation(block.location)
 
-        var displayEntity = getHighlightEntity(arenaId, location)
+        var displayEntity = getHighlightEntity(arenaId, blockLocation)
 
         if (displayEntity == null) {
-            val scale = 1.0f
-            displayEntity = location.world.spawnEntity(centerLocation, EntityType.BLOCK_DISPLAY) as BlockDisplay
-            displayEntity.transformation = Transformation(Vector3f(0f, 0f, 0f), Quaternionf(), Vector3f(scale, scale, scale), Quaternionf())
+            displayEntity = blockLocation.world.spawnEntity(blockLocation, EntityType.MAGMA_CUBE) as MagmaCube
+            displayEntity.size = 2
         }
 
-        displayEntity.isGlowing = false
+        displayEntity.isGlowing = true
+        displayEntity.isSilent = true
+        displayEntity.isInvulnerable = true
+        displayEntity.isCollidable = false
+        displayEntity.isAggressive = false
+        displayEntity.isAware = false
+        displayEntity.isInvisible = true
+        displayEntity.setGravity(false)
+        displayEntity.setAI(false)
 
         val scoreboard = Bukkit.getScoreboardManager().mainScoreboard
 
@@ -65,10 +70,10 @@ class GameFieldHighlightHandler {
     }
 
     fun removeHighlightEntities(arenaId: ArenaId, vararg highlightModeClasses: KClass<out HighlightMode>) {
-        val tempMap = this.highlightEntities
-        for ((entityId, arenaData) in tempMap) {
-            if (arenaData.first != arenaId) continue
-            if (!highlightModeClasses.contains(arenaData.second::class)) continue
+        for (entityId in this.highlightEntities.keys.toList()) {
+            val (currentArenaId, currentHighlightMode) = highlightEntities[entityId] ?: continue
+            if (currentArenaId != arenaId) continue
+            if (!highlightModeClasses.contains(currentHighlightMode::class)) continue
 
             this.highlightEntities.remove(entityId)
 
@@ -83,14 +88,14 @@ class GameFieldHighlightHandler {
         }
     }
 
-    fun getHighlightEntity(arenaId: ArenaId, location: Location): BlockDisplay? {
-        var displayEntity: BlockDisplay? = null
+    fun getHighlightEntity(arenaId: ArenaId, location: Location): MagmaCube? {
+        var displayEntity: MagmaCube? = null
 
         for ((entityId, arenaData) in this.highlightEntities) {
             if (arenaData.first != arenaId) continue
 
             val entity = Bukkit.getEntity(entityId) ?: continue
-            if (entity !is BlockDisplay) continue
+            if (entity !is MagmaCube) continue
             if (entity.location != location) continue
 
             displayEntity = entity

@@ -45,10 +45,8 @@ import net.spacetivity.blocko.translation.TranslationHandler
 import org.bukkit.Bukkit
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
-import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.scoreboard.Team
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -95,7 +93,6 @@ class BlockoGame : JavaPlugin() {
         instance = this
 
         val dataFolderPath = this.dataFolder.toPath()
-
         val databaseFile = DatabaseFile().createOrLoad(dataFolderPath) as DatabaseFile
 
         if (databaseFile.databaseType == DatabaseType.SQLITE) {
@@ -181,11 +178,13 @@ class BlockoGame : JavaPlugin() {
         PlayerSetupListener(this)
         PlayerListener(this)
         ProtectionListener(this)
+
+        println("Found ${Bukkit.getScoreboardManager().mainScoreboard.teams.size} teams")
     }
 
     override fun onDisable() {
-        for (player: Player in Bukkit.getOnlinePlayers()) {
-            for (team: Team in player.scoreboard.teams) {
+        for (player in Bukkit.getOnlinePlayers()) {
+            for (team in player.scoreboard.teams) {
                 if (!team.hasEntry(player.name)) continue
                 team.removeEntry(player.name)
             }
