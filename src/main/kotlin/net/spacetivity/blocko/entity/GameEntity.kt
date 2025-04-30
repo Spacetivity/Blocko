@@ -14,6 +14,8 @@ import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.entity.Animals
 import org.bukkit.entity.LivingEntity
+import kotlin.math.asin
+import kotlin.math.atan2
 
 data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntityType: GameEntityType, val entityId: Int) {
 
@@ -38,7 +40,15 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
     fun spawn(location: Location) {
         if (this.livingEntity != null) return
 
-        this.livingEntity = location.world.spawnEntity(location, this.gameEntityType.bukkitEntityType) as LivingEntity
+        // ensures that entities are looking at the board middle
+        val arenaMiddle = BlockoGame.instance.arenaHandler.getArena(this.arenaId)?.location ?: return
+        val direction = arenaMiddle.toVector().subtract(location.toVector()).normalize()
+        val livingEntityLocation = location.clone()
+
+        livingEntityLocation.yaw = Math.toDegrees(atan2(-direction.x, direction.z)).toFloat()
+        livingEntityLocation.pitch = Math.toDegrees(-asin(direction.y)).toFloat()
+
+        this.livingEntity = livingEntityLocation.world.spawnEntity(livingEntityLocation, this.gameEntityType.bukkitEntityType) as LivingEntity
         this.livingEntity!!.isSilent = true
         this.livingEntity!!.isInvulnerable = true
         this.livingEntity!!.setAI(false)
@@ -88,16 +98,12 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
     }
 
     fun isInGarage(): Boolean {
-        if (this.currentFieldId == null) return false
+        if (isAtSpawn()) return false
         return getTeamField(this.currentFieldId!!)!!.isGarageField
     }
 
-    fun isAtSpawn(): Boolean {
-        return this.currentFieldId == null
-    }
-
     fun isGarageInSight(dicedNumber: Int): Boolean {
-        if (this.currentFieldId == null) return false
+        if (isAtSpawn()) return false
 
         val startFieldId = this.currentFieldId!!
         val goalFieldId = startFieldId + dicedNumber
@@ -200,6 +206,10 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
         }
 
         return reachedGoal
+    }
+
+    fun isAtSpawn(): Boolean {
+        return this.currentFieldId == null
     }
 
     private fun getTeamField(id: Int): GameField? {
