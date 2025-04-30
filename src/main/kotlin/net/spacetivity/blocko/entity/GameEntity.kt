@@ -184,7 +184,7 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
         if ((newFieldId != goalFieldId) && newField.isTaken)
             return false
 
-        val worldPosition = newField.getWorldPosition()
+        val worldPosition = newField.getWorldPosition(false)
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!
 
         this.livingEntity!!.teleport(worldPosition)

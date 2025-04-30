@@ -22,11 +22,11 @@ import org.bukkit.entity.LivingEntity
 class GameField(
     val arenaId: ArenaId,
     val world: World,
-    val x: Double,
-    val z: Double,
+    val x: Int,
+    val z: Int,
     val properties: GameFieldProperties,
     var isGarageField: Boolean,
-    var isTaken: Boolean = false
+    var isTaken: Boolean = false,
 ) {
 
     var currentHighlightMode: HighlightMode? = null
@@ -67,11 +67,11 @@ class GameField(
         handleStatsReward(oldHolder, false)
     }
 
-    fun getWorldPosition(): Location {
+    fun getWorldPosition(isGameField: Boolean): Location {
         val yLevel = BlockoGame.instance.arenaHandler.getArena(this.arenaId)?.yLevel ?: 0.0
-        val location = Location(this.world, this.x, yLevel, this.z, 0.0F, 0.0F)
+        val location = Location(this.world, this.x.toDouble(), yLevel, this.z.toDouble(), 0.0F, 0.0F)
         val fixedLocation = location.clone().toCenterLocation()
-        fixedLocation.y = yLevel
+        fixedLocation.y = if (isGameField) yLevel - 1 else yLevel
         return fixedLocation
     }
 

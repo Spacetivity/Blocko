@@ -26,6 +26,8 @@ import org.bukkit.inventory.ItemStack
 
 class SetupTool(private val holder: Player) {
 
+    private val gameFieldHandler = BlockoGame.instance.gameFieldHandler
+
     val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
     val itemStack: ItemStack
 
@@ -76,18 +78,24 @@ class SetupTool(private val holder: Player) {
             }
 
             SetTurningPointsStep::class -> {
-                InventoryUtils.openGameFieldTurnInventory(this.holder, block.location)
+                val scanBoardStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+                val gameField = scanBoardStep.getField(block.x, block.z)
+                InventoryUtils.openGameFieldTurnInventory(this.holder, gameField)
             }
 
             SetTeamEntrancesStep::class -> {
-                InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.ENTRANCE, block)
+                val scanBoardStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+                val gameField = scanBoardStep.getField(block.x, block.z)
+                InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.ENTRANCE, gameField)
             }
 
             SetTeamPathsStep::class -> {
                 if (setupSession.currentTeamName == null || (event.action.isLeftClick && setupSession.currentTeamName != null)) {
-                    InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.IDS, block)
+                    val scanBoardStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+                    val gameField = scanBoardStep.getField(block.x, block.z)
+                    InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.IDS, gameField)
                 } else {
-                    BlockoGame.instance.arenaSetupHandler.setFieldTeamId(this.holder, setupSession.currentTeamName!!, block.location)
+                    BlockoGame.instance.arenaSetupHandler.setFieldTeamId(this.holder, setupSession.currentTeamName!!, block)
                 }
             }
         }

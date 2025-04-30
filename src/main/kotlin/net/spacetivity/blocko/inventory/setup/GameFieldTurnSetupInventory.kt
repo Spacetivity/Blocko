@@ -2,26 +2,25 @@ package net.spacetivity.blocko.inventory.setup
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.setup.getSetupSession
-import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
+import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.PathFace
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
 import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.item.setValue
 import net.spacetivity.blocko.translation.Translation
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.inventory.api.inventory.InventoryController
 import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
 import net.spacetivity.inventory.api.item.InteractiveItem
 import net.spacetivity.inventory.api.item.InventoryPos
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.SkullMeta
 
 @InventoryProperties(id = "turn_inv", rows = 1, columns = 9)
-class GameFieldTurnSetupInventory(private val blockLocation: Location) : InventoryProvider {
+class GameFieldTurnSetupInventory(private val gameField: GameField?) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
         val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
@@ -53,11 +52,13 @@ class GameFieldTurnSetupInventory(private val blockLocation: Location) : Invento
             })
             { _, _, _ ->
                 player.closeInventory()
-                val setupSession = player.getSetupSession() ?: return@of
-                val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return@of
-                val gameField = setupStep.gameFields.find { it.x == this.blockLocation.x && it.z == this.blockLocation.z } ?: return@of
 
-                BlockoGame.instance.arenaSetupHandler.setTurningPoint(player, gameField, this.blockLocation, pathFace)
+                if (this.gameField == null) {
+                    player.translateMessage("blocko.setup.no_field_found_at_location")
+                    return@of
+                }
+
+                BlockoGame.instance.arenaSetupHandler.setTurningPoint(player, gameField, pathFace)
             })
         }
 

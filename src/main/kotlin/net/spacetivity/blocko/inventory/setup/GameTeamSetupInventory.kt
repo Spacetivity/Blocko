@@ -4,7 +4,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.setup.getSetupSession
 import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
-import net.spacetivity.blocko.field.highlighting.scoreboard.impl.TeamPathHighlightMode
+import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.item.hideExtraInfo
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
@@ -18,13 +18,14 @@ import net.spacetivity.inventory.api.inventory.InventoryProvider
 import net.spacetivity.inventory.api.item.InteractiveItem
 import net.spacetivity.inventory.api.item.InventoryPos
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.LeatherArmorMeta
 
 @InventoryProperties(id = "garage_field_inv", rows = 1, 9)
-class GameTeamSetupInventory(private val type: InvType, private val location: Location) : InventoryProvider {
+class GameTeamSetupInventory(private val type: InvType, private val gameField: GameField?) : InventoryProvider {
+
+    private val highlightHandler = BlockoGame.instance.gameFieldHighlightHandler
 
     override fun init(player: Player, controller: InventoryController) {
         val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
@@ -62,25 +63,25 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
             { _, _, _ ->
                 player.closeInventory()
 
+                if (this.gameField == null) {
+                    player.translateMessage("blocko.setup.no_field_found_at_location")
+                    return@of
+                }
+
                 val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return@of
 
                 when (this.type) {
                     InvType.IDS -> {
-                        println(0)
                         if (setupSession.currentTeamName == gameTeam.name) {
                             //TODO: send message that you already have selected this team and show hint in item lore!
                             return@of
                         }
 
-                        val gameField = BlockoGame.instance.gameFieldHandler.getField(setupSession.arenaId, this.location.x, this.location.z) ?: return@of
-                        val oldHighlightMode = gameField.currentHighlightMode
-
-                        if (oldHighlightMode != null) {
-                            BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, this.location, oldHighlightMode)
-                        } else {
-                            BlockoGame.instance.gameFieldHighlightHandler.removeHighlightEntities(setupSession.arenaId, TeamPathHighlightMode::class)
+                        for (gameField in setupStep.gameFields) {
+                            val oldHighlightMode = gameField.currentHighlightMode
+                            if (oldHighlightMode == null) continue
+                            this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, gameField.getWorldPosition(true), oldHighlightMode)
                         }
-
 
                         setupSession.currentTeamName = gameTeam.name
                         setupStep.fieldIndex = 0
@@ -91,15 +92,8 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
                     }
 
                     else -> {
-                        val possibleField = setupStep.gameFields.find { it.world == location.world && it.x == this.location.x && it.z == this.location.z }
-
-                        if (possibleField == null) {
-                            player.translateMessage("blocko.inventory.game_team_setup.team_item.click.cannot_set_team_entrance")
-                            return@of
-                        }
-
-                        possibleField.properties.teamEntrance = gameTeam.name
-                        InventoryUtils.openGameFieldTurnInventory(player, location)
+                        this.gameField.properties.teamEntrance = gameTeam.name
+                        InventoryUtils.openGameFieldTurnInventory(player, gameField)
                     }
                 }
             })

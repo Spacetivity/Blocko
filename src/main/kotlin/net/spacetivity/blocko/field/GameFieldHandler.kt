@@ -53,7 +53,7 @@ class GameFieldHandler {
         return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == id }
     }
 
-    fun getField(arenaId: ArenaId, x: Double, z: Double): GameField? {
+    fun getField(arenaId: ArenaId, x: Int, z: Int): GameField? {
         return this.cachedGameFields.get(arenaId).find { it.x == x && it.z == z }
     }
 

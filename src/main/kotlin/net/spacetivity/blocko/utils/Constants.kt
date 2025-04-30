@@ -30,7 +30,7 @@ object Constants {
 
     val GAME_TEAMS: List<GameTeam> = listOf(
         GameTeam("red", NamedTextColor.RED, 0),
-        GameTeam("green", NamedTextColor.GREEN, 1),
+        GameTeam("green", NamedTextColor.DARK_GREEN, 1),
         GameTeam("blue", NamedTextColor.BLUE, 2),
         GameTeam("yellow", NamedTextColor.YELLOW, 3),
     )

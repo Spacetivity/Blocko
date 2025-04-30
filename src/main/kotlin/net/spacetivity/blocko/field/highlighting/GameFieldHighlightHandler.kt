@@ -119,7 +119,16 @@ class GameFieldHighlightHandler {
 
         val blockTypeColorString = type.name.split("_")[0].lowercase()
         val highlightModesByClass = this.highlightModes.values.filter { it::class.java.name.equals(clazz.java.name) }
-        return highlightModesByClass.find { it.teamName.split("_")[0].equals(blockTypeColorString, true) } as T?
+
+        var result: T? = null
+
+        for (highlightMode in highlightModesByClass) {
+            val highlightModeTeamPrefix = highlightMode.teamName.split("_")[0].lowercase()
+            if (highlightModeTeamPrefix.isEmpty() || highlightModeTeamPrefix != blockTypeColorString) continue
+            result = highlightMode as T?
+        }
+
+        return result
     }
 
     @Suppress("UNCHECKED_CAST")

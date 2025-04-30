@@ -19,6 +19,7 @@ import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.LocationUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
@@ -170,15 +171,15 @@ class ArenaSetupHandler {
 
         player.translateMessage("blocko.setup.scanning_board.running")
 
-        val regionData = RegionScanner.scanRegion(setupSession)
-        val inOrderResults: Multimap<Location, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
+        val regionData = RegionScanner.scanRegion(setupSession, setupStep.corner1!!)
+        val inOrderResults: Multimap<Block, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
 
         val validResultsFound = mutableMapOf<ScannerResult, Int>()
 
         for (entry in regionData.entries()) {
             val scannedDataForLocation = entry.value
 
-            val location = entry.key
+            val block = entry.key
             val scannerResult = scannedDataForLocation.first
             val teamName = scannedDataForLocation.second
 
@@ -194,11 +195,11 @@ class ArenaSetupHandler {
             when (scannerResult) {
                 ScannerResult.TEAM_SPAWN -> {
                     if (teamName == null) throw NullPointerException("The team name is required")
-                    setTeamSpawnLocation(setupSession, player, teamName, location)
+                    setTeamSpawnLocation(setupSession, player, teamName, LocationUtils.centerLocation(block.location))
                 }
 
                 ScannerResult.GARAGE_FIELD, ScannerResult.GAME_FIELD -> {
-                    inOrderResults.put(location, Pair(scannerResult, teamName))
+                    inOrderResults.put(block, Pair(scannerResult, teamName))
                 }
 
                 ScannerResult.UNKNOWN -> {}
@@ -211,16 +212,16 @@ class ArenaSetupHandler {
 
         if (scanningCompleted) {
             for (pipelineItem in sortedResults) {
-                val location = pipelineItem.key
+                val block = pipelineItem.key
                 val scannerResult = pipelineItem.value.first
                 val teamName = pipelineItem.value.second
 
                 if (scannerResult == ScannerResult.GAME_FIELD) {
-                    addField(setupSession, player, location)
+                    addField(setupSession, player, block)
                     continue
                 }
 
-                addGarageField(setupSession, player, teamName!!, location.block.location)
+                addGarageField(setupSession, player, teamName!!, block)
             }
         } else {
             setupStep.missingResults.putAll(ScannerResult.getMissingResults(regionData.values().map { it.first }))
@@ -274,22 +275,19 @@ class ArenaSetupHandler {
         this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, centeredLocation, highlightMode)
     }
 
-    fun addField(setupSession: ArenaSetupSession, player: Player, location: Location) {
+    fun addField(setupSession: ArenaSetupSession, player: Player, block: Block) {
         val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
-        val x = location.x
-        val z = location.z
-
-        if (setupStep.gameFields.any { it.x == x && it.z == z }) {
+        if (setupStep.isFieldAt(block.x, block.z)) {
             player.translateMessage("blocko.setup.game_field_already_set")
             return
         }
 
         val gameField = GameField(
             setupSession.arenaId,
-            location.world,
-            x,
-            z,
+            block.world,
+            block.x,
+            block.z,
             GameFieldProperties(mutableMapOf(), null, null, null),
             false,
             false
@@ -297,19 +295,16 @@ class ArenaSetupHandler {
 
 
         val highlightMode = this.highlightHandler.getHighlightModeByClass(GameFieldHighlightMode::class) ?: return
-        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(location), highlightMode)
+        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(block.location), highlightMode)
 
         gameField.currentHighlightMode = highlightMode
         setupStep.gameFields.add(gameField)
     }
 
-    fun addGarageField(setupSession: ArenaSetupSession, player: Player, teamName: String, location: Location) {
+    fun addGarageField(setupSession: ArenaSetupSession, player: Player, teamName: String, block: Block) {
         val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
 
-        val x = location.x
-        val z = location.z
-
-        val possibleField = setupStep.gameFields.find { it.world == location.world && it.x == x && it.z == z }
+        val possibleField = setupStep.getField(block.x, block.z)
 
         if (possibleField == null) {
             player.translateMessage("blocko.setup.no_field_found_at_location")
@@ -329,11 +324,11 @@ class ArenaSetupHandler {
         possibleField.isGarageField = true
         possibleField.properties.garageForTeam = teamName
 
-        val highlightMode = this.highlightHandler.getHighlightModeByBlockType(location.block.type, GarageFieldHighlightMode::class) ?: return
-        this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(location), highlightMode)
+        val highlightMode = this.highlightHandler.getHighlightModeByClass(GarageFieldHighlightMode::class) ?: return
+        this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, block.location, highlightMode)
     }
 
-    fun setTurningPoint(player: Player, gameField: GameField, location: Location, face: PathFace) {
+    fun setTurningPoint(player: Player, gameField: GameField, face: PathFace) {
         val setupSession = player.getSetupSession()
         if (setupSession == null) {
             player.translateMessage("blocko.setup.not_in_setup_mode")
@@ -348,10 +343,10 @@ class ArenaSetupHandler {
         gameField.properties.rotation = face
 
         val highlightMode = this.highlightHandler.getHighlightModeByClass(TurningPointHighlightMode::class) ?: return
-        this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(location), highlightMode)
+        this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, gameField.getWorldPosition(true), highlightMode)
     }
 
-    fun setFieldTeamId(player: Player, teamName: String, location: Location) {
+    fun setFieldTeamId(player: Player, teamName: String, block: Block) {
         val setupSession = player.getSetupSession()
         if (setupSession == null) {
             player.translateMessage("blocko.setup.not_in_setup_mode")
@@ -359,7 +354,7 @@ class ArenaSetupHandler {
         }
 
         val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
-        val possibleField = setupStep.gameFields.find { it.world == location.world && it.x == location.x && it.z == location.z }
+        val possibleField = setupStep.getField(block.x, block.z)
 
         if (possibleField == null) {
             player.translateMessage("blocko.setup.no_field_found_at_location")
@@ -386,7 +381,7 @@ class ArenaSetupHandler {
         val gameTeam = BlockoGame.instance.gameTeamHandler.getTeam(setupSession.arenaId, teamName) ?: return
         val highlightMode = this.highlightHandler.getHighlightModeByTeam(gameTeam, TeamPathHighlightMode::class) ?: return
 
-        this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(location), highlightMode)
+        this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(block.location), highlightMode)
     }
 
 }

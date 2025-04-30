@@ -4,6 +4,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.inventory.host.HostSettingsInventory
 import net.spacetivity.blocko.inventory.host.InvitationInventory
 import net.spacetivity.blocko.inventory.profile.*
@@ -18,21 +19,19 @@ import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.inventory.api.extension.openStaticInventory
 import net.spacetivity.inventory.api.inventory.InventoryController
 import net.spacetivity.inventory.api.item.InteractiveItem
-import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.block.Block
 import org.bukkit.entity.Player
 
 object InventoryUtils {
 
-    fun openGameFieldTurnInventory(opener: Player, location: Location) {
+    fun openGameFieldTurnInventory(opener: Player, gameField: GameField?) {
         val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.game_field_set_turn.title")
-        openStaticInventory(opener, title, GameFieldTurnSetupInventory(location))
+        openStaticInventory(opener, title, GameFieldTurnSetupInventory(gameField))
     }
 
-    fun openGameTeamSetupInventory(opener: Player, invType: InvType, block: Block) {
+    fun openGameTeamSetupInventory(opener: Player, invType: InvType, gameField: GameField?) {
         val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.game_team_setup.title.entrance")
-        openStaticInventory(opener, title, GameTeamSetupInventory(invType, block.location))
+        openStaticInventory(opener, title, GameTeamSetupInventory(invType, gameField))
     }
 
     fun openHostSettingsInventory(opener: Player, arena: Arena) {

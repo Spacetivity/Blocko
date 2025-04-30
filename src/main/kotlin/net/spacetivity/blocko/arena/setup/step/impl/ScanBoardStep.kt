@@ -30,6 +30,8 @@ class ScanBoardStep : SetupStep {
     var missingResults = mutableMapOf<ScannerResult, Int>()
 
     fun areCornersSet(): Boolean = this.corner1 != null && this.corner2 != null
+    fun isFieldAt(x: Int, z: Int): Boolean = this.gameFields.any { it.x == x && it.z == z }
+    fun getField(x: Int, z: Int): GameField? = this.gameFields.find { it.x == x && it.z == z }
 
     override fun reset(player: Player) {
         this.gameFields.clear()

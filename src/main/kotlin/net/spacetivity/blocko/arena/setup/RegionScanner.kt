@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap
 import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.block.Block
 
 /**
  * Scans a rectangular region in the world and identifies special blocks based on predefined types.
@@ -48,8 +49,8 @@ object RegionScanner {
         ), ScannerResult.GARAGE_FIELD)
     )
 
-    fun scanRegion(setupSession: ArenaSetupSession): Multimap<Location, Pair<ScannerResult, String?>> {
-        val resultsInRegion: Multimap<Location, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
+    fun scanRegion(setupSession: ArenaSetupSession, cornerLocation: Location): Multimap<Block, Pair<ScannerResult, String?>> {
+        val resultsInRegion: Multimap<Block, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
         val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return resultsInRegion
 
         val corner1 = setupStep.corner1 ?: return resultsInRegion
@@ -63,15 +64,15 @@ object RegionScanner {
 
         for (x in minX..maxX) {
             for (z in minZ..maxZ) {
-                val location = Location(corner1.world, x.toDouble(), corner1.blockY.toDouble(), z.toDouble())
-                val blockType = location.block.type
+                val block = cornerLocation.world.getBlockAt(x, cornerLocation.block.y, z)
+                val blockType = block.type
 
                 val categoriesCurrentBlockTypeIsRegisteredIn = this.blocksOfScannableType.entries.filter { it.key.contains(blockType) }
                 if (categoriesCurrentBlockTypeIsRegisteredIn.isEmpty()) continue
 
                 for (categoryCurrentBlockTypeIsRegisteredIn in categoriesCurrentBlockTypeIsRegisteredIn) {
                     val scannerResult = categoryCurrentBlockTypeIsRegisteredIn.value
-                    resultsInRegion.put(location, Pair(scannerResult, getPossibleTeamName(scannerResult, blockType, setupSession)))
+                    resultsInRegion.put(block, Pair(scannerResult, getPossibleTeamName(scannerResult, blockType, setupSession)))
                 }
             }
         }
