@@ -46,7 +46,6 @@ class SetupTool(private val holder: Player) {
         val meta = itemStack.itemMeta
         PersistentDataUtils.apply(meta, Constants.SETUP_TOOL_KEY, this.holder.uniqueId.toString())
         this.itemStack.itemMeta = meta
-
         this.holder.inventory.addItem(this.itemStack)
     }
 

@@ -20,7 +20,7 @@ class ArenaSetupSession(val arenaId: ArenaId, val setupTool: SetupTool) {
     var currentTeamName: String? = null
     val gameTeams = Constants.GAME_TEAMS
 
-    val setupSteps = mutableMapOf<KClass<out SetupStep>, SetupStep>(
+    val setupSteps = mutableMapOf(
         Pair(ScanBoardStep::class, ScanBoardStep()),
         Pair(SetTurningPointsStep::class, SetTurningPointsStep()),
         Pair(SetTeamEntrancesStep::class, SetTeamEntrancesStep()),
@@ -44,12 +44,12 @@ class ArenaSetupSession(val arenaId: ArenaId, val setupTool: SetupTool) {
     }
 
     fun setNextSetupStep(increase: Boolean): SetupStep {
+        val newStep = nextSetupStep(increase)
+
         getActiveSetupStep()?.active = false
+        newStep.active = true
 
-        val setupStep = nextSetupStep(increase)
-        setupStep.active
-
-        return setupStep
+        return newStep
     }
 
     private fun nextSetupStep(increase: Boolean): SetupStep {

@@ -9,7 +9,7 @@ import org.bukkit.entity.Player
 
 class SetTurningPointsStep : SetupStep {
 
-    override val id = 0
+    override val id = 1
     override val name = "Set Turning Point"
 
     override val keybindHints = setOf(

@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.achievement.getAchievementByClass
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.entity.GameEntityType
@@ -117,7 +118,7 @@ class EntityShopInventory : InventoryProvider {
                 }
 
                 val achievementPlayer = BlockoGame.instance.achievementHandler.getAchievementPlayer(player.uniqueId)
-                if (gameEntityType.neededAchievementKey != null && achievementPlayer != null && !achievementPlayer.achievementNames.contains(gameEntityType.neededAchievementKey))
+                if (gameEntityType.achievementClass != null && achievementPlayer != null && !achievementPlayer.achievementNames.contains(getAchievementByClass(gameEntityType.achievementClass)!!.translationKey))
                     return@of
 
                 val statsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)!!
@@ -182,8 +183,8 @@ class EntityShopInventory : InventoryProvider {
         val isUnlocked = gameEntityType.isUnlockedByPlayer(player.uniqueId)
         val loreKey = "blocko.inventory.entity_shop.entity_type_item.lore.${if (isUnlocked) "active" else "not_active"}"
 
-        val possibleAchievementPlaceholder: TagResolver.Single = if (gameEntityType.neededAchievementKey == null) Placeholder.parsed("possible_achievement_name", "-/-")
-        else Placeholder.parsed("possible_achievement_name", BlockoGame.instance.achievementHandler.getAchievementByKey(gameEntityType.neededAchievementKey)?.name
+        val possibleAchievementPlaceholder: TagResolver.Single = if (gameEntityType.achievementClass == null) Placeholder.parsed("possible_achievement_name", "-/-")
+        else Placeholder.parsed("possible_achievement_name", getAchievementByClass(gameEntityType.achievementClass)?.name
             ?: ":=)")
 
         val loreSuffixPlaceholder: TagResolver.Single = if (isUnlocked)

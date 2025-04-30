@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.achievement.getAchievementByClass
+import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.*
 import net.spacetivity.blocko.arena.toGamePlayerInstance
@@ -19,8 +19,9 @@ import org.bukkit.Sound
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import java.util.*
+import kotlin.reflect.KClass
 
-enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val isBaby: Boolean, val neededAchievementKey: String?) {
+enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val isBaby: Boolean, val achievementClass: KClass<out Achievement>?) {
 
     // Do not remove this! (Default Type)
     VILLAGER(EntityType.VILLAGER, 0, false, null),
@@ -34,7 +35,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     COW(EntityType.COW, 50, false, null),
     GOAT(EntityType.GOAT, 10, false, null),
     CREEPER(EntityType.CREEPER, 80, false, null),
-    DROWNED(EntityType.DROWNED, 70, false, getAchievementByClass(PlayFirstGameAchievement::class)?.translationKey),
+    DROWNED(EntityType.DROWNED, 70, false, PlayFirstGameAchievement::class),
     ENDERMAN(EntityType.ENDERMAN, 80, false, null),
     EVOKER(EntityType.EVOKER, 120, false, null),
     FOX(EntityType.FOX, 60, false, null),
@@ -42,7 +43,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     FROG(EntityType.FROG, 40, false, null),
     TURTLE(EntityType.TURTLE, 45, false, null),
     HUSK(EntityType.HUSK, 70, false, null),
-    MOOSHROOM(EntityType.MOOSHROOM, 3500, false, getAchievementByClass(EntityCollectorAchievement::class)?.translationKey),
+    MOOSHROOM(EntityType.MOOSHROOM, 3500, false, EntityCollectorAchievement::class),
     OCELOT(EntityType.OCELOT, 50, false, null),
     PIG(EntityType.PIG, 40, false, null),
     PIGLIN(EntityType.PIGLIN, 70, false, null),
@@ -51,13 +52,13 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     HOGLIN(EntityType.HOGLIN, 120, true, null),
     PILLAGER(EntityType.PILLAGER, 90, false, null),
     ILLUSIONER(EntityType.ILLUSIONER, 90, false, null),
-    RABBIT(EntityType.RABBIT, 40, false, getAchievementByClass(FirstEliminationAchievement::class)?.translationKey),
+    RABBIT(EntityType.RABBIT, 40, false, FirstEliminationAchievement::class),
     SHEEP(EntityType.SHEEP, 40, false, null),
     SHULKER(EntityType.SHULKER, 150, false, null),
     SKELETON(EntityType.SKELETON, 90, false, null),
     STRAY(EntityType.STRAY, 90, false, null),
     VINDICATOR(EntityType.VINDICATOR, 150, false, null),
-    WANDERING_TRADER(EntityType.WANDERING_TRADER, 1050, false, getAchievementByClass(EntityCollectorAchievement::class)?.translationKey),
+    WANDERING_TRADER(EntityType.WANDERING_TRADER, 1050, false, EntityCollectorAchievement::class),
     WITCH(EntityType.WITCH, 150, false, null),
     WITHER_SKELETON(EntityType.WITHER_SKELETON, 150, false, null),
     WOLF(EntityType.WOLF, 50, false, null),
@@ -71,7 +72,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     PARROT(EntityType.PARROT, 50, false, null),
     VEX(EntityType.VEX, 75, false, null),
 
-    IRON_GOLEM(EntityType.IRON_GOLEM, 350, false, getAchievementByClass(WinMonsterAchievement::class)?.translationKey),
+    IRON_GOLEM(EntityType.IRON_GOLEM, 350, false, WinMonsterAchievement::class),
 
     HORSE(EntityType.HORSE, 100, true, null),
     ZOMBIE_HORSE(EntityType.ZOMBIE_HORSE, 100, true, null),
@@ -93,7 +94,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     TROPICAL_FISH(EntityType.TROPICAL_FISH, 40, false, null),
     DOLPHIN(EntityType.DOLPHIN, 100, false, null),
 
-    WARDEN(EntityType.WARDEN, 15000, false, getAchievementByClass(MasterEliminatorAchievement::class)?.translationKey);
+    WARDEN(EntityType.WARDEN, 15000, false, MasterEliminatorAchievement::class);
 
     fun getCorrectedTypeName(): String {
         val rawEntityTypeName = this.bukkitEntityType.name.lowercase()
