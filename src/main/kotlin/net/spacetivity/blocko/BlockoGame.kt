@@ -52,7 +52,6 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.lang.reflect.Constructor
 import java.util.*
 
 class BlockoGame : JavaPlugin() {
@@ -202,7 +201,7 @@ class BlockoGame : JavaPlugin() {
     }
 
     private fun registerCommand(commandExecutor: SpaceCommandExecutor) {
-        val constructor: Constructor<BukkitCommandExecutor> = BukkitCommandExecutor::class.java.getDeclaredConstructor(CommandProperties::class.java, this::class.java)
+        val constructor = BukkitCommandExecutor::class.java.getDeclaredConstructor(CommandProperties::class.java, this::class.java)
         constructor.newInstance(this.commandHandler.registerCommand(commandExecutor), this)
     }
 
@@ -218,8 +217,7 @@ class BlockoGame : JavaPlugin() {
             private set
     }
 
-    fun getAchievementKey(isName: Boolean, title: String): String {
-        return "blocko.achievement.$title.${if (isName) "display_name" else "requirement"}"
-    }
+    fun getAchievementKey(isName: Boolean, title: String): String =
+        "blocko.achievement.$title.${if (isName) "display_name" else "requirement"}"
 
 }

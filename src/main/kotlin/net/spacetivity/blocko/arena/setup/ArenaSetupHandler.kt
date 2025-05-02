@@ -326,6 +326,8 @@ class ArenaSetupHandler {
 
         val highlightMode = this.highlightHandler.getHighlightModeByClass(GarageFieldHighlightMode::class) ?: return
         this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, block.location, highlightMode)
+
+        possibleField.currentHighlightMode = highlightMode
     }
 
     fun setTurningPoint(player: Player, gameField: GameField, face: PathFace) {
@@ -344,6 +346,8 @@ class ArenaSetupHandler {
 
         val highlightMode = this.highlightHandler.getHighlightModeByClass(TurningPointHighlightMode::class) ?: return
         this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, gameField.getWorldPosition(true), highlightMode)
+
+        gameField.currentHighlightMode = highlightMode
     }
 
     fun setFieldTeamId(player: Player, teamName: String, block: Block) {
