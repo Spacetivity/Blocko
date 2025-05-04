@@ -1,13 +1,13 @@
-package net.spacetivity.blocko.new_command.api.extension
+package net.spacetivity.blocko.command.api.extension
 
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.new_command.api.SpaceCommand
-import net.spacetivity.blocko.new_command.api.SpaceCommandSender
-import net.spacetivity.blocko.new_command.api.SpaceMainCommandExecutor
-import net.spacetivity.blocko.new_command.api.subcommand.SpaceSubCommand
-import net.spacetivity.blocko.new_command.api.subcommand.SpaceSubCommandExecutor
+import net.spacetivity.blocko.command.api.SpaceCommand
+import net.spacetivity.blocko.command.api.SpaceCommandSender
+import net.spacetivity.blocko.command.api.SpaceMainCommandExecutor
+import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommand
+import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
 import net.spacetivity.blocko.utils.DataTypeUtils
 
 fun SpaceMainCommandExecutor.sendUsageFormatted(sender: SpaceCommandSender) {

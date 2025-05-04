@@ -1,4 +1,4 @@
-package net.spacetivity.blocko.new_command.api
+package net.spacetivity.blocko.command.api
 
 enum class SpaceCommandPlatform {
 

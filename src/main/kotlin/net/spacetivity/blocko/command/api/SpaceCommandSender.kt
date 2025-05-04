@@ -1,4 +1,4 @@
-package net.spacetivity.blocko.new_command.api
+package net.spacetivity.blocko.command.api
 
 import net.kyori.adventure.identity.Identity
 import net.kyori.adventure.text.Component

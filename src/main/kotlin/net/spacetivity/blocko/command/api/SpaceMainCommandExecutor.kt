@@ -1,7 +1,7 @@
-package net.spacetivity.blocko.new_command.api
+package net.spacetivity.blocko.command.api
 
-import net.spacetivity.blocko.new_command.api.subcommand.SpaceSubCommand
-import net.spacetivity.blocko.new_command.api.subcommand.SpaceSubCommandExecutor
+import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommand
+import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
 
 abstract class SpaceMainCommandExecutor : SpaceCommandCompletable {
 
@@ -24,9 +24,9 @@ abstract class SpaceMainCommandExecutor : SpaceCommandCompletable {
     }
 
     abstract fun defaultExecute(sender: SpaceCommandSender)
-    abstract fun onDefaultTabComplete(sender: SpaceCommandSender, args: List<String>): List<String>
-
     abstract fun initSubCommands(subCommandExecutors: MutableList<SpaceSubCommandExecutor>)
+
+    abstract fun onDefaultTabComplete(sender: SpaceCommandSender, args: List<String>): List<String>
 
     fun findSubCommandParts(): List<String> {
         val subCommandParts = mutableListOf<String>()

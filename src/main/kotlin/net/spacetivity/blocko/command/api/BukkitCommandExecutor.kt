@@ -1,9 +1,7 @@
-package net.spacetivity.blocko.new_command
+package net.spacetivity.blocko.command.api
 
 import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.new_command.api.SpaceCommand
-import net.spacetivity.blocko.new_command.api.SpaceCommandSender
-import net.spacetivity.blocko.new_command.api.subcommand.SpaceSubCommand
+import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommand
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender

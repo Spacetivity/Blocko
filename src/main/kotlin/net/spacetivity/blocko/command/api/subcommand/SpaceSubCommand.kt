@@ -1,4 +1,4 @@
-package net.spacetivity.blocko.new_command.api.subcommand
+package net.spacetivity.blocko.command.api.subcommand
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.TYPE, AnnotationTarget.CLASS)

@@ -1,7 +1,7 @@
-package net.spacetivity.blocko.new_command.api.subcommand
+package net.spacetivity.blocko.command.api.subcommand
 
-import net.spacetivity.blocko.new_command.api.SpaceCommandCompletable
-import net.spacetivity.blocko.new_command.api.SpaceCommandSender
+import net.spacetivity.blocko.command.api.SpaceCommandCompletable
+import net.spacetivity.blocko.command.api.SpaceCommandSender
 
 interface SpaceSubCommandExecutor : SpaceCommandCompletable {
 
