@@ -15,7 +15,6 @@ import net.spacetivity.blocko.command.ArenaInviteCommand
 import net.spacetivity.blocko.command.BlockoCommand
 import net.spacetivity.blocko.command.api.CommandProperties
 import net.spacetivity.blocko.command.api.SpaceCommandExecutor
-import net.spacetivity.blocko.command.api.SpaceCommandHandler
 import net.spacetivity.blocko.command.api.impl.BukkitCommandExecutor
 import net.spacetivity.blocko.dice.DiceHandler
 import net.spacetivity.blocko.entity.GameEntityHandler
@@ -32,6 +31,10 @@ import net.spacetivity.blocko.listener.PlayerSetupListener
 import net.spacetivity.blocko.listener.ProtectionListener
 import net.spacetivity.blocko.lobby.LobbySpawnDAO
 import net.spacetivity.blocko.lobby.LobbySpawnHandler
+import net.spacetivity.blocko.new_command.BukkitCommandExecutor
+import net.spacetivity.blocko.new_command.api.SpaceCommand
+import net.spacetivity.blocko.new_command.api.SpaceCommandController
+import net.spacetivity.blocko.new_command.api.SpaceMainCommandExecutor
 import net.spacetivity.blocko.phase.GamePhaseHandler
 import net.spacetivity.blocko.player.EntityAiHandler
 import net.spacetivity.blocko.player.GamePlayActionHandler
@@ -67,7 +70,7 @@ class BlockoGame : JavaPlugin() {
     lateinit var translationHandler: TranslationHandler
     lateinit var sidebarHandler: SidebarHandler
     lateinit var playerFormatHandler: PlayerFormatHandler
-    lateinit var commandHandler: SpaceCommandHandler
+    lateinit var commandController: SpaceCommandController
     lateinit var bossbarHandler: BossbarHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
     lateinit var gameFieldHighlightHandler: GameFieldHighlightHandler
@@ -134,7 +137,7 @@ class BlockoGame : JavaPlugin() {
         this.sidebarHandler = SidebarHandler()
         this.playerFormatHandler = PlayerFormatHandler()
 
-        this.commandHandler = SpaceCommandHandler()
+        this.commandController = SpaceCommandController()
         this.bossbarHandler = BossbarHandler()
         this.gamePhaseHandler = GamePhaseHandler()
         this.gameFieldHighlightHandler = GameFieldHighlightHandler()
@@ -200,9 +203,10 @@ class BlockoGame : JavaPlugin() {
         this.arenaHandler.cachedArenas.map { it.gameWorld }.map { it.entities }.forEach { it.filter { entity -> entity.type != EntityType.PLAYER }.forEach(Entity::remove) }
     }
 
-    private fun registerCommand(commandExecutor: SpaceCommandExecutor) {
-        val constructor = BukkitCommandExecutor::class.java.getDeclaredConstructor(CommandProperties::class.java, this::class.java)
-        constructor.newInstance(this.commandHandler.registerCommand(commandExecutor), this)
+    private fun registerCommand(mainCommandExecutor: SpaceMainCommandExecutor) {
+        val spaceCommand = this.commandController.registerCommand(mainCommandExecutor)
+        val constructor = BukkitCommandExecutor::class.java.getDeclaredConstructor(SpaceCommand::class.java, this::class.java)
+        constructor.newInstance(spaceCommand)
     }
 
     companion object {

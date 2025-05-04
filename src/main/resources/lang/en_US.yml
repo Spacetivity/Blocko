@@ -10,6 +10,7 @@ blocko.prefix.global: "<gradient:green:yellow><bold>Blocko</gradient> <dark_gray
 blocko.utils:
   no_permission: "<prefix> <gray>No permission... :o"
   player_not_found: "<prefix> <gray>This player doesn't exist!"
+  data_type.invalid: "<prefix> <white><type> <gray>required!"
 
 blocko.format:
   chat: "<gray><yellow>@<gray><location> <dark_gray>| <color><player_name><dark_gray>: <white><message>"
@@ -140,6 +141,10 @@ blocko.countdown:
   ending:
     running: "<prefix> <gray>Arena resets in <yellow><time> <gray><time_string>."
     end: "<prefix> <gray>Arena resets now. You are teleported to spawn!"
+
+blocko.command.argument_type.invalid: "<prefix> <red><name> has to be an <type>!"
+blocko.command.usage.title: "<gold>Command Overview <gray>(<title>)"
+blocko.command.usage: "<blue>► <white>/<command>"
 
 blocko.command:
   blocko:
