@@ -11,7 +11,9 @@ import net.spacetivity.blocko.utils.Constants
 import java.time.Duration
 import kotlin.reflect.KClass
 
-class ArenaSetupSession(val arenaId: ArenaId, val setupTool: SetupTool) {
+class ArenaSetupSession(val arenaId: ArenaId, ) {
+
+    lateinit var setupTool: SetupTool
 
     val timeoutTimestamp =
         if (BlockoGame.instance.setupConfigFile.setupSessionEndless) -1

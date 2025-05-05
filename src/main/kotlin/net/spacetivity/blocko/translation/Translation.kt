@@ -54,6 +54,17 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
         }
     }
 
+    fun usage(subCommands: List<String>, vararg toReplace: TagResolver): Pair<Component, Set<Component>> {
+        val title = line("blocko.command.title", *toReplace)
+        val subCommandLines = mutableSetOf<Component>()
+
+        for (subCommandLine in subCommands) {
+            subCommandLines.add(line("blocko.command.usage", Placeholder.parsed("command", subCommandLine), *toReplace))
+        }
+
+        return title to subCommandLines
+    }
+
     private fun deserializeWithResolvers(message: String, vararg additionalResolvers: TagResolver): Component {
         // Build a combined resolver that includes defaults, additional ones, and extracted prefixes if needed.
         val combinedResolvers = mutableListOf<TagResolver>().apply {

@@ -9,15 +9,11 @@ import net.spacetivity.blocko.arena.setup.step.impl.SetTeamEntrancesStep
 import net.spacetivity.blocko.arena.setup.step.impl.SetTeamPathsStep
 import net.spacetivity.blocko.arena.setup.step.impl.SetTurningPointsStep
 import net.spacetivity.blocko.inventory.setup.InvType
-import net.spacetivity.blocko.item.hideExtraInfo
-import net.spacetivity.blocko.item.itemStack
-import net.spacetivity.blocko.item.meta
-import net.spacetivity.blocko.item.name
+import net.spacetivity.blocko.item.*
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -26,40 +22,32 @@ import org.bukkit.inventory.ItemStack
 
 class SetupTool(private val holder: Player) {
 
-    private val gameFieldHandler = BlockoGame.instance.gameFieldHandler
-
     val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-    val itemStack: ItemStack
 
-    init {
-        val type = Material.entries.find { it.name == BlockoGame.instance.globalConfigFile.setupItemType }
-            ?: throw NullPointerException("Invalid setup item type!")
-
-        this.itemStack = itemStack(type) {
-            meta {
-                name = translation.displayName("blocko.setup.tool.display_name")
-                lore(fetchLore(translation))
-                hideExtraInfo()
-            }
-        }
-    }
+    val type = Material.entries.find { it.name == BlockoGame.instance.globalConfigFile.setupItemType }
+        ?: throw NullPointerException("Invalid setup item type!")
 
     fun setToPlayer() {
-        val meta = itemStack.itemMeta
-        PersistentDataUtils.apply(meta, Constants.SETUP_TOOL_KEY, this.holder.uniqueId.toString())
-        this.itemStack.itemMeta = meta
-        this.holder.inventory.addItem(this.itemStack)
+        val lines = fetchLore(translation)
+        val itemStack = itemStack(type) {
+            meta {
+                name = translation.displayName("blocko.setup.tool.display_name")
+                lore(lines)
+                hideExtraInfo()
+                applyPersistentData(Constants.SETUP_TOOL_KEY, holder.uniqueId.toString())
+            }
+        }
+
+        this.holder.inventory.addItem(itemStack)
     }
 
-    fun onToggle(isNextModeRequested: Boolean, heldItemStack: ItemStack) {
+    fun onToggle(isNextModeRequested: Boolean, itemStack: ItemStack) {
         val setupSession = this.holder.getSetupSession() ?: return
         val nextSetupStep = setupSession.setNextSetupStep(isNextModeRequested)
 
-        val tempItemMeta = this.itemStack.itemMeta
-        tempItemMeta.lore(fetchLore(this.translation))
-
-        heldItemStack.itemMeta = tempItemMeta
-        this.itemStack.itemMeta = tempItemMeta
+        itemStack.meta {
+            lore(fetchLore(translation))
+        }
 
         this.holder.translateMessage("blocko.setup.tool.mode_change", Placeholder.parsed("mode", nextSetupStep.name))
         this.holder.playSound(this.holder.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)

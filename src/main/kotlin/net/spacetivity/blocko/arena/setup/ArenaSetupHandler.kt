@@ -16,12 +16,15 @@ import net.spacetivity.blocko.field.highlighting.scoreboard.impl.*
 import net.spacetivity.blocko.team.GameTeamLocation
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.LocationUtils
+import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
 
@@ -72,12 +75,13 @@ class ArenaSetupHandler {
             return
         }
 
+        this.activeSetupSessions[player.uniqueId] = ArenaSetupSession(arenaId)
+
         val setupTool = SetupTool(player)
         setupTool.setToPlayer()
 
+        player.getSetupSession()?.setupTool = setupTool
         player.translateMessage("blocko.setup.setup_mode_activated")
-
-        this.activeSetupSessions[player.uniqueId] = ArenaSetupSession(arenaId, setupTool)
     }
 
     fun handleSetupEnd(player: Player, success: Boolean) {
@@ -131,7 +135,16 @@ class ArenaSetupHandler {
             TeamSpawnHighlightMode::class
         )
 
-        player.inventory.remove(setupSession.setupTool.itemStack)
+        val tempInventoryContents = player.inventory.contents.filterNotNull()
+        var setupItemStack: ItemStack? = null
+
+        for (content in tempInventoryContents) {
+            if (!(PersistentDataUtils.has(content.itemMeta, Constants.SETUP_TOOL_KEY))) continue
+            setupItemStack = content
+        }
+
+        if (setupItemStack != null) player.inventory.remove(setupItemStack)
+
         player.translateMessage("blocko.setup.setup_mode_deactivated")
         this.activeSetupSessions.remove(player.uniqueId)
     }

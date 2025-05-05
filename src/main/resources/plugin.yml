@@ -4,6 +4,9 @@ api-version: "1.21.4"
 main: net.spacetivity.blocko.BlockoGame
 description: A "Mensch Ärgere dich nicht! / Ludo" inspired game in Minecraft
 website: wiki.spacetivity.net
+commands:
+  blocko:
+  arenainvite:
 author:
   - TGamings
 depend:

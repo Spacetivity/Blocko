@@ -65,7 +65,7 @@ inline fun ItemMeta.addLore(builder: ItemMetaLoreBuilder.() -> Unit) {
 }
 
 class ItemMetaLoreBuilder {
-    val components = ArrayList<Component>()
+    val components = mutableListOf<Component>()
 
     operator fun Component.unaryPlus() {
         components += this

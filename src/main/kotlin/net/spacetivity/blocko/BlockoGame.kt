@@ -11,12 +11,11 @@ import net.spacetivity.blocko.arena.setup.ArenaSetupHandler
 import net.spacetivity.blocko.arena.sign.ArenaSignDAO
 import net.spacetivity.blocko.arena.sign.ArenaSignHandler
 import net.spacetivity.blocko.bossbar.BossbarHandler
-import net.spacetivity.blocko.command.ArenaInviteCommand
-import net.spacetivity.blocko.command.BlockoCommand
-import net.spacetivity.blocko.command.api.CommandProperties
-import net.spacetivity.blocko.command.api.SpaceCommandExecutor
-import net.spacetivity.blocko.command.api.SpaceCommandHandler
-import net.spacetivity.blocko.command.api.impl.BukkitCommandExecutor
+import net.spacetivity.blocko.command.api.BukkitCommandExecutor
+import net.spacetivity.blocko.command.api.SpaceCommand
+import net.spacetivity.blocko.command.api.SpaceCommandController
+import net.spacetivity.blocko.command.api.SpaceMainCommandExecutor
+import net.spacetivity.blocko.command.commands.BlockoCommand
 import net.spacetivity.blocko.dice.DiceHandler
 import net.spacetivity.blocko.entity.GameEntityHandler
 import net.spacetivity.blocko.entity.GameEntityHistoryDAO
@@ -53,6 +52,7 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
+import kotlin.reflect.KClass
 
 class BlockoGame : JavaPlugin() {
 
@@ -67,7 +67,7 @@ class BlockoGame : JavaPlugin() {
     lateinit var translationHandler: TranslationHandler
     lateinit var sidebarHandler: SidebarHandler
     lateinit var playerFormatHandler: PlayerFormatHandler
-    lateinit var commandHandler: SpaceCommandHandler
+    lateinit var commandController: SpaceCommandController
     lateinit var bossbarHandler: BossbarHandler
     lateinit var gamePhaseHandler: GamePhaseHandler
     lateinit var gameFieldHighlightHandler: GameFieldHighlightHandler
@@ -134,7 +134,7 @@ class BlockoGame : JavaPlugin() {
         this.sidebarHandler = SidebarHandler()
         this.playerFormatHandler = PlayerFormatHandler()
 
-        this.commandHandler = SpaceCommandHandler()
+        this.commandController = SpaceCommandController()
         this.bossbarHandler = BossbarHandler()
         this.gamePhaseHandler = GamePhaseHandler()
         this.gameFieldHighlightHandler = GameFieldHighlightHandler()
@@ -171,8 +171,7 @@ class BlockoGame : JavaPlugin() {
         this.gamePlayActionHandler.startMovementTask()
         this.gamePlayActionHandler.startPlayerTask()
 
-        registerCommand(BlockoCommand())
-        registerCommand(ArenaInviteCommand())
+        registerCommand(BlockoCommand::class)
 
         PlayerSetupListener(this)
         PlayerListener(this)
@@ -200,9 +199,11 @@ class BlockoGame : JavaPlugin() {
         this.arenaHandler.cachedArenas.map { it.gameWorld }.map { it.entities }.forEach { it.filter { entity -> entity.type != EntityType.PLAYER }.forEach(Entity::remove) }
     }
 
-    private fun registerCommand(commandExecutor: SpaceCommandExecutor) {
-        val constructor = BukkitCommandExecutor::class.java.getDeclaredConstructor(CommandProperties::class.java, this::class.java)
-        constructor.newInstance(this.commandHandler.registerCommand(commandExecutor), this)
+    private fun registerCommand(executorClass: KClass<out SpaceMainCommandExecutor>) {
+        val commandExecutor = executorClass.java.getDeclaredConstructor().newInstance()
+        val spaceCommand = this.commandController.registerCommand(commandExecutor)
+        val constructor = BukkitCommandExecutor::class.java.getDeclaredConstructor(SpaceCommand::class.java, BlockoGame::class.java)
+        constructor.newInstance(spaceCommand, this)
     }
 
     companion object {
