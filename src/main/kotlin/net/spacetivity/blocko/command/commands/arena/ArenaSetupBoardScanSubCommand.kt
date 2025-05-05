@@ -9,7 +9,7 @@ import net.spacetivity.blocko.command.api.extension.generateSuggestions
 import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommand
 import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
 import net.spacetivity.blocko.translation.translateMessage
-import net.spacetivity.blocko.utils.SetupUtils
+import net.spacetivity.blocko.utils.HelperFunctions
 import org.bukkit.entity.Player
 
 @SpaceSubCommand(length = 5, parts = "arena setup board scan <id>", permission = "blocko.command.admin")
@@ -17,7 +17,7 @@ class ArenaSetupBoardScanSubCommand : SpaceSubCommandExecutor {
 
     override fun execute(sender: SpaceCommandSender, args: List<String>) {
         val player = sender.castTo(Player::class.java) ?: return
-        SetupUtils.checkSetupMode(player) { setupSession ->
+        HelperFunctions.checkSetupMode(player) { setupSession ->
             val arenaIdAsString = findArgument(player, "id", args, String::class.java) ?: return@checkSetupMode
             val arenaId = BlockoGame.instance.arenaHandler.getArenaId(arenaIdAsString)
             val gameArena = arenaId?.let { BlockoGame.instance.arenaHandler.getArena(it) }

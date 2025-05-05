@@ -55,7 +55,7 @@ class Translation(val name: String, val cachedMessages: MutableMap<String, Strin
     }
 
     fun usage(subCommands: List<String>, vararg toReplace: TagResolver): Pair<Component, Set<Component>> {
-        val title = line("blocko.command.usage.title", *toReplace)
+        val title = line("blocko.command.title", *toReplace)
         val subCommandLines = mutableSetOf<Component>()
 
         for (subCommandLine in subCommands) {

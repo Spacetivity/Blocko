@@ -22,13 +22,7 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
 
     @EventHandler
     fun onQuitWhileInSetup(event: PlayerQuitEvent) {
-        val player = event.player
-        val setupSession = player.getSetupSession() ?: return
-
-        this.setupHandler.handleSetupEnd(player, false)
-
-        player.inventory.removeAll { PersistentDataUtils.has(it.itemMeta, Constants.SETUP_TOOL_KEY) }
-        player.inventory.remove(setupSession.setupTool.itemStack)
+        this.setupHandler.handleSetupEnd(event.player, false)
     }
 
     @EventHandler

@@ -37,7 +37,7 @@ inline fun <reified T> SpaceSubCommandExecutor.findArgument(audience: Audience, 
     DataTypeUtils.parseDataTypeNullable(dataType, element) { resultData = it }
 
     if (resultData.first == null) {
-        audience.sendMessage(translation.line("blocko.command.argument_type.invalid", Placeholder.parsed("name", key), Placeholder.parsed("type", resultData.second!!)))
+        audience.sendMessage(translation.line("blocko.command.argument_type_invalid", Placeholder.parsed("name", key), Placeholder.parsed("type", resultData.second!!)))
         return null
     }
 

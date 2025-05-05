@@ -19,10 +19,9 @@ class BlockoCommand : SpaceMainCommandExecutor() {
     }
 
     override fun initSubCommands(subCommandExecutors: MutableList<SpaceSubCommandExecutor>) {
-        // setLobbySpawn
         subCommandExecutors.add(SetLobbySpawnSubCommand())
+        subCommandExecutors.add(WorldTpSubCommand())
 
-        // arena
         subCommandExecutors.add(ArenaListSubCommand())
         subCommandExecutors.add(ArenaInitSubCommand())
         subCommandExecutors.add(ArenaDeleteSubCommand())
@@ -31,11 +30,9 @@ class BlockoCommand : SpaceMainCommandExecutor() {
         subCommandExecutors.add(ArenaSetupBoardCheckSubCommand())
         subCommandExecutors.add(ArenaSetupCancelSubCommand())
         subCommandExecutors.add(ArenaSetupFinishSubCommand())
-
         subCommandExecutors.add(ArenaInviteSendSubCommand())
-
-        // worldTp
-        subCommandExecutors.add(WorldTpSubCommand())
+        subCommandExecutors.add(ArenaInviteAcceptSubCommand())
+        subCommandExecutors.add(ArenaInviteDenySubCommand())
     }
 
     override fun onDefaultTabComplete(sender: SpaceCommandSender, args: List<String>): List<String> {

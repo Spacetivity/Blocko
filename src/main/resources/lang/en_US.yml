@@ -142,11 +142,10 @@ blocko.countdown:
     running: "<prefix> <gray>Arena resets in <yellow><time> <gray><time_string>."
     end: "<prefix> <gray>Arena resets now. You are teleported to spawn!"
 
-blocko.command.argument_type.invalid: "<prefix> <red><name> has to be an <type>!"
-blocko.command.usage.title: "<gold>Command Overview <gray>(<title>)"
-blocko.command.usage: "<blue>► <white>/<command>"
-
 blocko.command:
+  argument_type_invalid: "<prefix> <red><name> has to be an <type>!"
+  title: "<gold>Command Overview <gray>(<title>)"
+  usage: "<blue>► <white>/<command>"
   blocko:
     lobby_spawn_set: "<prefix> <gray>Lobby spawn was set!"
     no_arenas_found: "<prefix> <gray>No arenas found!"
