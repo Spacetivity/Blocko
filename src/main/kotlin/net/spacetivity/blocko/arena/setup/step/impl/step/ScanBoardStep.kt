@@ -1,5 +1,6 @@
 package net.spacetivity.blocko.arena.setup.step.impl.step
 
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.setup.ScannerResult
 import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
@@ -9,6 +10,7 @@ import net.spacetivity.blocko.arena.setup.step.impl.reset.ScanBoardResetData
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.highlighting.impl.*
 import net.spacetivity.blocko.team.GameTeamLocation
+import net.spacetivity.blocko.translation.translateMessage
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -50,6 +52,8 @@ class ScanBoardStep : SetupStep<ScanBoardResetData> {
             GarageFieldHighlightMode::class,
             TurningPointHighlightMode::class
         )
+
+        player.translateMessage("blocko.setup.reset.step.success.generic", Placeholder.parsed("key", this.key))
     }
 
 }

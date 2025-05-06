@@ -47,31 +47,38 @@ class ArenaSetupResetStepSubCommand : SpaceSubCommandExecutor {
                 return@checkSetupMode
             }
 
-            var success = false
+            val teamName = findArgument(player, "team", args, String::class.java)
+            val gameTeam = teamName?.let { Blocko.instance.gameTeamHandler.getTeam(setupSession.arenaId, it) }
 
             when (setupStep) {
                 is ScanBoardStep -> {
                     setupStep.reset(player, ScanBoardResetData(arenaId))
-                    success = true
                 }
 
                 is SetTurningPointsStep, is SetTeamEntrancesStep -> {
                     setupStep.reset(player, null)
-                    success = true
                 }
 
                 is SetTeamPathsStep -> {
-                    val teamName = findArgument(player, "team", args, String::class.java)
-                    val index = findArgument(player, "index", args, Int::class.java)
-                    val optionalData = if (teamName != null && index != null) TeamPathResetData(teamName, index) else null
+                    if (teamName != null && gameTeam == null) {
+                        player.translateMessage("blocko.team.not_exist")
+                        return@checkSetupMode
+                    }
 
-                    setupStep.reset(player, optionalData)
-                    success = true
+                    if (args.size == 7 && args[6].toIntOrNull() == null) {
+                        player.translateMessage("blocko.command.argument_type_invalid", Placeholder.parsed("name", "index"), Placeholder.parsed("type", "integer"))
+                        return@checkSetupMode
+                    }
+
+                    val index = findArgument(player, "index", args, Int::class.java)
+
+                    when {
+                        teamName == null && index == null -> setupStep.reset(player, null)
+                        teamName != null && index == null -> setupStep.reset(player, TeamPathResetData(teamName))
+                        teamName != null && index != null -> setupStep.reset(player, TeamPathResetData(teamName, index))
+                    }
                 }
             }
-
-            if (!success) return@checkSetupMode
-            player.translateMessage("blocko.setup.reset.step.success", Placeholder.parsed("name", setupStep.key))
         }
     }
 

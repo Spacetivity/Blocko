@@ -34,7 +34,7 @@ class ArenaSetupSession(val arenaId: ArenaId) {
     }
 
     fun getSetupStep(key: String): SetupStep<*>? {
-        return this.setupSteps.values.first { it.key.equals(key, true) }
+        return this.setupSteps.values.find { it.key.equals(key, true) }
     }
 
     fun getActiveSetupStep(): SetupStep<*>? {

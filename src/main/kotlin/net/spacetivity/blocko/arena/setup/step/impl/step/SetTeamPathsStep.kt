@@ -1,5 +1,6 @@
 package net.spacetivity.blocko.arena.setup.step.impl.step
 
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
 import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
@@ -41,16 +42,19 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
         val setupSession = player.getSetupSession() ?: return
         val scanBoardStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
 
-        // resets the complete SetTeamPathsStep
         if (optionalData == null) {
+            if (scanBoardStep.gameFields.isEmpty()) {
+                player.translateMessage("blocko.setup.reset.step.no_fields")
+                return
+            }
+
             for (gameField in scanBoardStep.gameFields) {
                 gameField.properties.teamPathIds.clear()
                 removeHighlightEntity(gameField)
             }
-        } else {
-            // IF fieldAmount != null => only removes the path ids for the selected number of game fields
-            // ELSE => removes all pathIds of team
 
+            player.translateMessage("blocko.setup.reset.step.success.generic", Placeholder.parsed("step", this.key))
+        } else {
             val teamName = optionalData.teamName
             val fieldAmount = optionalData.fieldAmount
 
@@ -61,13 +65,13 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
                 fieldsWithTeamPathId.add(gameField)
             }
 
-            val fieldsTorRemoveTeamPath = if (fieldAmount == null) {
+            val fieldsTorRemoveTeamPath = if (fieldAmount == -1) {
                 fieldsWithTeamPathId
             } else {
                 fieldsWithTeamPathId.sortedByDescending { it.properties.getTeamPathId(teamName) }.take(fieldAmount)
             }
 
-            if (fieldsWithTeamPathId.size < fieldsTorRemoveTeamPath.size) {
+            if ((fieldsWithTeamPathId.size < fieldsTorRemoveTeamPath.size) || fieldsWithTeamPathId.isEmpty() || fieldsTorRemoveTeamPath.isEmpty()) {
                 player.translateMessage("blocko.setup.reset.step.field_amount_to_big")
                 return
             }
@@ -76,6 +80,12 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
                 gameField.properties.removeTeamPathId(teamName)
                 removeHighlightEntity(gameField)
             }
+
+            val gameTeam = Blocko.instance.gameTeamHandler.getTeam(setupSession.arenaId, optionalData.teamName)
+                ?: return
+            player.translateMessage("blocko.setup.reset.step.success.team_paths", Placeholder.parsed("step", this.key),
+                Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+                Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
         }
     }
 

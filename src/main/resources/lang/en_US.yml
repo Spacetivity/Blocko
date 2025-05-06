@@ -48,9 +48,12 @@ blocko.setup:
   scanning_board.missing_fields.title: "<prefix> <gray>Missing fields:"
   scanning_board.missing_fields.line: "<dark_gray>» <yellow><result><dark_gray>: <gray><amount><yellow>x"
 
-  reset.step.not_exist: "<prefix> <gray>This step does not exist!"
-  reset.step.field_amount_to_big: "<prefix> <gray>You want to delete to much team path ids!"
-  reset.step.success: "<prefix> <gray>Setup step <yellow><step> <gray>was reset."
+  reset.step:
+    not_exist: "<prefix> <gray>This step does not exist!"
+    no_fields: "<prefix> <gray>No game fields are configured yet!"
+    field_amount_to_big: "<prefix> <gray>You want to delete to much team path ids!"
+    success.generic: "<prefix> <gray>Setup step <yellow><step> <gray>was reset."
+    success.team_paths: "<prefix> <gray>Setup step <yellow><step> <gray>was reset for team <team_color><team_name><gray>."
 
   team_path_already_completed: "<prefix> <gray>You completed the path for team <team_color><team_name><gray>."
   field_already_has_id: "<prefix> <gray>This field already has an id!"
@@ -112,6 +115,7 @@ blocko.team:
   not_in_team: "<prefix> <gray>You are not in this team!"
   join: "<prefix> <gray>You are now in team <team_color><team_name><gray>."
   quit: "<prefix> <gray>You left your team."
+  not_exist: "<prefix> <gray>This team does not exist!"
 
 blocko.phase:
   not_found: "<dark_red>ERROR: Phase <priority> not found for arena <id>!"
