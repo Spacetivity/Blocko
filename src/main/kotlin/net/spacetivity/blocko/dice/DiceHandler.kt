@@ -3,7 +3,7 @@ package net.spacetivity.blocko.dice
 import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
 import net.spacetivity.blocko.item.name
@@ -27,12 +27,12 @@ class DiceHandler {
 
     val dicingPlayers = mutableMapOf<UUID, DiceSession>()
 
-    private val diceSides = BlockoGame.instance.diceSidesFile.diceSides
+    private val diceSides = Blocko.instance.diceSidesFile.diceSides
     private var diceAnimationTask: BukkitTask? = null
 
     fun startDiceAnimation() {
-        this.diceAnimationTask = Bukkit.getScheduler().runTaskTimer(BlockoGame.instance, Runnable {
-            for (gameArena in BlockoGame.instance.arenaHandler.cachedArenas) {
+        this.diceAnimationTask = Bukkit.getScheduler().runTaskTimer(Blocko.instance, Runnable {
+            for (gameArena in Blocko.instance.arenaHandler.cachedArenas) {
                 if (!gameArena.phase.isIngame()) continue
                 val ingamePhase = gameArena.phase as IngamePhase
 
@@ -115,7 +115,7 @@ class DiceHandler {
             itemStack.itemMeta = skullMeta
         }
 
-        BlockoGame.instance.arenaHandler.getArena(gamePlayer.arenaId)?.sendArenaSound(Sound.BLOCK_BAMBOO_BREAK, 0.2F)
+        Blocko.instance.arenaHandler.getArena(gamePlayer.arenaId)?.sendArenaSound(Sound.BLOCK_BAMBOO_BREAK, 0.2F)
         diceSession.currentDiceNumber = diceSide.first
 
         gamePlayer.translateActionBar("blocko.main_game_loop.current_dice_number", Placeholder.parsed("dice_number", diceSide.first.toString()))
@@ -124,7 +124,7 @@ class DiceHandler {
     }
 
     private fun getDiceDisplayName(diceNumber: Int): Component {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
         return translation.line("blocko.main_game_loop.dice_display_name", Placeholder.parsed("dice_number", diceNumber.toString()))
     }
 
@@ -133,7 +133,7 @@ class DiceHandler {
         val diceSide = this.diceSides.entries.find { it.key == randomNumber }?.toPair()
 
         if (diceSide == null) {
-            val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+            val translation = Blocko.instance.translationHandler.getSelectedTranslation()
             Bukkit.getConsoleSender().sendMessage(translation.line("blocko.main_game_loop.dice_error", Placeholder.parsed("number", randomNumber.toString())))
             return Pair(1, Constants.DICE_ONE_SKULL)
         }

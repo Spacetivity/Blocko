@@ -3,7 +3,7 @@ package net.spacetivity.blocko.entity
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.*
@@ -114,7 +114,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
     }
 
     fun isUnlockedByPlayer(uuid: UUID): Boolean {
-        return BlockoGame.instance.gameEntityHandler.hasUnlockedEntityType(uuid, this)
+        return Blocko.instance.gameEntityHandler.hasUnlockedEntityType(uuid, this)
     }
 
     fun buyEntityType(player: Player) {
@@ -123,7 +123,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
         val gamePlayer = player.toGamePlayerInstance() ?: return
         val statsPlayer = gamePlayer.toStatsPlayerInstance() ?: return
 
-        BlockoGame.instance.gameEntityHandler.unlockEntityType(player.uniqueId, this)
+        Blocko.instance.gameEntityHandler.unlockEntityType(player.uniqueId, this)
         statsPlayer.update(StatsType.COINS, UpdateOperation.DECREASE, this.price)
         statsPlayer.updateDbEntry()
 

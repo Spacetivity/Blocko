@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.utils
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.files.SpaceFile
 import java.io.*
 import java.nio.file.Files
@@ -12,7 +12,7 @@ object FileUtils {
 
     fun <T> read(file: File, clazz: Class<T>): T? {
         return try {
-            BlockoGame.GSON.fromJson(FileReader(file), clazz)
+            Blocko.GSON.fromJson(FileReader(file), clazz)
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
             null
@@ -22,7 +22,7 @@ object FileUtils {
     fun save(file: File, result: Any) {
         try {
             val fileWriter = FileWriter(file)
-            BlockoGame.GSON.toJson(result, fileWriter)
+            Blocko.GSON.toJson(result, fileWriter)
             fileWriter.close()
         } catch (e: IOException) {
             e.printStackTrace()

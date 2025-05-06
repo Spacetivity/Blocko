@@ -1,13 +1,13 @@
 package net.spacetivity.blocko.command.api
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommand
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 
-class BukkitCommandExecutor(private val spaceCommand: SpaceCommand, private val plugin: BlockoGame) : CommandExecutor, TabCompleter {
+class BukkitCommandExecutor(private val spaceCommand: SpaceCommand, private val plugin: Blocko) : CommandExecutor, TabCompleter {
 
     private val mainCommandExecutor = this.plugin.commandController.getCommandInitializer(this.spaceCommand.name)!!
 

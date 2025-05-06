@@ -1,7 +1,8 @@
 package net.spacetivity.blocko.arena.sign
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
+import net.spacetivity.blocko.arena.id.ArenaId
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -26,7 +27,7 @@ class ArenaSignHandler {
                 val y: Double = resultRow[ArenaSignDAO.y]
                 val z: Double = resultRow[ArenaSignDAO.z]
 
-                val gameArena = BlockoGame.instance.arenaHandler.cachedArenas.getOrNull(index)
+                val gameArena = Blocko.instance.arenaHandler.cachedArenas.getOrNull(index)
                 cachedArenaSigns.add(ArenaSign(Location(gameWorld, x, y, z), gameArena?.id))
             }
         }
@@ -34,6 +35,10 @@ class ArenaSignHandler {
 
     fun existsLocation(location: Location): Boolean {
         return this.cachedArenaSigns.any { it.location.world.name == location.world.name && it.location.x == location.x && it.location.y == location.y && it.location.z == location.z }
+    }
+
+    fun getSign(arenaId: ArenaId): ArenaSign? {
+        return this.cachedArenaSigns.find { it.arenaId == arenaId }
     }
 
     fun getSign(location: Location): ArenaSign? {
@@ -67,20 +72,20 @@ class ArenaSignHandler {
 
     fun updateArenaSign(arena: Arena) {
         val arenaSign = this.cachedArenaSigns.find { it.arenaId == arena.id } ?: return
-        BlockoGame.instance.arenaHandler.loadJoinSign(arenaSign.location, arena)
+        Blocko.instance.arenaHandler.loadJoinSign(arenaSign.location, arena)
     }
 
     fun loadArenaSigns() {
         for (arenaSign in this.cachedArenaSigns) {
             val arenaId = arenaSign.arenaId
-            val gameArena = if (arenaId == null) null else BlockoGame.instance.arenaHandler.getArena(arenaId)
-            BlockoGame.instance.arenaHandler.loadJoinSign(arenaSign.location, gameArena)
+            val gameArena = if (arenaId == null) null else Blocko.instance.arenaHandler.getArena(arenaId)
+            Blocko.instance.arenaHandler.loadJoinSign(arenaSign.location, gameArena)
         }
     }
 
     private fun recalculateSignData() {
         for (index in this.cachedArenaSigns.indices) {
-            cachedArenaSigns[index].arenaId = BlockoGame.instance.arenaHandler.cachedArenas.getOrNull(index)?.id
+            cachedArenaSigns[index].arenaId = Blocko.instance.arenaHandler.cachedArenas.getOrNull(index)?.id
         }
     }
 

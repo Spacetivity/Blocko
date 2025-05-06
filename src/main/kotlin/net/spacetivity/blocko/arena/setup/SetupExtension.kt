@@ -1,8 +1,8 @@
 package net.spacetivity.blocko.arena.setup
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import org.bukkit.entity.Player
 
 fun Player.getSetupSession(): ArenaSetupSession? {
-    return BlockoGame.instance.arenaSetupHandler.getSetupData(this.uniqueId)
+    return Blocko.instance.arenaSetupHandler.getSetupData(this.uniqueId)
 }

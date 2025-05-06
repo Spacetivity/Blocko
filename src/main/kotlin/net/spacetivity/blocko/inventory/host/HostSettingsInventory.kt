@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.item.hideExtraInfo
 import net.spacetivity.blocko.item.itemStack
@@ -26,7 +26,7 @@ import org.bukkit.entity.Player
 class HostSettingsInventory(private val arena: Arena) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation: Translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         controller.setItem(0, 1, InteractiveItem.of(itemStack(Material.WRITABLE_BOOK) {
             meta {
@@ -46,7 +46,7 @@ class HostSettingsInventory(private val arena: Arena) : InventoryProvider {
 
             this.arena.teamOptions = nextMode
 
-            BlockoGame.instance.arenaSignHandler.updateArenaSign(this.arena)
+            Blocko.instance.arenaSignHandler.updateArenaSign(this.arena)
 
             item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildTeamModeSelectorDisplayName(translation))
             item.update(controller, InteractiveItem.Modification.LORE, buildTeamModeSelectorLore(translation))

@@ -3,7 +3,7 @@ package net.spacetivity.blocko.utils
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 
 object DataTypeUtils {
 
@@ -46,7 +46,7 @@ object DataTypeUtils {
             }
             result(value)
         } catch (_: Exception) {
-            val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+            val translation = Blocko.instance.translationHandler.getSelectedTranslation()
             audience.sendMessage(translation.line("blocko.utils.data_type.invalid", Placeholder.parsed("type", dataType.name)))
         }
     }

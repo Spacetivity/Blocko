@@ -1,8 +1,7 @@
 package net.spacetivity.blocko.field.highlighting
 
 import net.spacetivity.blocko.arena.id.ArenaId
-import net.spacetivity.blocko.field.highlighting.scoreboard.HighlightMode
-import net.spacetivity.blocko.field.highlighting.scoreboard.impl.*
+import net.spacetivity.blocko.field.highlighting.impl.*
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.LocationUtils
@@ -38,6 +37,13 @@ class GameFieldHighlightHandler {
         for (highlightMode in this.highlightModes.values) {
             ScoreboardUtils.registerScoreboardTeam(highlightMode.teamName, highlightMode.color)
         }
+    }
+
+    fun spawnOrUpdateHighlightEntity(arenaId: ArenaId, location: Location, highlightModeClass: KClass<out HighlightMode>) {
+        val highlightMode = getHighlightModeByClass(highlightModeClass)
+            ?: throw NullPointerException("Cannot find highlightMode $highlightModeClass")
+
+        spawnOrUpdateHighlightEntity(arenaId, location, highlightMode)
     }
 
     fun spawnOrUpdateHighlightEntity(arenaId: ArenaId, location: Location, highlightMode: HighlightMode) {

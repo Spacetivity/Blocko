@@ -1,12 +1,12 @@
 package net.spacetivity.blocko.achievement.container
 
 import net.kyori.adventure.text.Component
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.player.GamePlayer
 
 open class Achievement(val translationKey: String, val rewardedCoins: Int, private val requirements: List<Requirement>) {
 
-    val name = BlockoGame.instance.translationHandler.getSelectedTranslation().lineAsString(BlockoGame.instance.getAchievementKey(true, this.translationKey))
+    val name = Blocko.instance.translationHandler.getSelectedTranslation().lineAsString(Blocko.instance.getAchievementKey(true, this.translationKey))
 
     fun getDescription(gamePlayer: GamePlayer): MutableList<Component> {
         val description = mutableListOf<Component>()
@@ -20,8 +20,8 @@ open class Achievement(val translationKey: String, val rewardedCoins: Int, priva
     }
 
     fun grantIfCompletedBy(gamePlayer: GamePlayer) {
-        if (gamePlayer.isAI || !isCompletedBy(gamePlayer) || BlockoGame.instance.achievementHandler.hasAchievementUnlocked(gamePlayer.uuid, this.translationKey)) return
-        BlockoGame.instance.achievementHandler.grantAchievement(gamePlayer.uuid, this.javaClass)
+        if (gamePlayer.isAI || !isCompletedBy(gamePlayer) || Blocko.instance.achievementHandler.hasAchievementUnlocked(gamePlayer.uuid, this.translationKey)) return
+        Blocko.instance.achievementHandler.grantAchievement(gamePlayer.uuid, this.javaClass)
     }
 
     private fun isCompletedBy(gamePlayer: GamePlayer): Boolean = this.requirements.all { it.isCompletedBy(gamePlayer) }

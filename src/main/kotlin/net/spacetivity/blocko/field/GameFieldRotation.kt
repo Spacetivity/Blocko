@@ -2,7 +2,7 @@ package net.spacetivity.blocko.field
 
 import net.spacetivity.blocko.utils.Constants
 
-enum class PathFace(val headValue: String, val radians: Float) {
+enum class GameFieldRotation(val headValue: String, val radians: Float) {
 
     NORTH(Constants.NORTH_SKULL, 180.0f),
     SOUTH(Constants.SOUTH_SKULL, 0.0f),

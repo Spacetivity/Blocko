@@ -1,12 +1,12 @@
 package net.spacetivity.blocko.player
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.team.GameTeam
 import org.bukkit.Sound
 import org.bukkit.inventory.ItemStack
 
 fun GamePlayer.getTeam(): GameTeam {
-    return BlockoGame.instance.gameTeamHandler.getTeamOfPlayer(this.arenaId, this.uuid)!!
+    return Blocko.instance.gameTeamHandler.getTeamOfPlayer(this.arenaId, this.uuid)!!
 }
 
 fun GamePlayer.playSound(sound: Sound) {

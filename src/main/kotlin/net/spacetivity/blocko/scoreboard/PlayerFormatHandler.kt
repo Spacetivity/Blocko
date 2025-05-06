@@ -3,7 +3,7 @@ package net.spacetivity.blocko.scoreboard
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
@@ -28,9 +28,9 @@ class PlayerFormatHandler {
         var color = NamedTextColor.GRAY
 
         if (gamePlayer?.teamName != null)
-            color = BlockoGame.instance.gameTeamHandler.getTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!.color
+            color = Blocko.instance.gameTeamHandler.getTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!.color
 
-        val prefix = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.format.tablist",
+        val prefix = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.format.tablist",
             Placeholder.parsed("color", "<${color.asHexString()}>"))
 
         val team = ScoreboardUtils.registerScoreboardTeamWithContent(scoreboard, teamName, prefix, Component.text(""))

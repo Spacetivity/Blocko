@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.utils
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.field.GameField
@@ -25,43 +25,43 @@ import org.bukkit.entity.Player
 object InventoryUtils {
 
     fun openGameFieldTurnInventory(opener: Player, gameField: GameField?) {
-        val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.game_field_set_turn.title")
+        val title = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.game_field_set_turn.title")
         openStaticInventory(opener, title, GameFieldTurnSetupInventory(gameField))
     }
 
     fun openGameTeamSetupInventory(opener: Player, invType: InvType, gameField: GameField?) {
-        val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.game_team_setup.title.entrance")
+        val title = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.game_team_setup.title.entrance")
         openStaticInventory(opener, title, GameTeamSetupInventory(invType, gameField))
     }
 
     fun openHostSettingsInventory(opener: Player, arena: Arena) {
-        val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.host.title")
+        val title = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.host.title")
         openStaticInventory(opener, title, HostSettingsInventory(arena))
     }
 
     fun openInvitationInventory(opener: Player, arena: Arena) {
-        val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.invitation.title")
+        val title = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.invitation.title")
         openStaticInventory(opener, title, InvitationInventory(arena))
     }
 
     fun openTeamSelectorInventory(opener: Player, arena: Arena) {
-        val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.team_selector.title")
+        val title = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.team_selector.title")
         openStaticInventory(opener, title, TeamSelectorInventory(arena))
     }
 
     fun openProfileInventory(opener: Player, isShopItemActive: Boolean) {
-        val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.profile.title")
+        val title = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.profile.title")
         openStaticInventory(opener, title, ProfileInventory(isShopItemActive))
     }
 
     fun openStatsTeamSelectorInventory(opener: Player) {
-        val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.stats_team_selector.title")
+        val title = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.stats_team_selector.title")
         val gameArena = opener.getArena() ?: return
         openStaticInventory(opener, title, StatsTeamSelectorInventory(gameArena))
     }
 
     fun openStatsInventory(opener: Player, statsPlayer: StatsPlayer) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         val gameArena = opener.getArena() ?: return
         val gamePlayer = gameArena.currentPlayers.find { it.uuid == statsPlayer.uuid } ?: return
@@ -77,17 +77,17 @@ object InventoryUtils {
     }
 
     fun openAchievementsInventory(opener: Player) {
-        val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.achievements.title")
+        val title = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.achievements.title")
         openStaticInventory(opener, title, AchievementsInventory())
     }
 
     fun openEntityShopInventory(opener: Player) {
-        val title = BlockoGame.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.entity_shop.title")
+        val title = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.entity_shop.title")
         openStaticInventory(opener, title, EntityShopInventory())
     }
 
     fun setPreviousPageItem(row: Int, column: Int, controller: InventoryController) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
         val pagination = controller.pagination ?: return
 
         controller.setItem(row, column, InteractiveItem.previousPage(itemStack(Material.ARROW) {
@@ -98,7 +98,7 @@ object InventoryUtils {
     }
 
     fun setNextPageItem(row: Int, column: Int, controller: InventoryController) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
         val pagination = controller.pagination ?: return
 
         controller.setItem(row, column, InteractiveItem.previousPage(itemStack(Material.SPECTRAL_ARROW) {

@@ -2,7 +2,7 @@ package net.spacetivity.blocko.arena.setup
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -51,7 +51,7 @@ object RegionScanner {
 
     fun scanRegion(setupSession: ArenaSetupSession, cornerLocation: Location): Multimap<Block, Pair<ScannerResult, String?>> {
         val resultsInRegion: Multimap<Block, Pair<ScannerResult, String?>> = ArrayListMultimap.create()
-        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return resultsInRegion
+        val setupStep = setupSession.getSetupStep<ScanBoardStep>() ?: return resultsInRegion
 
         val corner1 = setupStep.corner1 ?: return resultsInRegion
         val corner2 = setupStep.corner2 ?: return resultsInRegion

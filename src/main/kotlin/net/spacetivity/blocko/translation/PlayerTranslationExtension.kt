@@ -3,7 +3,7 @@ package net.spacetivity.blocko.translation
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.title.Title
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.player.GamePlayer
 import org.bukkit.entity.Player
 
@@ -32,7 +32,7 @@ fun GamePlayer.translateActionBar(key: String, vararg toReplace: TagResolver) {
 }
 
 private fun validateComponents(key: String, vararg toReplace: TagResolver): MutableList<Component> {
-    val selectedTranslation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+    val selectedTranslation = Blocko.instance.translationHandler.getSelectedTranslation()
     val components = mutableListOf<Component>()
     if (selectedTranslation.hasMultipleLines(key)) components.addAll(selectedTranslation.lines(key, *toReplace))
     else components.add(selectedTranslation.line(key, *toReplace))

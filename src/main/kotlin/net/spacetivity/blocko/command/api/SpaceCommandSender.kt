@@ -14,7 +14,7 @@ class SpaceCommandSender(private val commandSender: CommandSender) {
 
     fun hasPermission(permission: String): Boolean = this.commandSender.hasPermission(permission)
 
-    fun <T> castTo(clazz: Class<T>): T? = if (isPlayer()) clazz.cast(this.commandSender) else null
+    fun toPlayer(): Player = Player::class.java.cast(this.commandSender)
 
     fun sendMessage(component: Component) {
         this.commandSender.sendMessage(component)

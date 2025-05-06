@@ -28,6 +28,7 @@ class BlockoCommand : SpaceMainCommandExecutor() {
         subCommandExecutors.add(ArenaSetupStartSubCommand())
         subCommandExecutors.add(ArenaSetupBoardScanSubCommand())
         subCommandExecutors.add(ArenaSetupBoardCheckSubCommand())
+        subCommandExecutors.add(ArenaSetupResetStepSubCommand())
         subCommandExecutors.add(ArenaSetupCancelSubCommand())
         subCommandExecutors.add(ArenaSetupFinishSubCommand())
         subCommandExecutors.add(ArenaInviteSendSubCommand())

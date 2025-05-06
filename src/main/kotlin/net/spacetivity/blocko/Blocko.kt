@@ -54,7 +54,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 import kotlin.reflect.KClass
 
-class BlockoGame : JavaPlugin() {
+class Blocko : JavaPlugin() {
 
     val interactiveActions = mutableMapOf<UUID, (PlayerInteractEvent) -> Unit>()
 
@@ -202,7 +202,7 @@ class BlockoGame : JavaPlugin() {
     private fun registerCommand(executorClass: KClass<out SpaceMainCommandExecutor>) {
         val commandExecutor = executorClass.java.getDeclaredConstructor().newInstance()
         val spaceCommand = this.commandController.registerCommand(commandExecutor)
-        val constructor = BukkitCommandExecutor::class.java.getDeclaredConstructor(SpaceCommand::class.java, BlockoGame::class.java)
+        val constructor = BukkitCommandExecutor::class.java.getDeclaredConstructor(SpaceCommand::class.java, Blocko::class.java)
         constructor.newInstance(spaceCommand, this)
     }
 
@@ -214,7 +214,7 @@ class BlockoGame : JavaPlugin() {
             .create()
 
         @JvmStatic
-        lateinit var instance: BlockoGame
+        lateinit var instance: Blocko
             private set
     }
 

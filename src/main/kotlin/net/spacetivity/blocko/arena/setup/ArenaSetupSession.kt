@@ -1,23 +1,22 @@
 package net.spacetivity.blocko.arena.setup
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.arena.setup.step.SetupStep
-import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
-import net.spacetivity.blocko.arena.setup.step.impl.SetTeamEntrancesStep
-import net.spacetivity.blocko.arena.setup.step.impl.SetTeamPathsStep
-import net.spacetivity.blocko.arena.setup.step.impl.SetTurningPointsStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamEntrancesStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamPathsStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTurningPointsStep
 import net.spacetivity.blocko.utils.Constants
 import java.time.Duration
-import kotlin.reflect.KClass
 
-class ArenaSetupSession(val arenaId: ArenaId, ) {
+class ArenaSetupSession(val arenaId: ArenaId) {
 
     lateinit var setupTool: SetupTool
 
     val timeoutTimestamp =
-        if (BlockoGame.instance.setupConfigFile.setupSessionEndless) -1
-        else System.currentTimeMillis() + Duration.ofMinutes(BlockoGame.instance.setupConfigFile.setupSessionTimeoutMinutes.toLong()).toMillis()
+        if (Blocko.instance.setupConfigFile.setupSessionEndless) -1
+        else System.currentTimeMillis() + Duration.ofMinutes(Blocko.instance.setupConfigFile.setupSessionTimeoutMinutes.toLong()).toMillis()
 
     var currentTeamName: String? = null
     val gameTeams = Constants.GAME_TEAMS
@@ -30,12 +29,16 @@ class ArenaSetupSession(val arenaId: ArenaId, ) {
     )
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : SetupStep> getSetupStep(clazz: KClass<T>): T? {
-        return this.setupSteps[clazz] as? T
+    inline fun <reified T : SetupStep<*>> getSetupStep(): T? {
+        return this.setupSteps.values.firstOrNull { it is T } as? T
     }
 
-    fun getActiveSetupStep(): SetupStep? {
-        var activeStep: SetupStep? = null
+    fun getSetupStep(key: String): SetupStep<*>? {
+        return this.setupSteps.values.first { it.key.equals(key, true) }
+    }
+
+    fun getActiveSetupStep(): SetupStep<*>? {
+        var activeStep: SetupStep<*>? = null
 
         for (step in this.setupSteps.values) {
             if (!step.active) continue
@@ -45,7 +48,7 @@ class ArenaSetupSession(val arenaId: ArenaId, ) {
         return activeStep
     }
 
-    fun setNextSetupStep(increase: Boolean): SetupStep {
+    fun setNextSetupStep(increase: Boolean): SetupStep<*> {
         val newStep = nextSetupStep(increase)
 
         getActiveSetupStep()?.active = false
@@ -54,7 +57,7 @@ class ArenaSetupSession(val arenaId: ArenaId, ) {
         return newStep
     }
 
-    private fun nextSetupStep(increase: Boolean): SetupStep {
+    private fun nextSetupStep(increase: Boolean): SetupStep<*> {
         val initialStep = this.setupSteps.values.minBy { it.id }
         val activeSetupStep = getActiveSetupStep() ?: return initialStep
 

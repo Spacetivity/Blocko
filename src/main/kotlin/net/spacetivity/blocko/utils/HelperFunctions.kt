@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.utils
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.setup.ArenaSetupSession
 import net.spacetivity.blocko.arena.setup.getSetupSession
@@ -21,7 +21,7 @@ object HelperFunctions {
     }
 
     fun validateInvitation(arenaIdAsString: String, player: Player, result: (Arena) -> Unit) {
-        val arenaHandler = BlockoGame.instance.arenaHandler
+        val arenaHandler = Blocko.instance.arenaHandler
 
         val arenaId = arenaHandler.getArenaId(arenaIdAsString)
         val gameArena = arenaId?.let { arenaHandler.getArena(it) }

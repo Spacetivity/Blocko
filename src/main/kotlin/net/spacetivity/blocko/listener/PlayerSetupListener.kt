@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.listener
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.setup.getSetupSession
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
@@ -12,9 +12,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.EquipmentSlot
 
-class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
-
-    private val setupHandler = this.plugin.arenaSetupHandler
+class PlayerSetupListener(private val plugin: Blocko) : Listener {
 
     init {
         this.plugin.server.pluginManager.registerEvents(this, this.plugin)
@@ -22,7 +20,7 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
 
     @EventHandler
     fun onQuitWhileInSetup(event: PlayerQuitEvent) {
-        this.setupHandler.handleSetupEnd(event.player, false)
+        this.plugin.arenaSetupHandler.handleSetupEnd(event.player, false)
     }
 
     @EventHandler
@@ -32,15 +30,12 @@ class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
         if (event.hand != EquipmentSlot.HAND) return
 
         val heldItemStack = player.inventory.itemInMainHand
-        if (heldItemStack.type == Material.AIR) return
-        if (!PersistentDataUtils.has(heldItemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
+        if (heldItemStack.type == Material.AIR || !PersistentDataUtils.has(heldItemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
 
         val setupSession = player.getSetupSession() ?: return
 
-        // setup mode changing can only happen when the player is SNEAKING
         if (player.isSneaking) {
-            val isNextModeRequested = event.action.isLeftClick
-            setupSession.setupTool.onToggle(isNextModeRequested, heldItemStack)
+            setupSession.setupTool.onToggle(event.action.isLeftClick, heldItemStack)
             return
         }
 

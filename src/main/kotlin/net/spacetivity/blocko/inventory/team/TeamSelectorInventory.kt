@@ -2,7 +2,7 @@ package net.spacetivity.blocko.inventory.team
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.item.*
@@ -26,8 +26,8 @@ import org.bukkit.inventory.meta.LeatherArmorMeta
 class TeamSelectorInventory(private val arena: Arena) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-        val gameTeams = BlockoGame.instance.gameTeamHandler.gameTeams[this.arena.id]
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
+        val gameTeams = Blocko.instance.gameTeamHandler.gameTeams[this.arena.id]
 
         for (column in 0..<4) {
             val gameTeam = gameTeams.find { it.teamId == column } ?: continue
@@ -57,9 +57,9 @@ class TeamSelectorInventory(private val arena: Arena) : InventoryProvider {
             } else {
                 if (gamePlayer.teamName != null) {
                     val oldTeamName = gamePlayer.teamName!!
-                    val oldGameTeam = BlockoGame.instance.gameTeamHandler.getTeam(this.arena.id, oldTeamName) ?: return@of
+                    val oldGameTeam = Blocko.instance.gameTeamHandler.getTeam(this.arena.id, oldTeamName) ?: return@of
 
-                    BlockoGame.instance.gameTeamHandler.getTeamOfPlayer(gamePlayer.arenaId, gamePlayer.uuid)?.quit(gamePlayer)
+                    Blocko.instance.gameTeamHandler.getTeamOfPlayer(gamePlayer.arenaId, gamePlayer.uuid)?.quit(gamePlayer)
 
                     val oldTeamItem = controller.contents.values
                         .filter { it != null && it.item.type == Material.LEATHER_CHESTPLATE }

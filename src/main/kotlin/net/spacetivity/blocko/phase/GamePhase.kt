@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.phase
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.arena.isSpectating
@@ -45,7 +45,7 @@ abstract class GamePhase(protected val arenaId: ArenaId, val name: String, val p
     }
 
     protected fun getArena(): Arena {
-        return BlockoGame.instance.arenaHandler.getArena(this.arenaId)!!
+        return Blocko.instance.arenaHandler.getArena(this.arenaId)!!
     }
 
 }

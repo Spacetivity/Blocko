@@ -3,7 +3,7 @@ package net.spacetivity.blocko.scoreboard
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.arena.toGamePlayerInstance
@@ -17,10 +17,10 @@ import org.bukkit.entity.Player
 object GameScoreboardUtils {
 
     fun setGameSidebar(player: Player) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
         val initialEntityStatus = GameEntityStatus.AT_SPAWN
 
-        BlockoGame.instance.sidebarHandler.registerSidebar(SidebarBuilder(player)
+        Blocko.instance.sidebarHandler.registerSidebar(SidebarBuilder(player)
             .setTitle(translation.line("blocko.sidebar.title"))
             .addBlankLine()
             .addLine(getTeamComponent(translation, player.toGamePlayerInstance()))
@@ -36,44 +36,44 @@ object GameScoreboardUtils {
     }
 
     fun removeGameSidebar(player: Player) {
-        BlockoGame.instance.sidebarHandler.unregisterSidebar(player.uniqueId)
+        Blocko.instance.sidebarHandler.unregisterSidebar(player.uniqueId)
     }
 
     fun updateTeamLine(player: Player) {
-        val sidebar = BlockoGame.instance.sidebarHandler.getSidebar(player.uniqueId) ?: return
-        sidebar.updateLine(8, getTeamComponent(BlockoGame.instance.translationHandler.getSelectedTranslation(), player.toGamePlayerInstance()))
+        val sidebar = Blocko.instance.sidebarHandler.getSidebar(player.uniqueId) ?: return
+        sidebar.updateLine(8, getTeamComponent(Blocko.instance.translationHandler.getSelectedTranslation(), player.toGamePlayerInstance()))
     }
 
     fun updateControllingTeamLine(arena: Arena, controllingTeam: GameTeam) {
         for (player in arena.getAllPlayers()) {
-            val sidebar = BlockoGame.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
-            sidebar.updateLine(6, getControllingTeamComponent(BlockoGame.instance.translationHandler.getSelectedTranslation(), controllingTeam))
+            val sidebar = Blocko.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
+            sidebar.updateLine(6, getControllingTeamComponent(Blocko.instance.translationHandler.getSelectedTranslation(), controllingTeam))
         }
     }
 
     fun updateAllEntityStatusLines(arenaId: ArenaId, newControllingTeam: GameTeam) {
-        for (gameEntity in BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(arenaId, newControllingTeam.name)) {
+        for (gameEntity in Blocko.instance.gameEntityHandler.getEntitiesFromTeam(arenaId, newControllingTeam.name)) {
             updateEntityStatusLine(gameEntity)
         }
     }
 
     fun updateEntityStatusLine(gameEntity: GameEntity) {
-        val gameArena = BlockoGame.instance.arenaHandler.getArena(gameEntity.arenaId) ?: return
+        val gameArena = Blocko.instance.arenaHandler.getArena(gameEntity.arenaId) ?: return
 
         for (player in gameArena.getAllPlayers()) {
-            val sidebar = BlockoGame.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
+            val sidebar = Blocko.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
             val lineId = getSidebarLineForEntity(gameEntity.entityId) ?: continue
-            sidebar.updateLine(lineId, getStatusComponent(BlockoGame.instance.translationHandler.getSelectedTranslation(), gameEntity.entityId.inc(), gameEntity.entityStatus))
+            sidebar.updateLine(lineId, getStatusComponent(Blocko.instance.translationHandler.getSelectedTranslation(), gameEntity.entityId.inc(), gameEntity.entityStatus))
         }
     }
 
     fun updateDicedNumberLine(arenaId: ArenaId, currentDicedNumber: Int?) {
-        val gameArena = BlockoGame.instance.arenaHandler.getArena(arenaId) ?: return
+        val gameArena = Blocko.instance.arenaHandler.getArena(arenaId) ?: return
         if (!gameArena.phase.isIngame()) return
 
         for (player in gameArena.getAllPlayers()) {
-            val sidebar = BlockoGame.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
-            sidebar.updateLine(5, getDicedNumberComponent(BlockoGame.instance.translationHandler.getSelectedTranslation(), currentDicedNumber))
+            val sidebar = Blocko.instance.sidebarHandler.getSidebar(player.uniqueId) ?: continue
+            sidebar.updateLine(5, getDicedNumberComponent(Blocko.instance.translationHandler.getSelectedTranslation(), currentDicedNumber))
         }
     }
 
@@ -85,7 +85,7 @@ object GameScoreboardUtils {
             teamColorHex = NamedTextColor.GRAY.asHexString()
             teamName = "-/-"
         } else {
-            val gameTeam: GameTeam = BlockoGame.instance.gameTeamHandler.getTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!
+            val gameTeam: GameTeam = Blocko.instance.gameTeamHandler.getTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!
             teamColorHex = gameTeam.color.asHexString()
             teamName = gameTeam.name
         }

@@ -9,13 +9,12 @@ import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommand
 import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
 import net.spacetivity.blocko.translation.translateMessage
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 
 @SpaceSubCommand(length = 4, parts = "arena invite send <player>")
 class ArenaInviteSendSubCommand : SpaceSubCommandExecutor {
 
     override fun execute(sender: SpaceCommandSender, args: List<String>) {
-        val player = sender.castTo(Player::class.java) ?: return
+        val player = sender.toPlayer()
         val gameArena = player.getArena()
 
         if (gameArena == null) {
@@ -35,7 +34,7 @@ class ArenaInviteSendSubCommand : SpaceSubCommandExecutor {
     }
 
     override fun onTabComplete(sender: SpaceCommandSender, args: List<String>): List<String> {
-        val player = sender.castTo(Player::class.java) ?: return emptyList()
+        val player = if (sender.isPlayer()) sender.toPlayer() else return emptyList()
 
         return buildList {
             addAll(generateSuggestions(args, 2, listOf(Pair(0, "arena"))) { add("invite") })

@@ -1,9 +1,9 @@
 package net.spacetivity.blocko.inventory.setup
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.field.GameField
-import net.spacetivity.blocko.field.PathFace
+import net.spacetivity.blocko.field.GameFieldRotation
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
 import net.spacetivity.blocko.item.name
@@ -23,7 +23,7 @@ import org.bukkit.inventory.meta.SkullMeta
 class GameFieldTurnSetupInventory(private val gameField: GameField?) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         val availablePositions = listOf(
             InventoryPos.of(0, 2),
@@ -42,7 +42,7 @@ class GameFieldTurnSetupInventory(private val gameField: GameField?) : Inventory
     private fun initItems(translation: Translation, player: Player): List<InteractiveItem> {
         val items = mutableListOf<InteractiveItem>()
 
-        for (pathFace in PathFace.entries) {
+        for (pathFace in GameFieldRotation.entries) {
             items.add(InteractiveItem.of(itemStack(Material.PLAYER_HEAD) {
                 meta<SkullMeta> {
                     name = translation.displayName("blocko.inventory.game_field_set_turn.turn_item.display_name", Placeholder.parsed("face", pathFace.name))
@@ -58,7 +58,7 @@ class GameFieldTurnSetupInventory(private val gameField: GameField?) : Inventory
                     return@of
                 }
 
-                BlockoGame.instance.arenaSetupHandler.setTurningPoint(player, gameField, pathFace)
+                Blocko.instance.arenaSetupHandler.setTurningPoint(player, gameField, pathFace)
             })
         }
 

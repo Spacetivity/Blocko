@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.translation
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 
 
 class TranslationHandler {
@@ -8,7 +8,7 @@ class TranslationHandler {
     val cachedTranslations = mutableListOf<Translation>()
 
     fun getSelectedTranslation(): Translation {
-        return this.cachedTranslations.find { it.name == BlockoGame.instance.globalConfigFile.language }!!
+        return this.cachedTranslations.find { it.name == Blocko.instance.globalConfigFile.language }!!
     }
 
     fun getTranslation(name: String): Translation? {

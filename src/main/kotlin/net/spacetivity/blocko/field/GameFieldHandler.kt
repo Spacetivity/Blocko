@@ -2,7 +2,7 @@ package net.spacetivity.blocko.field
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
 import org.bukkit.Bukkit
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -22,7 +22,7 @@ class GameFieldHandler {
                 val world = Bukkit.getWorld(resultRow[GameFieldDAO.worldName]) ?: continue
                 val x = resultRow[GameFieldDAO.x]
                 val z = resultRow[GameFieldDAO.z]
-                val properties = BlockoGame.GSON.fromJson(resultRow[GameFieldDAO.properties], GameFieldProperties::class.java)
+                val properties = Blocko.GSON.fromJson(resultRow[GameFieldDAO.properties], GameFieldProperties::class.java)
                 val isGarageField = resultRow[GameFieldDAO.isGarageField]
 
                 cachedGameFields.put(arenaId, GameField(arenaId, world, x, z, properties, isGarageField, false))
@@ -31,7 +31,7 @@ class GameFieldHandler {
     }
 
     fun getFirstFieldForTeam(arenaId: ArenaId, teamName: String): GameField? {
-        return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == 0 }
+        return this.cachedGameFields[arenaId].find { it.properties.getTeamPathId(teamName) == 0 }
     }
 
     fun getLastFieldForTeam(arenaId: ArenaId, teamName: String): GameField? {
@@ -39,18 +39,18 @@ class GameFieldHandler {
         val validTeamFieldIds = mutableListOf<Int>()
 
         for (gameField in gameFieldsForTeam) {
-            val fieldId = gameField.properties.getFieldId(teamName) ?: continue
+            val fieldId = gameField.properties.getTeamPathId(teamName) ?: continue
             validTeamFieldIds.add(fieldId)
         }
 
         val highestTeamFieldId = validTeamFieldIds.maxOrNull() ?: return null
-        val lastGameField = gameFieldsForTeam.find { it.properties.getFieldId(teamName) == highestTeamFieldId }
+        val lastGameField = gameFieldsForTeam.find { it.properties.getTeamPathId(teamName) == highestTeamFieldId }
 
         return lastGameField
     }
 
     fun getFieldForTeam(arenaId: ArenaId, teamName: String, id: Int): GameField? {
-        return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == id }
+        return this.cachedGameFields[arenaId].find { it.properties.getTeamPathId(teamName) == id }
     }
 
     fun getField(arenaId: ArenaId, x: Int, z: Int): GameField? {
@@ -70,7 +70,7 @@ class GameFieldHandler {
                     statement[worldName] = gameField.world.name
                     statement[x] = gameField.x
                     statement[z] = gameField.z
-                    statement[properties] = BlockoGame.GSON.toJson(gameField.properties)
+                    statement[properties] = Blocko.GSON.toJson(gameField.properties)
                     statement[isGarageField] = gameField.isGarageField
                 }
 

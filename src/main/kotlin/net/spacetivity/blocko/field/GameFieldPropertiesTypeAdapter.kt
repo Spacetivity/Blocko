@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 
 class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
 
@@ -13,7 +13,7 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
         writer.beginObject()
 
         writer.name("teamFieldIds")
-        writer.value(BlockoGame.GSON.toJson(properties.teamFieldIds))
+        writer.value(Blocko.GSON.toJson(properties.teamPathIds))
 
         writer.name("garageForTeam")
         writer.value(if (properties.garageForTeam == null) "-" else properties.garageForTeam)
@@ -31,7 +31,7 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
         lateinit var teamFieldsIds: MutableMap<String, Int>
         var garageForTeam: String? = null
         var teamEntrance: String? = null
-        var turnComponent: PathFace? = null
+        var turnComponent: GameFieldRotation? = null
 
         reader.beginObject()
 
@@ -44,7 +44,7 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
             when (fieldName) {
                 "teamFieldIds" -> {
                     reader.peek()
-                    teamFieldsIds = BlockoGame.GSON.fromJson(reader.nextString(), object : TypeToken<MutableMap<String, Int>>() {}.type)
+                    teamFieldsIds = Blocko.GSON.fromJson(reader.nextString(), object : TypeToken<MutableMap<String, Int>>() {}.type)
                 }
                 "garageForTeam" -> {
                     reader.peek()
@@ -59,7 +59,7 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
                 "turnComponent" -> {
                     reader.peek()
                     val turnComponentValue = reader.nextString()
-                    turnComponent = if (turnComponentValue == "-") null else PathFace.valueOf(turnComponentValue)
+                    turnComponent = if (turnComponentValue == "-") null else GameFieldRotation.valueOf(turnComponentValue)
                 }
             }
         }

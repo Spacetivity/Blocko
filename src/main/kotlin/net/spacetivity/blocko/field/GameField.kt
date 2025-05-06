@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.field
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.FirstEliminationAchievement
 import net.spacetivity.blocko.achievement.impl.FirstKnockoutAchievement
@@ -9,7 +9,7 @@ import net.spacetivity.blocko.achievement.impl.MasterEliminatorAchievement
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
-import net.spacetivity.blocko.field.highlighting.scoreboard.HighlightMode
+import net.spacetivity.blocko.field.highlighting.HighlightMode
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsType
 import net.spacetivity.blocko.stats.UpdateOperation
@@ -33,11 +33,11 @@ class GameField(
     var currentHolder: GameEntity? = null
 
     fun trowOutOldHolder(newHolder: GamePlayer, newHolderEntity: LivingEntity) {
-        val gameArena = BlockoGame.instance.arenaHandler.getArena(this.arenaId) ?: return
+        val gameArena = Blocko.instance.arenaHandler.getArena(this.arenaId) ?: return
 
         if (!this.isTaken) return
 
-        val gameTeamHandler = BlockoGame.instance.gameTeamHandler
+        val gameTeamHandler = Blocko.instance.gameTeamHandler
         val oldHolderEntity = this.currentHolder ?: return
 
         val oldHolderGameTeam = gameTeamHandler.getTeam(this.arenaId, oldHolderEntity.teamName) ?: return
@@ -68,7 +68,7 @@ class GameField(
     }
 
     fun getWorldPosition(isGameField: Boolean): Location {
-        val yLevel = BlockoGame.instance.arenaHandler.getArena(this.arenaId)?.yLevel ?: 0.0
+        val yLevel = Blocko.instance.arenaHandler.getArena(this.arenaId)?.yLevel ?: 0.0
         val location = Location(this.world, this.x.toDouble(), yLevel, this.z.toDouble(), 0.0F, 0.0F)
         val fixedLocation = location.clone().toCenterLocation()
         fixedLocation.y = if (isGameField) yLevel - 1 else yLevel
@@ -85,11 +85,11 @@ class GameField(
             }
         }
 
-        val statsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
+        val statsPlayer = Blocko.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
         val statsType = if (isReward) StatsType.ELIMINATED_OPPONENTS else StatsType.KNOCKED_OUT_BY_OPPONENTS
         statsPlayer.update(statsType, UpdateOperation.INCREASE, 1)
 
-        val coinsPerElimination = BlockoGame.instance.globalConfigFile.coinsPerElimination
+        val coinsPerElimination = Blocko.instance.globalConfigFile.coinsPerElimination
 
         if (isReward) {
             gamePlayer.toBukkitInstance()?.addCoins(coinsPerElimination, true)

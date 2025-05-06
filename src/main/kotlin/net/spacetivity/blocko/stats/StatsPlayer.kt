@@ -1,12 +1,12 @@
 package net.spacetivity.blocko.stats
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import java.util.*
 
 data class StatsPlayer(val uuid: UUID, var eliminatedOpponents: Int, var knockedOutByOpponents: Int, var playedGames: Int, var wonGames: Int, var coins: Int) {
 
     fun updateDbEntry() {
-        BlockoGame.instance.statsPlayerHandler.updateStatsPlayer(this)
+        Blocko.instance.statsPlayerHandler.updateStatsPlayer(this)
     }
 
     fun update(type: StatsType, operation: UpdateOperation, newValue: Int) {

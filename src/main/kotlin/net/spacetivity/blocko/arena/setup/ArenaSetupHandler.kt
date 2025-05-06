@@ -3,16 +3,16 @@ package net.spacetivity.blocko.arena.setup
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.ArenaStatus
 import net.spacetivity.blocko.arena.id.ArenaId
-import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
-import net.spacetivity.blocko.arena.setup.step.impl.SetTeamEntrancesStep
-import net.spacetivity.blocko.arena.setup.step.impl.SetTurningPointsStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamEntrancesStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTurningPointsStep
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
-import net.spacetivity.blocko.field.PathFace
-import net.spacetivity.blocko.field.highlighting.scoreboard.impl.*
+import net.spacetivity.blocko.field.GameFieldRotation
+import net.spacetivity.blocko.field.highlighting.impl.*
 import net.spacetivity.blocko.team.GameTeamLocation
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
@@ -30,15 +30,15 @@ import java.util.*
 
 class ArenaSetupHandler {
 
-    private val highlightHandler = BlockoGame.instance.gameFieldHighlightHandler
+    private val highlightHandler = Blocko.instance.gameFieldHighlightHandler
 
     private val activeSetupSessions = mutableMapOf<UUID, ArenaSetupSession>()
 
-    private val isSetupEndless = BlockoGame.instance.setupConfigFile.setupSessionEndless
+    private val isSetupEndless = Blocko.instance.setupConfigFile.setupSessionEndless
     private var setupTask: BukkitTask? = null
 
     init {
-        this.setupTask = Bukkit.getScheduler().runTaskTimer(BlockoGame.instance, Runnable {
+        this.setupTask = Bukkit.getScheduler().runTaskTimer(Blocko.instance, Runnable {
             for (player in Bukkit.getOnlinePlayers()) {
                 val setupSession = player.getSetupSession() ?: continue
                 val activeSetupStep = setupSession.getActiveSetupStep() ?: continue
@@ -91,7 +91,7 @@ class ArenaSetupHandler {
             return
         }
 
-        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+        val setupStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
 
         for (gameField in setupStep.gameFields) {
             gameField.currentHighlightMode = null
@@ -116,17 +116,17 @@ class ArenaSetupHandler {
                 return
             }
 
-            BlockoGame.instance.gameFieldHandler.initFields(setupStep.gameFields)
-            BlockoGame.instance.gameTeamHandler.initTeamSpawns(setupStep.gameTeamLocations)
+            Blocko.instance.gameFieldHandler.initFields(setupStep.gameFields)
+            Blocko.instance.gameTeamHandler.initTeamSpawns(setupStep.gameTeamLocations)
 
-            val gameArena = BlockoGame.instance.arenaHandler.getArena(setupSession.arenaId) ?: return
-            BlockoGame.instance.arenaSignHandler.loadArenaSigns()
-            BlockoGame.instance.arenaSignHandler.updateArenaSign(gameArena)
+            val gameArena = Blocko.instance.arenaHandler.getArena(setupSession.arenaId) ?: return
+            Blocko.instance.arenaSignHandler.loadArenaSigns()
+            Blocko.instance.arenaSignHandler.updateArenaSign(gameArena)
 
-            BlockoGame.instance.arenaHandler.updateArenaStatus(setupSession.arenaId, ArenaStatus.READY)
+            Blocko.instance.arenaHandler.updateArenaStatus(setupSession.arenaId, ArenaStatus.READY)
         }
 
-        BlockoGame.instance.gameFieldHighlightHandler.removeHighlightEntities(
+        Blocko.instance.gameFieldHighlightHandler.removeHighlightEntities(
             setupSession.arenaId,
             GameFieldHighlightMode::class,
             GarageFieldHighlightMode::class,
@@ -157,7 +157,7 @@ class ArenaSetupHandler {
             return
         }
 
-        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+        val setupStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
 
         if (isLeftClick) {
             setupStep.corner1 = location
@@ -175,7 +175,7 @@ class ArenaSetupHandler {
 
     fun scanBoard(player: Player) {
         val setupSession = player.getSetupSession() ?: return
-        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+        val setupStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
 
         if (!setupStep.areCornersSet()) {
             player.translateMessage("blocko.setup.scanning_board.corners_not_set")
@@ -240,7 +240,7 @@ class ArenaSetupHandler {
             setupStep.missingResults.putAll(ScannerResult.getMissingResults(regionData.values().map { it.first }))
         }
 
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
         val statusKey = "blocko.setup.scanning_board.finished.${if (scanningCompleted) "satisfied" else "unsatisfied"}"
         val statusString = translation.line(statusKey, Placeholder.parsed("id", setupSession.arenaId.value))
 
@@ -260,7 +260,7 @@ class ArenaSetupHandler {
     }
 
     fun setTeamSpawnLocation(setupSession: ArenaSetupSession, player: Player, teamName: String, location: Location) {
-        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+        val setupStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
 
         if (setupStep.gameTeamLocations.any { it.x == location.x && it.y == location.y && it.z == location.z }) {
             player.translateMessage("blocko.setup.team_spawn_already_set")
@@ -268,7 +268,7 @@ class ArenaSetupHandler {
         }
 
         val centeredLocation = LocationUtils.centerLocation(location)
-        val yLevel = BlockoGame.instance.arenaHandler.getArena(setupSession.arenaId)!!.yLevel
+        val yLevel = Blocko.instance.arenaHandler.getArena(setupSession.arenaId)!!.yLevel
 
         val teamSpawn = GameTeamLocation(
             setupSession.arenaId,
@@ -289,7 +289,7 @@ class ArenaSetupHandler {
     }
 
     fun addField(setupSession: ArenaSetupSession, player: Player, block: Block) {
-        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+        val setupStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
 
         if (setupStep.isFieldAt(block.x, block.z)) {
             player.translateMessage("blocko.setup.game_field_already_set")
@@ -308,14 +308,14 @@ class ArenaSetupHandler {
 
 
         val highlightMode = this.highlightHandler.getHighlightModeByClass(GameFieldHighlightMode::class) ?: return
-        BlockoGame.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(block.location), highlightMode)
+        Blocko.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(block.location), highlightMode)
 
         gameField.currentHighlightMode = highlightMode
         setupStep.gameFields.add(gameField)
     }
 
     fun addGarageField(setupSession: ArenaSetupSession, player: Player, teamName: String, block: Block) {
-        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+        val setupStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
 
         val possibleField = setupStep.getField(block.x, block.z)
 
@@ -343,7 +343,7 @@ class ArenaSetupHandler {
         possibleField.currentHighlightMode = highlightMode
     }
 
-    fun setTurningPoint(player: Player, gameField: GameField, face: PathFace) {
+    fun setTurningPoint(player: Player, gameField: GameField, face: GameFieldRotation) {
         val setupSession = player.getSetupSession()
         if (setupSession == null) {
             player.translateMessage("blocko.setup.not_in_setup_mode")
@@ -363,14 +363,14 @@ class ArenaSetupHandler {
         gameField.currentHighlightMode = highlightMode
     }
 
-    fun setFieldTeamId(player: Player, teamName: String, block: Block) {
+    fun setTeamPathId(player: Player, teamName: String, block: Block) {
         val setupSession = player.getSetupSession()
         if (setupSession == null) {
             player.translateMessage("blocko.setup.not_in_setup_mode")
             return
         }
 
-        val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+        val setupStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
         val possibleField = setupStep.getField(block.x, block.z)
 
         if (possibleField == null) {
@@ -378,24 +378,24 @@ class ArenaSetupHandler {
             return
         }
 
-        val hasConfiguredCompleteTeamPath = setupStep.gameFields.all { it.properties.getFieldId(teamName) != null }
+        val hasConfiguredCompleteTeamPath = setupStep.gameFields.all { it.properties.getTeamPathId(teamName) != null }
         if (hasConfiguredCompleteTeamPath) {
-            val gameTeam = BlockoGame.instance.gameTeamHandler.getTeam(setupSession.arenaId, teamName) ?: return
+            val gameTeam = Blocko.instance.gameTeamHandler.getTeam(setupSession.arenaId, teamName) ?: return
             player.translateMessage("blocko.setup.team_path_already_completed",
                 Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
                 Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
             return
         }
 
-        if (possibleField.properties.getFieldId(teamName) != null) {
+        if (possibleField.properties.getTeamPathId(teamName) != null) {
             player.translateMessage("blocko.setup.field_already_has_id")
             return
         }
 
-        possibleField.properties.setFieldId(teamName, setupStep.fieldIndex)
+        possibleField.properties.setTeamPathId(teamName, setupStep.fieldIndex)
         setupStep.fieldIndex++
 
-        val gameTeam = BlockoGame.instance.gameTeamHandler.getTeam(setupSession.arenaId, teamName) ?: return
+        val gameTeam = Blocko.instance.gameTeamHandler.getTeam(setupSession.arenaId, teamName) ?: return
         val highlightMode = this.highlightHandler.getHighlightModeByTeam(gameTeam, TeamPathHighlightMode::class) ?: return
 
         this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(block.location), highlightMode)

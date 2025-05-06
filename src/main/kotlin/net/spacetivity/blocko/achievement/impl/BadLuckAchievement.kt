@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.achievement.impl
 
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.achievement.container.Requirement
 import net.spacetivity.blocko.player.GamePlayer
@@ -13,7 +13,7 @@ class BadLuckRequirement(override val translationKey: String) : Requirement {
 
     override fun isCompletedBy(gamePlayer: GamePlayer): Boolean {
         val teamName = gamePlayer.teamName ?: return false
-        val teamEntities = BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, teamName)
+        val teamEntities = Blocko.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, teamName)
         return teamEntities.none { it.isInGarage() }
     }
 

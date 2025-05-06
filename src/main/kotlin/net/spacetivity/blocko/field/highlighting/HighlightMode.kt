@@ -1,4 +1,4 @@
-package net.spacetivity.blocko.field.highlighting.scoreboard
+package net.spacetivity.blocko.field.highlighting
 
 import net.kyori.adventure.text.format.NamedTextColor
 

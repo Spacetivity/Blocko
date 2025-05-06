@@ -2,7 +2,7 @@ package net.spacetivity.blocko.inventory.profile
 
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.item.itemStack
@@ -22,7 +22,7 @@ import org.bukkit.entity.Player
 class AchievementsInventory : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
@@ -60,7 +60,7 @@ class AchievementsInventory : InventoryProvider {
     private fun fetchAchievementItems(player: Player, translation: Translation): List<InteractiveItem> {
         val items = mutableListOf<InteractiveItem>()
 
-        val achievementHandler = BlockoGame.instance.achievementHandler
+        val achievementHandler = Blocko.instance.achievementHandler
         val achievementPlayer = achievementHandler.getAchievementPlayer(player.uniqueId) ?: return items
 
         val gamePlayer = player.toGamePlayerInstance() ?: return items

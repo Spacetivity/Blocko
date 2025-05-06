@@ -9,13 +9,12 @@ import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
 import net.spacetivity.blocko.translation.translateMessage
 import org.bukkit.Bukkit
 import org.bukkit.WorldCreator
-import org.bukkit.entity.Player
 
 @SpaceSubCommand(length = 2, parts = "worldTp <world>")
 class WorldTpSubCommand : SpaceSubCommandExecutor {
 
     override fun execute(sender: SpaceCommandSender, args: List<String>) {
-        val player = sender.castTo(Player::class.java) ?: return
+        val player = sender.toPlayer()
         val worldName = findArgument(player, "world", args, String::class.java) ?: return
         val world = Bukkit.getWorld(worldName)
 

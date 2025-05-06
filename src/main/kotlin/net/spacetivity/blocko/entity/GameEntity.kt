@@ -2,7 +2,7 @@ package net.spacetivity.blocko.entity
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.player.GamePlayer
@@ -34,14 +34,14 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
     private var forceYaw: Float? = null
 
     init {
-        BlockoGame.instance.gameEntityHandler.gameEntities.put(this.arenaId, this)
+        Blocko.instance.gameEntityHandler.gameEntities.put(this.arenaId, this)
     }
 
     fun spawn(location: Location) {
         if (this.livingEntity != null) return
 
         // ensures that entities are looking at the board middle
-        val arenaMiddle = BlockoGame.instance.arenaHandler.getArena(this.arenaId)?.location ?: return
+        val arenaMiddle = Blocko.instance.arenaHandler.getArena(this.arenaId)?.location ?: return
         val direction = arenaMiddle.toVector().subtract(location.toVector()).normalize()
         val livingEntityLocation = location.clone()
 
@@ -60,7 +60,7 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
             animal.setBaby()
         }
 
-        val gameTeam = BlockoGame.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
+        val gameTeam = Blocko.instance.gameTeamHandler.getTeam(this.arenaId, this.teamName) ?: return
         this.livingEntity!!.customName(Component.text(this.teamName.uppercase(), gameTeam.color, TextDecoration.BOLD))
         MetadataUtils.apply(this.livingEntity!!, TEAM_NAME_KEY, this.teamName)
     }
@@ -126,10 +126,10 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
         val goalField = getTeamField(goalFieldId) ?: return false
         if (goalField.isTaken && goalField.currentHolder?.teamName == this.teamName) return false
 
-        val lastFieldForTeam = BlockoGame.instance.gameFieldHandler.getLastFieldForTeam(this.arenaId, this.teamName)
+        val lastFieldForTeam = Blocko.instance.gameFieldHandler.getLastFieldForTeam(this.arenaId, this.teamName)
             ?: throw NullPointerException("Last field cannot be found for team $teamName")
 
-        return !(this.currentFieldId != null && this.currentFieldId == lastFieldForTeam.properties.getFieldId(this.teamName))
+        return !(this.currentFieldId != null && this.currentFieldId == lastFieldForTeam.properties.getTeamPathId(this.teamName))
     }
 
     fun hasTargetAtGoalField(dicedNumber: Int): Boolean {
@@ -156,7 +156,7 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
         val goalField = getTeamField(goalFieldId) ?: return false
         val newField = getTeamField(newFieldId) ?: return false
 
-        val gameArena = BlockoGame.instance.arenaHandler.getArena(this.arenaId)!!
+        val gameArena = Blocko.instance.arenaHandler.getArena(this.arenaId)!!
         gameArena.sendArenaSound(Sound.BLOCK_BONE_BLOCK_STEP, 1.0F)
 
         if (this.currentFieldId != null) {
@@ -167,7 +167,7 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
             }
         } else {
             val location = LocationUtils.centerLocation(this.livingEntity!!.location)
-            val spawnLocation = BlockoGame.instance.gameTeamHandler.getLocationOfTeam(this.arenaId, this.teamName, location.x, location.y, location.z)
+            val spawnLocation = Blocko.instance.gameTeamHandler.getLocationOfTeam(this.arenaId, this.teamName, location.x, location.y, location.z)
                 ?: throw NullPointerException("Spawn location of team ${this.teamName} is not found!")
 
             spawnLocation.isTaken = false
@@ -213,7 +213,7 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
     }
 
     private fun getTeamField(id: Int): GameField? {
-        return BlockoGame.instance.gameFieldHandler.getFieldForTeam(this.arenaId, this.teamName, id)
+        return Blocko.instance.gameFieldHandler.getFieldForTeam(this.arenaId, this.teamName, id)
     }
 
     private fun isTeamGarageField(id: Int): Boolean {

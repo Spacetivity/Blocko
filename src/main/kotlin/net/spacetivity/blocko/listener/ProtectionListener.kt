@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.listener
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.GameMode
@@ -23,7 +23,7 @@ import org.bukkit.event.server.ServerListPingEvent
 import org.bukkit.event.weather.WeatherChangeEvent
 import java.util.*
 
-class ProtectionListener(private val plugin: BlockoGame) : Listener {
+class ProtectionListener(private val plugin: Blocko) : Listener {
 
     init {
         this.plugin.server.pluginManager.registerEvents(this, this.plugin)
@@ -39,18 +39,18 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     fun onInteractWithInteractiveItemStack(event: PlayerInteractEvent) {
         val itemMeta = event.item?.itemMeta ?: return
         val interactiveItemId = PersistentDataUtils.get(itemMeta, Constants.INTERACTIVE_ITEMSTACK_KEY, UUID::class.java)
-        BlockoGame.instance.interactiveActions[interactiveItemId]?.invoke(event)
+        Blocko.instance.interactiveActions[interactiveItemId]?.invoke(event)
     }
 
     @EventHandler
     fun onInteractWithGameEntity(event: PlayerInteractAtEntityEvent) {
-        if (BlockoGame.instance.gameEntityHandler.gameEntities.values().filter { it.livingEntity != null }.none { it.livingEntity!!.uniqueId == event.rightClicked.uniqueId }) return
+        if (Blocko.instance.gameEntityHandler.gameEntities.values().filter { it.livingEntity != null }.none { it.livingEntity!!.uniqueId == event.rightClicked.uniqueId }) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onDamageGameEntity(event: EntityDamageByEntityEvent) {
-        if (BlockoGame.instance.gameEntityHandler.gameEntities.values().filter { it.livingEntity != null }.none { it.livingEntity!!.uniqueId == event.entity.uniqueId }) return
+        if (Blocko.instance.gameEntityHandler.gameEntities.values().filter { it.livingEntity != null }.none { it.livingEntity!!.uniqueId == event.entity.uniqueId }) return
         event.isCancelled = true
     }
 

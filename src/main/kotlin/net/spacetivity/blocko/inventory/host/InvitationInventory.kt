@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.inventory.host
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.toGamePlayerInstance
@@ -25,7 +25,7 @@ import org.bukkit.inventory.meta.SkullMeta
 class InvitationInventory(private val arena: Arena) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))

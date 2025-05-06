@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.translation
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -15,7 +15,7 @@ import java.util.*
 object TranslationFileLoader {
 
     fun getFileContent(languageName: String): Map<String, String> {
-        val file = Paths.get(BlockoGame.instance.dataFolder.path, "locales", "$languageName.yml").toFile()
+        val file = Paths.get(Blocko.instance.dataFolder.path, "locales", "$languageName.yml").toFile()
         val result = mutableMapOf<String, String>()
         val yamlConfiguration = YamlConfiguration.loadConfiguration(file)
 
@@ -34,13 +34,13 @@ object TranslationFileLoader {
     }
 
     fun copyTranslationFileToDataFolder(languageName: String) {
-        val localesDirectory = File(BlockoGame.instance.dataFolder, "locales")
+        val localesDirectory = File(Blocko.instance.dataFolder, "locales")
         if (!localesDirectory.exists()) localesDirectory.mkdirs()
 
         val file = File(localesDirectory, "$languageName.yml")
         if (file.exists()) return
 
-        val inputStream = BlockoGame.instance.getResource("lang/$languageName.yml") ?: throw NullPointerException("File (lang/$languageName.yml) not found!")
+        val inputStream = Blocko.instance.getResource("lang/$languageName.yml") ?: throw NullPointerException("File (lang/$languageName.yml) not found!")
         inputStream.use { source -> FileOutputStream(file).use { output -> source.copyTo(output) } }
     }
 

@@ -2,12 +2,11 @@ package net.spacetivity.blocko.arena.setup
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
-import net.spacetivity.blocko.arena.setup.step.impl.SetTeamEntrancesStep
-import net.spacetivity.blocko.arena.setup.step.impl.SetTeamPathsStep
-import net.spacetivity.blocko.arena.setup.step.impl.SetTurningPointsStep
+import net.spacetivity.blocko.Blocko
+import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamEntrancesStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamPathsStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTurningPointsStep
 import net.spacetivity.blocko.inventory.setup.InvType
 import net.spacetivity.blocko.item.*
 import net.spacetivity.blocko.translation.Translation
@@ -22,17 +21,16 @@ import org.bukkit.inventory.ItemStack
 
 class SetupTool(private val holder: Player) {
 
-    val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+    val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
-    val type = Material.entries.find { it.name == BlockoGame.instance.globalConfigFile.setupItemType }
+    val type = Material.entries.find { it.name == Blocko.instance.globalConfigFile.setupItemType }
         ?: throw NullPointerException("Invalid setup item type!")
 
     fun setToPlayer() {
-        val lines = fetchLore(translation)
         val itemStack = itemStack(type) {
             meta {
                 name = translation.displayName("blocko.setup.tool.display_name")
-                lore(lines)
+                lore(fetchLore(translation))
                 hideExtraInfo()
                 applyPersistentData(Constants.SETUP_TOOL_KEY, holder.uniqueId.toString())
             }
@@ -49,7 +47,7 @@ class SetupTool(private val holder: Player) {
             lore(fetchLore(translation))
         }
 
-        this.holder.translateMessage("blocko.setup.tool.mode_change", Placeholder.parsed("mode", nextSetupStep.name))
+        this.holder.translateMessage("blocko.setup.tool.mode_change", Placeholder.parsed("mode", nextSetupStep.key))
         this.holder.playSound(this.holder.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)
     }
 
@@ -62,28 +60,28 @@ class SetupTool(private val holder: Player) {
 
         when (activeStep::class) {
             ScanBoardStep::class -> {
-                BlockoGame.instance.arenaSetupHandler.selectCorner(this.holder, event.action.isLeftClick, block.location)
+                Blocko.instance.arenaSetupHandler.selectCorner(this.holder, event.action.isLeftClick, block.location)
             }
 
             SetTurningPointsStep::class -> {
-                val scanBoardStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+                val scanBoardStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
                 val gameField = scanBoardStep.getField(block.x, block.z)
                 InventoryUtils.openGameFieldTurnInventory(this.holder, gameField)
             }
 
             SetTeamEntrancesStep::class -> {
-                val scanBoardStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+                val scanBoardStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
                 val gameField = scanBoardStep.getField(block.x, block.z)
                 InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.ENTRANCE, gameField)
             }
 
             SetTeamPathsStep::class -> {
                 if (setupSession.currentTeamName == null || (event.action.isLeftClick && setupSession.currentTeamName != null)) {
-                    val scanBoardStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return
+                    val scanBoardStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
                     val gameField = scanBoardStep.getField(block.x, block.z)
                     InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.IDS, gameField)
                 } else {
-                    BlockoGame.instance.arenaSetupHandler.setFieldTeamId(this.holder, setupSession.currentTeamName!!, block)
+                    Blocko.instance.arenaSetupHandler.setTeamPathId(this.holder, setupSession.currentTeamName!!, block)
                 }
             }
         }
@@ -100,7 +98,7 @@ class SetupTool(private val holder: Player) {
 
             val loreModeTitle = translation.displayName("blocko.setup.tool.lore.mode_title.${if (setupStep.active) "active" else "not_active"}",
                 Placeholder.parsed("mode_id", stepId.toString()),
-                Placeholder.parsed("mode", setupStep.name))
+                Placeholder.parsed("mode", setupStep.key))
 
             lore.add(loreModeTitle)
 
@@ -108,7 +106,7 @@ class SetupTool(private val holder: Player) {
                 val keybind = keybindHint.keybind
                 val hint = keybindHint.hint
 
-                val placeholders: MutableList<TagResolver> = mutableListOf(Placeholder.parsed("keybind", keybind.keybindName))
+                val placeholders = mutableListOf(Placeholder.parsed("keybind", keybind.keybindName))
 
                 placeholders.add(Placeholder.component("data_prefix", if (hint == null) Component.text("") else optionalDataPrefix))
                 placeholders.add(Placeholder.parsed("optional_data", hint ?: ""))

@@ -1,9 +1,9 @@
 package net.spacetivity.blocko.inventory.setup
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.setup.getSetupSession
-import net.spacetivity.blocko.arena.setup.step.impl.ScanBoardStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.item.hideExtraInfo
 import net.spacetivity.blocko.item.itemStack
@@ -25,10 +25,10 @@ import org.bukkit.inventory.meta.LeatherArmorMeta
 @InventoryProperties(id = "garage_field_inv", rows = 1, 9)
 class GameTeamSetupInventory(private val type: InvType, private val gameField: GameField?) : InventoryProvider {
 
-    private val highlightHandler = BlockoGame.instance.gameFieldHighlightHandler
+    private val highlightHandler = Blocko.instance.gameFieldHighlightHandler
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         val availablePositions = listOf(
             InventoryPos.of(0, 2),
@@ -68,7 +68,7 @@ class GameTeamSetupInventory(private val type: InvType, private val gameField: G
                     return@of
                 }
 
-                val setupStep = setupSession.getSetupStep(ScanBoardStep::class) ?: return@of
+                val setupStep = setupSession.getSetupStep<ScanBoardStep>() ?: return@of
 
                 when (this.type) {
                     InvType.IDS -> {

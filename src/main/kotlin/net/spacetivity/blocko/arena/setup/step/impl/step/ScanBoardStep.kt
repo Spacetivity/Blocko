@@ -1,22 +1,22 @@
-package net.spacetivity.blocko.arena.setup.step.impl
+package net.spacetivity.blocko.arena.setup.step.impl.step
 
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.setup.ScannerResult
 import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
 import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
 import net.spacetivity.blocko.arena.setup.step.SetupStep
+import net.spacetivity.blocko.arena.setup.step.impl.reset.ScanBoardResetData
 import net.spacetivity.blocko.field.GameField
-import net.spacetivity.blocko.field.highlighting.scoreboard.impl.*
+import net.spacetivity.blocko.field.highlighting.impl.*
 import net.spacetivity.blocko.team.GameTeamLocation
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-class ScanBoardStep : SetupStep {
+class ScanBoardStep : SetupStep<ScanBoardResetData> {
 
     override val id = 0
-    override val name = "Scan Board"
+    override val key = "ScanBoard"
     override val keybindHints = setOf(ToolModeKeybindHint(ToolModeKeybind.LEFT_CLICK, "Pos1"), ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, "Pos2"))
     override val validBlockTypes = setOf<Material>()
     override var active = true
@@ -33,16 +33,17 @@ class ScanBoardStep : SetupStep {
     fun isFieldAt(x: Int, z: Int): Boolean = this.gameFields.any { it.x == x && it.z == z }
     fun getField(x: Int, z: Int): GameField? = this.gameFields.find { it.x == x && it.z == z }
 
-    override fun reset(player: Player) {
+    override fun reset(player: Player, optionalData: ScanBoardResetData?) {
+        if (optionalData == null) return
+
         this.gameFields.clear()
         this.gameTeamLocations.clear()
         this.corner1 = null
         this.corner2 = null
         this.missingResults.clear()
 
-        val arenaId = player.getArena()?.id ?: return
-        BlockoGame.instance.gameFieldHighlightHandler.removeHighlightEntities(
-            arenaId,
+        Blocko.instance.gameFieldHighlightHandler.removeHighlightEntities(
+            optionalData.arenaId,
             GameFieldHighlightMode::class,
             TeamSpawnHighlightMode::class,
             TeamPathHighlightMode::class,

@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.player
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.player.ai.impl.*
 
@@ -32,8 +32,8 @@ class EntityAiHandler {
     )
 
     fun analyzeCurrentRuleSituation(gamePlayer: GamePlayer, dicedNumber: Int): Pair<EntityPickRule, GameEntity?> {
-        val gameEntities = BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
-        val startField = BlockoGame.instance.gameFieldHandler.getFirstFieldForTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!
+        val gameEntities = Blocko.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
+        val startField = Blocko.instance.gameFieldHandler.getFirstFieldForTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!
         var bestRule: Pair<EntityPickRule, GameEntity?> = Pair(EntityPickRule.NOT_MOVABLE, null)
 
         for (entity in gameEntities) {

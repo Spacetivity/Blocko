@@ -3,7 +3,7 @@ package net.spacetivity.blocko.phase
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.phase.impl.IngamePhase
@@ -34,7 +34,7 @@ class GamePhaseHandler {
 
         if (newGamePhase == null) {
             arena.reset(false)
-            val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+            val translation = Blocko.instance.translationHandler.getSelectedTranslation()
             Bukkit.getConsoleSender().sendMessage(translation.line("blocko.phase.not_found",
                 Placeholder.parsed("priority", newPhasePriority.toString()),
                 Placeholder.parsed("id", arena.id.value)))
@@ -42,7 +42,7 @@ class GamePhaseHandler {
         }
 
         if (newGamePhase is IngamePhase) {
-            val availableTeams = BlockoGame.instance.gameTeamHandler.gameTeams[arena.id].filter { it.teamMembers.isNotEmpty() }
+            val availableTeams = Blocko.instance.gameTeamHandler.gameTeams[arena.id].filter { it.teamMembers.isNotEmpty() }
             val smallestTeamId = availableTeams.minOfOrNull { it.teamId }
 
             newGamePhase.controllingTeamId = availableTeams.filter { it.teamId == smallestTeamId }.random().teamId
@@ -62,7 +62,7 @@ class GamePhaseHandler {
         arena.phase = newGamePhase
         newGamePhase.start()
 
-        BlockoGame.instance.arenaSignHandler.updateArenaSign(arena)
+        Blocko.instance.arenaSignHandler.updateArenaSign(arena)
     }
 
     fun initIndexPhase(arena: Arena) {

@@ -1,6 +1,6 @@
 package net.spacetivity.blocko.phase.impl
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.countdown.impl.IdleCountdown
@@ -27,7 +27,7 @@ class IdlePhase(arenaId: ArenaId) : GamePhase(arenaId, "idling", 0, IdleCountdow
     }
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         hotbarItems[0] = itemStack(Material.CLOCK) {
             meta {

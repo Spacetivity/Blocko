@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.inventory.profile
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.item.itemStack
@@ -27,7 +27,7 @@ import org.bukkit.inventory.meta.SkullMeta
 class StatsInventory(private val arena: Arena, private val statsPlayer: StatsPlayer, private val showSearchPlayerItem: Boolean) : InventoryProvider {
 
     override fun init(player: Player, controller: InventoryController) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
         controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
@@ -39,7 +39,7 @@ class StatsInventory(private val arena: Arena, private val statsPlayer: StatsPla
         }) { _, _, _ ->
 
             if (this.statsPlayer.uuid != player.uniqueId) {
-                val selfStatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId) ?: return@of
+                val selfStatsPlayer = Blocko.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId) ?: return@of
                 InventoryUtils.openStatsInventory(player, selfStatsPlayer)
                 return@of
             }

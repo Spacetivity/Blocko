@@ -1,21 +1,20 @@
 package net.spacetivity.blocko.command.commands.arena
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.command.api.SpaceCommandSender
 import net.spacetivity.blocko.command.api.extension.generateSuggestions
 import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommand
 import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
 import net.spacetivity.blocko.translation.translateMessage
-import org.bukkit.entity.Player
 
 @SpaceSubCommand(length = 2, parts = "arena list", permission = "blocko.command.admin")
 class ArenaListSubCommand : SpaceSubCommandExecutor {
 
     override fun execute(sender: SpaceCommandSender, args: List<String>) {
-        val player = sender.castTo(Player::class.java) ?: return
+        val player = sender.toPlayer()
 
-        val cachedArenas = BlockoGame.Companion.instance.arenaHandler.cachedArenas
+        val cachedArenas = Blocko.Companion.instance.arenaHandler.cachedArenas
 
         if (cachedArenas.isEmpty()) {
             player.translateMessage("blocko.command.blocko.no_arenas_found")

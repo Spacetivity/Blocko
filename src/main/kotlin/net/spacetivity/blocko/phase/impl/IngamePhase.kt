@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.phase.impl
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.RushExpertAchievement
 import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
@@ -38,7 +38,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
     var matchStartTime: Long? = null
 
     override fun start() {
-        BlockoGame.instance.arenaSignHandler.updateArenaSign(getArena())
+        Blocko.instance.arenaSignHandler.updateArenaSign(getArena())
 
         this.phaseMode = GamePhaseMode.DICE
 
@@ -57,7 +57,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
             val statsPlayer = gamePlayer.toStatsPlayerInstance()
             if (statsPlayer != null) statsPlayer.wonGames += 1
 
-            BlockoGame.instance.bossbarHandler.unregisterBossbar(player, Constants.TIMEOUT_BOSSBAR_NAME)
+            Blocko.instance.bossbarHandler.unregisterBossbar(player, Constants.TIMEOUT_BOSSBAR_NAME)
 
             gamePlayer.grantIfCompletedBy(RushExpertAchievement::class)
             gamePlayer.grantIfCompletedBy(WinMonsterAchievement::class)
@@ -89,9 +89,9 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     override fun initPhaseHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
-        hotbarItems[0] = BlockoGame.instance.diceHandler.getDiceItem()
+        hotbarItems[0] = Blocko.instance.diceHandler.getDiceItem()
 
         for ((entityIndex, i) in (1..4).withIndex()) {
             hotbarItems[i] = itemStack(Material.ARMOR_STAND) {
@@ -138,7 +138,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     override fun initSpectatorHotbarItems(hotbarItems: MutableMap<Int, ItemStack>) {
-        val translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         hotbarItems[8] = itemStack(Material.SLIME_BALL) {
             meta {
@@ -158,7 +158,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
     fun setNextControllingTeam(): GameTeam? {
         for (gamePlayer in getArena().currentPlayers) {
             if (gamePlayer.isAI) continue
-            BlockoGame.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
+            Blocko.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }
 
         GameScoreboardUtils.updateDicedNumberLine(this.arenaId, null)
@@ -171,7 +171,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
         if (this.controllingTeamId != null && oldControllingGamePlayer != null)
             getHighlightedEntities(oldControllingGamePlayer, getArena()).forEach { it.toggleHighlighting(false) }
 
-        val availableTeams = BlockoGame.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
+        val availableTeams = Blocko.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
         val newControllingTeam = if (hasControllingTeamMemberDicedSix(oldControllingGamePlayerDicedNumber)) getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
         val newControllingTeamId = newControllingTeam?.teamId ?: availableTeams.minOf { it.teamId }
 
@@ -196,7 +196,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun getControllingTeam(): GameTeam? {
-        return BlockoGame.instance.gameTeamHandler.gameTeams.get(this.arenaId).find { it.teamId == this.controllingTeamId }
+        return Blocko.instance.gameTeamHandler.gameTeams.get(this.arenaId).find { it.teamId == this.controllingTeamId }
     }
 
     fun getControllingGamePlayer(): GamePlayer? {
@@ -241,7 +241,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     private fun getHighlightedEntities(gamePlayer: GamePlayer, arena: Arena): List<GameEntity> {
-        return BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(arena.id, gamePlayer.teamName!!).filter { it.isHighlighted }
+        return Blocko.instance.gameEntityHandler.getEntitiesFromTeam(arena.id, gamePlayer.teamName!!).filter { it.isHighlighted }
     }
 
 }

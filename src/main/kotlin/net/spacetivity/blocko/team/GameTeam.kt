@@ -2,7 +2,7 @@ package net.spacetivity.blocko.team
 
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.translation.translateMessage
 import java.util.*
@@ -32,7 +32,7 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
             Placeholder.parsed("team_color", "<${this.color.asHexString()}>"),
             Placeholder.parsed("team_name", this.name.lowercase().replaceFirstChar { it.uppercase() }))
 
-        BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
+        Blocko.instance.playerFormatHandler.setTablistFormatForAll()
     }
 
     fun quit(gamePlayer: GamePlayer) {
@@ -45,7 +45,7 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
         gamePlayer.teamName = null
         gamePlayer.translateMessage("blocko.team.quit")
 
-        BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
+        Blocko.instance.playerFormatHandler.setTablistFormatForAll()
     }
 
     fun getFreeSpawnLocation(): GameTeamLocation? {

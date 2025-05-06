@@ -3,7 +3,7 @@ package net.spacetivity.blocko.arena
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.phase.impl.EndingPhase
 import net.spacetivity.blocko.phase.impl.IdlePhase
@@ -25,7 +25,7 @@ import java.util.*
 
 class ArenaHandler {
 
-    private val gamePhaseHandler = BlockoGame.instance.gamePhaseHandler
+    private val gamePhaseHandler = Blocko.instance.gamePhaseHandler
     val cachedArenaIds = mutableListOf<ArenaId>()
     val cachedArenas = mutableListOf<Arena>()
 
@@ -81,7 +81,7 @@ class ArenaHandler {
         val serializedLocation = "${location.x}:${location.y}:${location.z}:${location.yaw}:${location.pitch}"
         val status = ArenaStatus.CONFIGURATING
 
-        if (getArena(id) != null || (BlockoGame.instance.arenaHandler.cachedArenas.size >= BlockoGame.instance.globalConfigFile.gameArenaMaxParallelAmount)) return false
+        if (getArena(id) != null || (Blocko.instance.arenaHandler.cachedArenas.size >= Blocko.instance.globalConfigFile.gameArenaMaxParallelAmount)) return false
 
         transaction {
             ArenaDAO.insert { statement ->
@@ -103,18 +103,22 @@ class ArenaHandler {
         return true
     }
 
-    fun deleteArena(id: ArenaId) {
-        BlockoGame.instance.gameFieldHandler.deleteFields(id)
-        BlockoGame.instance.gameTeamHandler.deleteTeamSpawns(id)
-        BlockoGame.instance.gamePhaseHandler.deletePhases(id)
-        BlockoGame.instance.gameTeamHandler.gameTeams.removeAll(id)
+    fun deleteArena(arenaId: ArenaId) {
+        val arenaSign = Blocko.instance.arenaSignHandler.getSign(arenaId)
+
+        Blocko.instance.gameFieldHandler.deleteFields(arenaId)
+        Blocko.instance.gameTeamHandler.deleteTeamSpawns(arenaId)
+        Blocko.instance.gamePhaseHandler.deletePhases(arenaId)
+        Blocko.instance.gameTeamHandler.gameTeams.removeAll(arenaId)
 
         transaction {
-            ArenaDAO.deleteWhere { ArenaDAO.id eq id }
+            ArenaDAO.deleteWhere { ArenaDAO.id eq arenaId }
         }
 
-        this.cachedArenaIds.remove(id)
-        this.cachedArenas.removeIf { it.id == id }
+        this.cachedArenaIds.remove(arenaId)
+        this.cachedArenas.removeIf { it.id == arenaId }
+
+        if (arenaSign != null) loadJoinSign(arenaSign.location, null)
     }
 
     fun resetArenas(shutdown: Boolean) {

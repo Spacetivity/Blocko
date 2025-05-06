@@ -2,8 +2,7 @@ package net.spacetivity.blocko.item
 
 import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.Component.text
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Bukkit
@@ -39,7 +38,7 @@ fun ItemStack.onInteract(action: (PlayerInteractEvent) -> Unit): ItemStack {
     this.meta {
         applyPersistentData(Constants.INTERACTIVE_ITEMSTACK_KEY, id)
     }
-    BlockoGame.instance.interactiveActions[id] = action
+    Blocko.instance.interactiveActions[id] = action
     return this
 }
 
@@ -54,28 +53,6 @@ inline fun <reified T : ItemMeta> itemMeta(material: Material, builder: T.() -> 
 @JvmName("simpleItemMeta")
 inline fun itemMeta(material: Material, builder: ItemMeta.() -> Unit) = itemMeta<ItemMeta>(material, builder)
 
-inline fun ItemMeta.setLore(builder: ItemMetaLoreBuilder.() -> Unit) {
-    lore(ItemMetaLoreBuilder().apply(builder).components)
-}
-
-inline fun ItemMeta.addLore(builder: ItemMetaLoreBuilder.() -> Unit) {
-    val newLore = lore() ?: mutableListOf<Component>()
-    newLore.addAll(ItemMetaLoreBuilder().apply(builder).components)
-    lore(newLore)
-}
-
-class ItemMetaLoreBuilder {
-    val components = mutableListOf<Component>()
-
-    operator fun Component.unaryPlus() {
-        components += this
-    }
-
-    operator fun String.unaryPlus() {
-        components += text(this)
-    }
-}
-
 fun SkullMeta.setValue(value: String) {
     val profile = Bukkit.createProfile(UUID.randomUUID().toString().split("-")[0])
     profile.setProperty(ProfileProperty("textures", value))
@@ -85,6 +62,7 @@ fun SkullMeta.setValue(value: String) {
 fun ItemMeta.flag(itemFlag: ItemFlag) = addItemFlags(itemFlag)
 
 fun ItemMeta.flags(vararg itemFlag: ItemFlag) = addItemFlags(*itemFlag)
+
 fun ItemMeta.hideExtraInfo() {
     flag(ItemFlag.HIDE_ATTRIBUTES)
     flag(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
@@ -94,15 +72,8 @@ fun ItemMeta.hideExtraInfo() {
     flag(ItemFlag.HIDE_ARMOR_TRIM)
 }
 
-fun ItemMeta.removeFlag(itemFlag: ItemFlag) = removeItemFlags(itemFlag)
-
-fun ItemMeta.removeFlags(vararg itemFlag: ItemFlag) = removeItemFlags(*itemFlag)
-
 fun ItemMeta.applyPersistentData(key: String, value: Any) =
     PersistentDataUtils.apply(this, key, value)
-
-fun <T> ItemMeta.getPersistentDataValue(key: String, clazz: Class<T>): T? =
-    PersistentDataUtils.get(this, key, clazz)
 
 var ItemMeta.name: Component?
     get() = if (hasDisplayName()) displayName() else null

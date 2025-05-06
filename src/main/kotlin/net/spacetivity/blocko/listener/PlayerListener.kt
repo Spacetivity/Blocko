@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.BadMannersAchievement
 import net.spacetivity.blocko.achievement.impl.FairPlayAchievement
@@ -35,9 +35,9 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
-class PlayerListener(private val plugin: BlockoGame) : Listener {
+class PlayerListener(private val plugin: Blocko) : Listener {
 
-    private val gameArenaSignHandler = BlockoGame.instance.arenaSignHandler
+    private val gameArenaSignHandler = Blocko.instance.arenaSignHandler
 
     init {
         this.plugin.server.pluginManager.registerEvents(this, this.plugin)
@@ -50,7 +50,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
         player.allowFlight = true
         player.isFlying = true
 
-        val lobbySpawn = BlockoGame.instance.lobbySpawnHandler.lobbySpawn
+        val lobbySpawn = Blocko.instance.lobbySpawnHandler.lobbySpawn
         if (lobbySpawn != null) player.teleport(lobbySpawn.toBukkitInstance())
 
         this.plugin.statsPlayerHandler.createOrLoadStatsPlayer(player.uniqueId)
@@ -133,7 +133,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
     fun openSignEvent(event: PlayerOpenSignEvent) {
         val player = event.player
 
-        if (player.inventory.itemInMainHand.type == Material.DIAMOND_HOE || BlockoGame.instance.arenaSignHandler.existsLocation(event.sign.location))
+        if (player.inventory.itemInMainHand.type == Material.DIAMOND_HOE || Blocko.instance.arenaSignHandler.existsLocation(event.sign.location))
             event.isCancelled = true
     }
 
@@ -189,8 +189,8 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
 
                 event.isCancelled = true
 
-                val arenaSign = BlockoGame.instance.arenaSignHandler.getSign(block.location) ?: return
-                val gameArena = if (arenaSign.arenaId == null) null else BlockoGame.instance.arenaHandler.getArena(arenaSign.arenaId!!)
+                val arenaSign = Blocko.instance.arenaSignHandler.getSign(block.location) ?: return
+                val gameArena = if (arenaSign.arenaId == null) null else Blocko.instance.arenaHandler.getArena(arenaSign.arenaId!!)
 
                 if (gameArena == null) {
                     player.translateMessage("blocko.sign.no_arena_assigned")
@@ -263,7 +263,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
                 if (!PersistentDataUtils.has(itemInHand.itemMeta, ENTITY_SELECTOR_KEY)) return
 
                 val entityId = PersistentDataUtils.get(itemInHand.itemMeta, ENTITY_SELECTOR_KEY, Int::class.java)
-                val gameEntity = BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName!!).find { it.entityId == entityId } ?: return
+                val gameEntity = Blocko.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName!!).find { it.entityId == entityId } ?: return
 
                 if (gamePlayer.dicedNumber!! != 6 && gameEntity.currentFieldId == null) {
                     player.translateMessage("blocko.main_game_loop.needs_a_six")
@@ -307,7 +307,7 @@ class PlayerListener(private val plugin: BlockoGame) : Listener {
     }
 
     private fun getOtherHighlightedEntities(gamePlayer: GamePlayer, arena: Arena, highlightedEntity: GameEntity): List<GameEntity> {
-        return BlockoGame.instance.gameEntityHandler.getEntitiesFromTeam(arena.id, gamePlayer.teamName!!).filter { it.livingEntity?.uniqueId != highlightedEntity.livingEntity?.uniqueId }
+        return Blocko.instance.gameEntityHandler.getEntitiesFromTeam(arena.id, gamePlayer.teamName!!).filter { it.livingEntity?.uniqueId != highlightedEntity.livingEntity?.uniqueId }
     }
 
 }

@@ -2,7 +2,7 @@ package net.spacetivity.blocko.team
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
@@ -20,7 +20,7 @@ class GameTeamHandler {
     val gameTeams: Multimap<ArenaId, GameTeam> = ArrayListMultimap.create()
 
     init {
-        for (arena in BlockoGame.instance.arenaHandler.cachedArenas) {
+        for (arena in Blocko.instance.arenaHandler.cachedArenas) {
             this.gameTeams.putAll(arena.id, Constants.GAME_TEAMS)
         }
 
