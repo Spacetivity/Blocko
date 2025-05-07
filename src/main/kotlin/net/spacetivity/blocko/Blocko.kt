@@ -201,9 +201,8 @@ class Blocko : JavaPlugin() {
 
     private fun registerCommand(executorClass: KClass<out SpaceMainCommandExecutor>) {
         val commandExecutor = executorClass.java.getDeclaredConstructor().newInstance()
-        val spaceCommand = this.commandController.registerCommand(commandExecutor)
         val constructor = BukkitCommandExecutor::class.java.getDeclaredConstructor(SpaceCommand::class.java, Blocko::class.java)
-        constructor.newInstance(spaceCommand, this)
+        constructor.newInstance(this.commandController.registerCommand(commandExecutor), this)
     }
 
     companion object {

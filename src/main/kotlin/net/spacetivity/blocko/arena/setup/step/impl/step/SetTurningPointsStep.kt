@@ -42,7 +42,7 @@ class SetTurningPointsStep : SetupStep<IgnoredResetData> {
             Blocko.instance.gameFieldHighlightHandler.spawnOrUpdateHighlightEntity(gameField.arenaId, gameField.getWorldPosition(true), GameFieldHighlightMode::class)
         }
 
-        player.translateMessage("blocko.setup.reset.step.success.generic", Placeholder.parsed("key", this.key))
+        player.translateMessage("blocko.setup.reset.step.success.generic", Placeholder.parsed("step", this.key))
     }
 
 }

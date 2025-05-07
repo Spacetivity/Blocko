@@ -2,7 +2,7 @@ name: Blocko
 version: 1.0
 api-version: "1.21.4"
 main: net.spacetivity.blocko.Blocko
-description: A "Mensch Ärgere dich nicht! / Ludo" inspired game in Minecraft
+description: A "Mensch Ärgere dich nicht! / Ludo" clone in Minecraft
 website: wiki.spacetivity.net
 commands:
   blocko:

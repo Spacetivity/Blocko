@@ -5,7 +5,6 @@ import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.countdown.GameCountdown
 import net.spacetivity.blocko.stats.StatsType
-import net.spacetivity.blocko.stats.UpdateOperation
 import net.spacetivity.blocko.stats.addCoins
 import org.bukkit.Sound
 import org.bukkit.scheduler.BukkitTask
@@ -31,7 +30,7 @@ class EndingCountdown(arenaId: ArenaId) : GameCountdown(arenaId, Blocko.instance
             if (lobbySpawn != null) gamePlayer.toBukkitInstance()?.teleport(lobbySpawn.toBukkitInstance())
 
             val statsPlayer = Blocko.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: continue
-            statsPlayer.update(StatsType.PLAYED_GAMES, UpdateOperation.INCREASE, 1)
+            statsPlayer.update(StatsType.PLAYED_GAMES, true, 1)
 
             gamePlayer.addCoins(60, false)
             gamePlayer.matchStats.gainedCoins += 60

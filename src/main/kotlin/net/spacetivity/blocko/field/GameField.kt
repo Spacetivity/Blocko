@@ -12,7 +12,6 @@ import net.spacetivity.blocko.entity.GameEntityStatus
 import net.spacetivity.blocko.field.highlighting.HighlightMode
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsType
-import net.spacetivity.blocko.stats.UpdateOperation
 import net.spacetivity.blocko.stats.addCoins
 import org.bukkit.Location
 import org.bukkit.Sound
@@ -87,7 +86,7 @@ class GameField(
 
         val statsPlayer = Blocko.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
         val statsType = if (isReward) StatsType.ELIMINATED_OPPONENTS else StatsType.KNOCKED_OUT_BY_OPPONENTS
-        statsPlayer.update(statsType, UpdateOperation.INCREASE, 1)
+        statsPlayer.update(statsType, true, 1)
 
         val coinsPerElimination = Blocko.instance.globalConfigFile.coinsPerElimination
 

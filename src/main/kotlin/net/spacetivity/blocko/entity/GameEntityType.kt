@@ -9,7 +9,6 @@ import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.*
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.stats.StatsType
-import net.spacetivity.blocko.stats.UpdateOperation
 import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.NumberUtils
@@ -124,7 +123,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
         val statsPlayer = gamePlayer.toStatsPlayerInstance() ?: return
 
         Blocko.instance.gameEntityHandler.unlockEntityType(player.uniqueId, this)
-        statsPlayer.update(StatsType.COINS, UpdateOperation.DECREASE, this.price)
+        statsPlayer.update(StatsType.COINS, false, this.price)
         statsPlayer.updateDbEntry()
 
         gamePlayer.grantIfCompletedBy(EntityCollectorAchievement::class)

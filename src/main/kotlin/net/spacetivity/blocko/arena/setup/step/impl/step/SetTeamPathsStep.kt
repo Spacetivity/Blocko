@@ -71,7 +71,7 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
                 fieldsWithTeamPathId.sortedByDescending { it.properties.getTeamPathId(teamName) }.take(fieldAmount)
             }
 
-            if ((fieldsWithTeamPathId.size < fieldsTorRemoveTeamPath.size) || fieldsWithTeamPathId.isEmpty() || fieldsTorRemoveTeamPath.isEmpty()) {
+            if ((fieldAmount > fieldsWithTeamPathId.size) || fieldsWithTeamPathId.isEmpty() || fieldsTorRemoveTeamPath.isEmpty()) {
                 player.translateMessage("blocko.setup.reset.step.field_amount_to_big")
                 return
             }
