@@ -10,7 +10,7 @@ import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.*
-import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
+import net.spacetivity.blocko.scoreboard.ScoreboardUtils
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
@@ -120,7 +120,7 @@ class DiceHandler {
 
         gamePlayer.translateActionBar("blocko.main_game_loop.current_dice_number", Placeholder.parsed("dice_number", diceSide.first.toString()))
 
-        GameScoreboardUtils.updateDicedNumberLine(gamePlayer.arenaId, diceSession.currentDiceNumber)
+        ScoreboardUtils.updateDicedNumberLine(gamePlayer.arenaId, diceSession.currentDiceNumber)
     }
 
     private fun getDiceDisplayName(diceNumber: Int): Component {

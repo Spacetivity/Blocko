@@ -6,7 +6,7 @@ import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
+import net.spacetivity.blocko.scoreboard.ScoreboardUtils
 import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.MetadataUtils
@@ -202,7 +202,7 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
         if (reachedGoal) {
             if (goalField.isGarageField) this.entityStatus = GameEntityStatus.SAVED
             else this.entityStatus = GameEntityStatus.ON_FIELD
-            GameScoreboardUtils.updateEntityStatusLine(this)
+            ScoreboardUtils.updateEntityStatusLine(this)
         }
 
         return reachedGoal

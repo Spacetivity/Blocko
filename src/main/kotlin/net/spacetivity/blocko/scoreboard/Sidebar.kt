@@ -9,7 +9,7 @@ import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Objective
 import org.bukkit.scoreboard.Scoreboard
 
-class Sidebar(val viewer: Player, private val title: Component, private val lines: Map<Int, Component>) {
+class Sidebar(val viewer: Player, private val title: Component, val lines: Map<Int, Component>) {
 
     private var scoreboard: Scoreboard
     private var objective: Objective

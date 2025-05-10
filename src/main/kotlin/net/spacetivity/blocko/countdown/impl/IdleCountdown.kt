@@ -5,7 +5,7 @@ import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.countdown.GameCountdown
-import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
+import net.spacetivity.blocko.scoreboard.ScoreboardUtils
 import org.bukkit.Sound
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
@@ -41,7 +41,7 @@ class IdleCountdown(arenaId: ArenaId) : GameCountdown(arenaId, Blocko.instance.g
             Blocko.instance.gameTeamHandler.gameTeams[gameArena.id].first { it.teamMembers.isEmpty() }.join(gamePlayer)
         }
 
-        for (player in gameArena.getAllPlayers()) GameScoreboardUtils.updateTeamLine(player)
+        for (player in gameArena.getAllPlayers()) ScoreboardUtils.updateTeamLine(player)
 
         for (gameTeamLocation in Blocko.instance.gameTeamHandler.getLocationsOfAllTeams(this.arenaId)) {
             val gameTeam = Blocko.instance.gameTeamHandler.getTeam(gameTeamLocation.arenaId, gameTeamLocation.teamName)

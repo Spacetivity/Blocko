@@ -8,7 +8,7 @@ import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.playSound
-import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
+import net.spacetivity.blocko.scoreboard.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import java.time.Duration
@@ -49,7 +49,7 @@ class GamePhaseHandler {
             newGamePhase.lastControllingTeamId = newGamePhase.controllingTeamId
 
             val controllingTeam = newGamePhase.getControllingTeam() ?: return
-            GameScoreboardUtils.updateControllingTeamLine(arena, controllingTeam)
+            ScoreboardUtils.updateControllingTeamLine(arena, controllingTeam)
 
             val controllingPlayer = arena.currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
 

@@ -13,6 +13,7 @@ import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
 import net.spacetivity.blocko.field.GameFieldRotation
 import net.spacetivity.blocko.field.highlighting.impl.*
+import net.spacetivity.blocko.scoreboard.ScoreboardUtils
 import net.spacetivity.blocko.team.GameTeamLocation
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
@@ -80,6 +81,8 @@ class ArenaSetupHandler {
         val setupTool = SetupTool(player)
         setupTool.setToPlayer()
 
+        ScoreboardUtils.setSetupSidebar(player)
+
         player.getSetupSession()?.setupTool = setupTool
         player.translateMessage("blocko.setup.setup_mode_activated")
     }
@@ -144,6 +147,8 @@ class ArenaSetupHandler {
         }
 
         if (setupItemStack != null) player.inventory.remove(setupItemStack)
+
+        ScoreboardUtils.removeSidebar(player)
 
         player.translateMessage("blocko.setup.setup_mode_deactivated")
         this.activeSetupSessions.remove(player.uniqueId)

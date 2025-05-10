@@ -1,5 +1,6 @@
 package net.spacetivity.blocko.arena.setup.step.impl.step
 
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
@@ -30,6 +31,10 @@ class SetTurningPointsStep : SetupStep<IgnoredResetData> {
     )
 
     override var active = false
+
+    override fun getSidebarLines(player: Player): List<Component> {
+        return emptyList()
+    }
 
     override fun reset(player: Player, optionalData: IgnoredResetData?) {
         val setupSession = player.getSetupSession() ?: return

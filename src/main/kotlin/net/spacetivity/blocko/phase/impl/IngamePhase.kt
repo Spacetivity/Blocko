@@ -14,7 +14,7 @@ import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.playSound
-import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
+import net.spacetivity.blocko.scoreboard.ScoreboardUtils
 import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.translateMessage
@@ -161,7 +161,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
             Blocko.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }
 
-        GameScoreboardUtils.updateDicedNumberLine(this.arenaId, null)
+        ScoreboardUtils.updateDicedNumberLine(this.arenaId, null)
 
         val oldControllingGamePlayer = getControllingGamePlayer()
         val oldControllingGamePlayerDicedNumber = oldControllingGamePlayer?.dicedNumber
@@ -181,8 +181,8 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
         val controllingTeam = getControllingTeam()
 
         if (controllingTeam != null) {
-            GameScoreboardUtils.updateControllingTeamLine(getArena(), controllingTeam)
-            GameScoreboardUtils.updateAllEntityStatusLines(this.arenaId, controllingTeam)
+            ScoreboardUtils.updateControllingTeamLine(getArena(), controllingTeam)
+            ScoreboardUtils.updateAllEntityStatusLines(this.arenaId, controllingTeam)
 
             val gamePlayer = getArena().currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
 

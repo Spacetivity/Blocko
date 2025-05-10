@@ -6,6 +6,8 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.id.ArenaId
+import net.spacetivity.blocko.arena.setup.getSetupSession
+import net.spacetivity.blocko.arena.setup.step.SetupStep
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
@@ -14,7 +16,48 @@ import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import org.bukkit.entity.Player
 
-object GameScoreboardUtils {
+object ScoreboardUtils {
+
+    fun setSetupSidebar(player: Player) {
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
+
+        val setupSession = player.getSetupSession() ?: return
+        val activeSetupStep = setupSession.getActiveSetupStep() ?: return
+
+        val sidebarBuilder = SidebarBuilder(player)
+        sidebarBuilder.setTitle(Component.text("SETUP", NamedTextColor.YELLOW))
+        sidebarBuilder.addBlankLine()
+        sidebarBuilder.addLine(Component.text("Active step: ${activeSetupStep.key}"))
+        sidebarBuilder.addBlankLine()
+
+        val lines = activeSetupStep.getSidebarLines(player)
+
+        if (lines.isNotEmpty()) {
+            sidebarBuilder.addLine(Component.text("Configured data:"))
+            sidebarBuilder.addBlankLine()
+        }
+
+        for (line in lines) {
+            sidebarBuilder.addLine(line)
+        }
+
+        Blocko.instance.sidebarHandler.registerSidebar(sidebarBuilder.build())
+    }
+
+    fun updateSetupDataLines(player: Player, setupStep: SetupStep<*>) {
+        val sidebar = Blocko.instance.sidebarHandler.getSidebar(player.uniqueId) ?: return
+
+        val sidebarLines = setupStep.getSidebarLines(player)
+        if (sidebarLines.isEmpty()) return
+
+        val lineIds = sidebar.lines.keys
+
+        for ((index, lineId) in lineIds.withIndex()) {
+            //TODO: maybe insert a (index -1)
+            if (index >= sidebarLines.size) break
+            sidebar.updateLine(lineId, sidebarLines[index])
+        }
+    }
 
     fun setGameSidebar(player: Player) {
         val translation = Blocko.instance.translationHandler.getSelectedTranslation()
@@ -35,7 +78,7 @@ object GameScoreboardUtils {
             .build())
     }
 
-    fun removeGameSidebar(player: Player) {
+    fun removeSidebar(player: Player) {
         Blocko.instance.sidebarHandler.unregisterSidebar(player.uniqueId)
     }
 

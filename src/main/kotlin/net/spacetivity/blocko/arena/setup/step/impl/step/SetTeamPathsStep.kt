@@ -1,5 +1,6 @@
 package net.spacetivity.blocko.arena.setup.step.impl.step
 
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
@@ -9,6 +10,7 @@ import net.spacetivity.blocko.arena.setup.step.SetupStep
 import net.spacetivity.blocko.arena.setup.step.impl.reset.TeamPathResetData
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.utils.Constants
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
@@ -37,6 +39,27 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
     )
 
     override var active = false
+
+    override fun getSidebarLines(player: Player): List<Component> {
+        val setupSession = player.getSetupSession() ?: return emptyList()
+        val scanBoardStep = setupSession.getSetupStep<ScanBoardStep>() ?: return emptyList()
+
+        val lines = mutableListOf<Component>()
+
+        for (gameTeam in Constants.GAME_TEAMS) {
+            var allFieldsHaveTeamIds = true
+
+            for (gameField in scanBoardStep.gameFields) {
+                if (gameField.properties.getTeamPathId(gameTeam.name) != null) continue
+                allFieldsHaveTeamIds = false
+            }
+
+            val teamLine = Component.text("${gameTeam.name} entrance: ${if (allFieldsHaveTeamIds) "✓" else "✕"}")
+            lines.add(teamLine)
+        }
+
+        return lines
+    }
 
     override fun reset(player: Player, optionalData: TeamPathResetData?) {
         val setupSession = player.getSetupSession() ?: return

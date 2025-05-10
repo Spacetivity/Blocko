@@ -9,7 +9,7 @@ import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.getTeam
-import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
+import net.spacetivity.blocko.scoreboard.ScoreboardUtils
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.team.GameTeamOptions
 import net.spacetivity.blocko.translation.translateMessage
@@ -72,11 +72,11 @@ class Arena(
         this.phase.setupPlayerInventory(player)
 
         player.translateMessage("blocko.arena.spectate_join")
-        GameScoreboardUtils.setGameSidebar(player)
+        ScoreboardUtils.setGameSidebar(player)
 
         val ingamePhase = this.phase as IngamePhase
         val controllingTeam = ingamePhase.getControllingTeam() ?: return
-        GameScoreboardUtils.updateControllingTeamLine(this, controllingTeam)
+        ScoreboardUtils.updateControllingTeamLine(this, controllingTeam)
         Blocko.instance.playerFormatHandler.setTablistFormatForAll()
 
         togglePlayerVisibility(player, PlayerVisibility.SPECTATING)
@@ -96,7 +96,7 @@ class Arena(
         }
 
         Blocko.instance.bossbarHandler.clearBossbars(player)
-        GameScoreboardUtils.removeGameSidebar(player)
+        ScoreboardUtils.removeSidebar(player)
         Blocko.instance.playerFormatHandler.setTablistFormatForAll()
 
         this.spectatorPlayers.remove(player.uniqueId)
@@ -145,7 +145,7 @@ class Arena(
 
             togglePlayerVisibility(bukkitPlayer!!, PlayerVisibility.IN_ARENA)
 
-            GameScoreboardUtils.setGameSidebar(bukkitPlayer)
+            ScoreboardUtils.setGameSidebar(bukkitPlayer)
             Blocko.instance.playerFormatHandler.setTablistFormatForAll()
         } else {
             val aiStatsPlayer = StatsPlayer(uuid, 0, 0, 0, 0, 0)
@@ -178,7 +178,7 @@ class Arena(
 
         if (!gamePlayer.isAI) {
             Blocko.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)?.updateDbEntry()
-            GameScoreboardUtils.removeGameSidebar(player)
+            ScoreboardUtils.removeSidebar(player)
         }
 
         if (phase.isIngame()) {
@@ -236,7 +236,7 @@ class Arena(
             if (lobbySpawn != null && player.world.name != lobbySpawn.worldName)
                 player.teleport(lobbySpawn.toBukkitInstance())
 
-            GameScoreboardUtils.removeGameSidebar(player)
+            ScoreboardUtils.removeSidebar(player)
             Blocko.instance.bossbarHandler.clearBossbars(player)
 
             this.phase.clearPlayerInventory(player)

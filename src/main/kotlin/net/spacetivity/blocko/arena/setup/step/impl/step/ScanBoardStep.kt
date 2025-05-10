@@ -1,5 +1,6 @@
 package net.spacetivity.blocko.arena.setup.step.impl.step
 
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.setup.ScannerResult
@@ -34,6 +35,10 @@ class ScanBoardStep : SetupStep<ScanBoardResetData> {
     fun areCornersSet(): Boolean = this.corner1 != null && this.corner2 != null
     fun isFieldAt(x: Int, z: Int): Boolean = this.gameFields.any { it.x == x && it.z == z }
     fun getField(x: Int, z: Int): GameField? = this.gameFields.find { it.x == x && it.z == z }
+
+    override fun getSidebarLines(player: Player): List<Component> {
+        return emptyList()
+    }
 
     override fun reset(player: Player, optionalData: ScanBoardResetData?) {
         if (optionalData == null) return

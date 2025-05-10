@@ -7,7 +7,7 @@ import net.spacetivity.blocko.entity.GameEntityStatus
 import net.spacetivity.blocko.entity.GameEntityType
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
-import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
+import net.spacetivity.blocko.scoreboard.ScoreboardUtils
 import net.spacetivity.blocko.stats.GamePlayerMatchStats
 import net.spacetivity.blocko.utils.Constants
 import org.bukkit.Bukkit
@@ -40,7 +40,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: ArenaId, var tea
             Blocko.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }
 
-        GameScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
+        ScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
     }
 
@@ -68,7 +68,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: ArenaId, var tea
             Blocko.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
         }
 
-        GameScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
+        ScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
     }
 
