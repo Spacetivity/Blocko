@@ -8,7 +8,7 @@ import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.playSound
-import net.spacetivity.blocko.scoreboard.ScoreboardUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import java.time.Duration

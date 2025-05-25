@@ -41,21 +41,29 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
     override var active = false
 
     override fun getSidebarLines(player: Player): List<Component> {
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
         val setupSession = player.getSetupSession() ?: return emptyList()
         val scanBoardStep = setupSession.getSetupStep<ScanBoardStep>() ?: return emptyList()
 
         val lines = mutableListOf<Component>()
 
         for (gameTeam in Constants.GAME_TEAMS) {
-            var allFieldsHaveTeamIds = true
+            var fieldsWithTeamPathId = 0
 
             for (gameField in scanBoardStep.gameFields) {
-                if (gameField.properties.getTeamPathId(gameTeam.name) != null) continue
-                allFieldsHaveTeamIds = false
+                if (gameField.properties.getTeamPathId(gameTeam.name) == null) continue
+                fieldsWithTeamPathId++
             }
 
-            val teamLine = Component.text("${gameTeam.name} entrance: ${if (allFieldsHaveTeamIds) "✓" else "✕"}")
-            lines.add(teamLine)
+            val allTeamIdsConfigured = fieldsWithTeamPathId == 44 //TODO: make this dynamic (CONFIGURABLE)
+
+            val keyType = if (allTeamIdsConfigured) "configured" else "unconfigured"
+            val indicator = translation.lineAsString("blocko.sidebar.setup.lines.indicator.$keyType")
+
+            lines.add(translation.line("blocko.sidebar.setup.lines.team_path_step.$keyType",
+                Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+                Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }),
+                Placeholder.parsed("indicator", indicator)))
         }
 
         return lines

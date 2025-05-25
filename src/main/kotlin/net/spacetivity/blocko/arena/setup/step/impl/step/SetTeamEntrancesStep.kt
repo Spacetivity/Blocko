@@ -23,15 +23,28 @@ class SetTeamEntrancesStep : SetupStep<IgnoredResetData> {
     override var active = false
 
     override fun getSidebarLines(player: Player): List<Component> {
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
         val setupSession = player.getSetupSession() ?: return emptyList()
         val scanBoardStep = setupSession.getSetupStep<ScanBoardStep>() ?: return emptyList()
 
         val lines = mutableListOf<Component>()
 
         for (gameTeam in Constants.GAME_TEAMS) {
-            val configured = scanBoardStep.gameFields.any { it.properties.teamEntrance != null && it.properties.teamEntrance == gameTeam.name }
-            val teamLine = Component.text("${gameTeam.name} entrance: ${if (configured) "✓" else "✕"}")
-            lines.add(teamLine)
+            var teamEntranceConfigured = false
+
+            for (gameField in scanBoardStep.gameFields) {
+                if (gameField.properties.teamEntrance == null) continue
+                if (gameField.properties.teamEntrance != gameTeam.name) continue
+                teamEntranceConfigured = true
+            }
+
+            val keyType = if (teamEntranceConfigured) "configured" else "unconfigured"
+            val indicator = translation.lineAsString("blocko.sidebar.setup.lines.indicator.$keyType")
+
+            lines.add(translation.line("blocko.sidebar.setup.lines.entrance_step.$keyType",
+                Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+                Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }),
+                Placeholder.parsed("indicator", indicator)))
         }
 
         return lines

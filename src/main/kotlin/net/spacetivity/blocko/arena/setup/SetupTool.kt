@@ -9,11 +9,11 @@ import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamPathsStep
 import net.spacetivity.blocko.arena.setup.step.impl.step.SetTurningPointsStep
 import net.spacetivity.blocko.inventory.setup.InvType
 import net.spacetivity.blocko.item.*
-import net.spacetivity.blocko.scoreboard.ScoreboardUtils
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.InventoryUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -44,8 +44,8 @@ class SetupTool(private val holder: Player) {
         val setupSession = this.holder.getSetupSession() ?: return
         val nextSetupStep = setupSession.setNextSetupStep(isNextModeRequested)
 
-        if (nextSetupStep.getSidebarLines(this.holder).isNotEmpty())
-            ScoreboardUtils.updateSetupDataLines(this.holder, nextSetupStep)
+        ScoreboardUtils.updateSetupSidebarTitle(this.holder)
+        ScoreboardUtils.updateSetupDataLines(this.holder, nextSetupStep)
 
         itemStack.meta {
             lore(fetchLore(translation))

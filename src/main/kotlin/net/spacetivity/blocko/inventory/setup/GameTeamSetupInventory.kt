@@ -4,6 +4,8 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.setup.getSetupSession
 import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamEntrancesStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamPathsStep
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.item.hideExtraInfo
 import net.spacetivity.blocko.item.itemStack
@@ -12,6 +14,7 @@ import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.InventoryUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.inventory.api.inventory.InventoryController
 import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
@@ -86,6 +89,9 @@ class GameTeamSetupInventory(private val type: InvType, private val gameField: G
                         setupSession.currentTeamName = gameTeam.name
                         setupStep.fieldIndex = 0
 
+                        val teamPathsStep = setupSession.getSetupStep<SetTeamPathsStep>()!!
+                        ScoreboardUtils.updateSetupDataLines(player, teamPathsStep)
+
                         player.translateMessage("blocko.inventory.game_team_setup.team_item.click.set_field_ids",
                             Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
                             Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
@@ -94,6 +100,9 @@ class GameTeamSetupInventory(private val type: InvType, private val gameField: G
                     else -> {
                         this.gameField.properties.teamEntrance = gameTeam.name
                         InventoryUtils.openGameFieldTurnInventory(player, gameField)
+
+                        val teamEntranceStep = setupSession.getSetupStep<SetTeamEntrancesStep>()!!
+                        ScoreboardUtils.updateSetupDataLines(player, teamEntranceStep)
                     }
                 }
             })

@@ -10,7 +10,7 @@ import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.*
-import net.spacetivity.blocko.scoreboard.ScoreboardUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants

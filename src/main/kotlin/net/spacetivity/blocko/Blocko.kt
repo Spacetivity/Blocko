@@ -181,15 +181,11 @@ class Blocko : JavaPlugin() {
     override fun onDisable() {
         for (player in Bukkit.getOnlinePlayers()) {
             for (team in player.scoreboard.teams) {
-                if (!team.hasEntry(player.name)) continue
-                team.removeEntry(player.name)
-            }
-        }
+                if (team.hasEntry(player.name))
+                    team.removeEntry(player.name)
 
-        for (team in Bukkit.getScoreboardManager().mainScoreboard.teams) {
-            val teamNames = this.gameFieldHighlightHandler.highlightModes.map { it.value.teamName }
-            if (!teamNames.contains(team.name)) continue
-            team.unregister()
+                team.unregister()
+            }
         }
 
         this.diceHandler.stopDiceAnimation()

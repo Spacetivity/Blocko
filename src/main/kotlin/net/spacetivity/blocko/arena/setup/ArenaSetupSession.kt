@@ -28,7 +28,6 @@ class ArenaSetupSession(val arenaId: ArenaId) {
         Pair(SetTeamPathsStep::class, SetTeamPathsStep())
     )
 
-    @Suppress("UNCHECKED_CAST")
     inline fun <reified T : SetupStep<*>> getSetupStep(): T? {
         return this.setupSteps.values.firstOrNull { it is T } as? T
     }

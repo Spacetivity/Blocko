@@ -466,14 +466,28 @@ blocko.stats.show_match_stats: |
   <dark_gray><bold>»</bold> <gray>Time played: <yellow><time>
   <st><gray>---------------------------</st>
 
-# Sets the title displayed in the game's sidebar, with gradient color styling.
-blocko.sidebar.title: "<gradient:green:yellow><bold>Blocko Game</bold></gradient>"
-
-# Sidebar lines section includes various game status indicators.
-blocko.sidebar.line:
-  team_name: "<white>Your team: <team_color><team_name>"
-  controlling_team_name:
-    ingame: "<white>It's <team_color><team_name><white>'s turn"
-    not_ingame: "<gray>Not started yet..."
-  dice_status: "<white>Diced number: <yellow><number>"
-  entity_status: "<white>Entity <id>: <gray><status>"
+blocko.sidebar:
+  setup:
+    title: "<gradient:green:yellow><bold>Blocko Setup</bold></gradient> <gray>(<green><current_step_id><gray>/<yellow><max_step_id><gray>)"
+    lines:
+      active_setup_step: "<white>Active step: <yellow><step>"
+      active_setup_step_data: "<white>Configured data:"
+      placeholder: "<white>-/-"
+      indicator:
+        configured: "✔"
+        unconfigured: "✕"
+      entrance_step:
+        configured: "<team_color>■ <white>Entrance: <green><indicator>"
+        unconfigured: "<team_color>■ <white>Entrance: <red><indicator>"
+      team_path_step:
+        configured: "<team_color>■ <white>Path set: <green><indicator>"
+        unconfigured: "<team_color>■ <white>Path set: <red><indicator>"
+  game:
+    title: "<gradient:green:yellow><bold>Blocko Game</bold></gradient>"
+    lines:
+      team_name: "<white>Your team: <team_color><team_name>"
+      controlling_team_name:
+        ingame: "<white>It's <team_color><team_name><white>'s turn"
+        not_ingame: "<gray>Not started yet..."
+      dice_status: "<white>Diced number: <yellow><number>"
+      entity_status: "<white>Entity <id>: <gray><status>"

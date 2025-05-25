@@ -5,7 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.toGamePlayerInstance
-import net.spacetivity.blocko.utils.ScoreboardUtils
+import net.spacetivity.blocko.utils.ScoreboardTeamUtils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Scoreboard
@@ -33,7 +33,7 @@ class PlayerFormatHandler {
         val prefix = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.format.tablist",
             Placeholder.parsed("color", "<${color.asHexString()}>"))
 
-        val team = ScoreboardUtils.registerScoreboardTeamWithContent(scoreboard, teamName, prefix, Component.text(""))
+        val team = ScoreboardTeamUtils.registerScoreboardTeamWithContent(scoreboard, teamName, prefix, Component.text(""))
         team.color(color)
 
         if (!team.hasEntry(player.name)) team.addEntry(player.name)

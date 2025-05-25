@@ -14,7 +14,7 @@ class ArenaListSubCommand : SpaceSubCommandExecutor {
     override fun execute(sender: SpaceCommandSender, args: List<String>) {
         val player = sender.toPlayer()
 
-        val cachedArenas = Blocko.Companion.instance.arenaHandler.cachedArenas
+        val cachedArenas = Blocko.instance.arenaHandler.cachedArenas
 
         if (cachedArenas.isEmpty()) {
             player.translateMessage("blocko.command.blocko.no_arenas_found")

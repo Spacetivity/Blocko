@@ -13,13 +13,13 @@ import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
 import net.spacetivity.blocko.field.GameFieldRotation
 import net.spacetivity.blocko.field.highlighting.impl.*
-import net.spacetivity.blocko.scoreboard.ScoreboardUtils
 import net.spacetivity.blocko.team.GameTeamLocation
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.PersistentDataUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.block.Block
@@ -59,6 +59,17 @@ class ArenaSetupHandler {
         if (this.setupTask == null) return
         this.setupTask!!.cancel()
         this.setupTask = null
+    }
+
+    fun getSetupPlayers(arenaId: ArenaId): List<Player> {
+        val players = mutableListOf<Player>()
+
+        for (uuid in this.activeSetupSessions.filter { it.value.arenaId == arenaId }.keys) {
+            val player = Bukkit.getPlayer(uuid) ?: continue
+            players.add(player)
+        }
+
+        return players
     }
 
     fun getSetupData(uuid: UUID): ArenaSetupSession? {
@@ -129,6 +140,8 @@ class ArenaSetupHandler {
             Blocko.instance.arenaHandler.updateArenaStatus(setupSession.arenaId, ArenaStatus.READY)
         }
 
+        ScoreboardUtils.removeSidebar(player)
+
         Blocko.instance.gameFieldHighlightHandler.removeHighlightEntities(
             setupSession.arenaId,
             GameFieldHighlightMode::class,
@@ -147,8 +160,6 @@ class ArenaSetupHandler {
         }
 
         if (setupItemStack != null) player.inventory.remove(setupItemStack)
-
-        ScoreboardUtils.removeSidebar(player)
 
         player.translateMessage("blocko.setup.setup_mode_deactivated")
         this.activeSetupSessions.remove(player.uniqueId)

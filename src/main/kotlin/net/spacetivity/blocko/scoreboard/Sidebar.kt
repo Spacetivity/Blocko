@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.scoreboard
 
 import net.kyori.adventure.text.Component
-import net.spacetivity.blocko.utils.ScoreboardUtils
+import net.spacetivity.blocko.utils.ScoreboardTeamUtils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Criteria
@@ -55,7 +55,7 @@ class Sidebar(val viewer: Player, private val title: Component, val lines: Map<I
 
         for (line in this.lines.entries) {
             val lineId = line.key
-            val team = ScoreboardUtils.registerScoreboardTeamWithContent(this.scoreboard, "x$lineId", Component.text(""), Component.text(""))
+            val team = ScoreboardTeamUtils.registerScoreboardTeamWithContent(this.scoreboard, "x$lineId", Component.text(""), Component.text(""))
 
             val entryName = if (lineId < 10) "§$lineId§7" else "§${getColorCodeByName(lineId)}§7"
             if (team.hasEntry(entryName)) return

@@ -14,7 +14,7 @@ import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.playSound
-import net.spacetivity.blocko.scoreboard.ScoreboardUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.translateMessage

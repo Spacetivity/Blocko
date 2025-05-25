@@ -6,7 +6,7 @@ import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.scoreboard.ScoreboardUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.MetadataUtils

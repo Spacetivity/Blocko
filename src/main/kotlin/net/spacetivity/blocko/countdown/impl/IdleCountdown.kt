@@ -5,7 +5,7 @@ import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.countdown.GameCountdown
-import net.spacetivity.blocko.scoreboard.ScoreboardUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Sound
 import org.bukkit.scheduler.BukkitTask
 import java.util.*

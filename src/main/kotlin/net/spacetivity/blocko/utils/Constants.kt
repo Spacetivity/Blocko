@@ -28,7 +28,7 @@ object Constants {
     const val SETUP_TOOL_KEY = "setup_tool"
     const val TIMEOUT_BOSSBAR_NAME = "timeout_bar"
 
-    val GAME_TEAMS: List<GameTeam> = listOf(
+    val GAME_TEAMS = listOf(
         GameTeam("red", NamedTextColor.RED, 0),
         GameTeam("green", NamedTextColor.DARK_GREEN, 1),
         GameTeam("blue", NamedTextColor.BLUE, 2),

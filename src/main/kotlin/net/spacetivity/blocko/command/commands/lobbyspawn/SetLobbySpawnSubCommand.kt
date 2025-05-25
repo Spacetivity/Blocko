@@ -11,7 +11,7 @@ class SetLobbySpawnSubCommand : SpaceSubCommandExecutor {
 
     override fun execute(sender: SpaceCommandSender, args: List<String>) {
         val player = sender.toPlayer()
-        Blocko.Companion.instance.lobbySpawnHandler.setLobbySpawn(player.location)
+        Blocko.instance.lobbySpawnHandler.setLobbySpawn(player.location)
         player.translateMessage("blocko.command.blocko.lobby_spawn_set")
     }
 

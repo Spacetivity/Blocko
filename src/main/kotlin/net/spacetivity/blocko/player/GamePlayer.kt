@@ -7,7 +7,7 @@ import net.spacetivity.blocko.entity.GameEntityStatus
 import net.spacetivity.blocko.entity.GameEntityType
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
-import net.spacetivity.blocko.scoreboard.ScoreboardUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.blocko.stats.GamePlayerMatchStats
 import net.spacetivity.blocko.utils.Constants
 import org.bukkit.Bukkit
