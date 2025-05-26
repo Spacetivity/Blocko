@@ -6,7 +6,6 @@ description: A "Mensch Ärgere dich nicht! / Ludo" clone in Minecraft
 website: wiki.spacetivity.net
 commands:
   blocko:
-  arenainvite:
 author:
   - TGamings
 depend:

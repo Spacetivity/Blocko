@@ -8,7 +8,7 @@ import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.HelperFunctions
 
-@SpaceSubCommand(length = 2, parts = "setup cancel", permission = "blocko.command.admin")
+@SpaceSubCommand(length = 3, parts = "arena setup cancel", permission = "blocko.command.admin")
 class ArenaSetupCancelSubCommand : SpaceSubCommandExecutor {
 
     override fun execute(sender: SpaceCommandSender, args: List<String>) {
@@ -25,7 +25,7 @@ class ArenaSetupCancelSubCommand : SpaceSubCommandExecutor {
 
     override fun onTabComplete(sender: SpaceCommandSender, args: List<String>): List<String> {
         return buildList {
-            addAll(generateSuggestions(args, 2, listOf(Pair(0, "setup"))) { add("cancel") })
+            addAll(generateSuggestions(args, 3, listOf(Pair(0, "arena"), Pair(1, "setup"))) { add("cancel") })
         }
     }
 
