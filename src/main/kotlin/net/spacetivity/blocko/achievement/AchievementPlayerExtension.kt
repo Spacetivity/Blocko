@@ -5,6 +5,10 @@ import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.player.GamePlayer
 import kotlin.reflect.KClass
 
+fun getAchievementByKey(id: String): Achievement? {
+    return Blocko.instance.achievementHandler.getAchievementByKey(id)
+}
+
 fun <T : Achievement> getAchievementByClass(clazz: KClass<T>): Achievement? {
     return Blocko.instance.achievementHandler.getAchievement(clazz.java)
 }

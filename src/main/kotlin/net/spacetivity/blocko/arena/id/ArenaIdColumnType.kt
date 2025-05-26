@@ -5,7 +5,7 @@ import org.jetbrains.exposed.sql.ColumnType
 import org.jetbrains.exposed.sql.Table
 
 class ArenaIdColumnType(private val length: Int) : ColumnType<ArenaId>() {
-    override fun sqlType(): String = "VARCHAR($length)"
+    override fun sqlType() = "VARCHAR($length)"
 
     override fun valueFromDB(value: Any): ArenaId = when (value) {
         is ArenaId -> value

@@ -21,6 +21,7 @@ import net.spacetivity.blocko.command.commands.BlockoCommand
 import net.spacetivity.blocko.dice.DiceHandler
 import net.spacetivity.blocko.entity.GameEntityHandler
 import net.spacetivity.blocko.entity.GameEntityHistoryDAO
+import net.spacetivity.blocko.entity.GameEntityType
 import net.spacetivity.blocko.entity.GameEntityTypeDAO
 import net.spacetivity.blocko.field.GameFieldDAO
 import net.spacetivity.blocko.field.GameFieldHandler
@@ -91,6 +92,8 @@ class Blocko : JavaPlugin() {
 
     private lateinit var gamePlayActionHandler: GamePlayActionHandler
 
+    val gameEntityPropertiesFiles = mutableMapOf<String, GameEntityPropertiesFile>()
+
     override fun onEnable() {
         instance = this
 
@@ -134,6 +137,13 @@ class Blocko : JavaPlugin() {
         this.blockoBoardFile = BlockoBoardFile().createOrLoad(dataFolderPath) as BlockoBoardFile
         this.globalConfigFile = GlobalConfigFile().createOrLoad(dataFolderPath) as GlobalConfigFile
         this.botNamesFile = BotNamesFile().createOrLoad(dataFolderPath) as BotNamesFile
+
+        for (gameEntityType in GameEntityType.entries) {
+            val entityId = gameEntityType.name.lowercase()
+            val entityProperties = gameEntityType.defaultProperties
+            val entityFile = GameEntityPropertiesFile(entityId, entityProperties).createOrLoad(dataFolderPath) as GameEntityPropertiesFile
+            this.gameEntityPropertiesFiles.put(entityId, entityFile)
+        }
 
         this.sidebarHandler = SidebarHandler()
         this.playerFormatHandler = PlayerFormatHandler()

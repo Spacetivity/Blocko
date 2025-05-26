@@ -4,9 +4,8 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
-import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
-import net.spacetivity.blocko.achievement.impl.*
+import net.spacetivity.blocko.achievement.impl.EntityCollectorAchievement
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.stats.StatsType
 import net.spacetivity.blocko.stats.toStatsPlayerInstance
@@ -18,82 +17,86 @@ import org.bukkit.Sound
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import java.util.*
-import kotlin.reflect.KClass
 
-enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val isBaby: Boolean, val achievementClass: KClass<out Achievement>?) {
+enum class GameEntityType(val bukkitEntityType: EntityType, val defaultProperties: GameEntityProperties) {
 
     // Do not remove this! (Default Type)
-    VILLAGER(EntityType.VILLAGER, 0, false, null),
+    VILLAGER(EntityType.VILLAGER, GameEntityProperties(0, false)),
 
-    AXOLOTL(EntityType.AXOLOTL, 50, false, null),
-    BLAZE(EntityType.BLAZE, 75, false, null),
-    CAT(EntityType.CAT, 60, false, null),
-    CAVE_SPIDER(EntityType.CAVE_SPIDER, 70, false, null),
-    SPIDER(EntityType.SPIDER, 70, false, null),
-    CHICKEN(EntityType.CHICKEN, 40, false, null),
-    COW(EntityType.COW, 50, false, null),
-    GOAT(EntityType.GOAT, 10, false, null),
-    CREEPER(EntityType.CREEPER, 80, false, null),
-    DROWNED(EntityType.DROWNED, 70, false, PlayFirstGameAchievement::class),
-    ENDERMAN(EntityType.ENDERMAN, 80, false, null),
-    EVOKER(EntityType.EVOKER, 120, false, null),
-    FOX(EntityType.FOX, 60, false, null),
-    ARMADILLO(EntityType.ARMADILLO, 60, false, null),
-    FROG(EntityType.FROG, 40, false, null),
-    TURTLE(EntityType.TURTLE, 45, false, null),
-    HUSK(EntityType.HUSK, 70, false, null),
-    MOOSHROOM(EntityType.MOOSHROOM, 3500, false, EntityCollectorAchievement::class),
-    OCELOT(EntityType.OCELOT, 50, false, null),
-    PIG(EntityType.PIG, 40, false, null),
-    PIGLIN(EntityType.PIGLIN, 70, false, null),
-    PIGLIN_BRUTE(EntityType.PIGLIN_BRUTE, 120, false, null),
-    ZOGLIN(EntityType.ZOGLIN, 120, true, null),
-    HOGLIN(EntityType.HOGLIN, 120, true, null),
-    PILLAGER(EntityType.PILLAGER, 90, false, null),
-    ILLUSIONER(EntityType.ILLUSIONER, 90, false, null),
-    RABBIT(EntityType.RABBIT, 40, false, FirstEliminationAchievement::class),
-    SHEEP(EntityType.SHEEP, 40, false, null),
-    SHULKER(EntityType.SHULKER, 150, false, null),
-    SKELETON(EntityType.SKELETON, 90, false, null),
-    STRAY(EntityType.STRAY, 90, false, null),
-    VINDICATOR(EntityType.VINDICATOR, 150, false, null),
-    WANDERING_TRADER(EntityType.WANDERING_TRADER, 1050, false, EntityCollectorAchievement::class),
-    WITCH(EntityType.WITCH, 150, false, null),
-    WITHER_SKELETON(EntityType.WITHER_SKELETON, 150, false, null),
-    WOLF(EntityType.WOLF, 50, false, null),
+    AXOLOTL(EntityType.AXOLOTL, GameEntityProperties(50, false)),
+    BLAZE(EntityType.BLAZE, GameEntityProperties(75, false)),
+    CAT(EntityType.CAT, GameEntityProperties(60, false)),
+    CAVE_SPIDER(EntityType.CAVE_SPIDER, GameEntityProperties(70, false)),
+    SPIDER(EntityType.SPIDER, GameEntityProperties(70, false)),
+    CHICKEN(EntityType.CHICKEN, GameEntityProperties(40, false)),
+    COW(EntityType.COW, GameEntityProperties(50, false)),
+    GOAT(EntityType.GOAT, GameEntityProperties(10, false)),
+    CREEPER(EntityType.CREEPER, GameEntityProperties(80, false)),
+    DROWNED(EntityType.DROWNED, GameEntityProperties(70, false, "first_game")),
+    ENDERMAN(EntityType.ENDERMAN, GameEntityProperties(80, false)),
+    EVOKER(EntityType.EVOKER, GameEntityProperties(120, false)),
+    FOX(EntityType.FOX, GameEntityProperties(60, false)),
+    ARMADILLO(EntityType.ARMADILLO, GameEntityProperties(60, false)),
+    FROG(EntityType.FROG, GameEntityProperties(40, false)),
+    TURTLE(EntityType.TURTLE, GameEntityProperties(45, false)),
+    HUSK(EntityType.HUSK, GameEntityProperties(70, false)),
+    MOOSHROOM(EntityType.MOOSHROOM, GameEntityProperties(3500, false, "entity_collector")),
+    OCELOT(EntityType.OCELOT, GameEntityProperties(50, false)),
+    PIG(EntityType.PIG, GameEntityProperties(40, false)),
+    PIGLIN(EntityType.PIGLIN, GameEntityProperties(70, false)),
+    PIGLIN_BRUTE(EntityType.PIGLIN_BRUTE, GameEntityProperties(120, false)),
+    ZOGLIN(EntityType.ZOGLIN, GameEntityProperties(120, true)),
+    HOGLIN(EntityType.HOGLIN, GameEntityProperties(120, true)),
+    PILLAGER(EntityType.PILLAGER, GameEntityProperties(90, false)),
+    ILLUSIONER(EntityType.ILLUSIONER, GameEntityProperties(90, false)),
+    RABBIT(EntityType.RABBIT, GameEntityProperties(40, false, "first_elimination")),
+    SHEEP(EntityType.SHEEP, GameEntityProperties(40, false)),
+    SHULKER(EntityType.SHULKER, GameEntityProperties(150, false)),
+    SKELETON(EntityType.SKELETON, GameEntityProperties(90, false)),
+    STRAY(EntityType.STRAY, GameEntityProperties(90, false)),
+    VINDICATOR(EntityType.VINDICATOR, GameEntityProperties(150, false)),
+    WANDERING_TRADER(EntityType.WANDERING_TRADER, GameEntityProperties(1050, false, "entity_collector")),
+    WITCH(EntityType.WITCH, GameEntityProperties(150, false)),
+    WITHER_SKELETON(EntityType.WITHER_SKELETON, GameEntityProperties(150, false)),
+    WOLF(EntityType.WOLF, GameEntityProperties(50, false)),
 
-    BOGGED(EntityType.BOGGED, 70, false, null),
-    ZOMBIE(EntityType.ZOMBIE, 70, false, null),
-    ZOMBIE_VILLAGER(EntityType.ZOMBIE_VILLAGER, 70, false, null),
-    ZOMBIFIED_PIGLIN(EntityType.ZOMBIFIED_PIGLIN, 70, false, null),
+    BOGGED(EntityType.BOGGED, GameEntityProperties(70, false)),
+    ZOMBIE(EntityType.ZOMBIE, GameEntityProperties(70, false)),
+    ZOMBIE_VILLAGER(EntityType.ZOMBIE_VILLAGER, GameEntityProperties(70, false)),
+    ZOMBIFIED_PIGLIN(EntityType.ZOMBIFIED_PIGLIN, GameEntityProperties(70, false)),
 
-    BEE(EntityType.BEE, 50, false, null),
-    PARROT(EntityType.PARROT, 50, false, null),
-    VEX(EntityType.VEX, 75, false, null),
+    BEE(EntityType.BEE, GameEntityProperties(50, false)),
+    PARROT(EntityType.PARROT, GameEntityProperties(50, false)),
+    VEX(EntityType.VEX, GameEntityProperties(75, false)),
 
-    IRON_GOLEM(EntityType.IRON_GOLEM, 350, false, WinMonsterAchievement::class),
+    IRON_GOLEM(EntityType.IRON_GOLEM, GameEntityProperties(350, false, "win_monster")),
 
-    HORSE(EntityType.HORSE, 100, true, null),
-    ZOMBIE_HORSE(EntityType.ZOMBIE_HORSE, 100, true, null),
-    SKELETON_HORSE(EntityType.SKELETON_HORSE, 100, true, null),
+    HORSE(EntityType.HORSE, GameEntityProperties(100, true)),
+    ZOMBIE_HORSE(EntityType.ZOMBIE_HORSE, GameEntityProperties(100, true)),
+    SKELETON_HORSE(EntityType.SKELETON_HORSE, GameEntityProperties(100, true)),
 
-    MULE(EntityType.MULE, 70, false, null),
-    DONKEY(EntityType.DONKEY, 70, false, null),
+    MULE(EntityType.MULE, GameEntityProperties(70, false)),
+    DONKEY(EntityType.DONKEY, GameEntityProperties(70, false)),
 
-    LLAMA(EntityType.LLAMA, 70, false, null),
-    TRADER_LLAMA(EntityType.TRADER_LLAMA, 100, false, null),
+    LLAMA(EntityType.LLAMA, GameEntityProperties(70, false)),
+    TRADER_LLAMA(EntityType.TRADER_LLAMA, GameEntityProperties(100, false)),
 
-    POLAR_BEAR(EntityType.POLAR_BEAR, 100, true, null),
-    PANDA(EntityType.PANDA, 100, true, null),
-    CAMEL(EntityType.CAMEL, 100, true, null),
-    SNIFFER(EntityType.SNIFFER, 100, true, null),
+    POLAR_BEAR(EntityType.POLAR_BEAR, GameEntityProperties(100, true)),
+    PANDA(EntityType.PANDA, GameEntityProperties(100, true)),
+    CAMEL(EntityType.CAMEL, GameEntityProperties(100, true)),
+    SNIFFER(EntityType.SNIFFER, GameEntityProperties(100, true)),
 
-    COD(EntityType.COD, 40, false, null),
-    SALMON(EntityType.SALMON, 40, false, null),
-    TROPICAL_FISH(EntityType.TROPICAL_FISH, 40, false, null),
-    DOLPHIN(EntityType.DOLPHIN, 100, false, null),
+    COD(EntityType.COD, GameEntityProperties(40, false)),
+    SALMON(EntityType.SALMON, GameEntityProperties(40, false)),
+    TROPICAL_FISH(EntityType.TROPICAL_FISH, GameEntityProperties(40, false)),
+    DOLPHIN(EntityType.DOLPHIN, GameEntityProperties(100, false)),
 
-    WARDEN(EntityType.WARDEN, 15000, false, MasterEliminatorAchievement::class);
+    WARDEN(EntityType.WARDEN, GameEntityProperties(15000, false, "master_eliminator"));
+
+    fun getProperties(): GameEntityProperties {
+        val entityProperties = Blocko.instance.gameEntityPropertiesFiles[this.name.lowercase()]?.gameEntityProperties
+        return entityProperties ?: this.defaultProperties
+    }
 
     fun getCorrectedTypeName(): String {
         val rawEntityTypeName = this.bukkitEntityType.name.lowercase()
@@ -122,8 +125,10 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
         val gamePlayer = player.toGamePlayerInstance() ?: return
         val statsPlayer = gamePlayer.toStatsPlayerInstance() ?: return
 
+        val properties = getProperties()
+
         Blocko.instance.gameEntityHandler.unlockEntityType(player.uniqueId, this)
-        statsPlayer.update(StatsType.COINS, false, this.price)
+        statsPlayer.update(StatsType.COINS, false, properties.price)
         statsPlayer.updateDbEntry()
 
         gamePlayer.grantIfCompletedBy(EntityCollectorAchievement::class)
@@ -131,7 +136,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val price: Int, val 
         player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 10F, 1F)
         player.translateMessage("blocko.entity_shop.successfully_bought_entity_type",
             Placeholder.parsed("entity_type_name", getCorrectedTypeName()),
-            Placeholder.parsed("amount", NumberUtils.format(this.price)))
+            Placeholder.parsed("amount", NumberUtils.format(properties.price)))
     }
 
 }

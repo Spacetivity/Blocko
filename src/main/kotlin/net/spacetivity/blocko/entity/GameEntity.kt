@@ -6,10 +6,10 @@ import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.MetadataUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.entity.Animals
@@ -54,7 +54,7 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
         this.livingEntity!!.setAI(false)
         this.livingEntity!!.isCustomNameVisible = true
 
-        if (this.gameEntityType.isBaby && this.livingEntity!! is Animals) {
+        if (this.gameEntityType.getProperties().isBaby && this.livingEntity!! is Animals) {
             val animal = this.livingEntity as Animals
             animal.ageLock = true
             animal.setBaby()

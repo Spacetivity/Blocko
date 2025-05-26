@@ -98,14 +98,8 @@ class ArenaSetupHandler {
 
         val activeSetupStep = setupSession.getActiveSetupStep() ?: return
 
-        println(this.tooltipHandler.hasViewedTooltip(player.uniqueId, activeSetupStep.id))
-
         if (!this.tooltipHandler.hasViewedTooltip(player.uniqueId, activeSetupStep.id)) {
-            println(0)
             val tooltip = this.tooltipHandler.getTooltip(activeSetupStep) ?: return
-
-            println(1)
-
             this.tooltipHandler.addViewedTooltip(player.uniqueId, activeSetupStep.id)
             player.sendMessage(tooltip.getToolTipComponent(Blocko.instance.translationHandler.getSelectedTranslation()))
         }

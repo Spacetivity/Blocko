@@ -5,7 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.spacetivity.blocko.Blocko
-import net.spacetivity.blocko.achievement.getAchievementByClass
+import net.spacetivity.blocko.achievement.getAchievementByKey
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.entity.GameEntityType
@@ -118,12 +118,16 @@ class EntityShopInventory : InventoryProvider {
                 }
 
                 val achievementPlayer = Blocko.instance.achievementHandler.getAchievementPlayer(player.uniqueId)
-                if (gameEntityType.achievementClass != null && achievementPlayer != null && !achievementPlayer.achievementNames.contains(getAchievementByClass(gameEntityType.achievementClass)!!.translationKey))
+
+                val properties = gameEntityType.getProperties()
+                val requiresAchievement = properties.requiresAchievement()
+
+                if (requiresAchievement && achievementPlayer != null && !achievementPlayer.achievementNames.contains(properties.achievementKey))
                     return@of
 
                 val statsPlayer = Blocko.instance.statsPlayerHandler.getStatsPlayer(player.uniqueId)!!
 
-                if (statsPlayer.coins < gameEntityType.price)
+                if (statsPlayer.coins < properties.price)
                     return@of
 
                 gameEntityType.buyEntityType(playerWhoClicked)
@@ -183,19 +187,21 @@ class EntityShopInventory : InventoryProvider {
         val isUnlocked = gameEntityType.isUnlockedByPlayer(player.uniqueId)
         val loreKey = "blocko.inventory.entity_shop.entity_type_item.lore.${if (isUnlocked) "active" else "not_active"}"
 
-        val possibleAchievementPlaceholder: TagResolver.Single = if (gameEntityType.achievementClass == null) Placeholder.parsed("possible_achievement_name", "-/-")
-        else Placeholder.parsed("possible_achievement_name", getAchievementByClass(gameEntityType.achievementClass)?.name
+        val properties = gameEntityType.getProperties()
+
+        val possibleAchievementPlaceholder: TagResolver.Single = if (!properties.requiresAchievement()) Placeholder.parsed("possible_achievement_name", "-/-")
+        else Placeholder.parsed("possible_achievement_name", getAchievementByKey(properties.achievementKey)?.name
             ?: ":=)")
 
         val loreSuffixPlaceholder: TagResolver.Single = if (isUnlocked)
             Placeholder.parsed("lore_suffix", "")
-        else if (gameEntityType.price > statsPlayer.coins)
+        else if (properties.price > statsPlayer.coins)
             Placeholder.parsed("lore_suffix", translation.lineAsString("blocko.inventory.entity_shop.entity_type_item.lore.suffix.not_buyable"))
         else
             Placeholder.parsed("lore_suffix", translation.lineAsString("blocko.inventory.entity_shop.entity_type_item.lore.suffix.buyable"))
 
         return translation.lore(loreKey,
-            Placeholder.parsed("price", NumberUtils.format(gameEntityType.price)),
+            Placeholder.parsed("price", NumberUtils.format(properties.price)),
             possibleAchievementPlaceholder,
             loreSuffixPlaceholder)
     }

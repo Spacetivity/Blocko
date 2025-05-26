@@ -9,6 +9,7 @@ blocko.prefix.global: "<gradient:green:yellow><bold>Blocko</gradient> <dark_gray
 
 blocko.utils:
   no_permission: "<prefix> <gray>No permission... :o"
+  hello: "HELLO WORLD"
   player_not_found: "<prefix> <gray>This player doesn't exist!"
   data_type.invalid: "<prefix> <white><type> <gray>required!"
 
