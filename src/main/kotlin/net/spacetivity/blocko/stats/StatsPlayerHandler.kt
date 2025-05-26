@@ -6,7 +6,6 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import java.util.*
@@ -30,7 +29,7 @@ class StatsPlayerHandler {
 
             if (resultRow == null) {
                 statsPlayer = StatsPlayer(uuid, 0, 0, 0, 0, 0)
-                StatsPlayerDAO.insert { statement: InsertStatement<Number> ->
+                StatsPlayerDAO.insert { statement ->
                     statement[StatsPlayerDAO.uuid] = uuid.toString()
                     statement[eliminatedOpponents] = 0
                     statement[knockedOutByOpponents] = 0

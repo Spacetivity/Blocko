@@ -8,6 +8,7 @@ import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
 import net.spacetivity.blocko.arena.setup.getSetupSession
 import net.spacetivity.blocko.arena.setup.step.SetupStep
 import net.spacetivity.blocko.arena.setup.step.impl.reset.IgnoredResetData
+import net.spacetivity.blocko.arena.setup.tooltips.Tooltip
 import net.spacetivity.blocko.field.highlighting.impl.GameFieldHighlightMode
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
@@ -20,6 +21,7 @@ class SetTeamEntrancesStep : SetupStep<IgnoredResetData> {
     override val key = "SetTeamEntrance"
     override val keybindHints = setOf(ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, null))
     override val validBlockTypes = setOf(Material.BONE_BLOCK)
+    override val tooltip = Tooltip(this.id)
     override var active = false
 
     override fun getSidebarLines(player: Player): List<Component> {

@@ -263,7 +263,8 @@ class PlayerListener(private val plugin: Blocko) : Listener {
                 if (!PersistentDataUtils.has(itemInHand.itemMeta, ENTITY_SELECTOR_KEY)) return
 
                 val entityId = PersistentDataUtils.get(itemInHand.itemMeta, ENTITY_SELECTOR_KEY, Int::class.java)
-                val gameEntity = Blocko.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName!!).find { it.entityId == entityId } ?: return
+                val gameEntity = Blocko.instance.gameEntityHandler.getEntitiesFromTeam(gameArena.id, gamePlayer.teamName!!).find { it.entityId == entityId }
+                    ?: return
 
                 if (gamePlayer.dicedNumber!! != 6 && gameEntity.currentFieldId == null) {
                     player.translateMessage("blocko.main_game_loop.needs_a_six")

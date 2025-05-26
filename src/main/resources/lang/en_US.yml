@@ -35,6 +35,19 @@ blocko.setup:
   tool.lore.mode_keybind_line: "   <blue>- <gray><keybind><data_prefix><optional_data>"
   tool.mode_change: "<prefix> <gray>Tool mode set to: <yellow><mode>"
 
+  explanation_tooltips:
+    format: |
+      <obfuscated><gradient:blue:green>==============================================</obfuscated>
+
+      <white><bold>»</bold> <gray>Tooltip for Setup-Step <white>#<yellow><step>.
+      <white><bold>»</bold> <tool_tip>
+
+      <obfuscated><gradient:blue:green>==============================================</obfuscated>
+    tip_0: "<gray>Use your <blue>Setup Tool<gray> to mark two opposite corners of your Blocko board to scan the game fields."
+    tip_1: "<gray>Use your <blue>Setup Tool<gray> to set all turning points so that the game entities can move and turn correctly. <white>Note: <gray>The sky direction is displayed in your action bar to assist with configuring the correct turning direction."
+    tip_2: "<gray>Use your <blue>Setup Tool<gray> to set all team entrances. These are the points where the game entity turns toward its goal garage fields."
+    tip_3: "<gray>Use your <blue>Setup Tool<gray> to define the path each game entity needs to follow to reach its garage for all team members. <white>Note: <gray>By using <white>/blocko arena setup resetStep<gray>, you can also reset the configured path IDs for the fields."
+
   scanning_board.select_first_corner: "<prefix> <yellow>First <gray>corner selected."
   scanning_board.select_second_corner: "<prefix> <yellow>Second <gray>corner selected."
   scanning_board.confirm: "<prefix> <gray>Click <click:suggest_command:'/blocko arena setup board scan <id>'><yellow><bold><hover:show_text:'<gray>Click to scan the Blocko board'>HERE</hover></bold><gray></click> to scan the BLOCKO board."

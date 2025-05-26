@@ -31,6 +31,7 @@ import java.util.*
 
 class ArenaSetupHandler {
 
+    private val tooltipHandler = Blocko.instance.tooltipHandler
     private val highlightHandler = Blocko.instance.gameFieldHighlightHandler
 
     private val activeSetupSessions = mutableMapOf<UUID, ArenaSetupSession>()
@@ -87,12 +88,27 @@ class ArenaSetupHandler {
             return
         }
 
-        this.activeSetupSessions[player.uniqueId] = ArenaSetupSession(arenaId)
+        val setupSession = ArenaSetupSession(arenaId)
+        this.activeSetupSessions[player.uniqueId] = setupSession
 
         val setupTool = SetupTool(player)
         setupTool.setToPlayer()
 
         ScoreboardUtils.setSetupSidebar(player)
+
+        val activeSetupStep = setupSession.getActiveSetupStep() ?: return
+
+        println(this.tooltipHandler.hasViewedTooltip(player.uniqueId, activeSetupStep.id))
+
+        if (!this.tooltipHandler.hasViewedTooltip(player.uniqueId, activeSetupStep.id)) {
+            println(0)
+            val tooltip = this.tooltipHandler.getTooltip(activeSetupStep) ?: return
+
+            println(1)
+
+            this.tooltipHandler.addViewedTooltip(player.uniqueId, activeSetupStep.id)
+            player.sendMessage(tooltip.getToolTipComponent(Blocko.instance.translationHandler.getSelectedTranslation()))
+        }
 
         player.getSetupSession()?.setupTool = setupTool
         player.translateMessage("blocko.setup.setup_mode_activated")
@@ -300,7 +316,8 @@ class ArenaSetupHandler {
 
         setupStep.gameTeamLocations.add(teamSpawn)
 
-        val highlightMode = this.highlightHandler.getHighlightModeByBlockType(location.block.type, TeamSpawnHighlightMode::class) ?: return
+        val highlightMode = this.highlightHandler.getHighlightModeByBlockType(location.block.type, TeamSpawnHighlightMode::class)
+            ?: return
         this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, centeredLocation, highlightMode)
     }
 
@@ -412,7 +429,8 @@ class ArenaSetupHandler {
         setupStep.fieldIndex++
 
         val gameTeam = Blocko.instance.gameTeamHandler.getTeam(setupSession.arenaId, teamName) ?: return
-        val highlightMode = this.highlightHandler.getHighlightModeByTeam(gameTeam, TeamPathHighlightMode::class) ?: return
+        val highlightMode = this.highlightHandler.getHighlightModeByTeam(gameTeam, TeamPathHighlightMode::class)
+            ?: return
 
         this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(block.location), highlightMode)
     }

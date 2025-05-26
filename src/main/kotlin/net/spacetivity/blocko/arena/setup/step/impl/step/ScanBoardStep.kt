@@ -8,6 +8,7 @@ import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
 import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
 import net.spacetivity.blocko.arena.setup.step.SetupStep
 import net.spacetivity.blocko.arena.setup.step.impl.reset.ScanBoardResetData
+import net.spacetivity.blocko.arena.setup.tooltips.Tooltip
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.highlighting.impl.*
 import net.spacetivity.blocko.team.GameTeamLocation
@@ -22,6 +23,7 @@ class ScanBoardStep : SetupStep<ScanBoardResetData> {
     override val key = "ScanBoard"
     override val keybindHints = setOf(ToolModeKeybindHint(ToolModeKeybind.LEFT_CLICK, "Pos1"), ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, "Pos2"))
     override val validBlockTypes = setOf<Material>()
+    override val tooltip = Tooltip(this.id)
     override var active = true
 
     var fieldIndex = 0

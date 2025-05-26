@@ -8,6 +8,8 @@ import net.spacetivity.blocko.achievement.impl.*
 import net.spacetivity.blocko.arena.ArenaDAO
 import net.spacetivity.blocko.arena.ArenaHandler
 import net.spacetivity.blocko.arena.setup.ArenaSetupHandler
+import net.spacetivity.blocko.arena.setup.tooltips.TooltipHandler
+import net.spacetivity.blocko.arena.setup.tooltips.TooltipViewersDAO
 import net.spacetivity.blocko.arena.sign.ArenaSignDAO
 import net.spacetivity.blocko.arena.sign.ArenaSignHandler
 import net.spacetivity.blocko.bossbar.BossbarHandler
@@ -73,6 +75,7 @@ class Blocko : JavaPlugin() {
     lateinit var gameFieldHighlightHandler: GameFieldHighlightHandler
     lateinit var diceHandler: DiceHandler
     lateinit var arenaHandler: ArenaHandler
+    lateinit var tooltipHandler: TooltipHandler
     lateinit var arenaSetupHandler: ArenaSetupHandler
     lateinit var gameTeamHandler: GameTeamHandler
     lateinit var gameEntityHandler: GameEntityHandler
@@ -109,6 +112,7 @@ class Blocko : JavaPlugin() {
         transaction {
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(
+                TooltipViewersDAO,
                 ArenaDAO,
                 GameFieldDAO,
                 GameTeamLocationDAO,
@@ -141,6 +145,7 @@ class Blocko : JavaPlugin() {
         this.diceHandler = DiceHandler()
         this.diceHandler.startDiceAnimation()
         this.arenaHandler = ArenaHandler()
+        this.tooltipHandler = TooltipHandler()
         this.arenaSetupHandler = ArenaSetupHandler()
         this.gameTeamHandler = GameTeamHandler()
         this.gameEntityHandler = GameEntityHandler()

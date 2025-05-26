@@ -22,9 +22,10 @@ import org.bukkit.inventory.ItemStack
 
 class SetupTool(private val holder: Player) {
 
-    val translation = Blocko.instance.translationHandler.getSelectedTranslation()
+    private val tooltipHandler = Blocko.instance.tooltipHandler
+    private val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
-    val type = Material.entries.find { it.name == Blocko.instance.globalConfigFile.setupItemType }
+    private val type = Material.entries.find { it.name == Blocko.instance.globalConfigFile.setupItemType }
         ?: throw NullPointerException("Invalid setup item type!")
 
     fun setToPlayer() {
@@ -49,6 +50,12 @@ class SetupTool(private val holder: Player) {
 
         itemStack.meta {
             lore(fetchLore(translation))
+        }
+
+        if (!this.tooltipHandler.hasViewedTooltip(this.holder.uniqueId, nextSetupStep.id)) {
+            val tooltip = this.tooltipHandler.getTooltip(nextSetupStep) ?: return
+            this.tooltipHandler.addViewedTooltip(this.holder.uniqueId, nextSetupStep.id)
+            this.holder.sendMessage(tooltip.getToolTipComponent(this.translation))
         }
 
         this.holder.translateMessage("blocko.setup.tool.mode_change", Placeholder.parsed("mode", nextSetupStep.key))

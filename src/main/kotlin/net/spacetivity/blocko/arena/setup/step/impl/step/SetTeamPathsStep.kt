@@ -8,6 +8,7 @@ import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
 import net.spacetivity.blocko.arena.setup.getSetupSession
 import net.spacetivity.blocko.arena.setup.step.SetupStep
 import net.spacetivity.blocko.arena.setup.step.impl.reset.TeamPathResetData
+import net.spacetivity.blocko.arena.setup.tooltips.Tooltip
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
@@ -38,6 +39,7 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
         Material.BONE_BLOCK
     )
 
+    override val tooltip = Tooltip(this.id)
     override var active = false
 
     override fun getSidebarLines(player: Player): List<Component> {
@@ -48,14 +50,8 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
         val lines = mutableListOf<Component>()
 
         for (gameTeam in Constants.GAME_TEAMS) {
-            var fieldsWithTeamPathId = 0
-
-            for (gameField in scanBoardStep.gameFields) {
-                if (gameField.properties.getTeamPathId(gameTeam.name) == null) continue
-                fieldsWithTeamPathId++
-            }
-
-            val allTeamIdsConfigured = fieldsWithTeamPathId == 44 //TODO: make this dynamic (CONFIGURABLE)
+            val fieldsWithTeamPathId = scanBoardStep.gameFields.count { it.properties.getTeamPathId(gameTeam.name) != null }
+            val allTeamIdsConfigured = fieldsWithTeamPathId == 44
 
             val keyType = if (allTeamIdsConfigured) "configured" else "unconfigured"
             val indicator = translation.lineAsString("blocko.sidebar.setup.lines.indicator.$keyType")
