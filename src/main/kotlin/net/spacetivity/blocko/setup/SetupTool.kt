@@ -1,14 +1,14 @@
-package net.spacetivity.blocko.arena.setup
+package net.spacetivity.blocko.setup
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
-import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamEntrancesStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamPathsStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTurningPointsStep
 import net.spacetivity.blocko.inventory.setup.InvType
 import net.spacetivity.blocko.item.*
+import net.spacetivity.blocko.setup.step.impl.step.ScanBoardStep
+import net.spacetivity.blocko.setup.step.impl.step.SetTeamEntrancesStep
+import net.spacetivity.blocko.setup.step.impl.step.SetTeamPathsStep
+import net.spacetivity.blocko.setup.step.impl.step.SetTurningPointsStep
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants

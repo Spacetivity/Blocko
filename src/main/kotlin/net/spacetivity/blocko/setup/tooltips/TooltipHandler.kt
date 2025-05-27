@@ -1,6 +1,6 @@
-package net.spacetivity.blocko.arena.setup.tooltips
+package net.spacetivity.blocko.setup.tooltips
 
-import net.spacetivity.blocko.arena.setup.step.SetupStep
+import net.spacetivity.blocko.setup.step.SetupStep
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll

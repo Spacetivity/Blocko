@@ -14,13 +14,13 @@ import net.spacetivity.blocko.phase.GamePhase
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.playSound
-import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.blocko.stats.toStatsPlayerInstance
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.Constants.ENTITY_SELECTOR_KEY
 import net.spacetivity.blocko.utils.InventoryUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.inventory.api.SpaceInventoryProvider
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -232,12 +232,10 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
         return getArena().currentPlayers.filter { it.hasSavedAllEntities() }.size
     }
 
-    //TODO: check if this new impl works lol (old function was quite dumb...)
     private fun hasControllingTeamMemberDicedSix(dicedNumber: Int?): Boolean {
         val controllingTeam = getControllingTeam() ?: return false
         if (controllingTeam.deactivated) return false
-
-        return dicedNumber != null && dicedNumber == 6
+        return  dicedNumber != null && dicedNumber == 6
     }
 
     private fun getHighlightedEntities(gamePlayer: GamePlayer, arena: Arena): List<GameEntity> {

@@ -1,3 +1,3 @@
-package net.spacetivity.blocko.arena.setup.step
+package net.spacetivity.blocko.setup.step
 
 interface ResetData

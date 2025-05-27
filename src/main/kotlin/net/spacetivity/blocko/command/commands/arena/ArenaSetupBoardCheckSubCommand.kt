@@ -3,12 +3,12 @@ package net.spacetivity.blocko.command.commands.arena
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.ArenaStatus
-import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
 import net.spacetivity.blocko.command.api.SpaceCommandSender
 import net.spacetivity.blocko.command.api.extension.findArgument
 import net.spacetivity.blocko.command.api.extension.generateSuggestions
 import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommand
 import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
+import net.spacetivity.blocko.setup.step.impl.step.ScanBoardStep
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.HelperFunctions
 

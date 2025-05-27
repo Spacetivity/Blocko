@@ -1,8 +1,8 @@
-package net.spacetivity.blocko.arena.setup
+package net.spacetivity.blocko.setup
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
+import net.spacetivity.blocko.setup.step.impl.step.ScanBoardStep
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block

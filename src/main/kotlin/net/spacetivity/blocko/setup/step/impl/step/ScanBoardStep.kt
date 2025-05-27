@@ -1,16 +1,15 @@
-package net.spacetivity.blocko.arena.setup.step.impl.step
+package net.spacetivity.blocko.setup.step.impl.step
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
-import net.spacetivity.blocko.arena.setup.ScannerResult
-import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
-import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
-import net.spacetivity.blocko.arena.setup.step.SetupStep
-import net.spacetivity.blocko.arena.setup.step.impl.reset.ScanBoardResetData
-import net.spacetivity.blocko.arena.setup.tooltips.Tooltip
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.highlighting.impl.*
+import net.spacetivity.blocko.setup.ScannerResult
+import net.spacetivity.blocko.setup.SetupTool
+import net.spacetivity.blocko.setup.step.SetupStep
+import net.spacetivity.blocko.setup.step.impl.reset.ScanBoardResetData
+import net.spacetivity.blocko.setup.tooltips.Tooltip
 import net.spacetivity.blocko.team.GameTeamLocation
 import net.spacetivity.blocko.translation.translateMessage
 import org.bukkit.Location
@@ -21,7 +20,7 @@ class ScanBoardStep : SetupStep<ScanBoardResetData> {
 
     override val id = 0
     override val key = "ScanBoard"
-    override val keybindHints = setOf(ToolModeKeybindHint(ToolModeKeybind.LEFT_CLICK, "Pos1"), ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, "Pos2"))
+    override val keybindHints = setOf(SetupTool.ToolModeKeybindHint(SetupTool.ToolModeKeybind.LEFT_CLICK, "Pos1"), SetupTool.ToolModeKeybindHint(SetupTool.ToolModeKeybind.RIGHT_CLICK, "Pos2"))
     override val validBlockTypes = setOf<Material>()
     override val tooltip = Tooltip(this.id)
     override var active = true

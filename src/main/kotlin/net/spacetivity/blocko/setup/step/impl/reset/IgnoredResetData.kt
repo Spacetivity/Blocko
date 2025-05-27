@@ -1,5 +1,5 @@
-package net.spacetivity.blocko.arena.setup.step.impl.reset
+package net.spacetivity.blocko.setup.step.impl.reset
 
-import net.spacetivity.blocko.arena.setup.step.ResetData
+import net.spacetivity.blocko.setup.step.ResetData
 
 class IgnoredResetData : ResetData

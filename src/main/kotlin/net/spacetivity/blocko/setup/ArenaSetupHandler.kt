@@ -1,4 +1,4 @@
-package net.spacetivity.blocko.arena.setup
+package net.spacetivity.blocko.setup
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
@@ -6,14 +6,14 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.ArenaStatus
 import net.spacetivity.blocko.arena.id.ArenaId
-import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamEntrancesStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamPathsStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTurningPointsStep
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
 import net.spacetivity.blocko.field.GameFieldRotation
 import net.spacetivity.blocko.field.highlighting.impl.*
+import net.spacetivity.blocko.setup.step.impl.step.ScanBoardStep
+import net.spacetivity.blocko.setup.step.impl.step.SetTeamEntrancesStep
+import net.spacetivity.blocko.setup.step.impl.step.SetTeamPathsStep
+import net.spacetivity.blocko.setup.step.impl.step.SetTurningPointsStep
 import net.spacetivity.blocko.team.GameTeamLocation
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage

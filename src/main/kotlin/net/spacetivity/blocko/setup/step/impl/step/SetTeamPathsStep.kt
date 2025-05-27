@@ -1,19 +1,17 @@
-package net.spacetivity.blocko.arena.setup.step.impl.step
+package net.spacetivity.blocko.setup.step.impl.step
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
-import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
-import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
-import net.spacetivity.blocko.arena.setup.getSetupSession
-import net.spacetivity.blocko.arena.setup.step.SetupStep
-import net.spacetivity.blocko.arena.setup.step.impl.reset.TeamPathResetData
-import net.spacetivity.blocko.arena.setup.tooltips.Tooltip
 import net.spacetivity.blocko.field.GameField
+import net.spacetivity.blocko.setup.SetupTool
+import net.spacetivity.blocko.setup.getSetupSession
+import net.spacetivity.blocko.setup.step.SetupStep
+import net.spacetivity.blocko.setup.step.impl.reset.TeamPathResetData
+import net.spacetivity.blocko.setup.tooltips.Tooltip
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
 import org.bukkit.Material
-import org.bukkit.Sound
 import org.bukkit.entity.Player
 
 class SetTeamPathsStep : SetupStep<TeamPathResetData> {
@@ -22,8 +20,8 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
     override val key = "SetTeamPath"
 
     override val keybindHints = setOf(
-        ToolModeKeybindHint(ToolModeKeybind.LEFT_CLICK, "Opens Team Selector"),
-        ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, "Sets teamId to gameField")
+        SetupTool.ToolModeKeybindHint(SetupTool.ToolModeKeybind.LEFT_CLICK, "Opens Team Selector"),
+        SetupTool.ToolModeKeybindHint(SetupTool.ToolModeKeybind.RIGHT_CLICK, "Sets teamId to gameField")
     )
 
     override val validBlockTypes = setOf(
@@ -53,8 +51,6 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
         for (gameTeam in Constants.GAME_TEAMS) {
             val fieldsWithTeamPathId = scanBoardStep.gameFields.count { it.properties.getTeamPathId(gameTeam.name) != null }
             val allTeamIdsConfigured = fieldsWithTeamPathId == 44
-
-            if (allTeamIdsConfigured) player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 0.5f)
 
             val keyType = if (allTeamIdsConfigured) "configured" else "unconfigured"
             val indicator = translation.lineAsString("blocko.sidebar.setup.lines.indicator.$keyType")

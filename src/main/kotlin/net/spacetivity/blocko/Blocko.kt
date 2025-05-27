@@ -7,9 +7,6 @@ import net.spacetivity.blocko.achievement.AchievementPlayerDAO
 import net.spacetivity.blocko.achievement.impl.*
 import net.spacetivity.blocko.arena.ArenaDAO
 import net.spacetivity.blocko.arena.ArenaHandler
-import net.spacetivity.blocko.arena.setup.ArenaSetupHandler
-import net.spacetivity.blocko.arena.setup.tooltips.TooltipHandler
-import net.spacetivity.blocko.arena.setup.tooltips.TooltipViewersDAO
 import net.spacetivity.blocko.arena.sign.ArenaSignDAO
 import net.spacetivity.blocko.arena.sign.ArenaSignHandler
 import net.spacetivity.blocko.bossbar.BossbarHandler
@@ -35,10 +32,13 @@ import net.spacetivity.blocko.listener.ProtectionListener
 import net.spacetivity.blocko.lobby.LobbySpawnDAO
 import net.spacetivity.blocko.lobby.LobbySpawnHandler
 import net.spacetivity.blocko.phase.GamePhaseHandler
-import net.spacetivity.blocko.player.ai.AIEntityHandler
 import net.spacetivity.blocko.player.GamePlayActionHandler
+import net.spacetivity.blocko.player.ai.AIEntityHandler
 import net.spacetivity.blocko.scoreboard.PlayerFormatHandler
 import net.spacetivity.blocko.scoreboard.SidebarHandler
+import net.spacetivity.blocko.setup.ArenaSetupHandler
+import net.spacetivity.blocko.setup.tooltips.TooltipHandler
+import net.spacetivity.blocko.setup.tooltips.TooltipViewersDAO
 import net.spacetivity.blocko.stats.StatsPlayerDAO
 import net.spacetivity.blocko.stats.StatsPlayerHandler
 import net.spacetivity.blocko.team.GameTeamHandler

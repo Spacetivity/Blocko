@@ -1,12 +1,12 @@
-package net.spacetivity.blocko.arena.setup
+package net.spacetivity.blocko.setup
 
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
-import net.spacetivity.blocko.arena.setup.step.SetupStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamEntrancesStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamPathsStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTurningPointsStep
+import net.spacetivity.blocko.setup.step.SetupStep
+import net.spacetivity.blocko.setup.step.impl.step.ScanBoardStep
+import net.spacetivity.blocko.setup.step.impl.step.SetTeamEntrancesStep
+import net.spacetivity.blocko.setup.step.impl.step.SetTeamPathsStep
+import net.spacetivity.blocko.setup.step.impl.step.SetTurningPointsStep
 import net.spacetivity.blocko.utils.Constants
 import java.time.Duration
 

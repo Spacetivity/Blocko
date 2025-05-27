@@ -3,8 +3,8 @@ package net.spacetivity.blocko.utils
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
-import net.spacetivity.blocko.arena.setup.ArenaSetupSession
-import net.spacetivity.blocko.arena.setup.getSetupSession
+import net.spacetivity.blocko.setup.ArenaSetupSession
+import net.spacetivity.blocko.setup.getSetupSession
 import net.spacetivity.blocko.translation.translateMessage
 import org.bukkit.entity.Player
 

@@ -1,15 +1,14 @@
-package net.spacetivity.blocko.arena.setup.step.impl.step
+package net.spacetivity.blocko.setup.step.impl.step
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
-import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
-import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
-import net.spacetivity.blocko.arena.setup.getSetupSession
-import net.spacetivity.blocko.arena.setup.step.SetupStep
-import net.spacetivity.blocko.arena.setup.step.impl.reset.IgnoredResetData
-import net.spacetivity.blocko.arena.setup.tooltips.Tooltip
 import net.spacetivity.blocko.field.highlighting.impl.GameFieldHighlightMode
+import net.spacetivity.blocko.setup.SetupTool
+import net.spacetivity.blocko.setup.getSetupSession
+import net.spacetivity.blocko.setup.step.SetupStep
+import net.spacetivity.blocko.setup.step.impl.reset.IgnoredResetData
+import net.spacetivity.blocko.setup.tooltips.Tooltip
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
 import org.bukkit.Material
@@ -19,7 +18,7 @@ class SetTeamEntrancesStep : SetupStep<IgnoredResetData> {
 
     override val id = 2
     override val key = "SetTeamEntrance"
-    override val keybindHints = setOf(ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, null))
+    override val keybindHints = setOf(SetupTool.ToolModeKeybindHint(SetupTool.ToolModeKeybind.RIGHT_CLICK, null))
     override val validBlockTypes = setOf(Material.BONE_BLOCK)
     override val tooltip = Tooltip(this.id)
     override var active = false

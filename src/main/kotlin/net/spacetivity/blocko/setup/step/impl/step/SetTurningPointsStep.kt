@@ -1,15 +1,14 @@
-package net.spacetivity.blocko.arena.setup.step.impl.step
+package net.spacetivity.blocko.setup.step.impl.step
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
-import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybind
-import net.spacetivity.blocko.arena.setup.SetupTool.ToolModeKeybindHint
-import net.spacetivity.blocko.arena.setup.getSetupSession
-import net.spacetivity.blocko.arena.setup.step.SetupStep
-import net.spacetivity.blocko.arena.setup.step.impl.reset.IgnoredResetData
-import net.spacetivity.blocko.arena.setup.tooltips.Tooltip
 import net.spacetivity.blocko.field.highlighting.impl.GameFieldHighlightMode
+import net.spacetivity.blocko.setup.SetupTool
+import net.spacetivity.blocko.setup.getSetupSession
+import net.spacetivity.blocko.setup.step.SetupStep
+import net.spacetivity.blocko.setup.step.impl.reset.IgnoredResetData
+import net.spacetivity.blocko.setup.tooltips.Tooltip
 import net.spacetivity.blocko.translation.translateMessage
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -20,7 +19,7 @@ class SetTurningPointsStep : SetupStep<IgnoredResetData> {
     override val key = "SetTurningPoint"
 
     override val keybindHints = setOf(
-        ToolModeKeybindHint(ToolModeKeybind.RIGHT_CLICK, null)
+        SetupTool.ToolModeKeybindHint(SetupTool.ToolModeKeybind.RIGHT_CLICK, null)
     )
 
     override val validBlockTypes = setOf(

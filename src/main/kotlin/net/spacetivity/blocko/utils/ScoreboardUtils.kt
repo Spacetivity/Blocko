@@ -6,14 +6,14 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.id.ArenaId
-import net.spacetivity.blocko.arena.setup.ArenaSetupSession
-import net.spacetivity.blocko.arena.setup.getSetupSession
-import net.spacetivity.blocko.arena.setup.step.SetupStep
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.scoreboard.SidebarBuilder
+import net.spacetivity.blocko.setup.ArenaSetupSession
+import net.spacetivity.blocko.setup.getSetupSession
+import net.spacetivity.blocko.setup.step.SetupStep
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import org.bukkit.entity.Player
@@ -162,7 +162,7 @@ object ScoreboardUtils {
     }
 
     private fun getControllingTeamComponent(translation: Translation, gameTeam: GameTeam?): Component {
-        if (gameTeam == null) return translation.line("blocko.sidebar.line.controlling_team_name.not_ingame")
+        if (gameTeam == null) return translation.line("blocko.sidebar.game.lines.controlling_team_name.not_ingame")
         return translation.line("blocko.sidebar.game.lines.controlling_team_name.ingame", Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"), Placeholder.parsed("team_name", gameTeam.name))
     }
 

@@ -1,4 +1,4 @@
-package net.spacetivity.blocko.arena.setup
+package net.spacetivity.blocko.setup
 
 import net.spacetivity.blocko.Blocko
 import org.bukkit.entity.Player

@@ -1,4 +1,4 @@
-package net.spacetivity.blocko.arena.setup.tooltips
+package net.spacetivity.blocko.setup.tooltips
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder

@@ -1,7 +1,7 @@
 package net.spacetivity.blocko.listener
 
 import net.spacetivity.blocko.Blocko
-import net.spacetivity.blocko.arena.setup.getSetupSession
+import net.spacetivity.blocko.setup.getSetupSession
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Material

@@ -1,4 +1,4 @@
-package net.spacetivity.blocko.arena.setup.tooltips
+package net.spacetivity.blocko.setup.tooltips
 
 import org.jetbrains.exposed.sql.Table
 

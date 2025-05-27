@@ -99,7 +99,7 @@ class GameFieldHighlightHandler {
         if (highlightEntity == null) return
 
         val arena = Blocko.instance.arenaHandler.getArena(arenaId) ?: return
-        val arenaPlayers: List<Player> = when (arena.status) {
+        val arenaPlayers = when (arena.status) {
             ArenaStatus.CONFIGURATING -> Blocko.instance.arenaSetupHandler.getSetupPlayers(arenaId)
             ArenaStatus.READY -> arena.getAllPlayers()
             else -> emptyList()
@@ -129,7 +129,7 @@ class GameFieldHighlightHandler {
         }
 
         val arena = Blocko.instance.arenaHandler.getArena(arenaId) ?: return
-        val arenaPlayers: List<Player> = when (arena.status) {
+        val arenaPlayers = when (arena.status) {
             ArenaStatus.CONFIGURATING -> Blocko.instance.arenaSetupHandler.getSetupPlayers(arenaId)
             ArenaStatus.READY -> arena.getAllPlayers()
             else -> emptyList()

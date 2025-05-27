@@ -178,7 +178,7 @@ blocko.command:
     arena_not_exists: "<prefix> <gray>Arena with id <yellow><id> <gray>doesn't exist!"
     arena_list:
       title: "<prefix> <gray>All arenas: "
-      line: "<dark_gray>» <gray>Id: <yellow><id> <dark_gray>(<gray<status><dark_gray>) <click:run_command:'/blocko arena delete <id>'><hover:show_text:'<gray>Click here to delete the arena!'><dark_red>[DELETE]</hover></click> <dark_gray>(<green><current_player_amount><dark_gray>/<yellow><max_player_amount><dark_gray>)"
+      line: "<dark_gray>» <gray>Id: <yellow><id> <dark_gray>(<gray><status><dark_gray>) <click:run_command:'/blocko arena delete <id>'><hover:show_text:'<gray>Click here to delete the arena!'><dark_red>[DELETE]</hover></click> <dark_gray>(<green><current_player_amount><dark_gray>/<yellow><max_player_amount><dark_gray>)"
     arena_limit_reached: "<prefix> <gray>You cannot create more than <yellow><arena_limit> <gray>arenas on this server!"
     arena_created: "<prefix> <gray>Arena created."
     arena_deleted: "<prefix> <gray>Arena deleted."

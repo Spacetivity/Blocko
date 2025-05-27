@@ -2,14 +2,14 @@ package net.spacetivity.blocko.inventory.setup
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
-import net.spacetivity.blocko.arena.setup.getSetupSession
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamEntrancesStep
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldRotation
 import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
 import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.item.setValue
+import net.spacetivity.blocko.setup.getSetupSession
+import net.spacetivity.blocko.setup.step.impl.step.SetTeamEntrancesStep
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.ScoreboardUtils
