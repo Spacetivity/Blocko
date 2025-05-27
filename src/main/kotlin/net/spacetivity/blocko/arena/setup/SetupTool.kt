@@ -31,7 +31,7 @@ class SetupTool(private val holder: Player) {
     fun setToPlayer() {
         val itemStack = itemStack(type) {
             meta {
-                name = translation.displayName("blocko.setup.tool.display_name")
+                name = translation.displayName("blocko.tool.setup.display_name")
                 lore(fetchLore(translation))
                 hideExtraInfo()
                 applyPersistentData(Constants.SETUP_TOOL_KEY, holder.uniqueId.toString())
@@ -58,8 +58,8 @@ class SetupTool(private val holder: Player) {
             this.holder.sendMessage(tooltip.getToolTipComponent(this.translation))
         }
 
-        this.holder.translateMessage("blocko.setup.tool.mode_change", Placeholder.parsed("mode", nextSetupStep.key))
-        this.holder.playSound(this.holder.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)
+        this.holder.translateMessage("blocko.tool.setup.mode_change", Placeholder.parsed("mode", nextSetupStep.key))
+        this.holder.playSound(this.holder.location, Sound.UI_BUTTON_CLICK, 0.1F, 0.1F)
     }
 
     fun doAction(event: PlayerInteractEvent) {
@@ -100,14 +100,14 @@ class SetupTool(private val holder: Player) {
 
     private fun fetchLore(translation: Translation): MutableList<Component> {
         val lore = mutableListOf<Component>()
-        val optionalDataPrefix = translation.displayName("blocko.setup.tool.lore.separator")
+        val optionalDataPrefix = translation.displayName("blocko.tool.setup.lore.separator")
 
         val setupSession = this.holder.getSetupSession() ?: return lore
 
         for (setupStep in setupSession.setupSteps.values) {
             val stepId = setupStep.id + 1 // +1 because it looks nicer for players ingame to think of the first setup step as 1
 
-            val loreModeTitle = translation.displayName("blocko.setup.tool.lore.mode_title.${if (setupStep.active) "active" else "not_active"}",
+            val loreModeTitle = translation.displayName("blocko.tool.setup.lore.mode_title.${if (setupStep.active) "active" else "not_active"}",
                 Placeholder.parsed("mode_id", stepId.toString()),
                 Placeholder.parsed("mode", setupStep.key))
 
@@ -122,7 +122,7 @@ class SetupTool(private val holder: Player) {
                 placeholders.add(Placeholder.component("data_prefix", if (hint == null) Component.text("") else optionalDataPrefix))
                 placeholders.add(Placeholder.parsed("optional_data", hint ?: ""))
 
-                val loreModeKeybindLine = translation.displayName("blocko.setup.tool.lore.mode_keybind_line", *placeholders.toTypedArray())
+                val loreModeKeybindLine = translation.displayName("blocko.tool.setup.lore.mode_keybind_line", *placeholders.toTypedArray())
                 lore.add(loreModeKeybindLine)
             }
         }

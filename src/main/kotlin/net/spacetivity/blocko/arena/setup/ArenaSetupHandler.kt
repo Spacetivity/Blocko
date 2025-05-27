@@ -8,6 +8,7 @@ import net.spacetivity.blocko.arena.ArenaStatus
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
 import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamEntrancesStep
+import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamPathsStep
 import net.spacetivity.blocko.arena.setup.step.impl.step.SetTurningPointsStep
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.field.GameFieldProperties
@@ -22,6 +23,7 @@ import net.spacetivity.blocko.utils.PersistentDataUtils
 import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Sound
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
@@ -427,6 +429,11 @@ class ArenaSetupHandler {
             ?: return
 
         this.highlightHandler.spawnOrUpdateHighlightEntity(setupSession.arenaId, LocationUtils.centerLocation(block.location), highlightMode)
+
+        val teamPathsStep = setupSession.getSetupStep<SetTeamPathsStep>()!!
+        ScoreboardUtils.updateSetupDataLines(player, teamPathsStep)
+
+        player.playSound(player.location, Sound.ENTITY_LEASH_KNOT_BREAK, 0.5f, 0.5f)
     }
 
 }

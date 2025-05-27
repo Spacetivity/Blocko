@@ -13,6 +13,7 @@ import net.spacetivity.blocko.item.*
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.Constants.BALANCE_ITEM_KEY
 import net.spacetivity.blocko.utils.Constants.GAME_ENTITY_TYPE_KEY
 import net.spacetivity.blocko.utils.InventoryUtils
@@ -189,7 +190,7 @@ class EntityShopInventory : InventoryProvider {
 
         val properties = gameEntityType.getProperties()
 
-        val possibleAchievementPlaceholder: TagResolver.Single = if (!properties.requiresAchievement()) Placeholder.parsed("possible_achievement_name", "-/-")
+        val possibleAchievementPlaceholder: TagResolver.Single = if (!properties.requiresAchievement()) Placeholder.parsed("possible_achievement_name", Constants.PLACEHOLDER)
         else Placeholder.parsed("possible_achievement_name", getAchievementByKey(properties.achievementKey)?.name
             ?: ":=)")
 

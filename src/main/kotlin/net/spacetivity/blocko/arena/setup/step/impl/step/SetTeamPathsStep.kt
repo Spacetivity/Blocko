@@ -13,6 +13,7 @@ import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 
 class SetTeamPathsStep : SetupStep<TeamPathResetData> {
@@ -52,6 +53,8 @@ class SetTeamPathsStep : SetupStep<TeamPathResetData> {
         for (gameTeam in Constants.GAME_TEAMS) {
             val fieldsWithTeamPathId = scanBoardStep.gameFields.count { it.properties.getTeamPathId(gameTeam.name) != null }
             val allTeamIdsConfigured = fieldsWithTeamPathId == 44
+
+            if (allTeamIdsConfigured) player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 0.5f)
 
             val keyType = if (allTeamIdsConfigured) "configured" else "unconfigured"
             val indicator = translation.lineAsString("blocko.sidebar.setup.lines.indicator.$keyType")

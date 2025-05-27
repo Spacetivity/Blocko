@@ -1,7 +1,9 @@
 package net.spacetivity.blocko.entity
 
-data class GameEntityProperties(val price: Int, val isBaby: Boolean, val achievementKey: String = "-/-") {
+import net.spacetivity.blocko.utils.Constants
 
-    fun requiresAchievement(): Boolean = this.achievementKey != "-/-"
+data class GameEntityProperties(val price: Int, val isBaby: Boolean, val achievementKey: String = Constants.PLACEHOLDER) {
+
+    fun requiresAchievement(): Boolean = this.achievementKey != Constants.PLACEHOLDER
 
 }

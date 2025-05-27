@@ -22,19 +22,23 @@ blocko.motd: "        <gray><st>------</st> <gradient:green:yellow>Blocko Game<d
 
 blocko.bot.indicator: "[BOT]"
 
+blocko.tool:
+  setup:
+    display_name: "<yellow><bold>Setup</bold> <gray>(<white>SHIFT <gray>+ <white>Left<gray>/<white>Right-Click<gray> = <white>Change Mode<gray>)"
+    lore:
+      mode_title:
+        active: "<green><mode_id> <mode>"
+        not_active: "<blue><mode_id> <white><mode>"
+      separator: "<yellow>=<gray>"
+      mode_keybind_line: "   <blue>- <gray><keybind><data_prefix><optional_data>"
+    mode_change: "<prefix> <gray>Tool mode set to: <yellow><mode>"
+
 blocko.setup:
   not_in_setup_mode: "<prefix> <gray>You are not in setup mode!"
   already_in_setup_mode: "<prefix> <gray>You are already in setup mode!"
   arena_already_configurated_by_player: "<prefix> <gray>This arena is already being configured."
   setup_mode_activated: "<prefix> <gray>You are now in setup mode!"
   setup_mode_deactivated: "<prefix> <gray>You are no longer in setup mode!"
-
-  tool.display_name: "<yellow><bold>Setup</bold> <gray>(<white>SHIFT <gray>+ <white>Left<gray>/<white>Right-Click<gray> = <white>Change Mode<gray>)"
-  tool.lore.mode_title.active: "<green><mode_id> <mode>"
-  tool.lore.mode_title.not_active: "<blue><mode_id> <white><mode>"
-  tool.lore.separator: "<yellow>=<gray>"
-  tool.lore.mode_keybind_line: "   <blue>- <gray><keybind><data_prefix><optional_data>"
-  tool.mode_change: "<prefix> <gray>Tool mode set to: <yellow><mode>"
 
   explanation_tooltips:
     format: |

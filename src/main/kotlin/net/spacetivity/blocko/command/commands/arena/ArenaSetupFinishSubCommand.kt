@@ -8,7 +8,7 @@ import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.HelperFunctions
 
-@SpaceSubCommand(length = 2, parts = "arena setup finish", permission = "blocko.command.admin")
+@SpaceSubCommand(length = 3, parts = "arena setup finish", permission = "blocko.command.admin")
 class ArenaSetupFinishSubCommand : SpaceSubCommandExecutor {
 
     override fun execute(sender: SpaceCommandSender, args: List<String>) {

@@ -1,11 +1,12 @@
-package net.spacetivity.blocko.player
+package net.spacetivity.blocko.player.ai
 
 import net.spacetivity.blocko.Blocko
-import net.spacetivity.blocko.entity.GameEntity
+import net.spacetivity.blocko.player.EntityPickRule
+import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.ai.impl.*
 
 /*
- * Blocko-Bots – Decision Logic by Tobias Heimböck (TGamings)
+ * Blocko-Bots – Decision Logic by Tobias Heimböck
  *
  * Each rule is associated with:
  * - a weight (Int)
@@ -20,9 +21,9 @@ import net.spacetivity.blocko.player.ai.impl.*
  *
  * This logic introduces strategic randomness, making the AI less predictable and more dynamic.
  */
-class EntityAiHandler {
+class AIEntityHandler {
 
-    private val aiRules = listOf(
+    private val aiGamePlayRules = listOf(
         MovableOutOfStartRule(),
         MovableAwayFromFirstFieldRule(),
         MovableButLandsAfterOpponentRule(),
@@ -31,18 +32,18 @@ class EntityAiHandler {
         MovableRule()
     )
 
-    fun analyzeCurrentRuleSituation(gamePlayer: GamePlayer, dicedNumber: Int): Pair<EntityPickRule, GameEntity?> {
-        val gameEntities = Blocko.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
-        val startField = Blocko.instance.gameFieldHandler.getFirstFieldForTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!
-        var bestRule: Pair<EntityPickRule, GameEntity?> = Pair(EntityPickRule.NOT_MOVABLE, null)
+    fun analyzeSituation(gamePlayer: GamePlayer, dicedNumber: Int): AIResult {
+        val gameEntities = Blocko.Companion.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
+        val startField = Blocko.Companion.instance.gameFieldHandler.getFirstFieldForTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!
+        var bestRule = AIResult(EntityPickRule.NOT_MOVABLE, null)
 
         for (entity in gameEntities) {
-            for (rule in aiRules) {
+            for (rule in aiGamePlayRules) {
                 if (rule.evaluate(entity, gamePlayer, dicedNumber, startField)) {
                     val candidate = rule.result(entity)
-                    if (candidate.first.weight > bestRule.first.weight ||
-                        (candidate.first.weight == bestRule.first.weight &&
-                                (1..10).random() > 5 && candidate.first.probability > bestRule.first.probability)
+                    if (candidate.rule.weight > bestRule.rule.weight ||
+                        (candidate.rule.weight == bestRule.rule.weight &&
+                                (1..10).random() > 5 && candidate.rule.probability > bestRule.rule.probability)
                     ) {
                         bestRule = candidate
                     }
@@ -52,8 +53,8 @@ class EntityAiHandler {
 
         // Fallback: when all entities are at spawn.
         if (gameEntities.all { it.isAtSpawn() }) {
-            return if (dicedNumber == 6) Pair(EntityPickRule.MOVABLE_OUT_OF_START, gameEntities.random())
-            else Pair(EntityPickRule.NOT_MOVABLE, null)
+            return if (dicedNumber == 6) AIResult(EntityPickRule.MOVABLE_OUT_OF_START, gameEntities.random())
+            else AIResult(EntityPickRule.NOT_MOVABLE, null)
         }
 
         return bestRule

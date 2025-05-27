@@ -6,6 +6,7 @@ import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.player.GamePlayer
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.LocationUtils
 import net.spacetivity.blocko.utils.MetadataUtils
@@ -189,7 +190,7 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
 
         this.livingEntity!!.teleport(worldPosition)
 
-        val currentHolderTeamName = newField.currentHolder?.teamName ?: "-/-"
+        val currentHolderTeamName = newField.currentHolder?.teamName ?: Constants.PLACEHOLDER
 
         if ((newFieldId == goalFieldId) && (newField.isTaken && currentHolderTeamName != this.teamName))
             goalField.trowOutOldHolder(controller!!, this.livingEntity!!)

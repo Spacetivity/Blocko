@@ -35,7 +35,7 @@ import net.spacetivity.blocko.listener.ProtectionListener
 import net.spacetivity.blocko.lobby.LobbySpawnDAO
 import net.spacetivity.blocko.lobby.LobbySpawnHandler
 import net.spacetivity.blocko.phase.GamePhaseHandler
-import net.spacetivity.blocko.player.EntityAiHandler
+import net.spacetivity.blocko.player.ai.AIEntityHandler
 import net.spacetivity.blocko.player.GamePlayActionHandler
 import net.spacetivity.blocko.scoreboard.PlayerFormatHandler
 import net.spacetivity.blocko.scoreboard.SidebarHandler
@@ -88,7 +88,7 @@ class Blocko : JavaPlugin() {
 
     lateinit var lobbySpawnHandler: LobbySpawnHandler
 
-    lateinit var entityAiHandler: EntityAiHandler
+    lateinit var aiEntityHandler: AIEntityHandler
 
     private lateinit var gamePlayActionHandler: GamePlayActionHandler
 
@@ -179,7 +179,7 @@ class Blocko : JavaPlugin() {
 
         this.lobbySpawnHandler = LobbySpawnHandler()
 
-        this.entityAiHandler = EntityAiHandler()
+        this.aiEntityHandler = AIEntityHandler()
 
         this.gamePlayActionHandler = GamePlayActionHandler()
         this.gamePlayActionHandler.startMainTask()

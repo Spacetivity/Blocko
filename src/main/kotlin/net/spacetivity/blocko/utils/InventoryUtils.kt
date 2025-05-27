@@ -24,9 +24,9 @@ import org.bukkit.entity.Player
 
 object InventoryUtils {
 
-    fun openGameFieldTurnInventory(opener: Player, gameField: GameField?) {
+    fun openGameFieldTurnInventory(opener: Player, gameField: GameField?, isTeamEntrance: Boolean = false) {
         val title = Blocko.instance.translationHandler.getSelectedTranslation().line("blocko.inventory.game_field_set_turn.title")
-        openStaticInventory(opener, title, GameFieldTurnSetupInventory(gameField))
+        openStaticInventory(opener, title, GameFieldTurnSetupInventory(gameField, isTeamEntrance))
     }
 
     fun openGameTeamSetupInventory(opener: Player, invType: InvType, gameField: GameField?) {

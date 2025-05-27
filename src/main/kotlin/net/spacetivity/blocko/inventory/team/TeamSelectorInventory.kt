@@ -6,11 +6,12 @@ import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.toGamePlayerInstance
 import net.spacetivity.blocko.item.*
-import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.PersistentDataUtils
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.inventory.api.inventory.InventoryController
 import net.spacetivity.inventory.api.inventory.InventoryProperties
 import net.spacetivity.inventory.api.inventory.InventoryProvider
@@ -93,7 +94,7 @@ class TeamSelectorInventory(private val arena: Arena) : InventoryProvider {
 
     private fun buildTeamItemLore(gameTeam: GameTeam, translation: Translation): MutableList<Component> {
         val teamMemberUniqueId = gameTeam.teamMembers.firstOrNull()
-        val memberName = if (teamMemberUniqueId == null) "-/-" else Bukkit.getPlayer(teamMemberUniqueId)?.name ?: "-/-"
+        val memberName = if (teamMemberUniqueId == null) Constants.PLACEHOLDER else Bukkit.getPlayer(teamMemberUniqueId)?.name ?: Constants.PLACEHOLDER
 
         return translation.lore("blocko.inventory.team_selector.team_item.lore",
             Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),

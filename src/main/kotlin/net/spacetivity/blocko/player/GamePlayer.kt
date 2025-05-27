@@ -7,9 +7,9 @@ import net.spacetivity.blocko.entity.GameEntityStatus
 import net.spacetivity.blocko.entity.GameEntityType
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
-import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.blocko.stats.GamePlayerMatchStats
 import net.spacetivity.blocko.utils.Constants
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
@@ -47,10 +47,10 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: ArenaId, var tea
     fun autoPickEntity(ingamePhase: IngamePhase) {
         if (this.dicedNumber == null) return
 
-        val situation = Blocko.instance.entityAiHandler.analyzeCurrentRuleSituation(this, this.dicedNumber!!)
+        val situation = Blocko.instance.aiEntityHandler.analyzeSituation(this, this.dicedNumber!!)
         this.actionTimeoutTimestamp = null
 
-        if (situation.first == EntityPickRule.NOT_MOVABLE && situation.second == null) {
+        if (situation.rule == EntityPickRule.NOT_MOVABLE && situation.selectedEntity == null) {
             this.activeEntity = null
             this.lastEntityPickRule = null
             ingamePhase.phaseMode = GamePhaseMode.DICE
@@ -59,10 +59,10 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: ArenaId, var tea
             return
         }
 
-        this.activeEntity = situation.second!!
+        this.activeEntity = situation.selectedEntity!!
         this.activeEntity!!.entityStatus = GameEntityStatus.MOVING
         this.activeEntity!!.toggleHighlighting(true)
-        this.lastEntityPickRule = situation.first
+        this.lastEntityPickRule = situation.rule
 
         for (gamePlayer in Blocko.instance.arenaHandler.getArena(this.arenaId)!!.currentPlayers.filter { !it.isAI }) {
             Blocko.instance.bossbarHandler.unregisterBossbar(gamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)

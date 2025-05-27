@@ -147,7 +147,7 @@ object ScoreboardUtils {
 
         if (gamePlayer?.teamName == null) {
             teamColorHex = NamedTextColor.GRAY.asHexString()
-            teamName = "-/-"
+            teamName = Constants.PLACEHOLDER
         } else {
             val gameTeam: GameTeam = Blocko.instance.gameTeamHandler.getTeam(gamePlayer.arenaId, gamePlayer.teamName!!)!!
             teamColorHex = gameTeam.color.asHexString()
@@ -167,7 +167,7 @@ object ScoreboardUtils {
     }
 
     private fun getDicedNumberComponent(translation: Translation, dicedNumber: Int?): Component {
-        val placeholder = Placeholder.parsed("number", dicedNumber?.toString() ?: "-/-")
+        val placeholder = Placeholder.parsed("number", dicedNumber?.toString() ?: Constants.PLACEHOLDER)
         return translation.line("blocko.sidebar.game.lines.dice_status", placeholder)
     }
 

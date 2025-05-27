@@ -4,9 +4,10 @@ import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.player.EntityPickRule
 import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.player.ai.AiRule
+import net.spacetivity.blocko.player.ai.AIRule
+import net.spacetivity.blocko.player.ai.AIResult
 
-class MovableAndGarageEntrancePossibleRule : AiRule {
+class MovableAndGarageEntrancePossibleRule : AIRule {
     override val weight = EntityPickRule.MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE.weight
     override val probability = EntityPickRule.MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE.probability
 
@@ -14,7 +15,7 @@ class MovableAndGarageEntrancePossibleRule : AiRule {
         return entity.isMovableTo(dicedNumber) && entity.isGarageInSight(dicedNumber)
     }
 
-    override fun result(entity: GameEntity): Pair<EntityPickRule, GameEntity?> {
-        return Pair(EntityPickRule.MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE, entity)
+    override fun result(entity: GameEntity): AIResult {
+        return AIResult(EntityPickRule.MOVABLE_AND_GARAGE_ENTRANCE_POSSIBLE, entity)
     }
 }

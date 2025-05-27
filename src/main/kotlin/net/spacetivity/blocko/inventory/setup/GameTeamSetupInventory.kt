@@ -4,7 +4,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.arena.setup.getSetupSession
 import net.spacetivity.blocko.arena.setup.step.impl.step.ScanBoardStep
-import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamEntrancesStep
 import net.spacetivity.blocko.arena.setup.step.impl.step.SetTeamPathsStep
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.item.hideExtraInfo
@@ -75,10 +74,7 @@ class GameTeamSetupInventory(private val type: InvType, private val gameField: G
 
                 when (this.type) {
                     InvType.IDS -> {
-                        if (setupSession.currentTeamName == gameTeam.name) {
-                            //TODO: send message that you already have selected this team and show hint in item lore!
-                            return@of
-                        }
+                        if (setupSession.currentTeamName == gameTeam.name) return@of
 
                         for (gameField in setupStep.gameFields) {
                             val oldHighlightMode = gameField.currentHighlightMode
@@ -99,10 +95,7 @@ class GameTeamSetupInventory(private val type: InvType, private val gameField: G
 
                     else -> {
                         this.gameField.properties.teamEntrance = gameTeam.name
-                        InventoryUtils.openGameFieldTurnInventory(player, gameField)
-
-                        val teamEntranceStep = setupSession.getSetupStep<SetTeamEntrancesStep>()!!
-                        ScoreboardUtils.updateSetupDataLines(player, teamEntranceStep)
+                        InventoryUtils.openGameFieldTurnInventory(player, gameField, true)
                     }
                 }
             })

@@ -24,9 +24,10 @@ object Constants {
     const val GAME_ENTITY_TYPE_KEY = "game_entity_type"
     const val TEAM_NAME_KEY = "team_name"
     const val ENTITY_SELECTOR_KEY = "entity_selector"
-
     const val SETUP_TOOL_KEY = "setup_tool"
+
     const val TIMEOUT_BOSSBAR_NAME = "timeout_bar"
+    const val PLACEHOLDER = "-/-"
 
     val GAME_TEAMS = listOf(
         GameTeam("red", NamedTextColor.RED, 0),

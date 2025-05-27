@@ -4,9 +4,10 @@ import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.field.GameField
 import net.spacetivity.blocko.player.EntityPickRule
 import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.player.ai.AiRule
+import net.spacetivity.blocko.player.ai.AIRule
+import net.spacetivity.blocko.player.ai.AIResult
 
-class MovableOutOfStartRule : AiRule {
+class MovableOutOfStartRule : AIRule {
     override val weight = EntityPickRule.MOVABLE_OUT_OF_START.weight
     override val probability = EntityPickRule.MOVABLE_OUT_OF_START.probability
 
@@ -16,7 +17,7 @@ class MovableOutOfStartRule : AiRule {
                 (startField.currentHolder == null || startField.currentHolder?.teamName != player.teamName)
     }
 
-    override fun result(entity: GameEntity): Pair<EntityPickRule, GameEntity?> {
-        return Pair(EntityPickRule.MOVABLE_OUT_OF_START, entity)
+    override fun result(entity: GameEntity): AIResult {
+        return AIResult(EntityPickRule.MOVABLE_OUT_OF_START, entity)
     }
 }
