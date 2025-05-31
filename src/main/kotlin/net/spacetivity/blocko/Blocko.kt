@@ -142,7 +142,7 @@ class Blocko : JavaPlugin() {
             val entityId = gameEntityType.name.lowercase()
             val entityProperties = gameEntityType.defaultProperties
             val entityFile = GameEntityPropertiesFile(entityId, entityProperties).createOrLoad(dataFolderPath) as GameEntityPropertiesFile
-            this.gameEntityPropertiesFiles.put(entityId, entityFile)
+            this.gameEntityPropertiesFiles[entityId] = entityFile
         }
 
         this.sidebarHandler = SidebarHandler()
@@ -196,9 +196,7 @@ class Blocko : JavaPlugin() {
     override fun onDisable() {
         for (player in Bukkit.getOnlinePlayers()) {
             for (team in player.scoreboard.teams) {
-                if (team.hasEntry(player.name))
-                    team.removeEntry(player.name)
-
+                if (team.hasEntry(player.name)) team.removeEntry(player.name)
                 team.unregister()
             }
         }

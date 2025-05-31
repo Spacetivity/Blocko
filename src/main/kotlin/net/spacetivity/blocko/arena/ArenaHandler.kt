@@ -9,6 +9,7 @@ import net.spacetivity.blocko.phase.impl.EndingPhase
 import net.spacetivity.blocko.phase.impl.IdlePhase
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
+import net.spacetivity.blocko.utils.Constants
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -99,7 +100,10 @@ class ArenaHandler {
         gamePhaseHandler.cachedGamePhases.put(id, EndingPhase(id))
 
         this.cachedArenaIds.add(id)
-        this.cachedArenas.add(Arena(id, Bukkit.getWorld(worldName)!!, status, idlePhase, location.y, location))
+        val arena = Arena(id, Bukkit.getWorld(worldName)!!, status, idlePhase, location.y, location)
+        Blocko.instance.gameTeamHandler.gameTeams.putAll(arena.id, Constants.GAME_TEAMS)
+
+        this.cachedArenas.add(arena)
         return true
     }
 
