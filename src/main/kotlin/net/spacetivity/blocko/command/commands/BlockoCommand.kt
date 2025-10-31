@@ -8,6 +8,7 @@ import net.spacetivity.blocko.command.api.extension.generateSuggestions
 import net.spacetivity.blocko.command.api.extension.sendUsageFormatted
 import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
 import net.spacetivity.blocko.command.commands.arena.*
+import net.spacetivity.blocko.command.commands.coins.GiveCoinsSubCommand
 import net.spacetivity.blocko.command.commands.lobbyspawn.SetLobbySpawnSubCommand
 import net.spacetivity.blocko.command.commands.teleport.WorldTpSubCommand
 
@@ -21,6 +22,8 @@ class BlockoCommand : SpaceMainCommandExecutor() {
     override fun initSubCommands(subCommandExecutors: MutableList<SpaceSubCommandExecutor>) {
         subCommandExecutors.add(SetLobbySpawnSubCommand())
         subCommandExecutors.add(WorldTpSubCommand())
+
+        subCommandExecutors.add(GiveCoinsSubCommand())
 
         subCommandExecutors.add(ArenaListSubCommand())
         subCommandExecutors.add(ArenaInitSubCommand())
@@ -40,6 +43,9 @@ class BlockoCommand : SpaceMainCommandExecutor() {
         return buildList {
             addAll(generateSimpleSuggestions(args, 0) { add("setLobbySpawn") })
             addAll(generateSuggestions(args, 1) { add("setLobbySpawn") })
+
+            addAll(generateSimpleSuggestions(args, 0) { add("coins") })
+            addAll(generateSuggestions(args, 1) { add("coins") })
 
             addAll(generateSimpleSuggestions(args, 0) { add("arena") })
             addAll(generateSuggestions(args, 1) { add("arena") })

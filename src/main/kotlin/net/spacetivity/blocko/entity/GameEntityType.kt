@@ -68,6 +68,7 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val defaultPropertie
     BEE(EntityType.BEE, GameEntityProperties(50, false)),
     PARROT(EntityType.PARROT, GameEntityProperties(50, false)),
     VEX(EntityType.VEX, GameEntityProperties(75, false)),
+    ALLAY(EntityType.ALLAY, GameEntityProperties(50, false)),
 
     IRON_GOLEM(EntityType.IRON_GOLEM, GameEntityProperties(350, false, "win_monster")),
 
@@ -90,6 +91,10 @@ enum class GameEntityType(val bukkitEntityType: EntityType, val defaultPropertie
     SALMON(EntityType.SALMON, GameEntityProperties(40, false)),
     TROPICAL_FISH(EntityType.TROPICAL_FISH, GameEntityProperties(40, false)),
     DOLPHIN(EntityType.DOLPHIN, GameEntityProperties(100, false)),
+    GLOW_SQUID(EntityType.GLOW_SQUID, GameEntityProperties(60, false)),
+    TADPOLE(EntityType.TADPOLE, GameEntityProperties(30, false)),
+
+    BREEZE(EntityType.BREEZE, GameEntityProperties(100, false)),
 
     WARDEN(EntityType.WARDEN, GameEntityProperties(15000, false, "master_eliminator"));
 

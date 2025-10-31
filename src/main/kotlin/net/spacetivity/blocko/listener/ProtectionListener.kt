@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
+import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.event.server.ServerListPingEvent
@@ -44,13 +45,26 @@ class ProtectionListener(private val plugin: Blocko) : Listener {
 
     @EventHandler
     fun onInteractWithGameEntity(event: PlayerInteractAtEntityEvent) {
-        if (Blocko.instance.gameEntityHandler.gameEntities.values().filter { it.livingEntity != null }.none { it.livingEntity!!.uniqueId == event.rightClicked.uniqueId }) return
+        if (!isGameEntity(event.rightClicked.uniqueId)) return
+        event.isCancelled = true
+    }
+
+    @EventHandler
+    fun onInteractEntity(event: PlayerInteractEntityEvent) {
+        if (!isGameEntity(event.rightClicked.uniqueId)) return
+        event.isCancelled = true
+    }
+
+    @EventHandler
+    fun onEntityMount(event: EntityMountEvent) {
+        if (event.entity !is Player) return
+        if (!isGameEntity(event.mount.uniqueId)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onDamageGameEntity(event: EntityDamageByEntityEvent) {
-        if (Blocko.instance.gameEntityHandler.gameEntities.values().filter { it.livingEntity != null }.none { it.livingEntity!!.uniqueId == event.entity.uniqueId }) return
+        if (!isGameEntity(event.entity.uniqueId)) return
         event.isCancelled = true
     }
 
@@ -140,6 +154,12 @@ class ProtectionListener(private val plugin: Blocko) : Listener {
     private fun isLobbyWorld(world: World): Boolean {
         val lobbySpawn = this.plugin.lobbySpawnHandler.lobbySpawn ?: return false
         return lobbySpawn.worldName == world.name
+    }
+
+    private fun isGameEntity(entityUuid: UUID): Boolean {
+        return Blocko.instance.gameEntityHandler.gameEntities.values().any { 
+            it.livingEntity != null && it.livingEntity!!.uniqueId == entityUuid 
+        }
     }
 
 }

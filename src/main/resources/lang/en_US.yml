@@ -172,6 +172,8 @@ blocko.command:
   argument_type_invalid: "<prefix> <red><name> has to be an <type>!"
   title: "<gold>Command Overview <gray>(<title>)"
   usage: "<blue>► <white>/<command>"
+  coins:
+    given: "<prefix> <green>Gave <yellow><amount> <green>coins to <yellow><player><green>!"
   blocko:
     lobby_spawn_set: "<prefix> <gray>Lobby spawn was set!"
     no_arenas_found: "<prefix> <gray>No arenas found!"
