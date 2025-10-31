@@ -147,7 +147,7 @@ class Blocko : JavaPlugin() {
 
         this.sidebarHandler = SidebarHandler()
         this.playerFormatHandler = PlayerFormatHandler()
-
+        
         this.commandController = SpaceCommandController()
         this.bossbarHandler = BossbarHandler()
         this.gamePhaseHandler = GamePhaseHandler()
@@ -176,6 +176,13 @@ class Blocko : JavaPlugin() {
         this.achievementHandler.registerAchievement(WinMonsterAchievement("win_monster"))
         this.achievementHandler.registerAchievement(EntityCollectorAchievement("entity_collector"))
         this.achievementHandler.registerAchievement(BadLuckAchievement("bad_luck"))
+        this.achievementHandler.registerAchievement(PerfectVictoryAchievement("perfect_victory"))
+        this.achievementHandler.registerAchievement(VeteranPlayerAchievement("veteran_player"))
+        this.achievementHandler.registerAchievement(RichPlayerAchievement("rich_player"))
+        this.achievementHandler.registerAchievement(SpeedDemonAchievement("speed_demon"))
+        this.achievementHandler.registerAchievement(ComebackKingAchievement("comeback_king"))
+        this.achievementHandler.registerAchievement(SurvivorAchievement("survivor"))
+        this.achievementHandler.registerAchievement(TripleThreatAchievement("triple_threat"))
 
         this.lobbySpawnHandler = LobbySpawnHandler()
 
@@ -205,7 +212,11 @@ class Blocko : JavaPlugin() {
         this.gamePlayActionHandler.stopTasks()
         this.arenaSetupHandler.stopTask()
         this.arenaHandler.resetArenas(true)
-        this.arenaHandler.cachedArenas.map { it.gameWorld }.map { it.entities }.forEach { it.filter { entity -> entity.type != EntityType.PLAYER }.forEach(Entity::remove) }
+        this.arenaHandler.cachedArenas.forEach { arena ->
+            arena.gameWorld.entities
+                .filter { entity -> entity.type != EntityType.PLAYER }
+                .forEach(Entity::remove)
+        }
     }
 
     private fun registerCommand(executorClass: KClass<out SpaceMainCommandExecutor>) {

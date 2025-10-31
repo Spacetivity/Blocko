@@ -29,6 +29,21 @@ object Constants {
     const val TIMEOUT_BOSSBAR_NAME = "timeout_bar"
     const val PLACEHOLDER = "-/-"
 
+    // Task tick intervals (in ticks, where 1 tick = 50ms)
+    const val MAIN_TASK_TICK_INTERVAL = 1L
+    const val MOVEMENT_TASK_TICK_INTERVAL = 10L
+    const val PLAYER_TASK_TICK_INTERVAL = 10L
+
+    // Arena/Player related constants
+    const val Y_LEVEL_FALL_THRESHOLD = 10.0
+    
+    // Time thresholds for bossbar colors (in seconds)
+    const val BOSSBAR_GREEN_THRESHOLD = 30
+    const val BOSSBAR_YELLOW_THRESHOLD = 10
+
+    // Action timeout (in milliseconds)
+    const val TOTAL_ACTION_TIME_MS = 60_000L
+
     val GAME_TEAMS = listOf(
         GameTeam("red", NamedTextColor.RED, 0),
         GameTeam("green", NamedTextColor.DARK_GREEN, 1),

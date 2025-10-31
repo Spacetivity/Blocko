@@ -287,6 +287,7 @@ class Arena(
         }
 
         if (!this.phase.isIdle()) Blocko.instance.gamePhaseHandler.initIndexPhase(this)
+        Blocko.instance.arenaHandler.updateIngameArenaCache(this)
         Blocko.instance.arenaSignHandler.updateArenaSign(this)
     }
 

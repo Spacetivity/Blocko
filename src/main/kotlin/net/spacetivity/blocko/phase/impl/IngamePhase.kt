@@ -3,8 +3,15 @@ package net.spacetivity.blocko.phase.impl
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
+import net.spacetivity.blocko.achievement.impl.ComebackKingAchievement
+import net.spacetivity.blocko.achievement.impl.PerfectVictoryAchievement
+import net.spacetivity.blocko.achievement.impl.RichPlayerAchievement
 import net.spacetivity.blocko.achievement.impl.RushExpertAchievement
+import net.spacetivity.blocko.achievement.impl.SpeedDemonAchievement
+import net.spacetivity.blocko.achievement.impl.SurvivorAchievement
+import net.spacetivity.blocko.achievement.impl.VeteranPlayerAchievement
 import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
+import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.id.ArenaId
@@ -27,6 +34,7 @@ import org.bukkit.Sound
 import org.bukkit.inventory.ItemStack
 import java.time.Duration
 import java.util.*
+import kotlin.reflect.KClass
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -52,7 +60,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
 
     override fun stop() {
         for (gamePlayer in getArena().currentPlayers) {
-            val player = gamePlayer.toBukkitInstance() ?: return
+            val player = gamePlayer.toBukkitInstance() ?: continue
 
             val statsPlayer = gamePlayer.toStatsPlayerInstance()
             if (statsPlayer != null) statsPlayer.wonGames += 1
@@ -61,25 +69,34 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
 
             gamePlayer.grantIfCompletedBy(RushExpertAchievement::class)
             gamePlayer.grantIfCompletedBy(WinMonsterAchievement::class)
+            gamePlayer.grantIfCompletedBy(PerfectVictoryAchievement::class)
+            gamePlayer.grantIfCompletedBy(SpeedDemonAchievement::class)
+            gamePlayer.grantIfCompletedBy(ComebackKingAchievement::class)
+            gamePlayer.grantIfCompletedBy(VeteranPlayerAchievement::class)
+            gamePlayer.grantIfCompletedBy(RichPlayerAchievement::class)
+            gamePlayer.grantIfCompletedBy(SurvivorAchievement::class)
 
-            val matchDuration = (System.currentTimeMillis() - this.matchStartTime!!).toDuration(DurationUnit.MILLISECONDS)
+            val matchStartTime = this.matchStartTime
+            if (matchStartTime != null) {
+                val matchDuration = (System.currentTimeMillis() - matchStartTime).toDuration(DurationUnit.MILLISECONDS)
 
-            matchDuration.toComponents { hours, minutes, seconds, _ ->
-                val hoursString = if (hours in 0..9) "0$hours" else hours.toString()
-                val minutesString = if (minutes in 0..9) "0$minutes" else minutes.toString()
-                val secondsString = if (seconds in 0..9) "0$seconds" else seconds.toString()
+                matchDuration.toComponents { hours, minutes, seconds, _ ->
+                    val hoursString = if (hours in 0..9) "0$hours" else hours.toString()
+                    val minutesString = if (minutes in 0..9) "0$minutes" else minutes.toString()
+                    val secondsString = if (seconds in 0..9) "0$seconds" else seconds.toString()
 
-                val timeString = "$hoursString:$minutesString:$secondsString"
+                    val timeString = "$hoursString:$minutesString:$secondsString"
 
-                val lastPosition = getArena().teamOptions.playerCount
-                val positionString = if (gamePlayer.matchStats.position == null) lastPosition.toString() else gamePlayer.matchStats.position!!.toString()
+                    val lastPosition = getArena().teamOptions.playerCount
+                    val positionString = if (gamePlayer.matchStats.position == null) lastPosition.toString() else gamePlayer.matchStats.position!!.toString()
 
-                gamePlayer.toBukkitInstance()?.translateMessage("blocko.stats.show_match_stats",
-                    Placeholder.parsed("eliminations", gamePlayer.matchStats.eliminations.toString()),
-                    Placeholder.parsed("knockouts", gamePlayer.matchStats.knockedOutByOpponent.toString()),
-                    Placeholder.parsed("coins", gamePlayer.matchStats.gainedCoins.toString()),
-                    Placeholder.parsed("place", positionString),
-                    Placeholder.parsed("time", timeString))
+                    gamePlayer.toBukkitInstance()?.translateMessage("blocko.stats.show_match_stats",
+                        Placeholder.parsed("eliminations", gamePlayer.matchStats.eliminations.toString()),
+                        Placeholder.parsed("knockouts", gamePlayer.matchStats.knockedOutByOpponent.toString()),
+                        Placeholder.parsed("coins", gamePlayer.matchStats.gainedCoins.toString()),
+                        Placeholder.parsed("place", positionString),
+                        Placeholder.parsed("time", timeString))
+                }
             }
         }
 
@@ -188,7 +205,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
 
             if (gamePlayer != null) {
                 gamePlayer.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
-                if (gamePlayer.actionTimeoutTimestamp == null) gamePlayer.actionTimeoutTimestamp = System.currentTimeMillis() + Duration.ofMinutes(1).toMillis()
+                if (gamePlayer.actionTimeoutTimestamp == null) gamePlayer.actionTimeoutTimestamp = System.currentTimeMillis() + Constants.TOTAL_ACTION_TIME_MS
             }
         }
 
@@ -209,7 +226,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
     }
 
     fun getControllingGamePlayerTimeLeftFraction(): Float {
-        val totalActionTime = 60_000L
+        val totalActionTime = Constants.TOTAL_ACTION_TIME_MS
         val controllingGamePlayer = getControllingGamePlayer() ?: return 0f
         val timeoutTimestamp = controllingGamePlayer.actionTimeoutTimestamp ?: return 0f
         val currentTimeMillis = System.currentTimeMillis()

@@ -7,6 +7,18 @@ import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.ai.AIRule
 import net.spacetivity.blocko.player.ai.AIResult
 
+/**
+ * AI Rule: Movable Out Of Start
+ * 
+ * Highest priority rule (weight: 5). Triggers when an entity is still at spawn and can be moved out.
+ * 
+ * Conditions:
+ * - Entity must be at spawn (currentFieldId == null)
+ * - Dice number must be 6 (required to leave spawn)
+ * - Start field must be free or not occupied by own team
+ * 
+ * Strategy: Getting entities out of spawn is critical for progress, so this takes absolute precedence.
+ */
 class MovableOutOfStartRule : AIRule {
     override val weight = EntityPickRule.MOVABLE_OUT_OF_START.weight
     override val probability = EntityPickRule.MOVABLE_OUT_OF_START.probability

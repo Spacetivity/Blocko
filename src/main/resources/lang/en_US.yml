@@ -192,15 +192,15 @@ blocko.command:
     usage: |
       <prefix> <gray>Command usage:
       <dark_gray>» <gray>/blocko setLobbySpawn
-      
+
       <dark_gray>» <gray>/blocko arena list
       <dark_gray>» <gray>/blocko arena init
       <dark_gray>» <gray>/blocko arena delete <arenaId>
-      
+
       <dark_gray>» <gray>/blocko setup start <arenaId>
       <dark_gray>» <gray>/blocko setup cancel
       <dark_gray>» <gray>/blocko setup finish  
-      
+
       <dark_gray>» <gray>/blocko worldTp <worldName>
   arena_invite:
     not_in_a_game: "<prefix> <gray>You must be in a game arena to invite other players!"
@@ -300,7 +300,7 @@ blocko.inventory.team_selector.team_item:
   display_name: "<team_color>Team <team_name> <gray>(<member_count>/<max_member_count> Players)"
   lore: |
     <gray>- <team_color><member_name>
-    
+
     <gray>Click to join <team_color>Team <team_name>
 
 blocko.inventory.profile.title: "Your profile"
@@ -398,7 +398,7 @@ blocko.inventory.entity_shop.entity_type_item:
     not_active: |
       <gray>Price: <yellow><price>
       <gray>Required Achievement: <yellow><possible_achievement_name>
-      
+
       <lore_suffix>
     active: |
       <gray>Click to select and play 
@@ -467,11 +467,39 @@ blocko.achievement.bad_luck:
   display_name: "Bad Luck"
   requirement: "<gray>Complete a Blocko match without saving any entities."
 
+blocko.achievement.perfect_victory:
+  display_name: "Perfect Victory"
+  requirement: "<gray>Win a Blocko match without eliminating any opponents"
+
+blocko.achievement.veteran_player:
+  display_name: "Veteran Player"
+  requirement: "<gray>Play <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>Blocko games. (<yellow><progress>%<gray>)"
+
+blocko.achievement.rich_player:
+  display_name: "Rich Player"
+  requirement: "<gray>Accumulate <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>coins total. (<yellow><progress>%<gray>)"
+
+blocko.achievement.speed_demon:
+  display_name: "Speed Demon"
+  requirement: "<gray>Win a Blocko match in under 10 minutes"
+
+blocko.achievement.comeback_king:
+  display_name: "Comeback King"
+  requirement: "<gray>Win a Blocko match after being knocked out at least once"
+
+blocko.achievement.survivor:
+  display_name: "Survivor"
+  requirement: "<gray>Get knocked out by opponents <dark_gray>[<yellow><current_amount><dark_gray>/<green><amount><dark_gray>] <gray>times. (<yellow><progress>%<gray>)"
+
+blocko.achievement.triple_threat:
+  display_name: "Triple Threat"
+  requirement: "<gray>Eliminate 3 opponents in a single Blocko match"
+
 blocko.achievement.unlocked: |
   <obfuscated><gradient:blue:green>==============================================</obfuscated>
-  
+
   <gold>Nice! <green>You unlocked the achievement "<hover:show_text:'<hover_text>'><yellow><name><green></hover>"!
-  
+
   <obfuscated><gradient:green:blue>==============================================</obfuscated>
 
 blocko.stats.show_match_stats: |
@@ -480,7 +508,7 @@ blocko.stats.show_match_stats: |
   <dark_gray><bold>»</bold> <gray>Thrown out: <yellow><knockouts><gray>*
   <dark_gray><bold>»</bold> <gray>Gained coins: <yellow><coins><gray>
   <dark_gray><bold>»</bold> <gray>Your place: <yellow>#<place>
-  
+
   <dark_gray><bold>»</bold> <gray>Time played: <yellow><time>
   <st><gray>---------------------------</st>
 

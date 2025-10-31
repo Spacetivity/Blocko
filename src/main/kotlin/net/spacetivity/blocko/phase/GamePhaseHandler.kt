@@ -8,10 +8,11 @@ import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.playSound
+import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Sound
-import java.time.Duration
 
 class GamePhaseHandler {
 
@@ -54,7 +55,7 @@ class GamePhaseHandler {
             val controllingPlayer = arena.currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
 
             if (controllingPlayer != null) {
-                if (controllingPlayer.actionTimeoutTimestamp == null) controllingPlayer.actionTimeoutTimestamp = System.currentTimeMillis() + Duration.ofMinutes(1).toMillis()
+                if (controllingPlayer.actionTimeoutTimestamp == null) controllingPlayer.actionTimeoutTimestamp = System.currentTimeMillis() + Constants.TOTAL_ACTION_TIME_MS
                 controllingPlayer.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
             }
         }
@@ -62,6 +63,7 @@ class GamePhaseHandler {
         arena.phase = newGamePhase
         newGamePhase.start()
 
+        Blocko.instance.arenaHandler.updateIngameArenaCache(arena)
         Blocko.instance.arenaSignHandler.updateArenaSign(arena)
     }
 
@@ -71,6 +73,8 @@ class GamePhaseHandler {
         val indexPhase = this.cachedGamePhases[arena.id].find { it.priority == 0 } ?: return
         arena.phase = indexPhase
         indexPhase.start()
+        
+        Blocko.instance.arenaHandler.updateIngameArenaCache(arena)
     }
 
 }

@@ -23,7 +23,11 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: ArenaId, var tea
     var lastEntityPickRule: EntityPickRule? = null
     var actionTimeoutTimestamp: Long? = null
 
-    var selectedEntityType: GameEntityType = Blocko.instance.gameEntityHandler.getSelectedEntityType(this.uuid)
+    var selectedEntityType: GameEntityType = if (isAI) {
+        GameEntityType.entries.random()
+    } else {
+        Blocko.instance.gameEntityHandler.getSelectedEntityType(this.uuid)
+    }
 
     fun dice(ingamePhase: IngamePhase) {
         if (isDicing()) return

@@ -45,3 +45,11 @@ object HelperFunctions {
     }
 
 }
+
+/**
+ * Formats a team name by converting to lowercase and capitalizing the first letter.
+ * Example: "RED" -> "Red", "green" -> "Green"
+ */
+fun String.formatTeamName(): String {
+    return this.lowercase().replaceFirstChar { it.uppercase() }
+}

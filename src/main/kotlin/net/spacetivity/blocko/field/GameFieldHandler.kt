@@ -36,17 +36,11 @@ class GameFieldHandler {
 
     fun getLastFieldForTeam(arenaId: ArenaId, teamName: String): GameField? {
         val gameFieldsForTeam = this.cachedGameFields[arenaId]
-        val validTeamFieldIds = mutableListOf<Int>()
-
-        for (gameField in gameFieldsForTeam) {
-            val fieldId = gameField.properties.getTeamPathId(teamName) ?: continue
-            validTeamFieldIds.add(fieldId)
-        }
-
-        val highestTeamFieldId = validTeamFieldIds.maxOrNull() ?: return null
-        val lastGameField = gameFieldsForTeam.find { it.properties.getTeamPathId(teamName) == highestTeamFieldId }
-
-        return lastGameField
+        
+        return gameFieldsForTeam
+            .mapNotNull { field -> field.properties.getTeamPathId(teamName)?.let { field to it } }
+            .maxByOrNull { it.second }
+            ?.first
     }
 
     fun getFieldForTeam(arenaId: ArenaId, teamName: String, id: Int): GameField? {

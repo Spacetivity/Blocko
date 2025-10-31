@@ -29,6 +29,9 @@ class ArenaHandler {
     private val gamePhaseHandler = Blocko.instance.gamePhaseHandler
     val cachedArenaIds = mutableListOf<ArenaId>()
     val cachedArenas = mutableListOf<Arena>()
+    
+    // Cache für aktive Ingame-Arenen zur Performance-Optimierung
+    val activeIngameArenas = mutableSetOf<Arena>()
 
     init {
         transaction {
@@ -121,6 +124,7 @@ class ArenaHandler {
 
         this.cachedArenaIds.remove(arenaId)
         this.cachedArenas.removeIf { it.id == arenaId }
+        this.activeIngameArenas.removeIf { it.id == arenaId }
 
         if (arenaSign != null) loadJoinSign(arenaSign.location, null)
     }
@@ -128,6 +132,15 @@ class ArenaHandler {
     fun resetArenas(shutdown: Boolean) {
         this.cachedArenas.forEach {
             it.reset(shutdown)
+        }
+        this.activeIngameArenas.clear()
+    }
+
+    fun updateIngameArenaCache(arena: Arena) {
+        if (arena.phase.isIngame()) {
+            this.activeIngameArenas.add(arena)
+        } else {
+            this.activeIngameArenas.remove(arena)
         }
     }
 

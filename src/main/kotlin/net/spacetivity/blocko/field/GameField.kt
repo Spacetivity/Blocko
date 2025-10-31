@@ -6,6 +6,7 @@ import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.FirstEliminationAchievement
 import net.spacetivity.blocko.achievement.impl.FirstKnockoutAchievement
 import net.spacetivity.blocko.achievement.impl.MasterEliminatorAchievement
+import net.spacetivity.blocko.achievement.impl.TripleThreatAchievement
 import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
@@ -13,6 +14,7 @@ import net.spacetivity.blocko.field.highlighting.HighlightMode
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.stats.StatsType
 import net.spacetivity.blocko.stats.addCoins
+import net.spacetivity.blocko.utils.formatTeamName
 import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.World
@@ -53,9 +55,9 @@ class GameField(
 
         gameArena.sendArenaMessage("blocko.main_game_loop.entity_thrown_out_by_opponent",
             Placeholder.parsed("successor_team_color", "<${newHolderGameTeam.color.asHexString()}>"),
-            Placeholder.parsed("successor_team_name", newHolderGameTeam.name.lowercase().replaceFirstChar { it.uppercase() }),
+            Placeholder.parsed("successor_team_name", newHolderGameTeam.name.formatTeamName()),
             Placeholder.parsed("victim_team_color", "<${oldHolderGameTeam.color.asHexString()}>"),
-            Placeholder.parsed("victim_team_name", oldHolderGameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
+            Placeholder.parsed("victim_team_name", oldHolderGameTeam.name.formatTeamName()))
 
         gameArena.sendArenaSound(Sound.ENTITY_WITHER_DEATH, 0.05F)
 
@@ -79,6 +81,7 @@ class GameField(
             if (isReward) {
                 gamePlayer.grantIfCompletedBy(FirstEliminationAchievement::class)
                 gamePlayer.grantIfCompletedBy(MasterEliminatorAchievement::class)
+                gamePlayer.grantIfCompletedBy(TripleThreatAchievement::class)
             } else {
                 gamePlayer.grantIfCompletedBy(FirstKnockoutAchievement::class)
             }
