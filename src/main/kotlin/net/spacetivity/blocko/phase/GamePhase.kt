@@ -1,19 +1,20 @@
 package net.spacetivity.blocko.phase
 
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.Blocko
+import net.spacetivity.blocko.arena.Arena
+import net.spacetivity.blocko.arena.id.ArenaId
+import net.spacetivity.blocko.arena.isSpectating
 import net.spacetivity.blocko.countdown.GameCountdown
-import net.spacetivity.blocko.extensions.isSpectating
 import net.spacetivity.blocko.phase.impl.EndingPhase
 import net.spacetivity.blocko.phase.impl.IdlePhase
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-abstract class GamePhase(protected val arenaId: String, val name: String, val priority: Int, var countdown: GameCountdown?) {
+abstract class GamePhase(protected val arenaId: ArenaId, val name: String, val priority: Int, var countdown: GameCountdown?) {
 
-    private val hotbarItems: MutableMap<Int, ItemStack> = mutableMapOf()
-    private val spectatorItems: MutableMap<Int, ItemStack> = mutableMapOf()
+    private val hotbarItems = mutableMapOf<Int, ItemStack>()
+    private val spectatorItems = mutableMapOf<Int, ItemStack>()
 
     init {
         this.initPhaseHotbarItems(this.hotbarItems)
@@ -32,7 +33,7 @@ abstract class GamePhase(protected val arenaId: String, val name: String, val pr
     fun setupPlayerInventory(player: Player) {
         clearPlayerInventory(player)
 
-        for (entry: MutableMap.MutableEntry<Int, ItemStack> in if (player.isSpectating()) this.spectatorItems.entries else this.hotbarItems.entries) {
+        for (entry in if (player.isSpectating()) this.spectatorItems.entries else this.hotbarItems.entries) {
             player.inventory.setItem(entry.key, entry.value)
         }
     }
@@ -43,8 +44,8 @@ abstract class GamePhase(protected val arenaId: String, val name: String, val pr
         player.level = 0
     }
 
-    protected fun getArena(): GameArena {
-        return BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)!!
+    protected fun getArena(): Arena {
+        return Blocko.instance.arenaHandler.getArena(this.arenaId)!!
     }
 
 }

@@ -2,92 +2,88 @@ package net.spacetivity.blocko.inventory.profile
 
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.achievement.AchievementHandler
-import net.spacetivity.blocko.achievement.AchievementPlayer
-import net.spacetivity.blocko.achievement.container.Achievement
-import net.spacetivity.blocko.arena.GameArena
-import net.spacetivity.blocko.extensions.getArena
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
-import net.spacetivity.blocko.player.GamePlayer
+import net.spacetivity.blocko.Blocko
+import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.arena.toGamePlayerInstance
+import net.spacetivity.blocko.item.itemStack
+import net.spacetivity.blocko.item.meta
+import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.blocko.utils.ItemBuilder
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPos
-import net.spacetivity.inventory.api.pagination.InventoryPagination
+import net.spacetivity.inventorylib.api.GuiProvider
+import net.spacetivity.inventorylib.api.inventory.GuiController
+import net.spacetivity.inventorylib.api.inventory.GuiProperties
+import net.spacetivity.inventorylib.api.inventory.Gui
+import net.spacetivity.inventorylib.api.item.GuiItem
+import net.spacetivity.inventorylib.api.item.GuiPos
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-@InventoryProperties(id = "achievements_inv", rows = 6, columns = 9)
-class AchievementsInventory : InventoryProvider {
+@GuiProperties(id = "achievements_inv", rows = 6, columns = 9)
+class AchievementsInventory : Gui {
 
-    override fun init(player: Player, controller: InventoryController) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+    override fun init(player: Player, controller: GuiController) {
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
-        controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
-        controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
+        controller.fill(GuiController.FillType.TOP_BORDER, GuiProvider.api.placeholder(Material.BLACK_STAINED_GLASS_PANE))
+        controller.fill(GuiController.FillType.BOTTOM_BORDER, GuiProvider.api.placeholder(Material.BLACK_STAINED_GLASS_PANE))
 
-        controller.setItem(0, 4, InteractiveItem.of(ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.validateItemName("blocko.inventory_utils.back_item_display_name"))
-            .build()) { _, _, _ ->
-            val gameArena: GameArena = player.getArena() ?: return@of
-            val isShopItemActive: Boolean = gameArena.phase.isIdle()
+        controller.setItem(0, 4, GuiProvider.api.of(itemStack(Material.SLIME_BALL) {
+            meta {
+                name = translation.displayName("blocko.inventory_utils.back_item_display_name")
+            }
+        }) { _, _, _ ->
+            val gameArena = player.getArena() ?: return@of
+            val isShopItemActive = gameArena.phase.isIdle()
             InventoryUtils.openProfileInventory(player, isShopItemActive)
         })
 
-        val pageItems: List<InteractiveItem> = fetchAchievementItems(player, translation)
+        val pageItems = fetchAchievementItems(player, translation)
 
         if (pageItems.isEmpty()) {
-            controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(ItemBuilder(Material.BARRIER)
-                .setName(translation.validateItemName("blocko.inventory.achievements.no_achievements_found.display_name"))
-                .build()), InventoryPos.of(2, 3), InventoryPos.of(3, 5))
+            controller.fill(GuiController.FillType.RECTANGLE, GuiProvider.api.of(itemStack(Material.BARRIER) {
+                meta {
+                    name = translation.displayName("blocko.inventory.achievements.no_achievements_found.display_name")
+                }
+            }), GuiPos.of(2, 3), GuiPos.of(3, 5))
             return
         }
 
-        val pagination: InventoryPagination = controller.createPagination()
+        val pagination = controller.createPagination()
         pagination.limitItemsPerPage(36)
         pagination.setItemField(1, 0, 4, 8)
         pagination.distributeItems(pageItems)
 
-        controller.setItem(5, 7, InteractiveItem.previousPage(ItemBuilder(Material.ARROW)
-            .setName(translation.validateItemName("blocko.inventory_utils.previous_page_item_display_name"))
-            .build(), pagination))
-
-        controller.setItem(5, 8, InteractiveItem.nextPage(ItemBuilder(Material.SPECTRAL_ARROW)
-            .setName(translation.validateItemName("blocko.inventory_utils.next_page_item_display_name"))
-            .build(), pagination))
+        InventoryUtils.setPreviousPageItem(5, 7, controller)
+        InventoryUtils.setNextPageItem(5, 8, controller)
     }
 
-    private fun fetchAchievementItems(player: Player, translation: Translation): List<InteractiveItem> {
-        val items: MutableList<InteractiveItem> = mutableListOf()
+    private fun fetchAchievementItems(player: Player, translation: Translation): List<GuiItem> {
+        val items = mutableListOf<GuiItem>()
 
-        val achievementHandler: AchievementHandler = BlockoGame.instance.achievementHandler
-        val achievementPlayer: AchievementPlayer = achievementHandler.getAchievementPlayer(player.uniqueId)
-            ?: return items
+        val achievementHandler = Blocko.instance.achievementHandler
+        val achievementPlayer = achievementHandler.getAchievementPlayer(player.uniqueId) ?: return items
 
-        val gamePlayer: GamePlayer = player.toGamePlayerInstance() ?: return items
+        val gamePlayer = player.toGamePlayerInstance() ?: return items
 
-        for (achievement: Achievement in achievementHandler.cachedAchievements) {
-            val hasCompleted: Boolean = achievementPlayer.hasCompleted(achievement)
+        for (achievement in achievementHandler.cachedAchievements) {
+            val hasCompleted = achievementPlayer.hasCompleted(achievement)
 
-            val suffixPlaceholder: TagResolver = if (hasCompleted)
-                Placeholder.parsed("suffix", translation.validateLineAsString("blocko.inventory.achievements.achievement_item.suffix"))
+            val suffixPlaceholder = if (hasCompleted)
+                Placeholder.parsed("suffix", translation.lineAsString("blocko.inventory.achievements.achievement_item.suffix"))
             else
                 Placeholder.parsed("suffix", "")
 
-            val itemBuilder = ItemBuilder(if (hasCompleted) Material.LIME_DYE else Material.GRAY_DYE)
-                .setName(translation.validateItemName("blocko.inventory.achievements.achievement_item.display_name",
-                    Placeholder.parsed("achievement_color", "<${if (hasCompleted) NamedTextColor.GREEN.asHexString() else NamedTextColor.DARK_GRAY.asHexString()}>"),
-                    Placeholder.parsed("achievement_name", achievement.name),
-                    suffixPlaceholder))
+            items.add(GuiProvider.api.of(itemStack(if (hasCompleted) Material.LIME_DYE else Material.GRAY_DYE) {
+                meta {
+                    name = translation.displayName("blocko.inventory.achievements.achievement_item.display_name",
+                        Placeholder.parsed("achievement_color", "<${if (hasCompleted) NamedTextColor.GREEN.asHexString() else NamedTextColor.DARK_GRAY.asHexString()}>"),
+                        Placeholder.parsed("achievement_name", achievement.name),
+                        suffixPlaceholder)
 
-            if (!hasCompleted) itemBuilder.setLoreByComponent(achievement.getDescription(gamePlayer))
-            items.add(InteractiveItem.of(itemBuilder.build()))
+                    if (!hasCompleted) lore(achievement.getDescription(gamePlayer))
+                }
+            }))
         }
 
         return items

@@ -2,17 +2,17 @@ package net.spacetivity.blocko.team
 
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.player.GamePlayer
+import net.spacetivity.blocko.translation.translateMessage
 import java.util.*
 
 class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
 
-    val teamMembers: MutableSet<UUID> = mutableSetOf()
-    val teamLocations: MutableSet<GameTeamLocation> = mutableSetOf()
+    val teamMembers = mutableSetOf<UUID>()
+    val teamLocations = mutableSetOf<GameTeamLocation>()
 
-    var deactivated: Boolean = false
+    var deactivated = false
 
     fun join(gamePlayer: GamePlayer) {
         if (isFull()) {
@@ -32,7 +32,7 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
             Placeholder.parsed("team_color", "<${this.color.asHexString()}>"),
             Placeholder.parsed("team_name", this.name.lowercase().replaceFirstChar { it.uppercase() }))
 
-        BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
+        Blocko.instance.playerFormatHandler.setTablistFormatForAll()
     }
 
     fun quit(gamePlayer: GamePlayer) {
@@ -45,13 +45,13 @@ class GameTeam(val name: String, val color: NamedTextColor, val teamId: Int) {
         gamePlayer.teamName = null
         gamePlayer.translateMessage("blocko.team.quit")
 
-        BlockoGame.instance.playerFormatHandler.setTablistFormatForAll()
+        Blocko.instance.playerFormatHandler.setTablistFormatForAll()
     }
 
     fun getFreeSpawnLocation(): GameTeamLocation? {
-        val freeSpawns: MutableList<GameTeamLocation> = mutableListOf()
+        val freeSpawns = mutableListOf<GameTeamLocation>()
 
-        for (teamLocation: GameTeamLocation in this.teamLocations) {
+        for (teamLocation in this.teamLocations) {
             if (teamLocation.isTaken) continue
             freeSpawns.add(teamLocation)
         }

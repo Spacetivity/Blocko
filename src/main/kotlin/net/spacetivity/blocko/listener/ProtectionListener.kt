@@ -1,8 +1,7 @@
 package net.spacetivity.blocko.listener
 
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.lobby.LobbySpawn
-import net.spacetivity.blocko.utils.ItemBuilder
+import net.spacetivity.blocko.Blocko
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.GameMode
 import org.bukkit.World
@@ -18,14 +17,14 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
+import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.event.server.ServerListPingEvent
 import org.bukkit.event.weather.WeatherChangeEvent
-import org.bukkit.inventory.ItemStack
 import java.util.*
 
-class ProtectionListener(private val plugin: BlockoGame) : Listener {
+class ProtectionListener(private val plugin: Blocko) : Listener {
 
     init {
         this.plugin.server.pluginManager.registerEvents(this, this.plugin)
@@ -34,31 +33,38 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     @EventHandler
     fun onServerListPing(event: ServerListPingEvent) {
         if (!this.plugin.globalConfigFile.motdEnabled) return
-        event.motd(this.plugin.translationHandler.getSelectedTranslation().validateLine("blocko.motd"))
+        event.motd(this.plugin.translationHandler.getSelectedTranslation().line("blocko.motd"))
     }
 
     @EventHandler
-    fun onInteractWithClickableItem(event: PlayerInteractEvent) {
-        val item: ItemStack = event.item ?: return
-
-        if (item.itemMeta == null) return
-        if (!PersistentDataUtils.hasData(item.itemMeta, "clickableItem")) return
-
-        val clickableItemId: UUID = PersistentDataUtils.getData(item.itemMeta, "clickableItem", UUID::class.java)
-        val itemBuilder: ItemBuilder = this.plugin.clickableItems[clickableItemId] ?: return
-
-        itemBuilder.action.invoke(event)
+    fun onInteractWithInteractiveItemStack(event: PlayerInteractEvent) {
+        val itemMeta = event.item?.itemMeta ?: return
+        val interactiveItemId = PersistentDataUtils.get(itemMeta, Constants.INTERACTIVE_ITEMSTACK_KEY, UUID::class.java)
+        Blocko.instance.interactiveActions[interactiveItemId]?.invoke(event)
     }
 
     @EventHandler
     fun onInteractWithGameEntity(event: PlayerInteractAtEntityEvent) {
-        if (BlockoGame.instance.gameEntityHandler.gameEntities.values().filter { it.livingEntity != null }.none { it.livingEntity!!.uniqueId == event.rightClicked.uniqueId }) return
+        if (!isGameEntity(event.rightClicked.uniqueId)) return
+        event.isCancelled = true
+    }
+
+    @EventHandler
+    fun onInteractEntity(event: PlayerInteractEntityEvent) {
+        if (!isGameEntity(event.rightClicked.uniqueId)) return
+        event.isCancelled = true
+    }
+
+    @EventHandler
+    fun onEntityMount(event: EntityMountEvent) {
+        if (event.entity !is Player) return
+        if (!isGameEntity(event.mount.uniqueId)) return
         event.isCancelled = true
     }
 
     @EventHandler
     fun onDamageGameEntity(event: EntityDamageByEntityEvent) {
-        if (BlockoGame.instance.gameEntityHandler.gameEntities.values().filter { it.livingEntity != null }.none { it.livingEntity!!.uniqueId == event.entity.uniqueId }) return
+        if (!isGameEntity(event.entity.uniqueId)) return
         event.isCancelled = true
     }
 
@@ -142,12 +148,18 @@ class ProtectionListener(private val plugin: BlockoGame) : Listener {
     }
 
     private fun isArenaWorld(world: World): Boolean {
-        return this.plugin.gameArenaHandler.cachedArenas.any { it.gameWorld.name == world.name }
+        return this.plugin.arenaHandler.cachedArenas.any { it.gameWorld.name == world.name }
     }
 
     private fun isLobbyWorld(world: World): Boolean {
-        val lobbySpawn: LobbySpawn = this.plugin.lobbySpawnHandler.lobbySpawn ?: return false
+        val lobbySpawn = this.plugin.lobbySpawnHandler.lobbySpawn ?: return false
         return lobbySpawn.worldName == world.name
+    }
+
+    private fun isGameEntity(entityUuid: UUID): Boolean {
+        return Blocko.instance.gameEntityHandler.gameEntities.values().any { 
+            it.livingEntity != null && it.livingEntity!!.uniqueId == entityUuid 
+        }
     }
 
 }

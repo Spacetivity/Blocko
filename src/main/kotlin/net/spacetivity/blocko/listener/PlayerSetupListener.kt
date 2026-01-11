@@ -1,60 +1,51 @@
 package net.spacetivity.blocko.listener
 
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.setup.GameArenaSetupData
-import net.spacetivity.blocko.arena.setup.GameArenaSetupHandler
+import net.spacetivity.blocko.Blocko
+import net.spacetivity.blocko.setup.getSetupSession
+import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import org.bukkit.Material
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.EquipmentSlot
-import org.bukkit.inventory.ItemStack
 
-class PlayerSetupListener(private val plugin: BlockoGame) : Listener {
-
-    private val setupHandler: GameArenaSetupHandler = this.plugin.gameArenaSetupHandler
+class PlayerSetupListener(private val plugin: Blocko) : Listener {
 
     init {
         this.plugin.server.pluginManager.registerEvents(this, this.plugin)
     }
 
     @EventHandler
-    fun onQuitWhilstInSetup(event: PlayerQuitEvent) {
-        val player: Player = event.player
-        val setupData: GameArenaSetupData = this.setupHandler.getSetupData(player.uniqueId) ?: return
-        player.inventory.remove(setupData.setupTool.itemStack)
+    fun onQuitWhileInSetup(event: PlayerQuitEvent) {
+        this.plugin.arenaSetupHandler.handleSetupEnd(event.player, false)
     }
 
     @EventHandler
     fun onInteractWithSetupTool(event: PlayerInteractEvent) {
-        val player: Player = event.player
+        val player = event.player
 
         if (event.hand != EquipmentSlot.HAND) return
 
-        val heldItemStack: ItemStack = player.inventory.itemInMainHand
+        val heldItemStack = player.inventory.itemInMainHand
+        if (heldItemStack.type == Material.AIR || !PersistentDataUtils.has(heldItemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
 
-        if (heldItemStack.type == Material.AIR) return
-        if (!PersistentDataUtils.hasData(heldItemStack.itemMeta, "setupTool")) return
+        val setupSession = player.getSetupSession() ?: return
 
-        val setupData: GameArenaSetupData = this.setupHandler.getSetupData(player.uniqueId) ?: return
-
-        if (event.action.isLeftClick) {
-            setupData.setupTool.onToggle(!player.isSneaking, heldItemStack)
+        if (player.isSneaking) {
+            setupSession.setupTool.onToggle(event.action.isLeftClick, heldItemStack)
             return
         }
 
         if (event.clickedBlock == null) return
-
-        setupData.setupTool.doAction(event)
+        setupSession.setupTool.doAction(event)
     }
 
     @EventHandler
     fun onDropSetupTool(event: PlayerDropItemEvent) {
-        if (!PersistentDataUtils.hasData(event.itemDrop.itemStack.itemMeta, "setupTool")) return
+        if (!PersistentDataUtils.has(event.itemDrop.itemStack.itemMeta, Constants.SETUP_TOOL_KEY)) return
         event.isCancelled = true
     }
 

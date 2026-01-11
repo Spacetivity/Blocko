@@ -1,14 +1,14 @@
 package net.spacetivity.blocko.translation
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 
 
 class TranslationHandler {
 
-    val cachedTranslations: MutableList<Translation> = mutableListOf()
+    val cachedTranslations = mutableListOf<Translation>()
 
     fun getSelectedTranslation(): Translation {
-        return this.cachedTranslations.find { it.name == BlockoGame.instance.globalConfigFile.language }!!
+        return this.cachedTranslations.find { it.name == Blocko.instance.globalConfigFile.language }!!
     }
 
     fun getTranslation(name: String): Translation? {
@@ -17,7 +17,7 @@ class TranslationHandler {
 
     fun generateTranslations(mainClass: Class<*>) {
         for (translationFileName in TranslationFileLoader.getLangFileNamesFromJar("lang", mainClass)) {
-            val splittedName: List<String> = translationFileName.split("/")
+            val splittedName = translationFileName.split("/")
             val validatedLanguageFileName = splittedName[splittedName.size - 1].split(".")[0]
 
             val translation = Translation(validatedLanguageFileName, mutableMapOf())
@@ -25,7 +25,7 @@ class TranslationHandler {
 
             TranslationFileLoader.copyTranslationFileToDataFolder(validatedLanguageFileName)
 
-            val messagesInFile: Map<String, String> = TranslationFileLoader.getFileContent(validatedLanguageFileName)
+            val messagesInFile = TranslationFileLoader.getFileContent(validatedLanguageFileName)
             translation.cachedMessages.putAll(messagesInFile)
         }
     }

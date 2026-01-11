@@ -8,7 +8,7 @@ sqlite = "3.7.2"
 mariadb = "3.5.2"
 exposed = "0.59.0"
 
-api-paper = "1.21.4-R0.1-SNAPSHOT"
+api-paper = "1.21.11-R0.1-SNAPSHOT"
 api-paper-async = "2.21.0"
 
 api-inventory = "1.0-SNAPSHOT"
@@ -27,7 +27,7 @@ paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "api
 async-paper-api = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-api", version.ref = "api-paper-async" }
 async-paper-core = { group = "com.github.shynixn.mccoroutine", name = "mccoroutine-bukkit-core", version.ref = "api-paper-async" }
 
-api-inventory = { group = "net.spacetivity.inventory", name = "inventory-api", version.ref = "api-inventory" }
+api-inventory = { group = "net.spacetivity.inventorylib", name = "inventory-api", version.ref = "api-inventory" }
 
 [bundles]
 database = ["sqlite", "mariadb", "exposed-core", "exposed-dao", "exposed-jdbc"]

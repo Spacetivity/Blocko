@@ -1,77 +1,77 @@
 package net.spacetivity.blocko.inventory.host
 
-import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
-import net.spacetivity.blocko.extensions.getArena
-import net.spacetivity.blocko.extensions.toGamePlayerInstance
-import net.spacetivity.blocko.player.GamePlayer
+import net.spacetivity.blocko.Blocko
+import net.spacetivity.blocko.arena.Arena
+import net.spacetivity.blocko.arena.getArena
+import net.spacetivity.blocko.arena.toGamePlayerInstance
+import net.spacetivity.blocko.item.itemStack
+import net.spacetivity.blocko.item.meta
+import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.blocko.utils.ItemBuilder
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPos
-import net.spacetivity.inventory.api.pagination.InventoryPagination
+import net.spacetivity.inventorylib.api.GuiProvider
+import net.spacetivity.inventorylib.api.inventory.GuiController
+import net.spacetivity.inventorylib.api.inventory.GuiProperties
+import net.spacetivity.inventorylib.api.inventory.Gui
+import net.spacetivity.inventorylib.api.item.GuiItem
+import net.spacetivity.inventorylib.api.item.GuiPos
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
+import org.bukkit.inventory.meta.SkullMeta
 
-@InventoryProperties(id = "invitation_inv", rows = 6, columns = 9)
-class InvitationInventory(private val gameArena: GameArena) : InventoryProvider {
+@GuiProperties(id = "invitation_inv", rows = 6, columns = 9)
+class InvitationInventory(private val arena: Arena) : Gui {
 
-    override fun init(player: Player, controller: InventoryController) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+    override fun init(player: Player, controller: GuiController) {
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
-        controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
-        controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
+        controller.fill(GuiController.FillType.TOP_BORDER, GuiProvider.api.placeholder(Material.BLACK_STAINED_GLASS_PANE))
+        controller.fill(GuiController.FillType.BOTTOM_BORDER, GuiProvider.api.placeholder(Material.BLACK_STAINED_GLASS_PANE))
 
-        controller.setItem(0, 4, InteractiveItem.of(ItemBuilder(Material.SLIME_BALL)
-            .setName(translation.validateItemName("blocko.inventory_utils.back_item_display_name"))
-            .build()) { _, _, _ -> InventoryUtils.openHostSettingsInventory(player, gameArena) })
+        controller.setItem(0, 4, GuiProvider.api.of(itemStack(Material.SLIME_BALL) {
+            meta {
+                name = translation.displayName("blocko.inventory_utils.back_item_display_name")
+            }
+        }) { _, _, _ -> InventoryUtils.openHostSettingsInventory(player, arena) })
 
-        val pageItems: List<InteractiveItem> = fetchPlayerItems(player, translation)
+        val pageItems = fetchPlayerItems(player, translation)
 
         if (pageItems.isEmpty()) {
-            controller.fill(InventoryController.FillType.RECTANGLE, InteractiveItem.of(ItemBuilder(Material.BARRIER)
-                .setName(translation.validateItemName("blocko.inventory.invitation.no_players_to_invite_found.display_name"))
-                .setLoreByComponent(translation.validateItemLore("blocko.inventory.invitation.no_players_to_invite_found.lore"))
-                .build()), InventoryPos.of(2, 3), InventoryPos.of(3, 5))
+            controller.fill(GuiController.FillType.RECTANGLE, GuiProvider.api.of(itemStack(Material.BARRIER) {
+                meta {
+                    name = translation.displayName("blocko.inventory.invitation.no_players_to_invite_found.display_name")
+                    lore(translation.lore("blocko.inventory.invitation.no_players_to_invite_found.lore"))
+                }
+            }), GuiPos.of(2, 3), GuiPos.of(3, 5))
             return
         }
 
-        val pagination: InventoryPagination = controller.createPagination()
+        val pagination = controller.createPagination()
         pagination.limitItemsPerPage(36)
         pagination.setItemField(1, 0, 4, 8)
         pagination.distributeItems(pageItems)
 
-        controller.setItem(5, 7, InteractiveItem.previousPage(ItemBuilder(Material.ARROW)
-            .setName(translation.validateItemName("blocko.inventory_utils.previous_page_item_display_name"))
-            .build(), pagination))
-
-        controller.setItem(5, 8, InteractiveItem.nextPage(ItemBuilder(Material.SPECTRAL_ARROW)
-            .setName(translation.validateItemName("blocko.inventory_utils.next_page_item_display_name"))
-            .build(), pagination))
+        InventoryUtils.setPreviousPageItem(5, 7, controller)
+        InventoryUtils.setNextPageItem(5, 8, controller)
     }
 
-    private fun fetchPlayerItems(host: Player, translation: Translation): List<InteractiveItem> {
-        val hostGamePlayer: GamePlayer = host.toGamePlayerInstance() ?: return emptyList()
+    private fun fetchPlayerItems(host: Player, translation: Translation): List<GuiItem> {
+        val hostGamePlayer = host.toGamePlayerInstance() ?: return emptyList()
 
-        val items: MutableList<InteractiveItem> = mutableListOf()
+        val items = mutableListOf<GuiItem>()
 
-        for (player: Player in Bukkit.getOnlinePlayers().filter { it.name != host.name && it.getArena() == null }) {
-            val property: ProfileProperty = player.playerProfile.properties.first()
-
-            items.add(InteractiveItem.of(ItemBuilder(Material.PLAYER_HEAD)
-                .setName(translation.validateItemName("blocko.inventory.invitation.player_head.display_name", Placeholder.parsed("name", player.name)))
-                .setLoreByComponent(translation.validateItemLore("blocko.inventory.invitation.player_head.lore"))
-                .setOwner(property.value)
-                .build()) { _, _, _ ->
-                this.gameArena.sendArenaInvite(hostGamePlayer, player.name)
+        for (player in Bukkit.getOnlinePlayers().filter { it.name != host.name && it.getArena() == null }) {
+            items.add(GuiProvider.api.of(itemStack(Material.PLAYER_HEAD) {
+                meta<SkullMeta> {
+                    name = translation.displayName("blocko.inventory.invitation.player_head.display_name", Placeholder.parsed("name", player.name))
+                    lore(translation.lore("blocko.inventory.invitation.player_head.lore"))
+                    playerProfile = player.playerProfile
+                }
+            }) { _, _, _ ->
+                this.arena.sendArenaInvite(hostGamePlayer, player.name)
                 host.playSound(host.location, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.0F)
             })
         }

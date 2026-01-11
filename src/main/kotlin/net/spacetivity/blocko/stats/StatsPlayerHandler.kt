@@ -1,67 +1,60 @@
 package net.spacetivity.blocko.stats
 
-import kotlinx.coroutines.*
-import org.jetbrains.exposed.sql.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class StatsPlayerHandler {
 
-    val cachedStatsPlayers: MutableList<StatsPlayer> = mutableListOf()
+    val cachedStatsPlayers = mutableListOf<StatsPlayer>()
 
-    @OptIn(DelicateCoroutinesApi::class)
     fun deleteStatsPlayer(uuid: UUID) {
-        GlobalScope.launch {
-            transaction {
-                StatsPlayerDAO.deleteWhere { StatsPlayerDAO.uuid eq uuid.toString() }
-            }
-
-            synchronized(cachedStatsPlayers) {
-                cachedStatsPlayers.removeIf { it.uuid == uuid }
-            }
+        transaction {
+            StatsPlayerDAO.deleteWhere { StatsPlayerDAO.uuid eq uuid.toString() }
         }
+
+        cachedStatsPlayers.removeIf { it.uuid == uuid }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     fun createOrLoadStatsPlayer(uuid: UUID) {
-        GlobalScope.launch {
-            transaction {
-                val resultRow: ResultRow? = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
-                val statsPlayer: StatsPlayer
+        transaction {
+            val resultRow = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
+            val statsPlayer: StatsPlayer
 
-                if (resultRow == null) {
-                    statsPlayer = StatsPlayer(uuid, 0, 0, 0, 0, 0)
-                    StatsPlayerDAO.insert { statement: InsertStatement<Number> ->
-                        statement[StatsPlayerDAO.uuid] = uuid.toString()
-                        statement[eliminatedOpponents] = 0
-                        statement[knockedOutByOpponents] = 0
-                        statement[playedGames] = 0
-                        statement[wonGames] = 0
-                        statement[coins] = 0
-                    }
-
-                } else {
-                    statsPlayer = StatsPlayer(
-                        uuid,
-                        resultRow[StatsPlayerDAO.eliminatedOpponents],
-                        resultRow[StatsPlayerDAO.knockedOutByOpponents],
-                        resultRow[StatsPlayerDAO.playedGames],
-                        resultRow[StatsPlayerDAO.wonGames],
-                        resultRow[StatsPlayerDAO.coins]
-                    )
+            if (resultRow == null) {
+                statsPlayer = StatsPlayer(uuid, 0, 0, 0, 0, 0)
+                StatsPlayerDAO.insert { statement ->
+                    statement[StatsPlayerDAO.uuid] = uuid.toString()
+                    statement[eliminatedOpponents] = 0
+                    statement[knockedOutByOpponents] = 0
+                    statement[playedGames] = 0
+                    statement[wonGames] = 0
+                    statement[coins] = 0
                 }
 
-                synchronized(cachedStatsPlayers) {
-                    cachedStatsPlayers.add(statsPlayer)
-                }
+            } else {
+                statsPlayer = StatsPlayer(
+                    uuid,
+                    resultRow[StatsPlayerDAO.eliminatedOpponents],
+                    resultRow[StatsPlayerDAO.knockedOutByOpponents],
+                    resultRow[StatsPlayerDAO.playedGames],
+                    resultRow[StatsPlayerDAO.wonGames],
+                    resultRow[StatsPlayerDAO.coins]
+                )
             }
+
+            cachedStatsPlayers.add(statsPlayer)
         }
     }
 
     fun unloadStatsPlayer(uuid: UUID) {
-        val statsPlayer: StatsPlayer = getStatsPlayer(uuid) ?: return
+        val statsPlayer = getStatsPlayer(uuid) ?: return
         statsPlayer.updateDbEntry()
         this.cachedStatsPlayers.removeIf { it.uuid == uuid }
     }
@@ -86,7 +79,7 @@ class StatsPlayerHandler {
         var statsPlayer: StatsPlayer? = null
 
         transaction {
-            val resultRow: ResultRow? = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
+            val resultRow = StatsPlayerDAO.selectAll().where { StatsPlayerDAO.uuid eq uuid.toString() }.limit(1).firstOrNull()
             if (resultRow != null) {
                 statsPlayer = StatsPlayer(
                     uuid,

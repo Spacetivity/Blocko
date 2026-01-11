@@ -2,8 +2,8 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="e0239fb1-9cce-4b57-ae12-f0177172bd13" name="spacetivity-server">
-        <fileTransfer rootFolder="/home/testservice" accessType="SFTP" host="37.114.34.28" port="22" sshConfigId="e9845df8-35c3-4b90-bb6c-53c994c33659" sshConfig="root@37.114.34.28:22 agent" authAgent="true">
+      <webServer id="e0239fb1-9cce-4b57-ae12-f0177172bd13" name="devserver">
+        <fileTransfer rootFolder="/opt/tobisgeheimerserver" accessType="SFTP" host="37.114.34.110" port="22" sshConfigId="e9845df8-35c3-4b90-bb6c-53c994c33659" sshConfig="root@37.114.34.110:22 agent" authAgent="true">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>

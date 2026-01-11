@@ -1,10 +1,16 @@
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.*
+
+val localProperties = File(rootDir, "local.properties").takeIf { it.exists() }?.inputStream()?.use {
+    Properties().apply { load(it) }
+}
 
 plugins {
     kotlin("jvm") version "2.1.10"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "9.2.2"
 }
 
 group = "net.spacetivity.blocko"
@@ -15,13 +21,15 @@ repositories {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
+    
     maven {
-        url = uri("https://maven.pkg.github.com/Spacetivity/SpaceInventories") // Your GitHub repository URL
+        url = uri("https://maven.pkg.github.com/Spacetivity/inventory-library")
         credentials {
-            username = project.findProperty("username")?.toString() ?: "defaultUsername"
-            password = project.findProperty("token")?.toString() ?: "defaultToken"
+            username = localProperties?.getProperty("gpr.user") ?: "defaultUsername"
+            password = localProperties?.getProperty("gpr.key") ?: "defaultToken"
         }
     }
+
     mavenCentral()
 }
 

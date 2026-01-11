@@ -3,77 +3,78 @@ package net.spacetivity.blocko.phase
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.GameArena
-import net.spacetivity.blocko.extensions.playSound
+import net.spacetivity.blocko.Blocko
+import net.spacetivity.blocko.arena.Arena
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.phase.impl.IngamePhase
-import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.scoreboard.GameScoreboardUtils
-import net.spacetivity.blocko.team.GameTeam
-import net.spacetivity.blocko.translation.Translation
+import net.spacetivity.blocko.player.playSound
+import net.spacetivity.blocko.translation.translateMessage
+import net.spacetivity.blocko.utils.Constants
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Sound
-import org.bukkit.entity.Player
-import java.time.Duration
 
 class GamePhaseHandler {
 
-    val cachedGamePhases: Multimap<String, GamePhase> = ArrayListMultimap.create()
+    val cachedGamePhases: Multimap<ArenaId, GamePhase> = ArrayListMultimap.create()
 
-    fun deletePhases(arenaId: String) {
+    fun deletePhases(arenaId: ArenaId) {
         this.cachedGamePhases.removeAll(arenaId)
     }
 
-    fun nextPhase(gameArena: GameArena) {
-        for (gamePlayer: GamePlayer in gameArena.currentPlayers.filter { !it.isAI }) {
-            val player: Player = gamePlayer.toBukkitInstance() ?: continue
-            gameArena.phase.clearPlayerInventory(player)
+    fun nextPhase(arena: Arena) {
+        for (gamePlayer in arena.currentPlayers.filter { !it.isAI }) {
+            val player = gamePlayer.toBukkitInstance() ?: continue
+            arena.phase.clearPlayerInventory(player)
         }
 
-        gameArena.phase.stop()
+        arena.phase.stop()
 
-        val newPhasePriority: Int = gameArena.phase.priority.inc()
-        val newGamePhase: GamePhase? = this.cachedGamePhases[gameArena.id].find { it.priority == newPhasePriority }
+        val newPhasePriority = arena.phase.priority.inc()
+        val newGamePhase = this.cachedGamePhases[arena.id].find { it.priority == newPhasePriority }
 
         if (newGamePhase == null) {
-            gameArena.reset(false)
-            val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
-            Bukkit.getConsoleSender().sendMessage(translation.validateLine("blocko.phase.not_found",
+            arena.reset(false)
+            val translation = Blocko.instance.translationHandler.getSelectedTranslation()
+            Bukkit.getConsoleSender().sendMessage(translation.line("blocko.phase.not_found",
                 Placeholder.parsed("priority", newPhasePriority.toString()),
-                Placeholder.parsed("id", gameArena.id)))
+                Placeholder.parsed("id", arena.id.value)))
             return
         }
 
         if (newGamePhase is IngamePhase) {
-            val availableTeams: List<GameTeam> = BlockoGame.instance.gameTeamHandler.gameTeams[gameArena.id].filter { it.teamMembers.isNotEmpty() }
-            val smallestTeamId: Int? = availableTeams.minOfOrNull { it.teamId }
+            val availableTeams = Blocko.instance.gameTeamHandler.gameTeams[arena.id].filter { it.teamMembers.isNotEmpty() }
+            val smallestTeamId = availableTeams.minOfOrNull { it.teamId }
 
             newGamePhase.controllingTeamId = availableTeams.filter { it.teamId == smallestTeamId }.random().teamId
             newGamePhase.lastControllingTeamId = newGamePhase.controllingTeamId
 
-            val controllingTeam: GameTeam = newGamePhase.getControllingTeam() ?: return
-            GameScoreboardUtils.updateControllingTeamLine(gameArena, controllingTeam)
+            val controllingTeam = newGamePhase.getControllingTeam() ?: return
+            ScoreboardUtils.updateControllingTeamLine(arena, controllingTeam)
 
-            val controllingPlayer: GamePlayer? = gameArena.currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
+            val controllingPlayer = arena.currentPlayers.find { it.uuid == controllingTeam.teamMembers.first() }
 
             if (controllingPlayer != null) {
-                if (controllingPlayer.actionTimeoutTimestamp == null) controllingPlayer.actionTimeoutTimestamp = System.currentTimeMillis() + Duration.ofMinutes(1).toMillis()
+                if (controllingPlayer.actionTimeoutTimestamp == null) controllingPlayer.actionTimeoutTimestamp = System.currentTimeMillis() + Constants.TOTAL_ACTION_TIME_MS
                 controllingPlayer.playSound(Sound.BLOCK_NOTE_BLOCK_PLING)
             }
         }
 
-        gameArena.phase = newGamePhase
+        arena.phase = newGamePhase
         newGamePhase.start()
 
-        BlockoGame.instance.gameArenaSignHandler.updateArenaSign(gameArena)
+        Blocko.instance.arenaHandler.updateIngameArenaCache(arena)
+        Blocko.instance.arenaSignHandler.updateArenaSign(arena)
     }
 
-    fun initIndexPhase(gameArena: GameArena) {
-        gameArena.phase.stop()
+    fun initIndexPhase(arena: Arena) {
+        arena.phase.stop()
 
-        val indexPhase: GamePhase = this.cachedGamePhases[gameArena.id].find { it.priority == 0 } ?: return
-        gameArena.phase = indexPhase
+        val indexPhase = this.cachedGamePhases[arena.id].find { it.priority == 0 } ?: return
+        arena.phase = indexPhase
         indexPhase.start()
+        
+        Blocko.instance.arenaHandler.updateIngameArenaCache(arena)
     }
 
 }

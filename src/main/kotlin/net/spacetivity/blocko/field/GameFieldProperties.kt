@@ -1,13 +1,17 @@
 package net.spacetivity.blocko.field
 
-data class GameFieldProperties(val teamFieldIds: MutableMap<String, Int>, var garageForTeam: String?, var teamEntrance: String?, var rotation: PathFace?) {
+data class GameFieldProperties(val teamPathIds: MutableMap<String, Int>, var garageForTeam: String?, var teamEntrance: String?, var rotation: GameFieldRotation?) {
 
-    fun getFieldId(teamName: String): Int? {
-        return this.teamFieldIds[teamName]
+    fun getTeamPathId(teamName: String): Int? {
+        return this.teamPathIds[teamName]
     }
 
-    fun setFieldId(teamName: String, id: Int) {
-        this.teamFieldIds[teamName] = id
+    fun setTeamPathId(teamName: String, id: Int) {
+        this.teamPathIds[teamName] = id
+    }
+
+    fun removeTeamPathId(teamName: String) {
+        this.teamPathIds.remove(teamName)
     }
 
 }

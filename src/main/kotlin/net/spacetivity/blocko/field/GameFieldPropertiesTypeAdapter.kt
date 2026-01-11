@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
 import com.google.gson.stream.JsonWriter
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 
 class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
 
@@ -13,7 +13,7 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
         writer.beginObject()
 
         writer.name("teamFieldIds")
-        writer.value(BlockoGame.GSON.toJson(properties.teamFieldIds))
+        writer.value(Blocko.GSON.toJson(properties.teamPathIds))
 
         writer.name("garageForTeam")
         writer.value(if (properties.garageForTeam == null) "-" else properties.garageForTeam)
@@ -31,35 +31,35 @@ class GameFieldPropertiesTypeAdapter : TypeAdapter<GameFieldProperties>() {
         lateinit var teamFieldsIds: MutableMap<String, Int>
         var garageForTeam: String? = null
         var teamEntrance: String? = null
-        var turnComponent: PathFace? = null
+        var turnComponent: GameFieldRotation? = null
 
         reader.beginObject()
 
         var fieldName: String? = null
 
         while (reader.hasNext()) {
-            val token: JsonToken = reader.peek()
+            val token = reader.peek()
             if (token == JsonToken.NAME) fieldName = reader.nextName()
 
             when (fieldName) {
                 "teamFieldIds" -> {
                     reader.peek()
-                    teamFieldsIds = BlockoGame.GSON.fromJson(reader.nextString(), object : TypeToken<MutableMap<String, Int>>() {}.type)
+                    teamFieldsIds = Blocko.GSON.fromJson(reader.nextString(), object : TypeToken<MutableMap<String, Int>>() {}.type)
                 }
                 "garageForTeam" -> {
                     reader.peek()
-                    val garageValue: String = reader.nextString()
+                    val garageValue = reader.nextString()
                     garageForTeam = if (garageValue == "-") null else garageValue
                 }
                 "teamEntrance" -> {
                     reader.peek()
-                    val teamEntranceValue: String = reader.nextString()
+                    val teamEntranceValue = reader.nextString()
                     teamEntrance = if (teamEntranceValue == "-") null else teamEntranceValue
                 }
                 "turnComponent" -> {
                     reader.peek()
-                    val turnComponentValue: String = reader.nextString()
-                    turnComponent = if (turnComponentValue == "-") null else PathFace.valueOf(turnComponentValue)
+                    val turnComponentValue = reader.nextString()
+                    turnComponent = if (turnComponentValue == "-") null else GameFieldRotation.valueOf(turnComponentValue)
                 }
             }
         }

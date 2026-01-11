@@ -1,88 +1,118 @@
 package net.spacetivity.blocko.inventory.setup
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.arena.setup.GameArenaSetupData
-import net.spacetivity.blocko.extensions.translateMessage
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.field.GameField
-import net.spacetivity.blocko.team.GameTeam
+import net.spacetivity.blocko.item.hideExtraInfo
+import net.spacetivity.blocko.item.itemStack
+import net.spacetivity.blocko.item.meta
+import net.spacetivity.blocko.item.name
+import net.spacetivity.blocko.setup.getSetupSession
+import net.spacetivity.blocko.setup.step.impl.step.ScanBoardStep
+import net.spacetivity.blocko.setup.step.impl.step.SetTeamPathsStep
 import net.spacetivity.blocko.translation.Translation
+import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.blocko.utils.ItemBuilder
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPos
+import net.spacetivity.blocko.utils.ScoreboardUtils
+import net.spacetivity.inventorylib.api.GuiProvider
+import net.spacetivity.inventorylib.api.inventory.Gui
+import net.spacetivity.inventorylib.api.inventory.GuiController
+import net.spacetivity.inventorylib.api.inventory.GuiProperties
+import net.spacetivity.inventorylib.api.item.GuiItem
+import net.spacetivity.inventorylib.api.item.GuiPos
 import org.bukkit.Color
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.meta.LeatherArmorMeta
 
-@InventoryProperties(id = "garage_field_inv", rows = 1, 9)
-class GameTeamSetupInventory(private val type: InvType, private val location: Location) : InventoryProvider {
+@GuiProperties(id = "garage_field_inv", rows = 1, columns = 9)
+class GameTeamSetupInventory(private val type: InvType, private val gameField: GameField?) : Gui {
 
-    override fun init(player: Player, controller: InventoryController) {
-        val translation: Translation = BlockoGame.instance.translationHandler.getSelectedTranslation()
+    private val highlightHandler = Blocko.instance.gameFieldHighlightHandler
+
+    override fun init(player: Player, controller: GuiController) {
+        val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         val availablePositions = listOf(
-            InventoryPos.of(0, 2),
-            InventoryPos.of(0, 3),
-            InventoryPos.of(0, 5),
-            InventoryPos.of(0, 6)
+            GuiPos.of(0, 2),
+            GuiPos.of(0, 3),
+            GuiPos.of(0, 5),
+            GuiPos.of(0, 6)
         )
 
-        val items: List<InteractiveItem> = initItems(translation, player)
+        val items = initItems(translation, player)
 
         for (i in items.indices) {
             controller.setItem(availablePositions[i], items[i])
         }
     }
 
-    private fun initItems(translation: Translation, player: Player): List<InteractiveItem> {
-        val items: MutableList<InteractiveItem> = mutableListOf()
-        val arenaSetupData: GameArenaSetupData = BlockoGame.instance.gameArenaSetupHandler.getSetupData(player.uniqueId)
-            ?: return items
+    private fun initItems(translation: Translation, player: Player): List<GuiItem> {
+        val items = mutableListOf<GuiItem>()
+        val setupSession = player.getSetupSession() ?: return items
 
-        for (gameTeam: GameTeam in arenaSetupData.gameTeams) {
-            items.add(InteractiveItem.of(ItemBuilder(Material.LEATHER_CHESTPLATE)
-                .setName(translation.validateItemName("blocko.inventory.game_team_setup.team_item.display_name",
-                    Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
-                    Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() })))
-                .setLoreByComponent(translation.validateItemLore("blocko.inventory.game_team_setup.team_item.lore.${if (this.type == InvType.GARAGE) "garage" else "entrance"}"))
-                .setArmorColor(Color.fromRGB(gameTeam.color.red(), gameTeam.color.green(), gameTeam.color.blue()))
-                .build())
-            { _, _, _ ->
-                player.closeInventory()
-                when (this.type) {
-
-                    InvType.GARAGE -> {
-                        BlockoGame.instance.gameArenaSetupHandler.addGarageField(player, gameTeam.name, this.location)
-                    }
-
-                    InvType.IDS -> {
-                        val setupData: GameArenaSetupData = BlockoGame.instance.gameArenaSetupHandler.getSetupData(player.uniqueId)
-                            ?: return@of
-                        setupData.setupTool.currentTeamName = gameTeam.name
-                        setupData.setupTool.fieldIndex = 0
-                        player.translateMessage("blocko.inventory.game_team_setup.team_item.click.set_field_ids",
+        for (gameTeam in setupSession.gameTeams) {
+            items.add(
+                GuiProvider.api.of(itemStack(Material.LEATHER_CHESTPLATE) {
+                    meta<LeatherArmorMeta> {
+                        name = translation.displayName(
+                            "blocko.inventory.game_team_setup.team_item.display_name",
                             Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
-                            Placeholder.parsed("team_name", gameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
+                            Placeholder.parsed(
+                                "team_name",
+                                gameTeam.name.lowercase().replaceFirstChar { it.uppercase() })
+                        )
+
+                        lore(translation.lore("blocko.inventory.game_team_setup.team_item.lore.entrance"))
+                        setColor(Color.fromRGB(gameTeam.color.red(), gameTeam.color.green(), gameTeam.color.blue()))
+                        hideExtraInfo()
                     }
+                })
+                { _, _, _ ->
+                    player.closeInventory()
 
-                    else -> {
-                        val possibleField: GameField? = arenaSetupData.gameFields.find { it.world == location.world && it.x == this.location.x && it.z == this.location.z }
+                    val setupStep = setupSession.getSetupStep<ScanBoardStep>() ?: return@of
 
-                        if (possibleField == null) {
-                            player.translateMessage("blocko.inventory.game_team_setup.team_item.click.cannot_set_team_entrance")
-                            return@of
+                    when (this.type) {
+                        InvType.IDS -> {
+                            if (setupSession.currentTeamName == gameTeam.name) return@of
+
+                            for (gameField in setupStep.gameFields) {
+                                val oldHighlightMode = gameField.currentHighlightMode
+                                if (oldHighlightMode == null) continue
+                                this.highlightHandler.spawnOrUpdateHighlightEntity(
+                                    setupSession.arenaId,
+                                    gameField.getWorldPosition(true),
+                                    oldHighlightMode
+                                )
+                            }
+
+                            setupSession.currentTeamName = gameTeam.name
+                            setupStep.fieldIndex = 0
+
+                            val teamPathsStep = setupSession.getSetupStep<SetTeamPathsStep>()!!
+                            ScoreboardUtils.updateSetupDataLines(player, teamPathsStep)
+
+                            player.translateMessage(
+                                "blocko.inventory.game_team_setup.team_item.click.set_field_ids",
+                                Placeholder.parsed("team_color", "<${gameTeam.color.asHexString()}>"),
+                                Placeholder.parsed(
+                                    "team_name",
+                                    gameTeam.name.lowercase().replaceFirstChar { it.uppercase() })
+                            )
                         }
 
-                        possibleField.properties.teamEntrance = gameTeam.name
-                        InventoryUtils.openGameFieldTurnInventory(player, location)
+                        else -> {
+                            if (this.gameField == null) {
+                                player.translateMessage("blocko.setup.no_field_found_at_location")
+                                return@of
+                            }
+
+                            this.gameField.properties.teamEntrance = gameTeam.name
+                            InventoryUtils.openGameFieldTurnInventory(player, gameField, true)
+                        }
                     }
-                }
-            })
+                })
         }
 
         return items
@@ -91,7 +121,6 @@ class GameTeamSetupInventory(private val type: InvType, private val location: Lo
 }
 
 enum class InvType {
-    GARAGE,
-    ENTRANCE,
-    IDS
+    IDS,
+    ENTRANCE
 }

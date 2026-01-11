@@ -1,22 +1,21 @@
 package net.spacetivity.blocko.phase.impl
 
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.BadLuckAchievement
 import net.spacetivity.blocko.achievement.impl.PlayFirstGameAchievement
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.countdown.impl.EndingCountdown
 import net.spacetivity.blocko.phase.GamePhase
-import net.spacetivity.blocko.player.GamePlayer
 import org.bukkit.inventory.ItemStack
 
-class EndingPhase(arenaId: String) : GamePhase(arenaId, "ending", 2, EndingCountdown(arenaId)) {
+class EndingPhase(arenaId: ArenaId) : GamePhase(arenaId, "ending", 2, EndingCountdown(arenaId)) {
 
     override fun start() {
-        val gameArena: GameArena = getArena()
+        val gameArena = getArena()
 
-        for (gamePlayer: GamePlayer in gameArena.currentPlayers) {
-            BlockoGame.instance.achievementHandler.getAchievement(PlayFirstGameAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
-            BlockoGame.instance.achievementHandler.getAchievement(BadLuckAchievement::class.java)?.grantIfCompletedBy(gamePlayer)
+        for (gamePlayer in gameArena.currentPlayers) {
+            gamePlayer.grantIfCompletedBy(PlayFirstGameAchievement::class)
+            gamePlayer.grantIfCompletedBy(BadLuckAchievement::class)
         }
 
         countdown?.tryStartup()

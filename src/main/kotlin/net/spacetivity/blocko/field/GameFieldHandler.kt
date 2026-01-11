@@ -2,77 +2,69 @@ package net.spacetivity.blocko.field
 
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
+import net.spacetivity.blocko.arena.id.ArenaId
 import org.bukkit.Bukkit
-import org.bukkit.World
-import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class GameFieldHandler {
 
-    val cachedGameFields: Multimap<String, GameField> = ArrayListMultimap.create()
+    val cachedGameFields: Multimap<ArenaId, GameField> = ArrayListMultimap.create()
 
     init {
         transaction {
-            for (resultRow: ResultRow in GameFieldDAO.selectAll().toMutableList()) {
-                val arenaId: String = resultRow[GameFieldDAO.arenaId]
-                val world: World = Bukkit.getWorld(resultRow[GameFieldDAO.worldName]) ?: continue
-                val x: Double = resultRow[GameFieldDAO.x]
-                val z: Double = resultRow[GameFieldDAO.z]
-                val properties: GameFieldProperties = BlockoGame.GSON.fromJson(resultRow[GameFieldDAO.properties], GameFieldProperties::class.java)
-                val isGarageField: Boolean = resultRow[GameFieldDAO.isGarageField]
+            for (resultRow in GameFieldDAO.selectAll().toMutableList()) {
+                val arenaId = resultRow[GameFieldDAO.arenaId]
+                val world = Bukkit.getWorld(resultRow[GameFieldDAO.worldName]) ?: continue
+                val x = resultRow[GameFieldDAO.x]
+                val z = resultRow[GameFieldDAO.z]
+                val properties = Blocko.GSON.fromJson(resultRow[GameFieldDAO.properties], GameFieldProperties::class.java)
+                val isGarageField = resultRow[GameFieldDAO.isGarageField]
 
                 cachedGameFields.put(arenaId, GameField(arenaId, world, x, z, properties, isGarageField, false))
             }
         }
     }
 
-    fun getFirstFieldForTeam(arenaId: String, teamName: String): GameField? {
-        return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == 0 }
+    fun getFirstFieldForTeam(arenaId: ArenaId, teamName: String): GameField? {
+        return this.cachedGameFields[arenaId].find { it.properties.getTeamPathId(teamName) == 0 }
     }
 
-    fun getLastFieldForTeam(arenaId: String, teamName: String): GameField? {
-        val gameFieldsForTeam: MutableCollection<GameField> = this.cachedGameFields[arenaId]
-        val validTeamFieldIds: MutableList<Int> = mutableListOf()
-
-        for (gameField in gameFieldsForTeam) {
-            val fieldId: Int = gameField.properties.getFieldId(teamName) ?: continue
-            validTeamFieldIds.add(fieldId)
-        }
-
-        val highestTeamFieldId: Int = validTeamFieldIds.maxOrNull() ?: return null
-        val lastGameField: GameField? = gameFieldsForTeam.find { it.properties.getFieldId(teamName) == highestTeamFieldId }
-
-        return lastGameField
+    fun getLastFieldForTeam(arenaId: ArenaId, teamName: String): GameField? {
+        val gameFieldsForTeam = this.cachedGameFields[arenaId]
+        
+        return gameFieldsForTeam
+            .mapNotNull { field -> field.properties.getTeamPathId(teamName)?.let { field to it } }
+            .maxByOrNull { it.second }
+            ?.first
     }
 
-    fun getFieldForTeam(arenaId: String, teamName: String, id: Int): GameField? {
-        return this.cachedGameFields[arenaId].find { it.properties.getFieldId(teamName) == id }
+    fun getFieldForTeam(arenaId: ArenaId, teamName: String, id: Int): GameField? {
+        return this.cachedGameFields[arenaId].find { it.properties.getTeamPathId(teamName) == id }
     }
 
-    fun getField(arenaId: String, x: Double, z: Double): GameField? {
+    fun getField(arenaId: ArenaId, x: Int, z: Int): GameField? {
         return this.cachedGameFields.get(arenaId).find { it.x == x && it.z == z }
     }
 
-    fun deleteFields(arenaId: String) {
+    fun deleteFields(arenaId: ArenaId) {
         transaction { GameFieldDAO.deleteWhere { GameFieldDAO.arenaId eq arenaId } }
         this.cachedGameFields.removeAll(arenaId)
     }
 
     fun initFields(gameFields: MutableList<GameField>) {
         transaction {
-            for (gameField: GameField in gameFields) {
-                GameFieldDAO.insert { statement: InsertStatement<Number> ->
+            for (gameField in gameFields) {
+                GameFieldDAO.insert { statement ->
                     statement[arenaId] = gameField.arenaId
                     statement[worldName] = gameField.world.name
                     statement[x] = gameField.x
                     statement[z] = gameField.z
-                    statement[properties] = BlockoGame.GSON.toJson(gameField.properties)
+                    statement[properties] = Blocko.GSON.toJson(gameField.properties)
                     statement[isGarageField] = gameField.isGarageField
                 }
 

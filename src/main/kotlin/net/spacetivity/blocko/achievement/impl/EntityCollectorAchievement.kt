@@ -2,7 +2,7 @@ package net.spacetivity.blocko.achievement.impl
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
-import net.spacetivity.blocko.BlockoGame
+import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.achievement.container.Achievement
 import net.spacetivity.blocko.achievement.container.ProgressRequirement
 import net.spacetivity.blocko.player.GamePlayer
@@ -12,7 +12,7 @@ class EntityCollectorAchievement(translationKey: String) : Achievement(translati
 class EntityCollectorRequirement(override val translationKey: String, override val neededCount: Int) : ProgressRequirement<Int> {
 
     override fun getPlaceholders(gamePlayer: GamePlayer): List<TagResolver> {
-        val size: Int = BlockoGame.instance.gameEntityHandler.getUnlockedEntityTypes(gamePlayer.uuid).size
+        val size = Blocko.instance.gameEntityHandler.getUnlockedEntityTypes(gamePlayer.uuid).size
 
         return listOf(
             Placeholder.parsed("current_amount", size.toString()),
@@ -22,7 +22,7 @@ class EntityCollectorRequirement(override val translationKey: String, override v
     }
 
     override fun isCompletedBy(gamePlayer: GamePlayer): Boolean {
-        return BlockoGame.instance.gameEntityHandler.hasUnlockedAllEntityTypes(gamePlayer.uuid)
+        return Blocko.instance.gameEntityHandler.hasUnlockedAllEntityTypes(gamePlayer.uuid)
     }
 
 }

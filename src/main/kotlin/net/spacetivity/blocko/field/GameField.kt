@@ -1,50 +1,49 @@
 package net.spacetivity.blocko.field
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import net.spacetivity.blocko.BlockoGame
-import net.spacetivity.blocko.achievement.container.Achievement
+import net.spacetivity.blocko.Blocko
+import net.spacetivity.blocko.achievement.grantIfCompletedBy
 import net.spacetivity.blocko.achievement.impl.FirstEliminationAchievement
 import net.spacetivity.blocko.achievement.impl.FirstKnockoutAchievement
 import net.spacetivity.blocko.achievement.impl.MasterEliminatorAchievement
-import net.spacetivity.blocko.arena.GameArena
+import net.spacetivity.blocko.achievement.impl.TripleThreatAchievement
+import net.spacetivity.blocko.arena.id.ArenaId
 import net.spacetivity.blocko.entity.GameEntity
 import net.spacetivity.blocko.entity.GameEntityStatus
-import net.spacetivity.blocko.extensions.addCoins
+import net.spacetivity.blocko.field.highlighting.HighlightMode
 import net.spacetivity.blocko.player.GamePlayer
-import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.stats.StatsType
-import net.spacetivity.blocko.stats.UpdateOperation
-import net.spacetivity.blocko.team.GameTeam
-import net.spacetivity.blocko.team.GameTeamHandler
-import net.spacetivity.blocko.team.GameTeamLocation
+import net.spacetivity.blocko.stats.addCoins
+import net.spacetivity.blocko.utils.formatTeamName
 import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.entity.LivingEntity
 
 class GameField(
-    val arenaId: String,
+    val arenaId: ArenaId,
     val world: World,
-    val x: Double,
-    val z: Double,
+    val x: Int,
+    val z: Int,
     val properties: GameFieldProperties,
     var isGarageField: Boolean,
-    var isTaken: Boolean = false
+    var isTaken: Boolean = false,
 ) {
 
+    var currentHighlightMode: HighlightMode? = null
     var currentHolder: GameEntity? = null
 
     fun trowOutOldHolder(newHolder: GamePlayer, newHolderEntity: LivingEntity) {
-        val gameArena: GameArena = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId) ?: return
+        val gameArena = Blocko.instance.arenaHandler.getArena(this.arenaId) ?: return
 
         if (!this.isTaken) return
 
-        val gameTeamHandler: GameTeamHandler = BlockoGame.instance.gameTeamHandler
-        val oldHolderEntity: GameEntity = this.currentHolder ?: return
+        val gameTeamHandler = Blocko.instance.gameTeamHandler
+        val oldHolderEntity = this.currentHolder ?: return
 
-        val oldHolderGameTeam: GameTeam = gameTeamHandler.getTeam(this.arenaId, oldHolderEntity.teamName) ?: return
+        val oldHolderGameTeam = gameTeamHandler.getTeam(this.arenaId, oldHolderEntity.teamName) ?: return
 
-        val teamSpawnLocation: GameTeamLocation = oldHolderGameTeam.getFreeSpawnLocation()
+        val teamSpawnLocation = oldHolderGameTeam.getFreeSpawnLocation()
             ?: throw NullPointerException("No empty team spawn was found for $oldHolderGameTeam.name")
 
         oldHolderEntity.currentFieldId = null
@@ -52,51 +51,47 @@ class GameField(
         oldHolderEntity.entityStatus = GameEntityStatus.AT_SPAWN
         teamSpawnLocation.isTaken = true
 
-        val newHolderGameTeam: GameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolderEntity) ?: return
+        val newHolderGameTeam = gameTeamHandler.getTeamOfEntity(this.arenaId, newHolderEntity) ?: return
 
         gameArena.sendArenaMessage("blocko.main_game_loop.entity_thrown_out_by_opponent",
             Placeholder.parsed("successor_team_color", "<${newHolderGameTeam.color.asHexString()}>"),
-            Placeholder.parsed("successor_team_name", newHolderGameTeam.name.lowercase().replaceFirstChar { it.uppercase() }),
+            Placeholder.parsed("successor_team_name", newHolderGameTeam.name.formatTeamName()),
             Placeholder.parsed("victim_team_color", "<${oldHolderGameTeam.color.asHexString()}>"),
-            Placeholder.parsed("victim_team_name", oldHolderGameTeam.name.lowercase().replaceFirstChar { it.uppercase() }))
+            Placeholder.parsed("victim_team_name", oldHolderGameTeam.name.formatTeamName()))
 
         gameArena.sendArenaSound(Sound.ENTITY_WITHER_DEATH, 0.05F)
 
         handleStatsReward(newHolder, true)
 
-        val oldHolder: GamePlayer = gameArena.currentPlayers.firstOrNull { it.teamName == oldHolderEntity.teamName }
-            ?: return
+        val oldHolder = gameArena.currentPlayers.firstOrNull { it.teamName == oldHolderEntity.teamName } ?: return
 
         handleStatsReward(oldHolder, false)
     }
 
-    fun getWorldPosition(): Location {
-        val yLevel: Double = BlockoGame.instance.gameArenaHandler.getArena(this.arenaId)?.yLevel ?: 0.0
-        val location = Location(this.world, this.x, yLevel, this.z, 0.0F, 0.0F)
-        val fixedLocation: Location = location.clone().toCenterLocation()
-        fixedLocation.y = yLevel
+    fun getWorldPosition(isGameField: Boolean): Location {
+        val yLevel = Blocko.instance.arenaHandler.getArena(this.arenaId)?.yLevel ?: 0.0
+        val location = Location(this.world, this.x.toDouble(), yLevel, this.z.toDouble(), 0.0F, 0.0F)
+        val fixedLocation = location.clone().toCenterLocation()
+        fixedLocation.y = if (isGameField) yLevel - 1 else yLevel
         return fixedLocation
     }
 
     private fun handleStatsReward(gamePlayer: GamePlayer, isReward: Boolean) {
-        val possibleAchievements: MutableSet<Achievement?> = mutableSetOf()
-
         if (!gamePlayer.isAI) {
             if (isReward) {
-                possibleAchievements.add(BlockoGame.instance.achievementHandler.getAchievement(FirstEliminationAchievement::class.java))
-                possibleAchievements.add(BlockoGame.instance.achievementHandler.getAchievement(MasterEliminatorAchievement::class.java))
+                gamePlayer.grantIfCompletedBy(FirstEliminationAchievement::class)
+                gamePlayer.grantIfCompletedBy(MasterEliminatorAchievement::class)
+                gamePlayer.grantIfCompletedBy(TripleThreatAchievement::class)
             } else {
-                possibleAchievements.add(BlockoGame.instance.achievementHandler.getAchievement(FirstKnockoutAchievement::class.java))
+                gamePlayer.grantIfCompletedBy(FirstKnockoutAchievement::class)
             }
         }
 
-        possibleAchievements.forEach { it?.grantIfCompletedBy(gamePlayer) }
+        val statsPlayer = Blocko.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
+        val statsType = if (isReward) StatsType.ELIMINATED_OPPONENTS else StatsType.KNOCKED_OUT_BY_OPPONENTS
+        statsPlayer.update(statsType, true, 1)
 
-        val statsPlayer: StatsPlayer = BlockoGame.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid) ?: return
-        val statsType: StatsType = if (isReward) StatsType.ELIMINATED_OPPONENTS else StatsType.KNOCKED_OUT_BY_OPPONENTS
-        statsPlayer.update(statsType, UpdateOperation.INCREASE, 1)
-
-        val coinsPerElimination: Int = BlockoGame.instance.globalConfigFile.coinsPerElimination
+        val coinsPerElimination = Blocko.instance.globalConfigFile.coinsPerElimination
 
         if (isReward) {
             gamePlayer.toBukkitInstance()?.addCoins(coinsPerElimination, true)

@@ -1,0 +1,40 @@
+package net.spacetivity.blocko.translation
+
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
+import net.kyori.adventure.title.Title
+import net.spacetivity.blocko.Blocko
+import net.spacetivity.blocko.player.GamePlayer
+import org.bukkit.entity.Player
+
+fun Player.translateMessage(key: String, vararg toReplace: TagResolver) {
+    validateComponents(key, *toReplace).forEach { sendMessage(it) }
+}
+
+fun Player.translateActionBar(key: String, vararg toReplace: TagResolver) {
+    validateComponents(key, *toReplace).forEach { sendActionBar(it) }
+}
+
+fun Player.translateTitle(key: String, vararg toReplace: TagResolver) {
+    val titleParts = validateComponents(key, *toReplace)
+    if (titleParts.size > 2) throw UnsupportedOperationException("Title $key can only have two lines!")
+    showTitle(Title.title(titleParts[0], titleParts[1]))
+}
+
+fun GamePlayer.translateMessage(key: String, vararg toReplace: TagResolver) {
+    val player = toBukkitInstance() ?: return
+    validateComponents(key, *toReplace).forEach { player.sendMessage(it) }
+}
+
+fun GamePlayer.translateActionBar(key: String, vararg toReplace: TagResolver) {
+    val player = toBukkitInstance() ?: return
+    validateComponents(key, *toReplace).forEach { player.sendActionBar(it) }
+}
+
+private fun validateComponents(key: String, vararg toReplace: TagResolver): MutableList<Component> {
+    val selectedTranslation = Blocko.instance.translationHandler.getSelectedTranslation()
+    val components = mutableListOf<Component>()
+    if (selectedTranslation.hasMultipleLines(key)) components.addAll(selectedTranslation.lines(key, *toReplace))
+    else components.add(selectedTranslation.line(key, *toReplace))
+    return components
+}
