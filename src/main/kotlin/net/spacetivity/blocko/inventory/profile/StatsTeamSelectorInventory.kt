@@ -9,25 +9,26 @@ import net.spacetivity.blocko.team.GameTeam
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
+import net.spacetivity.inventorylib.api.GuiProvider
+import net.spacetivity.inventorylib.api.inventory.GuiController
+import net.spacetivity.inventorylib.api.inventory.GuiProperties
+import net.spacetivity.inventorylib.api.inventory.Gui
+import net.spacetivity.inventorylib.api.item.GuiItem
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.LeatherArmorMeta
 
-@InventoryProperties(id = "stats_team_selector_inv", rows = 5, columns = 9)
-class StatsTeamSelectorInventory(private val arena: Arena) : InventoryProvider {
+@GuiProperties(id = "stats_team_selector_inv", rows = 5, columns = 9)
+class StatsTeamSelectorInventory(private val arena: Arena) : Gui {
 
-    override fun init(player: Player, controller: InventoryController) {
+    override fun init(player: Player, controller: GuiController) {
         val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
-        controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
-        controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
+        controller.fill(GuiController.FillType.TOP_BORDER, GuiProvider.api.placeholder(Material.BLACK_STAINED_GLASS_PANE))
+        controller.fill(GuiController.FillType.BOTTOM_BORDER, GuiProvider.api.placeholder(Material.BLACK_STAINED_GLASS_PANE))
 
-        controller.setItem(0, 4, InteractiveItem.of(itemStack(Material.SLIME_BALL) {
+        controller.setItem(0, 4, GuiProvider.api.of(itemStack(Material.SLIME_BALL) {
             meta {
                 name = translation.displayName("blocko.inventory_utils.back_item_display_name")
             }
@@ -44,7 +45,7 @@ class StatsTeamSelectorInventory(private val arena: Arena) : InventoryProvider {
         }
     }
 
-    private fun getTeamItem(player: Player, gameTeam: GameTeam, translation: Translation): InteractiveItem {
+    private fun getTeamItem(player: Player, gameTeam: GameTeam, translation: Translation): GuiItem {
         val teamColor = gameTeam.color
 
         val isNotEmptyTeam = gameTeam.teamMembers.isNotEmpty()
@@ -75,7 +76,7 @@ class StatsTeamSelectorInventory(private val arena: Arena) : InventoryProvider {
             }
         }
 
-        return InteractiveItem.of(teamItemStack) { _, _, _ ->
+        return GuiProvider.api.of(teamItemStack) { _, _, _ ->
             if (!isNotEmptyTeam) return@of
 
             val gamePlayer = this.arena.currentPlayers.find { it.uuid == gameTeam.teamMembers.first() } ?: return@of

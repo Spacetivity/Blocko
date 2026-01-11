@@ -6,8 +6,8 @@ description: A "Mensch Ärgere dich nicht! / Ludo" clone in Minecraft
 website: wiki.spacetivity.net
 commands:
   blocko:
+  chunk:
 author:
   - TGamings
 depend:
-  - SpaceDependencies
-  - SpaceInventories
+  - inventory-library

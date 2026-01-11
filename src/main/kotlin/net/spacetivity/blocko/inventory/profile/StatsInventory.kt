@@ -14,25 +14,26 @@ import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.NumberUtils
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPos
+import net.spacetivity.inventorylib.api.GuiProvider
+import net.spacetivity.inventorylib.api.inventory.GuiController
+import net.spacetivity.inventorylib.api.inventory.GuiProperties
+import net.spacetivity.inventorylib.api.inventory.Gui
+import net.spacetivity.inventorylib.api.item.GuiItem
+import net.spacetivity.inventorylib.api.item.GuiPos
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.SkullMeta
 
-@InventoryProperties(id = "stats_inv", rows = 5, columns = 9)
-class StatsInventory(private val arena: Arena, private val statsPlayer: StatsPlayer, private val showSearchPlayerItem: Boolean) : InventoryProvider {
+@GuiProperties(id = "stats_inv", rows = 5, columns = 9)
+class StatsInventory(private val arena: Arena, private val statsPlayer: StatsPlayer, private val showSearchPlayerItem: Boolean) : Gui {
 
-    override fun init(player: Player, controller: InventoryController) {
+    override fun init(player: Player, controller: GuiController) {
         val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
-        controller.fill(InventoryController.FillType.TOP_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
-        controller.fill(InventoryController.FillType.BOTTOM_BORDER, InteractiveItem.placeholder(Material.BLACK_STAINED_GLASS_PANE))
+        controller.fill(GuiController.FillType.TOP_BORDER, GuiProvider.api.placeholder(Material.BLACK_STAINED_GLASS_PANE))
+        controller.fill(GuiController.FillType.BOTTOM_BORDER, GuiProvider.api.placeholder(Material.BLACK_STAINED_GLASS_PANE))
 
-        controller.setItem(0, 4, InteractiveItem.of(itemStack(Material.SLIME_BALL) {
+        controller.setItem(0, 4, GuiProvider.api.of(itemStack(Material.SLIME_BALL) {
             meta {
                 name = translation.displayName("blocko.inventory_utils.back_item_display_name")
             }
@@ -62,7 +63,7 @@ class StatsInventory(private val arena: Arena, private val statsPlayer: StatsPla
             else
                 gamePlayer.toBukkitInstance()?.playerProfile?.properties?.first()?.value ?: Constants.BOT_SKULL
 
-        controller.setItem(InventoryPos.of(4, if (this.showSearchPlayerItem) 2 else 4), InteractiveItem.of(itemStack(Material.PLAYER_HEAD) {
+        controller.setItem(GuiPos.of(4, if (this.showSearchPlayerItem) 2 else 4), GuiProvider.api.of(itemStack(Material.PLAYER_HEAD) {
             meta<SkullMeta> {
                 name = translation.displayName("blocko.inventory.stats.overview_item.display_name")
                 lore(translation.lore("blocko.inventory.stats.overview_item.lore",
@@ -86,7 +87,7 @@ class StatsInventory(private val arena: Arena, private val statsPlayer: StatsPla
         }))
 
         if (this.showSearchPlayerItem) {
-            controller.setItem(4, 6, InteractiveItem.of(itemStack(Material.NAME_TAG) {
+            controller.setItem(4, 6, GuiProvider.api.of(itemStack(Material.NAME_TAG) {
                 meta {
                     name = translation.displayName("blocko.inventory.stats.search_player_item.display_name")
                     lore(translation.lore("blocko.inventory.stats.search_player_item.lore"))
@@ -95,13 +96,13 @@ class StatsInventory(private val arena: Arena, private val statsPlayer: StatsPla
         }
     }
 
-    private fun getStatsItem(translation: Translation, isAI: Boolean, statsType: StatsType): InteractiveItem {
+    private fun getStatsItem(translation: Translation, isAI: Boolean, statsType: StatsType): GuiItem {
         val statsValue = this.statsPlayer.getStatsValue(statsType)
 
         val displayAsAI = isAI && (statsType == StatsType.COINS || statsType == StatsType.PLAYED_GAMES)
         val displayNameKey = "blocko.inventory.stats.stats_type_item.display_name.${if (displayAsAI) "not_active" else "active"}"
 
-        return InteractiveItem.of(itemStack(if (displayAsAI) Material.BARRIER else Material.PAPER) {
+        return GuiProvider.api.of(itemStack(if (displayAsAI) Material.BARRIER else Material.PAPER) {
             meta {
                 name = translation.displayName(displayNameKey,
                     Placeholder.parsed("type_name", translation.lineAsString(statsType.nameKey)),

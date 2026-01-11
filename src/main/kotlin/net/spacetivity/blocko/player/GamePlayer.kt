@@ -52,6 +52,7 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: ArenaId, var tea
         if (this.dicedNumber == null) return
 
         val situation = Blocko.instance.aiEntityHandler.analyzeSituation(this, this.dicedNumber!!)
+
         this.actionTimeoutTimestamp = null
 
         if (situation.rule == EntityPickRule.NOT_MOVABLE && situation.selectedEntity == null) {
@@ -74,6 +75,10 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: ArenaId, var tea
 
         ScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
+        
+        // Initialize movement immediately for AI player
+        // This ensures shouldMove and controller are set before the movement task runs
+        this.movePickedEntity()
     }
 
     fun movePickedEntity() {

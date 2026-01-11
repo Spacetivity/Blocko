@@ -48,7 +48,7 @@ class AIEntityHandler {
     ).sortedByDescending { it.weight }
 
     fun analyzeSituation(gamePlayer: GamePlayer, dicedNumber: Int): AIResult {
-        val gameEntities = Blocko.Companion.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
+        val gameEntities = Blocko.instance.gameEntityHandler.getEntitiesFromTeam(gamePlayer.arenaId, gamePlayer.teamName!!)
         
         // Early fallback: when all entities are at spawn, only move if dice is 6
         if (gameEntities.all { it.isAtSpawn() }) {

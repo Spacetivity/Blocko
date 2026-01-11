@@ -169,6 +169,17 @@ blocko.countdown:
     end: "<prefix> <gray>Arena resets now. You are teleported to spawn!"
 
 blocko.command:
+  chunk:
+    copy:
+      success: "<prefix> <green>Chunk kopiert! <gray>(<yellow><chunk_x><gray>, <yellow><chunk_z><gray>) <gray>- <yellow><size> KB"
+      failed: "<prefix> <red>Fehler beim Kopieren des Chunks!"
+    paste:
+      success: "<prefix> <green>Chunk eingefügt! <gray>(<yellow><chunk_x><gray>, <yellow><chunk_z><gray>)"
+      failed: "<prefix> <red>Fehler beim Einfügen des Chunks!"
+      no_chunk_found: "<prefix> <gray>Kein kopierter Chunk gefunden! Verwende <yellow>/chunk copy <gray>erst."
+      chunk_not_found: "<prefix> <gray>Chunk nicht gefunden!"
+      invalid_coordinates: "<prefix> <gray>Ungültige Koordinaten!"
+    invalid_world: "<prefix> <red>Ungültige Welt!"
   argument_type_invalid: "<prefix> <red><name> has to be an <type>!"
   title: "<gold>Command Overview <gray>(<title>)"
   usage: "<blue>► <white>/<command>"

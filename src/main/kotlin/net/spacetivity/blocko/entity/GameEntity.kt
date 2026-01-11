@@ -144,7 +144,9 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
     }
 
     fun moveOneFieldForward(dicedNumber: Int): Boolean {
-        if (this.livingEntity == null) return false
+        if (this.livingEntity == null) {
+            return false
+        }
 
         if (this.lastStartField == null) {
             if (this.currentFieldId == null) this.lastStartField = 0
@@ -154,9 +156,16 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
         val newFieldId = if (this.currentFieldId == null) 0 else this.currentFieldId!! + 1
         val goalFieldId = if (this.currentFieldId == null) 0 else if (dicedNumber == 1) newFieldId else this.lastStartField!! + dicedNumber
 
-        val goalField = getTeamField(goalFieldId) ?: return false
-        val newField = getTeamField(newFieldId) ?: return false
-
+        val goalField = getTeamField(goalFieldId)
+        if (goalField == null) {
+            return false
+        }
+        
+        val newField = getTeamField(newFieldId)
+        if (newField == null) {
+            return false
+        }
+        
         val gameArena = Blocko.instance.arenaHandler.getArena(this.arenaId)!!
         gameArena.sendArenaSound(Sound.BLOCK_BONE_BLOCK_STEP, 1.0F)
 
@@ -182,8 +191,9 @@ data class GameEntity(val arenaId: ArenaId, val teamName: String, val gameEntity
         if (rotation != null && (teamEntranceName == null || teamEntranceName == this.teamName))
             this.forceYaw = rotation.radians
 
-        if ((newFieldId != goalFieldId) && newField.isTaken)
+        if ((newFieldId != goalFieldId) && newField.isTaken) {
             return false
+        }
 
         val worldPosition = newField.getWorldPosition(false)
         if (this.forceYaw != null) worldPosition.yaw = this.forceYaw!!

@@ -13,27 +13,28 @@ import net.spacetivity.blocko.setup.step.impl.step.SetTeamEntrancesStep
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.ScoreboardUtils
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPos
+import net.spacetivity.inventorylib.api.GuiProvider
+import net.spacetivity.inventorylib.api.inventory.Gui
+import net.spacetivity.inventorylib.api.inventory.GuiController
+import net.spacetivity.inventorylib.api.inventory.GuiProperties
+import net.spacetivity.inventorylib.api.item.GuiItem
+import net.spacetivity.inventorylib.api.item.GuiPos
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.SkullMeta
 
-@InventoryProperties(id = "turn_inv", rows = 1, columns = 9, playSoundOnOpen = false, playSoundOnClose = false)
-class GameFieldTurnSetupInventory(private val gameField: GameField?, private val isTeamEntrance: Boolean) : InventoryProvider {
+@GuiProperties(id = "turn_inv", rows = 1, columns = 9, playSoundOnOpen = false, playSoundOnClose = false)
+class GameFieldTurnSetupInventory(private val gameField: GameField?, private val isTeamEntrance: Boolean) : Gui {
 
-    override fun init(player: Player, controller: InventoryController) {
+    override fun init(player: Player, controller: GuiController) {
         val translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
         val availablePositions = listOf(
-            InventoryPos.of(0, 2),
-            InventoryPos.of(0, 3),
-            InventoryPos.of(0, 5),
-            InventoryPos.of(0, 6)
+            GuiPos.of(0, 2),
+            GuiPos.of(0, 3),
+            GuiPos.of(0, 5),
+            GuiPos.of(0, 6)
         )
 
         val items = initItems(translation, player)
@@ -43,12 +44,12 @@ class GameFieldTurnSetupInventory(private val gameField: GameField?, private val
         }
     }
 
-    private fun initItems(translation: Translation, player: Player): List<InteractiveItem> {
-        val items = mutableListOf<InteractiveItem>()
+    private fun initItems(translation: Translation, player: Player): List<GuiItem> {
+        val items = mutableListOf<GuiItem>()
         val setupSession = player.getSetupSession() ?: return items
 
         for (pathFace in GameFieldRotation.entries) {
-            items.add(InteractiveItem.of(itemStack(Material.PLAYER_HEAD) {
+            items.add(GuiProvider.api.of(itemStack(Material.PLAYER_HEAD) {
                 meta<SkullMeta> {
                     name = translation.displayName("blocko.inventory.game_field_set_turn.turn_item.display_name", Placeholder.parsed("face", pathFace.name))
                     lore(translation.lore("blocko.inventory.game_field_set_turn.turn_item.lore"))
@@ -70,7 +71,7 @@ class GameFieldTurnSetupInventory(private val gameField: GameField?, private val
                     ScoreboardUtils.updateSetupDataLines(player, teamEntranceStep)
                 }
 
-                player.playSound(player.location, Sound.ENTITY_LEASH_KNOT_BREAK, 0.5f, 0.5f)
+                player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 0.5f)
             })
         }
 

@@ -433,7 +433,7 @@ class ArenaSetupHandler {
         val teamPathsStep = setupSession.getSetupStep<SetTeamPathsStep>()!!
         ScoreboardUtils.updateSetupDataLines(player, teamPathsStep)
 
-        player.playSound(player.location, Sound.ENTITY_LEASH_KNOT_BREAK, 0.5f, 0.5f)
+        player.playSound(player.location, Sound.ENTITY_ARMOR_STAND_BREAK, 0.5f, 0.5f)
     }
 
 }

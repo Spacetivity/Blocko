@@ -6,7 +6,7 @@ import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommand
 import net.spacetivity.blocko.command.api.subcommand.SpaceSubCommandExecutor
 import net.spacetivity.blocko.translation.translateMessage
 
-@SpaceSubCommand(length = 3, parts = "setLobbySpawn")
+@SpaceSubCommand(length = 1, parts = "setLobbySpawn")
 class SetLobbySpawnSubCommand : SpaceSubCommandExecutor {
 
     override fun execute(sender: SpaceCommandSender, args: List<String>) {

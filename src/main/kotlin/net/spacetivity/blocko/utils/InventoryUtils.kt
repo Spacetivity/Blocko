@@ -16,9 +16,10 @@ import net.spacetivity.blocko.item.itemStack
 import net.spacetivity.blocko.item.meta
 import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.stats.StatsPlayer
-import net.spacetivity.inventory.api.extension.openStaticInventory
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.item.InteractiveItem
+import net.spacetivity.inventorylib.api.GuiProvider
+import net.spacetivity.inventorylib.api.extension.openStaticInventory
+import net.spacetivity.inventorylib.api.inventory.GuiController
+import net.spacetivity.inventorylib.api.item.GuiItem
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
@@ -86,22 +87,22 @@ object InventoryUtils {
         openStaticInventory(opener, title, EntityShopInventory())
     }
 
-    fun setPreviousPageItem(row: Int, column: Int, controller: InventoryController) {
+    fun setPreviousPageItem(row: Int, column: Int, controller: GuiController) {
         val translation = Blocko.instance.translationHandler.getSelectedTranslation()
         val pagination = controller.pagination ?: return
 
-        controller.setItem(row, column, InteractiveItem.previousPage(itemStack(Material.ARROW) {
+        controller.setItem(row, column, GuiProvider.api.previousPage(itemStack(Material.ARROW) {
             meta {
                 name = translation.displayName("blocko.inventory_utils.previous_page_item_display_name")
             }
         }, pagination))
     }
 
-    fun setNextPageItem(row: Int, column: Int, controller: InventoryController) {
+    fun setNextPageItem(row: Int, column: Int, controller: GuiController) {
         val translation = Blocko.instance.translationHandler.getSelectedTranslation()
         val pagination = controller.pagination ?: return
 
-        controller.setItem(row, column, InteractiveItem.previousPage(itemStack(Material.SPECTRAL_ARROW) {
+        controller.setItem(row, column, GuiProvider.api.nextPage(itemStack(Material.SPECTRAL_ARROW) {
             meta {
                 name = translation.displayName("blocko.inventory_utils.next_page_item_display_name")
             }

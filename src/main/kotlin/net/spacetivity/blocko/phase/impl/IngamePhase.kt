@@ -3,15 +3,7 @@ package net.spacetivity.blocko.phase.impl
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.spacetivity.blocko.Blocko
 import net.spacetivity.blocko.achievement.grantIfCompletedBy
-import net.spacetivity.blocko.achievement.impl.ComebackKingAchievement
-import net.spacetivity.blocko.achievement.impl.PerfectVictoryAchievement
-import net.spacetivity.blocko.achievement.impl.RichPlayerAchievement
-import net.spacetivity.blocko.achievement.impl.RushExpertAchievement
-import net.spacetivity.blocko.achievement.impl.SpeedDemonAchievement
-import net.spacetivity.blocko.achievement.impl.SurvivorAchievement
-import net.spacetivity.blocko.achievement.impl.VeteranPlayerAchievement
-import net.spacetivity.blocko.achievement.impl.WinMonsterAchievement
-import net.spacetivity.blocko.achievement.container.Achievement
+import net.spacetivity.blocko.achievement.impl.*
 import net.spacetivity.blocko.arena.Arena
 import net.spacetivity.blocko.arena.getArena
 import net.spacetivity.blocko.arena.id.ArenaId
@@ -28,13 +20,11 @@ import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.Constants.ENTITY_SELECTOR_KEY
 import net.spacetivity.blocko.utils.InventoryUtils
 import net.spacetivity.blocko.utils.ScoreboardUtils
-import net.spacetivity.inventory.api.SpaceInventoryProvider
+import net.spacetivity.inventorylib.api.GuiProvider
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.inventory.ItemStack
-import java.time.Duration
 import java.util.*
-import kotlin.reflect.KClass
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -136,7 +126,7 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
             val player = event.player
             val gameArena = player.getArena() ?: return@onInteract
 
-            SpaceInventoryProvider.api.openConfirmationInventory(
+            GuiProvider.api.openConfirmationInventory(
                 player,
                 translation.displayName("blocko.inventory.leave.title"),
                 itemStack(Material.OAK_DOOR) {
@@ -189,7 +179,15 @@ class IngamePhase(arenaId: ArenaId) : GamePhase(arenaId, "ingame", 1, null) {
             getHighlightedEntities(oldControllingGamePlayer, getArena()).forEach { it.toggleHighlighting(false) }
 
         val availableTeams = Blocko.instance.gameTeamHandler.gameTeams[this.arenaId].filter { it.teamMembers.size == 1 && !it.deactivated }
-        val newControllingTeam = if (hasControllingTeamMemberDicedSix(oldControllingGamePlayerDicedNumber)) getControllingTeam() else availableTeams.find { it.teamId > this.controllingTeamId!! }
+        val newControllingTeam = if (hasControllingTeamMemberDicedSix(oldControllingGamePlayerDicedNumber)) {
+            getControllingTeam()
+        } else if (this.controllingTeamId == null) {
+            // If no team is controlling yet, select the first team (smallest teamId)
+            availableTeams.minByOrNull { it.teamId }
+        } else {
+            // Find the next team with a higher teamId
+            availableTeams.find { it.teamId > this.controllingTeamId!! }
+        }
         val newControllingTeamId = newControllingTeam?.teamId ?: availableTeams.minOf { it.teamId }
 
         this.lastControllingTeamId = if (this.controllingTeamId == null) null else this.controllingTeamId

@@ -10,10 +10,10 @@ import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.*
-import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.blocko.translation.translateActionBar
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -129,7 +129,8 @@ class DiceHandler {
     }
 
     private fun getDiceSide(blockedDiceNumber: Number): Pair<Int, String> {
-        val randomNumber = ThreadLocalRandom.current().nextInt(1, 7)
+        val availableNumbers = (1..6).filter { it != blockedDiceNumber.toInt() }
+        val randomNumber = availableNumbers[ThreadLocalRandom.current().nextInt(availableNumbers.size)]
         val diceSide = this.diceSides.entries.find { it.key == randomNumber }?.toPair()
 
         if (diceSide == null) {
@@ -138,7 +139,6 @@ class DiceHandler {
             return Pair(1, Constants.DICE_ONE_SKULL)
         }
 
-        if (diceSide.first == blockedDiceNumber) return getDiceSide(blockedDiceNumber)
         return diceSide
     }
 

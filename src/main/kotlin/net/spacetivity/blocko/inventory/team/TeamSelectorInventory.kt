@@ -12,10 +12,11 @@ import net.spacetivity.blocko.utils.Constants
 import net.spacetivity.blocko.utils.Constants.TEAM_NAME_KEY
 import net.spacetivity.blocko.utils.PersistentDataUtils
 import net.spacetivity.blocko.utils.ScoreboardUtils
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
+import net.spacetivity.inventorylib.api.GuiProvider
+import net.spacetivity.inventorylib.api.inventory.GuiController
+import net.spacetivity.inventorylib.api.inventory.GuiProperties
+import net.spacetivity.inventorylib.api.inventory.Gui
+import net.spacetivity.inventorylib.api.item.GuiItem
 import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
@@ -23,10 +24,10 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.LeatherArmorMeta
 
-@InventoryProperties(id = "team_selector_inv", rows = 1, columns = 9)
-class TeamSelectorInventory(private val arena: Arena) : InventoryProvider {
+@GuiProperties(id = "team_selector_inv", rows = 1, columns = 9)
+class TeamSelectorInventory(private val arena: Arena) : Gui {
 
-    override fun init(player: Player, controller: InventoryController) {
+    override fun init(player: Player, controller: GuiController) {
         val translation = Blocko.instance.translationHandler.getSelectedTranslation()
         val gameTeams = Blocko.instance.gameTeamHandler.gameTeams[this.arena.id]
 
@@ -36,10 +37,10 @@ class TeamSelectorInventory(private val arena: Arena) : InventoryProvider {
         }
     }
 
-    private fun getTeamItem(controller: InventoryController, gameTeam: GameTeam, translation: Translation): InteractiveItem {
+    private fun getTeamItem(controller: GuiController, gameTeam: GameTeam, translation: Translation): GuiItem {
         val teamColor = gameTeam.color
 
-        return InteractiveItem.of(itemStack(Material.LEATHER_CHESTPLATE) {
+        return GuiProvider.api.of(itemStack(Material.LEATHER_CHESTPLATE) {
             meta<LeatherArmorMeta> {
                 name = buildTeamItemDisplayName(gameTeam, translation)
                 lore(buildTeamItemLore(gameTeam, translation))
@@ -68,15 +69,15 @@ class TeamSelectorInventory(private val arena: Arena) : InventoryProvider {
                         .first { PersistentDataUtils.get(it!!.item.itemMeta, TEAM_NAME_KEY, String::class.java) == oldTeamName }
                         ?: return@of
 
-                    oldTeamItem.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildTeamItemDisplayName(oldGameTeam, translation))
-                    oldTeamItem.update(controller, InteractiveItem.Modification.LORE, buildTeamItemLore(oldGameTeam, translation))
+                    oldTeamItem.update(controller, GuiItem.Modification.DISPLAY_NAME, buildTeamItemDisplayName(oldGameTeam, translation))
+                    oldTeamItem.update(controller, GuiItem.Modification.LORE, buildTeamItemLore(oldGameTeam, translation))
                 }
 
                 gameTeam.join(gamePlayer)
             }
 
-            item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildTeamItemDisplayName(gameTeam, translation))
-            item.update(controller, InteractiveItem.Modification.LORE, buildTeamItemLore(gameTeam, translation))
+            item.update(controller, GuiItem.Modification.DISPLAY_NAME, buildTeamItemDisplayName(gameTeam, translation))
+            item.update(controller, GuiItem.Modification.LORE, buildTeamItemLore(gameTeam, translation))
 
             player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.0F)
 

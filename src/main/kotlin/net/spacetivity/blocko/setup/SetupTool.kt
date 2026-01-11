@@ -63,24 +63,28 @@ class SetupTool(private val holder: Player) {
     }
 
     fun doAction(event: PlayerInteractEvent) {
-        val block = event.clickedBlock ?: return
+        val block = event.clickedBlock
         val setupSession = this.holder.getSetupSession() ?: return
         val activeStep = setupSession.getActiveSetupStep() ?: return
 
-        if (activeStep.validBlockTypes.isNotEmpty() && !activeStep.validBlockTypes.contains(block.type)) return
-
         when (activeStep::class) {
             ScanBoardStep::class -> {
+                if (block == null) return
+                if (activeStep.validBlockTypes.isNotEmpty() && !activeStep.validBlockTypes.contains(block.type)) return
                 Blocko.instance.arenaSetupHandler.selectCorner(this.holder, event.action.isLeftClick, block.location)
             }
 
             SetTurningPointsStep::class -> {
+                if (block == null) return
+                if (activeStep.validBlockTypes.isNotEmpty() && !activeStep.validBlockTypes.contains(block.type)) return
                 val scanBoardStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
                 val gameField = scanBoardStep.getField(block.x, block.z)
                 InventoryUtils.openGameFieldTurnInventory(this.holder, gameField)
             }
 
             SetTeamEntrancesStep::class -> {
+                if (block == null) return
+                if (activeStep.validBlockTypes.isNotEmpty() && !activeStep.validBlockTypes.contains(block.type)) return
                 val scanBoardStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
                 val gameField = scanBoardStep.getField(block.x, block.z)
                 InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.ENTRANCE, gameField)
@@ -89,9 +93,10 @@ class SetupTool(private val holder: Player) {
             SetTeamPathsStep::class -> {
                 if (setupSession.currentTeamName == null || (event.action.isLeftClick && setupSession.currentTeamName != null)) {
                     val scanBoardStep = setupSession.getSetupStep<ScanBoardStep>() ?: return
-                    val gameField = scanBoardStep.getField(block.x, block.z)
-                    InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.IDS, gameField)
+                    InventoryUtils.openGameTeamSetupInventory(this.holder, InvType.IDS, null)
                 } else {
+                    if (block == null) return
+                    if (activeStep.validBlockTypes.isNotEmpty() && !activeStep.validBlockTypes.contains(block.type)) return
                     Blocko.instance.arenaSetupHandler.setTeamPathId(this.holder, setupSession.currentTeamName!!, block)
                 }
             }
@@ -105,11 +110,14 @@ class SetupTool(private val holder: Player) {
         val setupSession = this.holder.getSetupSession() ?: return lore
 
         for (setupStep in setupSession.setupSteps.values) {
-            val stepId = setupStep.id + 1 // +1 because it looks nicer for players ingame to think of the first setup step as 1
+            val stepId =
+                setupStep.id + 1 // +1 because it looks nicer for players ingame to think of the first setup step as 1
 
-            val loreModeTitle = translation.displayName("blocko.tool.setup.lore.mode_title.${if (setupStep.active) "active" else "not_active"}",
+            val loreModeTitle = translation.displayName(
+                "blocko.tool.setup.lore.mode_title.${if (setupStep.active) "active" else "not_active"}",
                 Placeholder.parsed("mode_id", stepId.toString()),
-                Placeholder.parsed("mode", setupStep.key))
+                Placeholder.parsed("mode", setupStep.key)
+            )
 
             lore.add(loreModeTitle)
 
@@ -119,10 +127,16 @@ class SetupTool(private val holder: Player) {
 
                 val placeholders = mutableListOf(Placeholder.parsed("keybind", keybind.keybindName))
 
-                placeholders.add(Placeholder.component("data_prefix", if (hint == null) Component.text("") else optionalDataPrefix))
+                placeholders.add(
+                    Placeholder.component(
+                        "data_prefix",
+                        if (hint == null) Component.text("") else optionalDataPrefix
+                    )
+                )
                 placeholders.add(Placeholder.parsed("optional_data", hint ?: ""))
 
-                val loreModeKeybindLine = translation.displayName("blocko.tool.setup.lore.mode_keybind_line", *placeholders.toTypedArray())
+                val loreModeKeybindLine =
+                    translation.displayName("blocko.tool.setup.lore.mode_keybind_line", *placeholders.toTypedArray())
                 lore.add(loreModeKeybindLine)
             }
         }

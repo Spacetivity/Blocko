@@ -13,29 +13,30 @@ import net.spacetivity.blocko.item.name
 import net.spacetivity.blocko.team.GameTeamOptions
 import net.spacetivity.blocko.translation.Translation
 import net.spacetivity.blocko.utils.InventoryUtils
-import net.spacetivity.inventory.api.inventory.InventoryController
-import net.spacetivity.inventory.api.inventory.InventoryProperties
-import net.spacetivity.inventory.api.inventory.InventoryProvider
-import net.spacetivity.inventory.api.item.InteractiveItem
-import net.spacetivity.inventory.api.item.InventoryPos
+import net.spacetivity.inventorylib.api.GuiProvider
+import net.spacetivity.inventorylib.api.inventory.GuiController
+import net.spacetivity.inventorylib.api.inventory.GuiProperties
+import net.spacetivity.inventorylib.api.inventory.Gui
+import net.spacetivity.inventorylib.api.item.GuiItem
+import net.spacetivity.inventorylib.api.item.GuiPos
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 
-@InventoryProperties(id = "host_settings_inv", rows = 1, columns = 9)
-class HostSettingsInventory(private val arena: Arena) : InventoryProvider {
+@GuiProperties(id = "host_settings_inv", rows = 1, columns = 9)
+class HostSettingsInventory(private val arena: Arena) : Gui {
 
-    override fun init(player: Player, controller: InventoryController) {
+    override fun init(player: Player, controller: GuiController) {
         val translation: Translation = Blocko.instance.translationHandler.getSelectedTranslation()
 
-        controller.setItem(0, 1, InteractiveItem.of(itemStack(Material.WRITABLE_BOOK) {
+        controller.setItem(0, 1, GuiProvider.api.of(itemStack(Material.WRITABLE_BOOK) {
             meta {
                 name = translation.displayName("blocko.inventory.host.invite_players.display_name")
                 hideExtraInfo()
             }
         }) { _, _, _ -> InventoryUtils.openInvitationInventory(player, this.arena) })
 
-        controller.setItem(0, 2, InteractiveItem.of(itemStack(Material.END_CRYSTAL) {
+        controller.setItem(0, 2, GuiProvider.api.of(itemStack(Material.END_CRYSTAL) {
             meta {
                 name = buildTeamModeSelectorDisplayName(translation)
                 lore(buildTeamModeSelectorLore(translation))
@@ -48,18 +49,18 @@ class HostSettingsInventory(private val arena: Arena) : InventoryProvider {
 
             Blocko.instance.arenaSignHandler.updateArenaSign(this.arena)
 
-            item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, buildTeamModeSelectorDisplayName(translation))
-            item.update(controller, InteractiveItem.Modification.LORE, buildTeamModeSelectorLore(translation))
+            item.update(controller, GuiItem.Modification.DISPLAY_NAME, buildTeamModeSelectorDisplayName(translation))
+            item.update(controller, GuiItem.Modification.LORE, buildTeamModeSelectorLore(translation))
 
             player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)
         })
 
-        setIndicatorItem(controller, InventoryPos.of(0, 6), IndicatorType.PRIVACY, translation, player)
-        setIndicatorItem(controller, InventoryPos.of(0, 7), IndicatorType.WAITING_PREDICATE, translation, player)
+        setIndicatorItem(controller, GuiPos.of(0, 6), IndicatorType.PRIVACY, translation, player)
+        setIndicatorItem(controller, GuiPos.of(0, 7), IndicatorType.WAITING_PREDICATE, translation, player)
     }
 
-    private fun setIndicatorItem(controller: InventoryController, position: InventoryPos, indicatorType: IndicatorType, translation: Translation, player: Player) {
-        controller.setItem(position, InteractiveItem.of(itemStack(getIndicatorMaterialType(indicatorType)) {
+    private fun setIndicatorItem(controller: GuiController, position: GuiPos, indicatorType: IndicatorType, translation: Translation, player: Player) {
+        controller.setItem(position, GuiProvider.api.of(itemStack(getIndicatorMaterialType(indicatorType)) {
             meta {
                 name = getIndicatorDisplayName(indicatorType, translation)
                 hideExtraInfo()
@@ -73,8 +74,8 @@ class HostSettingsInventory(private val arena: Arena) : InventoryProvider {
                 else this.arena.phase.countdown?.tryStartup()
             }
 
-            item.update(controller, InteractiveItem.Modification.TYPE, getIndicatorMaterialType(indicatorType))
-            item.update(controller, InteractiveItem.Modification.DISPLAY_NAME, getIndicatorDisplayName(indicatorType, translation))
+            item.update(controller, GuiItem.Modification.TYPE, getIndicatorMaterialType(indicatorType))
+            item.update(controller, GuiItem.Modification.DISPLAY_NAME, getIndicatorDisplayName(indicatorType, translation))
 
             player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.0F)
         })

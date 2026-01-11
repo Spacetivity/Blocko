@@ -9,11 +9,11 @@ import net.spacetivity.blocko.phase.GamePhaseMode
 import net.spacetivity.blocko.phase.impl.IngamePhase
 import net.spacetivity.blocko.player.GamePlayer
 import net.spacetivity.blocko.player.getTeam
-import net.spacetivity.blocko.utils.ScoreboardUtils
 import net.spacetivity.blocko.stats.StatsPlayer
 import net.spacetivity.blocko.team.GameTeamOptions
 import net.spacetivity.blocko.translation.translateMessage
 import net.spacetivity.blocko.utils.Constants
+import net.spacetivity.blocko.utils.ScoreboardUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Sound
@@ -89,11 +89,12 @@ class Arena(
         player.clearPhaseItems()
 
         val lobbySpawn = Blocko.instance.lobbySpawnHandler.lobbySpawn
-        if (lobbySpawn != null && player.world.name != lobbySpawn.worldName) player.teleportAsync(lobbySpawn.toBukkitInstance()).thenAccept {
-            togglePlayerVisibility(player, PlayerVisibility.IN_LOBBY)
-            player.allowFlight = true
-            player.isFlying = true
-        }
+        if (lobbySpawn != null && player.world.name != lobbySpawn.worldName) player.teleportAsync(lobbySpawn.toBukkitInstance())
+            .thenAccept {
+                togglePlayerVisibility(player, PlayerVisibility.IN_LOBBY)
+                player.allowFlight = true
+                player.isFlying = true
+            }
 
         Blocko.instance.bossbarHandler.clearBossbars(player)
         ScoreboardUtils.removeSidebar(player)
@@ -163,11 +164,12 @@ class Arena(
         player.clearPhaseItems()
 
         val lobbySpawn = Blocko.instance.lobbySpawnHandler.lobbySpawn
-        if (lobbySpawn != null && player.world.name != lobbySpawn.worldName) player.teleportAsync(lobbySpawn.toBukkitInstance()).thenAccept {
-            togglePlayerVisibility(player, PlayerVisibility.IN_LOBBY)
-            player.allowFlight = true
-            player.isFlying = true
-        }
+        if (lobbySpawn != null && player.world.name != lobbySpawn.worldName) player.teleportAsync(lobbySpawn.toBukkitInstance())
+            .thenAccept {
+                togglePlayerVisibility(player, PlayerVisibility.IN_LOBBY)
+                player.allowFlight = true
+                player.isFlying = true
+            }
 
         Blocko.instance.bossbarHandler.clearBossbars(player)
 
@@ -187,7 +189,10 @@ class Arena(
             gamePlayer.actionTimeoutTimestamp = null
 
             for (currentGamePlayer in this.currentPlayers.filter { !it.isAI }) {
-                Blocko.instance.bossbarHandler.unregisterBossbar(currentGamePlayer.toBukkitInstance()!!, Constants.TIMEOUT_BOSSBAR_NAME)
+                Blocko.instance.bossbarHandler.unregisterBossbar(
+                    currentGamePlayer.toBukkitInstance()!!,
+                    Constants.TIMEOUT_BOSSBAR_NAME
+                )
             }
 
             ingamePhase.phaseMode = GamePhaseMode.DICE
@@ -247,7 +252,7 @@ class Arena(
             gamePlayer.activeEntity = null
             gamePlayer.lastEntityPickRule = null
 
-            val statsPlayer= Blocko.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)
+            val statsPlayer = Blocko.instance.statsPlayerHandler.getStatsPlayer(gamePlayer.uuid)
 
             if (gamePlayer.isAI)
                 Blocko.instance.statsPlayerHandler.cachedStatsPlayers.removeIf { it.uuid == gamePlayer.uuid }
@@ -331,7 +336,11 @@ class Arena(
         this.invitedPlayers.add(receiverBukkitPlayer.uniqueId)
 
         senderBukkitPlayer.translateMessage("blocko.arena.invite_sent", Placeholder.parsed("name", receiverName))
-        receiverBukkitPlayer.translateMessage("blocko.arena.invite_received", Placeholder.parsed("name", senderBukkitPlayer.name), Placeholder.parsed("id", sender.arenaId.value))
+        receiverBukkitPlayer.translateMessage(
+            "blocko.arena.invite_received",
+            Placeholder.parsed("name", senderBukkitPlayer.name),
+            Placeholder.parsed("id", sender.arenaId.value)
+        )
 
         Blocko.instance.arenaSignHandler.updateArenaSign(this)
     }
@@ -368,7 +377,8 @@ class Arena(
         for (currentPlayer in Bukkit.getOnlinePlayers()) {
             when (visibility) {
                 PlayerVisibility.IN_ARENA -> {
-                    val playersInSameArena = (bukkitPlayer.getArena() != null && currentPlayer.getArena() != null) && (bukkitPlayer.getArena()!!.id == currentPlayer.getArena()!!.id)
+                    val playersInSameArena =
+                        (bukkitPlayer.getArena() != null && currentPlayer.getArena() != null) && (bukkitPlayer.getArena()!!.id == currentPlayer.getArena()!!.id)
 
                     if (playersInSameArena) {
                         bukkitPlayer.showPlayer(Blocko.instance, currentPlayer)
