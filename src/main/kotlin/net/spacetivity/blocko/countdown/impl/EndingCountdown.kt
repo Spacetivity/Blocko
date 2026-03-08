@@ -19,7 +19,7 @@ class EndingCountdown(arenaId: ArenaId) : GameCountdown(arenaId, Blocko.instance
             Placeholder.parsed("time", (if (isOne) "one" else remainingSeconds).toString()),
             Placeholder.parsed("time_string", if (isOne) "second" else "seconds"))
 
-        arena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP,0.2F)
+        arena.sendArenaSound(Sound.ENTITY_PLAYER_LEVELUP, 0.2F)
     }
 
     override fun handleCountdownEnd() {

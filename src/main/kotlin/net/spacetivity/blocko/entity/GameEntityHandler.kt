@@ -26,8 +26,12 @@ class GameEntityHandler {
     }
 
     fun clearEntitiesFromArena(arenaId: ArenaId) {
-        val entities = this.gameEntities.get(arenaId).toMutableList()
-        entities.forEach { it.despawn() }
+        val entities = this.gameEntities.get(arenaId).toList()
+
+        for (entity in entities) {
+            entity.despawn()
+        }
+
         this.gameEntities.removeAll(arenaId)
     }
 

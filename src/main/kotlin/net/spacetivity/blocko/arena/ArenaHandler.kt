@@ -29,7 +29,7 @@ class ArenaHandler {
     private val gamePhaseHandler = Blocko.instance.gamePhaseHandler
     val cachedArenaIds = mutableListOf<ArenaId>()
     val cachedArenas = mutableListOf<Arena>()
-    
+
     // Cache für aktive Ingame-Arenen zur Performance-Optimierung
     val activeIngameArenas = mutableSetOf<Arena>()
 
@@ -45,7 +45,8 @@ class ArenaHandler {
                     gameWorld = WorldCreator(worldName).createWorld()
 
                 if (gameWorld == null) {
-                    Bukkit.getConsoleSender().sendMessage(Component.text("Cannot load game world $worldName!", NamedTextColor.RED))
+                    Bukkit.getConsoleSender()
+                        .sendMessage(Component.text("Cannot load game world $worldName!", NamedTextColor.RED))
                     continue
                 }
 
@@ -130,10 +131,13 @@ class ArenaHandler {
     }
 
     fun resetArenas(shutdown: Boolean) {
-        this.cachedArenas.forEach {
-            it.reset(shutdown)
+        for (arena in this.cachedArenas) {
+            arena.reset(shutdown)
         }
+
         this.activeIngameArenas.clear()
+
+        if (shutdown) this.cachedArenas.map { it.gameWorld }.forEach { world -> world.save(true) }
     }
 
     fun updateIngameArenaCache(arena: Arena) {
@@ -153,7 +157,8 @@ class ArenaHandler {
     }
 
     fun getArenaOfPlayer(uuid: UUID): Arena? {
-        return this.cachedArenas.find { it.currentPlayers.any { gamePlayer: GamePlayer -> gamePlayer.uuid == uuid } } ?: getArenaOfSpectator(uuid)
+        return this.cachedArenas.find { it.currentPlayers.any { gamePlayer: GamePlayer -> gamePlayer.uuid == uuid } }
+            ?: getArenaOfSpectator(uuid)
     }
 
     fun getArenaOfSpectator(uuid: UUID): Arena? {
@@ -179,7 +184,11 @@ class ArenaHandler {
 
             val statusLine = when (arenaStatus) {
                 ArenaStatus.READY -> when (arenaPhase) {
-                    is IdlePhase -> Component.text("${arena.currentPlayers.size}/${arena.teamOptions.playerCount}", NamedTextColor.YELLOW)
+                    is IdlePhase -> Component.text(
+                        "${arena.currentPlayers.size}/${arena.teamOptions.playerCount}",
+                        NamedTextColor.YELLOW
+                    )
+
                     is IngamePhase -> Component.text("Ingame...", NamedTextColor.RED)
                     is EndingPhase -> Component.text("Ending...", NamedTextColor.RED)
                     else -> Component.text("Phase 404", NamedTextColor.RED)

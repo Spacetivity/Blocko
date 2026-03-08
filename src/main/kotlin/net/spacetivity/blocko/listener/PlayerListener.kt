@@ -85,7 +85,9 @@ class PlayerListener(private val plugin: Blocko) : Listener {
     @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
+
         player.getArena()?.quit(player)
+
         this.plugin.statsPlayerHandler.unloadStatsPlayer(player.uniqueId)
         this.plugin.achievementHandler.unloadAchievementPlayer(player.uniqueId)
         this.plugin.gameEntityHandler.unloadUnlockedEntityTypes(player.uniqueId)

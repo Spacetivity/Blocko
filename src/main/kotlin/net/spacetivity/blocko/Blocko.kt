@@ -45,8 +45,6 @@ import net.spacetivity.blocko.team.GameTeamHandler
 import net.spacetivity.blocko.team.GameTeamLocationDAO
 import net.spacetivity.blocko.translation.TranslationHandler
 import org.bukkit.Bukkit
-import org.bukkit.entity.Entity
-import org.bukkit.entity.EntityType
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.exposed.sql.Database
@@ -212,11 +210,6 @@ class Blocko : JavaPlugin() {
         this.gamePlayActionHandler.stopTasks()
         this.arenaSetupHandler.stopTask()
         this.arenaHandler.resetArenas(true)
-        this.arenaHandler.cachedArenas.forEach { arena ->
-            arena.gameWorld.entities
-                .filter { entity -> entity.type != EntityType.PLAYER }
-                .forEach(Entity::remove)
-        }
     }
 
     private fun registerCommand(executorClass: KClass<out SpaceMainCommandExecutor>) {

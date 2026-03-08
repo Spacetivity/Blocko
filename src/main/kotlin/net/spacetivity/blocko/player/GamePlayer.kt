@@ -75,10 +75,8 @@ class GamePlayer(val uuid: UUID, val name: String, val arenaId: ArenaId, var tea
 
         ScoreboardUtils.updateEntityStatusLine(this.activeEntity!!)
         ingamePhase.phaseMode = GamePhaseMode.MOVE_ENTITY
-        
-        // Initialize movement immediately for AI player
-        // This ensures shouldMove and controller are set before the movement task runs
-        this.movePickedEntity()
+
+        movePickedEntity()
     }
 
     fun movePickedEntity() {
